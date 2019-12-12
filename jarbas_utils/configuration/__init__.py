@@ -96,6 +96,7 @@ class LocalConf(dict):
             Args:
                 path (str): file to load
         """
+        path = expanduser(path)
         if exists(path) and isfile(path):
             try:
                 config = load_commented_json(path)
@@ -121,6 +122,7 @@ class LocalConf(dict):
             LOG.warning("config path not set, updating user config!!")
             update_mycroft_config(self)
             return
+        path = expanduser(path)
         if not isdir(dirname(path)):
             makedirs(dirname(path))
         with open(path, 'w', encoding="utf-8") as f:

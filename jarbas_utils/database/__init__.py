@@ -2,7 +2,8 @@ from jarbas_utils.configuration import LocalConf
 from jarbas_utils import fuzzy_match
 
 
-def get_key_recursively(search_dict, field):
+def get_key_recursively(search_dict, field, filter_None=False):
+    # TODO 0.3.0 filter_None = True by default
     """
     Takes a dict with nested lists and dicts,
     and searches all dicts for a key of the field
@@ -11,22 +12,24 @@ def get_key_recursively(search_dict, field):
     fields_found = []
 
     for key, value in search_dict.items():
-
+        if value is None and filter_None:
+            continue
         if key == field:
             fields_found.append(search_dict)
 
         elif isinstance(value, dict):
-            fields_found += get_key_recursively(value, field)
+            fields_found += get_key_recursively(value, field, filter_None)
 
         elif isinstance(value, list):
             for item in value:
                 if isinstance(item, dict):
-                    fields_found += get_key_recursively(item, field)
+                    fields_found += get_key_recursively(item, field, filter_None)
 
     return fields_found
 
 
-def get_key_recursively_fuzzy(search_dict, field, thresh=0.6):
+def get_key_recursively_fuzzy(search_dict, field, thresh=0.6, filter_None=False):
+    # TODO 0.3.0 filter_None = True by default
     """
     Takes a dict with nested lists and dicts,
     and searches all dicts for a key of the field
@@ -35,6 +38,8 @@ def get_key_recursively_fuzzy(search_dict, field, thresh=0.6):
     fields_found = []
 
     for key, value in search_dict.items():
+        if value is None and filter_None:
+            continue
         score = 0
         if isinstance(key, str):
             score = fuzzy_match(key, field)
@@ -42,12 +47,12 @@ def get_key_recursively_fuzzy(search_dict, field, thresh=0.6):
         if score >= thresh:
             fields_found.append((search_dict, score))
         elif isinstance(value, dict):
-            fields_found += get_key_recursively_fuzzy(value, field, thresh)
+            fields_found += get_key_recursively_fuzzy(value, field, thresh, filter_None)
 
         elif isinstance(value, list):
             for item in value:
                 if isinstance(item, dict):
-                    fields_found += get_key_recursively_fuzzy(item, field, thresh)
+                    fields_found += get_key_recursively_fuzzy(item, field, thresh, filter_None)
 
     return sorted(fields_found, key = lambda i: i[1],reverse=True)
 
@@ -128,10 +133,11 @@ class JsonDatabase(LocalConf):
     def add_item(self, value):
         self.db[self.name] += [value]
 
-    def search_by_key(self, key, fuzzy=False, thresh=0.7):
+    def search_by_key(self, key, fuzzy=False, thresh=0.7, include_empty=True):
+        # TODO 0.3.0 include_empty=False by default
         if fuzzy:
-            return get_key_recursively_fuzzy(self.db, key, thresh)
-        return get_key_recursively(self.db, key)
+            return get_key_recursively_fuzzy(self.db, key, thresh, not include_empty)
+        return get_key_recursively(self.db, key, not include_empty)
 
     def search_by_value(self, key, value, fuzzy=False, thresh=0.7):
         if fuzzy:
@@ -161,7 +167,7 @@ class JsonDatabase(LocalConf):
 
 
 if __name__ == "__main__":
-    db = JsonDatabase(None)
+    db = JsonDatabase("users")
     for user in [
             {"name": "bob", "age": 12},
             {"name": "bobby"},
