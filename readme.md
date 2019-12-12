@@ -44,20 +44,47 @@ from jarbas_utils.messagebus import listen_for_message
 from jarbas_utils.log import LOG
 from jarbas_utils import wait_for_exit_signal
 
-counter = 0
+spoken = 0
 
 
-def handle_message(message):
-    global counter
-    counter += 1
-    # NOTE: A matched padatious_intent is handled this way, too
-    LOG.info("Intent failure detected: {n}".format(n=counter))
+def handle_speak(message):
+    global spoken
+    spoken += 1
+    LOG.info("Mycroft spoke {n} sentences since start".format(n=spoken))
 
-bus = listen_for_message("intent_failure", handle_message)
-wait_for_exit_signal()
-bus.remove_all_listeners("intent_failure")
+
+bus = listen_for_message("speak", handle_speak)
+wait_for_exit_signal()  # wait for ctrl+c
+
+# cleanup is a good practice! 
+bus.remove_all_listeners("speak")
 bus.close()
+```
 
+Triggering events in mycroft is also trivial
+
+```python
+from jarbas_utils.messagebus import send
+from jarbas_utils.log import LOG
+from jarbas_utils import create_daemon, wait_for_exit_signal
+import random
+from time import sleep
+
+
+def alert():
+    LOG.info("Alerting user of some event using Mycroft")
+    send("speak", {"utterance": "Alert! something happened"})
+
+
+def did_something_happen():
+    while True:
+        if random.choice([True, False]):
+            alert()
+        sleep(10)
+
+
+create_daemon(did_something_happen) # check for something in background
+wait_for_exit_signal()  # wait for ctrl+c
 ```
 
 ### Configuration
