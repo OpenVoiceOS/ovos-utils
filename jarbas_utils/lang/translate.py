@@ -1,8 +1,7 @@
 from googletrans import Translator
-from jarbas_utils.sound import play_mp3, play_wav
+from jarbas_utils.sound import play_mp3
 from jarbas_utils.lang.detect import detect_lang
-from os.path import expanduser, isdir, dirname
-from os import system, makedirs
+from jarbas_utils.lang import get_tts
 import logging
 
 logging.getLogger("hyper").setLevel("ERROR")
@@ -21,21 +20,13 @@ def translate_text(text, lang="en-us", source_lang=None):
     return tx.text
 
 
-def say_in_language(sentence, lang="en-us", wav_file="/tmp/chatterbox/translated"):
+def translate_to_mp3(sentence, lang="en-us", mp3_file="/tmp/chatterbox/tts.mp3"):
     if detect_lang(sentence) != lang.split("-")[0]:
         sentence = translate_text(sentence, lang)
-    ext = "mp3"
-    if not wav_file.endswith(ext):
-        wav_file += "." + ext
-    wav_file = expanduser(wav_file)
-    if not isdir(dirname(wav_file)):
-        makedirs(dirname(wav_file))
-    get_sentence = 'wget -q -U Mozilla -O' + wav_file + \
-                   ' "https://translate.google.com/translate_tts?tl=' + \
-                   lang + '&q=' + sentence + '&client=tw-ob' + '"'
-    system(get_sentence)
-    if ext == "mp3":
-        play_mp3(wav_file)
-    elif ext == "wav":
-        play_wav(wav_file)
+    return get_tts(sentence, lang, mp3_file)
+
+
+def say_in_language(sentence, lang="en-us", mp3_file="/tmp/chatterbox/tts.mp3"):
+    mp3_file = translate_to_mp3(sentence, lang, mp3_file)
+    play_mp3(mp3_file)
     return sentence

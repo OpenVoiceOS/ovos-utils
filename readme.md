@@ -275,6 +275,9 @@ class MyPretendEnclosure:
         - read_mycroft_config
         - update_mycroft_config
         - json / dictionary utils
+    - language utils
+        - get_tts
+        - translate_to_mp3
 - 0.1.1
     - language utils
         - detect_language alternative using google services
@@ -284,6 +287,7 @@ class MyPretendEnclosure:
         - get_phonemes
         - detect_language
         - translate
+        - say_in_language
     -  sound utils
         - play_wav
         - play_mp3
