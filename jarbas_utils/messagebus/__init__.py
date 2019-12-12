@@ -2,13 +2,20 @@ from mycroft_bus_client import MessageBusClient, Message
 import json
 
 
-def get_mycroft_bus(host='0.0.0.0', port=8181, route='/core', ssl=False):
+def get_websocket(host, port, route='/', ssl=False):
     """
-    Returns a connection to the mycroft messagebus
+    Returns a connection to a websocket
     """
     client = MessageBusClient(host, port, route, ssl)
     client.run_in_thread()
     return client
+
+
+def get_mycroft_bus(host='0.0.0.0', port=8181, route='/core', ssl=False):
+    """
+    Returns a connection to the mycroft messagebus
+    """
+    return get_websocket(host, port, route, ssl)
 
 
 def listen_for_message(msg_type, handler, bus=None):
