@@ -2,14 +2,13 @@
 
 collection of simple utilities for use across the mycroft ecosystem
 
-- [Jarbas - utils](#jarbas---utils)
-  * [Install](#install)
-  * [Usage](#usage)
+* [Install](#install)
+* [Usage](#usage)
     + [Wake words](#wake-words)
-  * [Enclosures](#enclosures)
-    + [System actions](#system-actions)
-    + [Sound](#sound)
-  * [Changelog](#changelog)
+    + [Enclosures](#enclosures)
+        - [System actions](#system-actions)
+         - [Sound](#sound)
+* [Changelog](#changelog)
 
 
 ## Install
@@ -38,11 +37,11 @@ Here is some sample output
     hey chatterbox HH EY1 . CH AE T EH R B OW K S
     alexa AH0 L EH1 K S AH0
 
-## Enclosures
+### Enclosures
 
 If you are making a system enclosure you will likely need to handle system actions
 
-### System actions
+#### System actions
 
 ```python
 from jarbas_utils.system import system_reboot, system_shutdown, ssh_enable, ssh_disable
@@ -69,7 +68,7 @@ class MyEnclosureClass:
         
         
 ```
-### Sound
+#### Sound
 
 Volume control is also a common thing you need to handle
 
