@@ -120,8 +120,8 @@ class MyPretendEnclosure:
 
 - 0.1.1
     - language utils
-        - add detect_language alternative using google services
-        - make pycld2 optional
+        - detect_language alternative using google services
+            - make pycld2 optional
 - 0.1.0
     - language utils
         - get_phonemes
@@ -131,6 +131,7 @@ class MyPretendEnclosure:
         - play_wav
         - play_mp3
         - play_ogg
+        - record
         - AlsaControl
         - PulseControl
     - system utils
