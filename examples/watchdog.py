@@ -1,4 +1,4 @@
-from jarbas_utils.messagebus import send
+from jarbas_utils.messagebus import send_message
 from jarbas_utils.log import LOG
 from jarbas_utils import create_daemon, wait_for_exit_signal
 import random
@@ -7,7 +7,7 @@ from time import sleep
 
 def alert():
     LOG.info("Alerting user of some event using Mycroft")
-    send("speak", {"utterance": "Alert! something happened"})
+    send_message("speak", {"utterance": "Alert! something happened"})
 
 
 def did_something_happen():

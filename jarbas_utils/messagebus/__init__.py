@@ -1,12 +1,12 @@
-from mycroft_bus_client import MessageBusClient, Message, send
+from mycroft_bus_client import MessageBusClient, Message
+import json
 
 
-def get_mycroft_bus():
+def get_mycroft_bus(*args, **kwargs):
     """
-    TODO add host to params
     Returns a connection to the mycroft messagebus
     """
-    client = MessageBusClient()
+    client = MessageBusClient(*args, **kwargs)
     client.run_in_thread()
     return client
 
@@ -52,7 +52,11 @@ def wait_for_reply(message, reply_type=None, timeout=None, bus=None):
     auto_close = bus is None
     bus = bus or get_mycroft_bus()
     if isinstance(message, str):
-        # TODO check for json
+        try:
+            message = json.loads(message)
+        except:
+            pass
+    if isinstance(message, str):
         message = Message(message)
     elif isinstance(message, dict):
         message = Message(message["type"],
@@ -66,17 +70,22 @@ def wait_for_reply(message, reply_type=None, timeout=None, bus=None):
     return response
 
 
-def send_message(message, bus=None):
+def send_message(message, data=None, context=None, bus=None):
     auto_close = bus is None
     bus = bus or get_mycroft_bus()
     if isinstance(message, str):
-        # TODO check for json
-        message = Message(message)
-    elif isinstance(message, dict):
+        if isinstance(data, dict) or isinstance(context, dict):
+            message = Message(message, data, context)
+        else:
+            try:
+                message = json.loads(message)
+            except:
+                message = Message(message)
+    if isinstance(message, dict):
         message = Message(message["type"],
                           message.get("data"),
                           message.get("context"))
-    elif not isinstance(message, Message):
+    if not isinstance(message, Message):
         raise ValueError
     bus.emit(message)
     if auto_close:

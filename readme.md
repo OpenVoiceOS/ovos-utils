@@ -64,7 +64,7 @@ bus.close()
 Triggering events in mycroft is also trivial
 
 ```python
-from jarbas_utils.messagebus import send
+from jarbas_utils.messagebus import send_message
 from jarbas_utils.log import LOG
 from jarbas_utils import create_daemon, wait_for_exit_signal
 import random
@@ -73,7 +73,7 @@ from time import sleep
 
 def alert():
     LOG.info("Alerting user of some event using Mycroft")
-    send("speak", {"utterance": "Alert! something happened"})
+    send_message("speak", {"utterance": "Alert! something happened"})
 
 
 def did_something_happen():
@@ -270,6 +270,7 @@ class MyPretendEnclosure:
         - listen_for_message
         - listen_once_for_message
         - wait_for_reply
+        - send_message
     - configuration utils
         - read_mycroft_config
         - update_mycroft_config
