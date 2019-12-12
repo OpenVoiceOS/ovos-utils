@@ -1,0 +1,15 @@
+from setuptools import setup
+
+setup(
+    name='jarbas_utils',
+    version='0.1.1',
+    packages=['jarbas_utils', 'jarbas_utils.sound', 'jarbas_utils.system'],
+    url='',
+    install_requires=["pronouncing",
+                      "googletrans",
+                      "pyalsaaudio==0.8.2"],
+    license='MIT',
+    author='jarbasAI',
+    author_email='jarbasai@mailfence.com',
+    description='collection of simple utilities for use across the mycroft ecosystem'
+)

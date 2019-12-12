@@ -1,0 +1,6 @@
+pycld2 # optional, needed for lang detection
+pycld3 # optional, needed for lang detection
+pronouncing
+hyper  # optional, enables http2 for google translate which makes it faster
+googletrans
+pyalsaaudio==0.8.2
