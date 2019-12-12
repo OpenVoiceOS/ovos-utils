@@ -174,11 +174,19 @@ class MycroftUserConfig(LocalConf):
 class MycroftDefaultConfig(ReadOnlyConfig):
     def __init__(self):
         path = None
-        # TODO check all common paths
-        paths = ["/opt/mycroft"]
+        # TODO check system config platform and go directly to correct path if it exists
+        paths = [
+            "/opt/venvs/mycroft-core",  # mark1/2
+            "/opt/venvs/mycroft",
+            "/usr/bin/mycroft-core",
+            "/usr/bin/mycroft",
+            "/opt/mycroft",
+            join(expanduser("~"), "mycroft-core")  # picroft
+        ]
         for p in paths:
-            if isdir(p):
-                path = join(p, "mycroft", "configuration", "mycroft.conf")
+            p = join(p, "mycroft", "configuration", "mycroft.conf")
+            if isfile(p):
+                path = p
         super().__init__(path)
         if not self.path or not isdir(self.path):
             LOG.warning("mycroft root path not found")
