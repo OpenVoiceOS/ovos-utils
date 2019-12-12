@@ -301,6 +301,9 @@ class MyPretendEnclosure:
         - read_mycroft_config
         - update_mycroft_config
         - json / dictionary utils
+    - database utils
+        - json database (search and storage)
+        - fuzzy match
     - language utils
         - get_tts
         - translate_to_mp3
