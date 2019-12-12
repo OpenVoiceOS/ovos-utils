@@ -4,7 +4,7 @@ setup(
     name='jarbas_utils',
     version='0.1.1',
     packages=['jarbas_utils', 'jarbas_utils.sound', 'jarbas_utils.system'],
-    url='',
+    url='https://github.com/JarbasAl/jarbas_utils',
     install_requires=["pronouncing",
                       "googletrans",
                       "pyalsaaudio==0.8.2"],
