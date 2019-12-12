@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0]  - 2019-12-12
 
+First public release
+
 ### Added
 
 - ssml utils
