@@ -130,7 +130,11 @@ class MyPretendEnclosure:
     - generic utils
         - create_daemon
         - wait_for_exit_signal
+    - messagebus utils
         - get_mycroft_bus
+        - listen_for_message
+        - listen_once_for_message
+        - wait_for_reply
 - 0.1.1
     - language utils
         - detect_language alternative using google services
