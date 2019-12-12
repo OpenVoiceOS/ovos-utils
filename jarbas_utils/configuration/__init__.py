@@ -185,7 +185,7 @@ class MycroftDefaultConfig(ReadOnlyConfig):
             if isfile(p):
                 path = p
         super().__init__(path)
-        if not self.path or not isdir(self.path):
+        if not self.path or not isfile(self.path):
             LOG.warning("mycroft root path not found")
 
     def set_mycroft_root(self, mycroft_root_path):
