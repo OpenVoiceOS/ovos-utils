@@ -297,27 +297,20 @@ from jarbas_utils.database import JsonDatabase
 
 db = JsonDatabase("users", "~/databases/users.json")
 
-users = [
-    {
-        "email": "something@mail.net",
-        "secret_key": None,
-        "data": {
-            "name": "jonas",
-            "birthday": "12 May"
-        }
-    },
-    {
-        "email": "second@mail.net",
-        "key": "secret",
-        "data": {
-            "name": ["joe", "jony"],
-            "age": 12
-        }
-    }
-]
+class User:
+    def __init__(self, email, key=None, data=None):
+        self.email = email
+        self.secret_key = key
+        self.data = data
 
-for user in users:
-    db.add_item(user)
+
+user1 = User("something@mail.net",
+             data={"name": "jonas", "birthday": "12 May"})
+user2 = User("second@mail.net", "secret", 
+             data={"name": ["joe", "jony"], "age": 12})
+
+db.add_item(user1)
+db.add_item(user2)
 
 # search entries with non empty secret_key
 print(db.search_by_key("secret_key", include_empty=False))
@@ -334,6 +327,9 @@ db.commit() # save
 
 ## Changelog
 
+- 0.2.2
+    - database utils
+        - allow custom classes as database items
 - 0.2.1
     - database utils
         - allow filtering empty values on JsonDatabase key search

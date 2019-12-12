@@ -2,29 +2,24 @@ from jarbas_utils.database import JsonDatabase
 
 db = JsonDatabase("users", "~/databases/users.json")
 
-users = [
-    {
-        "email": "something@mail.net",
-        "secret_key": None,
-        "data": {
-            "name": "jonas",
-            "birthday": "12 May"
-        }
-    },
-    {
-        "email": "second@mail.net",
-        "key": "secret",
-        "data": {
-            "name": ["joe", "jony"],
-            "age": 12
-        }
-    }
-]
 
-for user in users:
-    db.add_item(user)
+class User:
+    def __init__(self, email, key=None, data=None):
+        self.email = email
+        self.secret_key = key
+        self.data = data
 
-# search entries with non empty secret_key
+    def __repr__(self):
+        return "User:"+self.email
+
+
+user1 = User("first@mail.net", data={"name": "jonas", "birthday": "12 May"})
+user2 = User("second@mail.net", "secret", data={"name": ["joe", "jony"], "age": 12})
+
+db.add_item(user1)
+db.add_item(user2)
+
+# search entries with non empty key
 print(db.search_by_key("secret_key", include_empty=False))
 
 # search in user provided data

@@ -22,7 +22,14 @@ def get_key_recursively(search_dict, field, filter_None=False):
 
         elif isinstance(value, list):
             for item in value:
-                if isinstance(item, dict):
+                if not isinstance(item, dict):
+                    try:
+                        item = item.__dict__
+                        if get_key_recursively(item, field, filter_None):
+                            fields_found.append(search_dict)
+                    except:
+                        continue  # can't parse
+                else:
                     fields_found += get_key_recursively(item, field, filter_None)
 
     return fields_found
@@ -35,6 +42,12 @@ def get_key_recursively_fuzzy(search_dict, field, thresh=0.6, filter_None=False)
     and searches all dicts for a key of the field
     provided.
     """
+    if not isinstance(search_dict, dict) and not isinstance(search_dict, list):  # TODO check for generic iterable
+        try:
+            search_dict = search_dict.__dict__
+        except:
+            pass  # probably can't parse
+
     fields_found = []
 
     for key, value in search_dict.items():
@@ -51,9 +64,15 @@ def get_key_recursively_fuzzy(search_dict, field, thresh=0.6, filter_None=False)
 
         elif isinstance(value, list):
             for item in value:
-                if isinstance(item, dict):
+                if not isinstance(item, dict):
+                    try:
+                        item = item.__dict__
+                        if get_key_recursively_fuzzy(item, field, thresh, filter_None):
+                            fields_found.append((search_dict, score))
+                    except:
+                        continue  # can't parse
+                else:
                     fields_found += get_key_recursively_fuzzy(item, field, thresh, filter_None)
-
     return sorted(fields_found, key = lambda i: i[1],reverse=True)
 
 
@@ -75,7 +94,14 @@ def get_value_recursively(search_dict, field, target_value):
 
         elif isinstance(value, list):
             for item in value:
-                if isinstance(item, dict):
+                if not isinstance(item, dict):
+                    try:
+                        item = item.__dict__
+                        if get_value_recursively(item, field, target_value):
+                            fields_found.append(search_dict)
+                    except:
+                        continue  # can't parse
+                else:
                     fields_found += get_value_recursively(item, field, target_value)
 
     return fields_found
@@ -88,7 +114,6 @@ def get_value_recursively_fuzzy(search_dict, field, target_value, thresh=0.6):
     provided.
     """
     fields_found = []
-
     for key, value in search_dict.items():
         if key == field:
             if isinstance(value, str):
@@ -105,7 +130,14 @@ def get_value_recursively_fuzzy(search_dict, field, target_value, thresh=0.6):
 
         elif isinstance(value, list):
             for item in value:
-                if isinstance(item, dict):
+                if not isinstance(item, dict):
+                    try:
+                        found = get_value_recursively_fuzzy(item.__dict__, field, target_value, thresh)
+                        if len(found):
+                            fields_found.append((item, found[0][1]))
+                    except:
+                        continue  # can't parse
+                else:
                     fields_found += get_value_recursively_fuzzy(item, field, target_value, thresh)
 
     return sorted(fields_found, key = lambda i: i[1],reverse=True)
