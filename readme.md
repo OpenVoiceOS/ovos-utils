@@ -15,13 +15,13 @@ collection of simple utilities for use across the mycroft ecosystem
 
 ## Install
 
-stable version on pip 0.3.0
+stable version on pip 0.3.2
 
 ```bash
 pip install jarbas_utils
 ```
 
-dev version (this branch) 0.3.x - 0.4.0
+dev version
 
 ```bash
 pip install git+https://github.com/OpenJarbas/jarbas_utils
@@ -312,7 +312,7 @@ db.add_item(user1)
 db.add_item(user2)
 
 # search entries with non empty secret_key
-print(db.search_by_key("secret_key", include_empty=False))
+print(db.search_by_key("secret_key"))
 
 # search in user provided data
 print(db.search_by_key("birth", fuzzy=True))

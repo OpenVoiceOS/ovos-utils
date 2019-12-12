@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2]  - 2019-12-12
+
+quick bugfix for pipy package
+
+### Added
+
+- json utils
+    - is_jsonifiable
+
+### Fixed
+
+- json utils
+    - get_XX_recursively list comprehension
+        - fixes search_XX in JsonDatabase
+    
 ## [0.3.1]  - 2019-12-12
 
 First public release under OpenJarbas 

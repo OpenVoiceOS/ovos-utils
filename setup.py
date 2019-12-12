@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='jarbas_utils',
-    version='0.3.1',
+    version='0.3.2',
     packages=['jarbas_utils',
               'jarbas_utils.sound',
               'jarbas_utils.configuration',
