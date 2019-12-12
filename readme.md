@@ -11,7 +11,6 @@ collection of simple utilities for use across the mycroft ecosystem
         - [System actions](#system-actions)
         - [Sound](#sound)
     + [Data](#data)
-* [Changelog](#changelog)
 
 
 ## Install
@@ -324,66 +323,3 @@ print(db.search_by_value("name", "jon", fuzzy=True))
 
 db.commit() # save
 ```
-
-## Changelog
-
-- 0.3.0
-    - database utils
-        - bugfix/ mutating source list on jsonify_recursively
-    - ssml utils
-    - xml utils
-- 0.2.3
-    - database utils
-        - jsonify_recursively
-        - fix saving of db containing custom classes
-        - pretty print method
-- 0.2.2
-    - database utils
-        - allow custom classes as database items
-- 0.2.1
-    - database utils
-        - allow filtering empty values on JsonDatabase key search
-    - configuration util
-        - bugfix/ expand paths with ~
-- 0.2.0
-    - generic utils
-        - create_daemon
-        - wait_for_exit_signal
-    - messagebus utils
-        - get_mycroft_bus
-        - listen_for_message
-        - listen_once_for_message
-        - wait_for_reply
-        - send_message
-    - configuration utils
-        - read_mycroft_config
-        - update_mycroft_config
-        - json / dictionary utils
-    - database utils
-        - json database (search and storage)
-        - fuzzy match
-    - language utils
-        - get_tts
-        - translate_to_mp3
-- 0.1.1
-    - language utils
-        - detect_language alternative using google services
-            - make pycld2 optional
-- 0.1.0
-    - language utils
-        - get_phonemes
-        - detect_language
-        - translate
-        - say_in_language
-    -  sound utils
-        - play_wav
-        - play_mp3
-        - play_ogg
-        - record
-        - AlsaControl
-        - PulseControl
-    - system utils
-        - reboot
-        - shutdown
-        - enable/disable ssh
-        - ntp sync
