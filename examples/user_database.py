@@ -1,6 +1,6 @@
 from jarbas_utils.database import JsonDatabase
 
-db = JsonDatabase("users", "~/databases")
+db = JsonDatabase("users", "~/databases/users.json")
 
 users = [
     {

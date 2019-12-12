@@ -16,13 +16,13 @@ collection of simple utilities for use across the mycroft ecosystem
 
 ## Install
 
-stable version on pip 0.2.1
+stable version on pip 0.2.0
 
 ```bash
 pip install jarbas_utils
 ```
 
-dev version
+dev version (this branch) 0.2.x - 0.3.0
 
 ```bash
 pip install git+https://github.com/JarbasAl/jarbas_utils
@@ -295,7 +295,7 @@ i provide a simple class to handle arbitrary json serializable data
 ```python
 from jarbas_utils.database import JsonDatabase
 
-db = JsonDatabase("users", "~/databases")
+db = JsonDatabase("users", "~/databases/users.json")
 
 users = [
     {
