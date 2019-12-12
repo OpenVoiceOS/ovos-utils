@@ -222,7 +222,9 @@ class MyPretendEnclosure:
         - listen_once_for_message
         - wait_for_reply
     - configuration utils
+        - read_mycroft_config
         - update_mycroft_config
+        - json / dictionary utils
 - 0.1.1
     - language utils
         - detect_language alternative using google services
