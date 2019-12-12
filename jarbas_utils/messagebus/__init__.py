@@ -2,11 +2,11 @@ from mycroft_bus_client import MessageBusClient, Message
 import json
 
 
-def get_mycroft_bus(*args, **kwargs):
+def get_mycroft_bus(host='0.0.0.0', port=8181, route='/core', ssl=False):
     """
     Returns a connection to the mycroft messagebus
     """
-    client = MessageBusClient(*args, **kwargs)
+    client = MessageBusClient(host, port, route, ssl)
     client.run_in_thread()
     return client
 
