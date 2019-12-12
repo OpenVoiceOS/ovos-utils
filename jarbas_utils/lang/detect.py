@@ -96,12 +96,18 @@ def detect_lang_neural(text, return_multiple=False, return_dict=False,
     return languages
 
 
-def detect_lang(text, return_dict=False):
+def detect_lang_google(text, return_dict=False):
     translator = Translator()
     tx = translator.detect(text)
     if return_dict:
         return {"lang_code": tx.lang, "conf": tx.confidence, "lang": code_to_name(tx.lang)}
     return tx.lang
+
+
+def detect_lang(text, return_dict=False):
+    if cld2 is not None:
+        return detect_lang_naive(text, return_dict=return_dict)
+    return detect_lang_google(text, return_dict=return_dict)
 
 
 if __name__ == "__main__":
