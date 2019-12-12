@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - database utils
     - mutating source list on jsonify_recursively
     
+### Changed
+
+- moved functions around to json_helper
+
 ## [0.2.3]
 
 ### Added
