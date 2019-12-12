@@ -7,13 +7,19 @@ collection of simple utilities for use across the mycroft ecosystem
     + [Wake words](#wake-words)
     + [Enclosures](#enclosures)
         - [System actions](#system-actions)
-         - [Sound](#sound)
+        - [Sound](#sound)
 * [Changelog](#changelog)
 
 
 ## Install
+stable version on pip 0.1.1
+
 ```bash
 pip install jarbas_utils
+```
+dev version (this branch)
+```bash
+pip install git+https://github.com/JarbasAl/jarbas_utils
 ```
 
 ## Usage
@@ -46,16 +52,14 @@ If you are making a system enclosure you will likely need to handle system actio
 ```python
 from jarbas_utils.system import system_reboot, system_shutdown, ssh_enable, ssh_disable
 from jarbas_utils.log import LOG
-from mycroft_bus_client import MessageBusClient, Message
-
+from jarbas_utils.messagebus import get_mycroft_bus, Message
 
 
 class MyEnclosureClass:
 
     def __init__(self):
         LOG.info('Setting up client to connect to a local mycroft instance')
-        self.bus = MessageBusClient()
-        self.bus.run_in_thread()
+        self.bus = get_mycroft_bus()
         self.bus.on("system.reboot", self.handle_reboot)
         
     def speak(self, utterance):
@@ -76,15 +80,14 @@ Volume control is also a common thing you need to handle
 from jarbas_utils.sound.alsa import AlsaControl
 #from jarbas_utils.sound.pulse import PulseAudio
 from jarbas_utils.log import LOG
-from mycroft_bus_client import MessageBusClient, Message
+from jarbas_utils.messagebus import get_mycroft_bus, Message
 
 
 class MyPretendEnclosure:
 
     def __init__(self):
         LOG.info('Setting up client to connect to a local mycroft instance')
-        self.bus = MessageBusClient()
-        self.bus.run_in_thread()
+        self.bus = get_mycroft_bus()
         # None of these are mycroft signals, but you get the point
         self.bus.on("set.volume", self.handle_set_volume)
         self.bus.on("speak.volume", self.handle_speak_volume)
@@ -118,6 +121,11 @@ class MyPretendEnclosure:
 
 ## Changelog
 
+- 0.1.2 - Current Dev, not yet released on pip, api might change
+    - generic utils
+        - create_daemon
+        - wait_for_exit_signal
+        - get_mycroft_bus
 - 0.1.1
     - language utils
         - detect_language alternative using google services
