@@ -178,7 +178,7 @@ class MycroftDefaultConfig(ReadOnlyConfig):
         paths = [
             "/opt/venvs/mycroft-core/lib/python3.7/site-packages/",  # mark1/2
             "/opt/venvs/mycroft-core/lib/python3.4/site-packages/ ",  # old mark1 installs
-            join(expanduser("~"), "mycroft-core")  # picroft
+            "/home/pi/mycroft-core"  # picroft
         ]
         for p in paths:
             p = join(p, "mycroft", "configuration", "mycroft.conf")
