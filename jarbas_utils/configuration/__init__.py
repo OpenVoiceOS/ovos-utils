@@ -109,6 +109,9 @@ class LocalConf(dict):
         else:
             LOG.debug("Configuration '{}' not defined, skipping".format(path))
 
+    def reload(self):
+        self.load_local(self.path)
+
     def store(self, path=None):
         """
             store the configuration locally.

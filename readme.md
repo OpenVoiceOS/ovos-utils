@@ -64,6 +64,8 @@ bus.close()
 
 utils are provided to manipulate the user config
 
+NOTE: this assumes you are running this code on the same machine as mycroft, it manipulates files directly in your system
+
 ```python
 from jarbas_utils.configuration import read_mycroft_config
 
@@ -93,6 +95,25 @@ except PermissionError:
     LOG.error("config is read only")
 ```
 
+you can also use the LocalConf class with your own path for other use cases
+```python
+from jarbas_utils.configuration import LocalConf
+
+MY_CONFIG = "~/.projectX/projectX.conf"
+
+class MyConfig(LocalConf):
+    def __init__(self):
+        super().__init__(MY_CONFIG)
+        
+config = MyConfig()
+if not config.get("lang"):
+    config["lang"] = "pt"
+    config.store() # now changes are saved
+
+config.merge({"host": "http://somedomain.net"})
+config.reload() # now changes are gone
+
+```
 
 #### Wake words
 
