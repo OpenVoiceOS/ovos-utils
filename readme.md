@@ -12,12 +12,17 @@ collection of simple utilities for use across the mycroft ecosystem
 
 
 ## Install
+
 stable version on pip 0.1.1
 
 ```bash
 pip install jarbas_utils
 ```
-dev version (this branch)
+
+dev version (this branch) - 0.2.0
+
+NOTE: this branch is unstable, apis might change under you without warning
+
 ```bash
 pip install git+https://github.com/JarbasAl/jarbas_utils
 ```
@@ -121,7 +126,7 @@ class MyPretendEnclosure:
 
 ## Changelog
 
-- 0.1.2 - Current Dev, not yet released on pip, api might change
+- 0.2.0
     - generic utils
         - create_daemon
         - wait_for_exit_signal
