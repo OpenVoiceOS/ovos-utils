@@ -1,4 +1,4 @@
-from jarbas_utils.database import JsonDatabase
+from jarbas_utils.database import JsonDatabase, jsonify_recursively
 
 db = JsonDatabase("users", "~/databases/users.json")
 
@@ -18,6 +18,7 @@ user2 = User("second@mail.net", "secret", data={"name": ["joe", "jony"], "age": 
 
 db.add_item(user1)
 db.add_item(user2)
+db.print()
 
 # search entries with non empty key
 print(db.search_by_key("secret_key", include_empty=False))
@@ -28,3 +29,5 @@ print(db.search_by_key("birth", fuzzy=True))
 # search entries with a certain value
 print(db.search_by_value("age", 12))
 print(db.search_by_value("name", "jon", fuzzy=True))
+
+db.commit()

@@ -16,7 +16,7 @@ collection of simple utilities for use across the mycroft ecosystem
 
 ## Install
 
-stable version on pip 0.2.2
+stable version on pip 0.2.3
 
 ```bash
 pip install jarbas_utils
@@ -327,6 +327,11 @@ db.commit() # save
 
 ## Changelog
 
+- 0.2.3
+    - database utils
+        - jsonify_recursively
+        - fix saving of db containing custom classes
+        - pretty print method
 - 0.2.2
     - database utils
         - allow custom classes as database items

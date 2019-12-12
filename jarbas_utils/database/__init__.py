@@ -1,5 +1,9 @@
 from jarbas_utils.configuration import LocalConf
 from jarbas_utils import fuzzy_match
+from os.path import expanduser, isdir, dirname
+from os import makedirs
+import json
+from pprint import pprint
 
 
 def get_key_recursively(search_dict, field, filter_None=False):
@@ -143,6 +147,27 @@ def get_value_recursively_fuzzy(search_dict, field, target_value, thresh=0.6):
     return sorted(fields_found, key = lambda i: i[1],reverse=True)
 
 
+def jsonify_recursively(thing):
+    if isinstance(thing, list):
+        jsonified = thing
+        for idx, item in enumerate(thing):
+            jsonified[idx] = jsonify_recursively(item)
+    elif isinstance(thing, dict):
+        if isinstance(thing, JsonDatabase):
+            jsonified = dict(thing.db)
+        else:
+            jsonified = dict(thing)
+        for key in jsonified.keys():
+            value = jsonified[key]
+            jsonified[key] = jsonify_recursively(value)
+    else:
+        try:
+            jsonified = thing.__dict__
+        except:
+            jsonified = thing
+    return jsonified
+
+
 class JsonDatabase(LocalConf):
     def __init__(self, name, path=None):
         super().__init__(path)
@@ -151,7 +176,7 @@ class JsonDatabase(LocalConf):
         self.db[name] = []
 
     def __repr__(self):
-        return str(self.db)
+        return str(jsonify_recursively(self))
 
     def __getitem__(self, item):
         return self.get_key(item)
@@ -193,9 +218,16 @@ class JsonDatabase(LocalConf):
             store the configuration locally.
         """
         path = path or self.path
+        path = expanduser(path)
         if not path:
             raise ValueError("database path not set")
-        self.db.store(self.path)
+        if not isdir(dirname(path)):
+            makedirs(dirname(path))
+        with open(path, 'w', encoding="utf-8") as f:
+            json.dump(jsonify_recursively(self), f, indent=4, ensure_ascii=False)
+
+    def print(self):
+        pprint(jsonify_recursively(self))
 
 
 if __name__ == "__main__":
@@ -209,6 +241,7 @@ if __name__ == "__main__":
             {"name": "jorge"},
             {"name": "joey",  "birthday": "may 12"} ]:
         db.add_item(user)
+
 
     print(db.search_by_key("age"))
     print(db.search_by_key("birth", fuzzy=True))
