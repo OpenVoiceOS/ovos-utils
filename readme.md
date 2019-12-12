@@ -5,11 +5,11 @@ collection of simple utilities for use across the mycroft ecosystem
 * [Install](#install)
 * [Usage](#usage)
     + [Messagebus](#messagebus)
-    + [Configuration](#configuration)
-        - [Wake words](#wake-words)
     + [Enclosures](#enclosures)
         - [System actions](#system-actions)
         - [Sound](#sound)
+        - [Configuration](#configuration)
+            * [Wake words](#wake-words)
     + [Data](#data)
 
 
@@ -113,7 +113,37 @@ bus.remove_all_listeners("speak")
 bus.close()
 ```
 
-### Configuration
+### Enclosures
+
+If you are making a system enclosure you will likely need to handle system actions
+
+#### System actions
+
+```python
+from jarbas_utils.system import system_reboot, system_shutdown, ssh_enable, ssh_disable
+from jarbas_utils.log import LOG
+from jarbas_utils.messagebus import get_mycroft_bus, Message
+
+
+class MyEnclosureClass:
+
+    def __init__(self):
+        LOG.info('Setting up client to connect to a local mycroft instance')
+        self.bus = get_mycroft_bus()
+        self.bus.on("system.reboot", self.handle_reboot)
+        
+    def speak(self, utterance):
+        LOG.info('Sending speak message...')
+        self.bus.emit(Message('speak', data={'utterance': utterance}))
+        
+    def handle_reboot(self, message):
+        self.speak("rebooting")
+        system_reboot()
+        
+        
+```
+
+#### Configuration
 
 utils are provided to manipulate the user config
 
@@ -169,7 +199,7 @@ config.reload() # now changes are gone
 
 ```
 
-#### Wake words
+##### Wake words
 
 when defining pocketsphinx wake words you often need to know the phonemes
 
@@ -209,35 +239,6 @@ Here is some sample output from get_phonemes
     alexa AH0 L EH1 K S AH0
 
 
-### Enclosures
-
-If you are making a system enclosure you will likely need to handle system actions
-
-#### System actions
-
-```python
-from jarbas_utils.system import system_reboot, system_shutdown, ssh_enable, ssh_disable
-from jarbas_utils.log import LOG
-from jarbas_utils.messagebus import get_mycroft_bus, Message
-
-
-class MyEnclosureClass:
-
-    def __init__(self):
-        LOG.info('Setting up client to connect to a local mycroft instance')
-        self.bus = get_mycroft_bus()
-        self.bus.on("system.reboot", self.handle_reboot)
-        
-    def speak(self, utterance):
-        LOG.info('Sending speak message...')
-        self.bus.emit(Message('speak', data={'utterance': utterance}))
-        
-    def handle_reboot(self, message):
-        self.speak("rebooting")
-        system_reboot()
-        
-        
-```
 #### Sound
 
 Volume control is also a common thing you need to handle
