@@ -16,13 +16,13 @@ collection of simple utilities for use across the mycroft ecosystem
 
 ## Install
 
-stable version on pip 0.2.0
+stable version on pip 0.2.1
 
 ```bash
 pip install jarbas_utils
 ```
 
-dev version (this branch) 0.2.x - 0.3.0
+dev version
 
 ```bash
 pip install git+https://github.com/JarbasAl/jarbas_utils
