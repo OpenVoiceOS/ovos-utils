@@ -115,7 +115,7 @@ First public release
     - enable/disable ssh
     - ntp sync
 
-[unreleased]: https://github.com/JarbasAl/jarbas_utils/tree/dev
-[0.3.0]: https://github.com/JarbasAl/jarbas_utils/tree/0.3
-[0.2.3]: https://github.com/JarbasAl/jarbas_utils/tree/0.2
-[0.1.1]: https://github.com/JarbasAl/jarbas_utils/tree/0.1
+[unreleased]: https://github.com/OpenJarbas/jarbas_utils/tree/dev
+[0.3.0]: https://github.com/OpenJarbas/jarbas_utils/tree/0.3
+[0.2.3]: https://github.com/OpenJarbas/jarbas_utils/tree/0.2
+[0.1.1]: https://github.com/OpenJarbas/jarbas_utils/tree/0.1
