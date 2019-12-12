@@ -22,7 +22,7 @@ stable version on pip 0.2.3
 pip install jarbas_utils
 ```
 
-dev version (this branch) 0.2.x - 0.3.0
+dev version
 
 ```bash
 pip install git+https://github.com/JarbasAl/jarbas_utils
