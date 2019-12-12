@@ -37,7 +37,7 @@ The main way to interact with a mycroft instance is using the messagebus
 
     WARNING: the mycroft bus is unencrypted, be sure to secure your communications in some way before you start poking firewall ports open
 
-Listening for events is super easy, here is a small program counting number of intent failures
+Listening for events is super easy, here is a small program counting number of spoken utterances
 
 ```python
 from jarbas_utils.messagebus import listen_for_message
