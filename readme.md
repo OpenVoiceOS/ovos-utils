@@ -277,7 +277,7 @@ class MyPretendEnclosure:
             self.alsa.mute()
         
     def handle_unmute_volume(self, message):
-        if not self.alsa.is_muted():
+        if self.alsa.is_muted():
             self.alsa.unmute()
         
     def handle_set_volume(self, message):
