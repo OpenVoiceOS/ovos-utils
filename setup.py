@@ -2,8 +2,14 @@ from setuptools import setup
 
 setup(
     name='jarbas_utils',
-    version='0.2.3',
-    packages=['jarbas_utils', 'jarbas_utils.sound', 'jarbas_utils.system'],
+    version='0.3.0',
+    packages=['jarbas_utils',
+              'jarbas_utils.sound',
+              'jarbas_utils.configuration',
+              'jarbas_utils.database',
+              'jarbas_utils.lang',
+              'jarbas_utils.messagebus',
+              'jarbas_utils.system'],
     url='https://github.com/JarbasAl/jarbas_utils',
     install_requires=["pronouncing",
                       "googletrans",

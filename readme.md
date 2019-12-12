@@ -16,13 +16,13 @@ collection of simple utilities for use across the mycroft ecosystem
 
 ## Install
 
-stable version on pip 0.2.3
+stable version on pip 0.3.0
 
 ```bash
 pip install jarbas_utils
 ```
 
-dev version
+dev version (this branch) - 0.3.x - 0.4
 
 ```bash
 pip install git+https://github.com/JarbasAl/jarbas_utils
@@ -327,6 +327,11 @@ db.commit() # save
 
 ## Changelog
 
+- 0.3.0
+    - database utils
+        - bugfix/ mutating source list on jsonify_recursively
+    - ssml utils
+    - xml utils
 - 0.2.3
     - database utils
         - jsonify_recursively
