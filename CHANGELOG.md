@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1]  - 2019-12-12
+
+First public release under OpenJarbas 
+
 ## [0.3.0]  - 2019-12-12
 
-First public release
+Released on [pypi](https://pypi.org/project/jarbas-utils/)
 
 ### Added
 
@@ -116,6 +120,4 @@ First public release
     - ntp sync
 
 [unreleased]: https://github.com/OpenJarbas/jarbas_utils/tree/dev
-[0.3.0]: https://github.com/OpenJarbas/jarbas_utils/tree/0.3
-[0.2.3]: https://github.com/OpenJarbas/jarbas_utils/tree/0.2
-[0.1.1]: https://github.com/OpenJarbas/jarbas_utils/tree/0.1
+[0.3.1]: https://github.com/OpenJarbas/jarbas_utils/tree/0.3
