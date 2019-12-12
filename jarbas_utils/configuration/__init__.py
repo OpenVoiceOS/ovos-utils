@@ -139,6 +139,12 @@ class ReadOnlyConfig(LocalConf):
         super().__init__(path)
         self.allow_overwrite = allow_overwrite
 
+    def reload(self):
+        old = self.allow_overwrite
+        self.allow_overwrite = True
+        super().reload()
+        self.allow_overwrite = old
+
     def __setitem__(self, key, value):
         if not self.allow_overwrite:
             raise PermissionError
@@ -167,8 +173,19 @@ class MycroftUserConfig(LocalConf):
 
 class MycroftDefaultConfig(ReadOnlyConfig):
     def __init__(self):
-        super().__init__("/tmp/mycroft/default_mycroft.conf")
-        # TODO actually load values
+        path = None
+        # TODO check all common paths
+        paths = ["/opt/mycroft"]
+        for p in paths:
+            if isdir(p):
+                path = join(p, "mycroft", "configuration", "mycroft.conf")
+        super().__init__(path)
+        if not self.path or not isdir(self.path):
+            LOG.warning("mycroft root path not found")
+
+    def set_mycroft_root(self, mycroft_root_path):
+        self.path = join(mycroft_root_path, "mycroft", "configuration", "mycroft.conf")
+        self.reload()
 
 
 class MycroftSystemConfig(ReadOnlyConfig):

@@ -88,6 +88,7 @@ config["enclosure"] = {"platform": "respeaker"}
 config.store()
 
 config = MycroftDefaultConfig()
+config.set_mycroft_root("~/mycroft-core")
 lang = config["lang"]
 try:
     config["lang"] = "pt"
