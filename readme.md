@@ -21,10 +21,10 @@ stable version on pip 0.3.0
 pip install jarbas_utils
 ```
 
-dev version (this branch) - 0.3.x - 0.4
+dev version
 
 ```bash
-pip install git+https://github.com/JarbasAl/jarbas_utils
+pip install git+https://github.com/OpenJarbas/jarbas_utils
 ```
 
 ## Usage
