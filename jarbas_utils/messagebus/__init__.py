@@ -1,25 +1,4 @@
-from jarbas_utils.log import LOG
-
-try:
-    from mycroft_bus_client import MessageBusClient, Message
-except ImportError:
-    # TODO add to setup.py blocked until https://github.com/MycroftAI/mycroft-messagebus-client is on pip
-    # TODO create websocket connection manually or just wait?
-    MessageBusClient = None
-
-
-    class Message(dict):
-        @property
-        def type(self):
-            return self.get("type", "mycroft_message")
-
-        @property
-        def data(self):
-            return self.get("data", {})
-
-        @property
-        def context(self):
-            return self.get("context", {})
+from mycroft_bus_client import MessageBusClient, Message, send
 
 
 def get_mycroft_bus():
@@ -27,9 +6,6 @@ def get_mycroft_bus():
     TODO add host to params
     Returns a connection to the mycroft messagebus
     """
-    if MessageBusClient is None:
-        LOG.error("pip install git+https://github.com/MycroftAI/mycroft-messagebus-client")
-        raise ImportError("mycroft-messagebus-client not found")
     client = MessageBusClient()
     client.run_in_thread()
     return client
@@ -50,8 +26,15 @@ def listen_once_for_message(msg_type, handler, bus=None):
     """
     listens and reacts once to a specific messagetype on the mycroft messagebus
     """
+    auto_close = bus is None
     bus = bus or get_mycroft_bus()
-    bus.once(msg_type, handler)
+
+    def _handler(message):
+        handler(message)
+        if auto_close:
+            bus.close()
+
+    bus.once(msg_type, _handler)
     return bus
 
 
@@ -66,6 +49,7 @@ def wait_for_reply(message, reply_type=None, timeout=None, bus=None):
     Returns:
         The received message or None if the response timed out
     """
+    auto_close = bus is None
     bus = bus or get_mycroft_bus()
     if isinstance(message, str):
         # TODO check for json
@@ -76,4 +60,24 @@ def wait_for_reply(message, reply_type=None, timeout=None, bus=None):
                           message.get("context"))
     elif not isinstance(message, Message):
         raise ValueError
-    return bus.wait_for_response(message, reply_type, timeout)
+    response = bus.wait_for_response(message, reply_type, timeout)
+    if auto_close:
+        bus.close()
+    return response
+
+
+def send_message(message, bus=None):
+    auto_close = bus is None
+    bus = bus or get_mycroft_bus()
+    if isinstance(message, str):
+        # TODO check for json
+        message = Message(message)
+    elif isinstance(message, dict):
+        message = Message(message["type"],
+                          message.get("data"),
+                          message.get("context"))
+    elif not isinstance(message, Message):
+        raise ValueError
+    bus.emit(message)
+    if auto_close:
+        bus.close()

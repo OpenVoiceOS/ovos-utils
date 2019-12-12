@@ -4,6 +4,7 @@ collection of simple utilities for use across the mycroft ecosystem
 
 * [Install](#install)
 * [Usage](#usage)
+    + [Messagebus](#messagebus)
     + [Wake words](#wake-words)
     + [Enclosures](#enclosures)
         - [System actions](#system-actions)
@@ -28,6 +29,36 @@ pip install git+https://github.com/JarbasAl/jarbas_utils
 ```
 
 ## Usage
+
+### Messagebus
+
+The main way to interact with a mycroft instance is using the messagebus
+
+    WARNING: the mycroft bus is unencrypted, be sure to secure your communications in some way before you start poking firewall ports open
+
+Listening for events is super easy, here is a small program counting number of intent failures
+
+```python
+from jarbas_utils.messagebus import listen_for_message
+from jarbas_utils.log import LOG
+from jarbas_utils import wait_for_exit_signal
+
+counter = 0
+
+
+def handle_message(message):
+    global counter
+    counter += 1
+    # NOTE: A matched padatious_intent is handled this way, too
+    LOG.info("Intent failure detected: {n}".format(n=counter))
+
+bus = listen_for_message("intent_failure", handle_message)
+wait_for_exit_signal()
+bus.remove_all_listeners("intent_failure")
+bus.close()
+
+```
+
 
 ### Wake words
 
