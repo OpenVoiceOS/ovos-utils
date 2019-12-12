@@ -115,7 +115,7 @@ config["enclosure"] = {"platform": "respeaker"}
 config.store()
 
 config = MycroftDefaultConfig()
-config.set_mycroft_root("~/mycroft-core")
+config.set_mycroft_root("~/PycharmProjects/mycroft-core")  # not needed for mark1/mark2/picroft
 lang = config["lang"]
 try:
     config["lang"] = "pt"

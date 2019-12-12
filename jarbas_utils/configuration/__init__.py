@@ -176,11 +176,8 @@ class MycroftDefaultConfig(ReadOnlyConfig):
         path = None
         # TODO check system config platform and go directly to correct path if it exists
         paths = [
-            "/opt/venvs/mycroft-core",  # mark1/2
-            "/opt/venvs/mycroft",
-            "/usr/bin/mycroft-core",
-            "/usr/bin/mycroft",
-            "/opt/mycroft",
+            "/opt/venvs/mycroft-core/lib/python3.7/site-packages/",  # mark1/2
+            "/opt/venvs/mycroft-core/lib/python3.4/site-packages/ ",  # old mark1 installs
             join(expanduser("~"), "mycroft-core")  # picroft
         ]
         for p in paths:
