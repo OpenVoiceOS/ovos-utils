@@ -5,7 +5,8 @@ collection of simple utilities for use across the mycroft ecosystem
 * [Install](#install)
 * [Usage](#usage)
     + [Messagebus](#messagebus)
-    + [Wake words](#wake-words)
+    + [Configuration](#configuration)
+        - [Wake words](#wake-words)
     + [Enclosures](#enclosures)
         - [System actions](#system-actions)
         - [Sound](#sound)
@@ -59,25 +60,79 @@ bus.close()
 
 ```
 
+### Configuration
 
-### Wake words
+utils are provided to manipulate the user config
+
+```python
+from jarbas_utils.configuration import read_mycroft_config
+
+config = read_mycroft_config()
+stt = config["stt"]["module"]
+```
+
+individual configs can also be manipulated
+```python
+from jarbas_utils.configuration import MycroftUserConfig, MycroftSystemConfig, MycroftDefaultConfig
+from jarbas_utils.log import LOG
+
+config = MycroftUserConfig()
+config["lang"] = "pt"
+config["tts"] = {"module": "google"}
+config.store()
+
+config = MycroftSystemConfig(allow_overwrite=True)
+config["enclosure"] = {"platform": "respeaker"}
+config.store()
+
+config = MycroftDefaultConfig()
+lang = config["lang"]
+try:
+    config["lang"] = "pt"
+except PermissionError:
+    LOG.error("config is read only")
+```
+
+
+#### Wake words
 
 when defining pocketsphinx wake words you often need to know the phonemes
 
 ```python
+from jarbas_utils.configuration import update_mycroft_config
 from jarbas_utils.lang.phonemes import get_phonemes
 
-words = ["hey mycroft", "hey chatterbox", "alexa"]
-for word in words:
-    print(word, get_phonemes(word))
+
+def create_wakeword(word, sensitivity):
+    # sensitivity is a bitch to do automatically
+    # IDEA make some web ui or whatever to tweak it experimentally
+    phonemes = get_phonemes(word)
+    config = {
+        "listener": {
+            "wake_word": word
+          },
+          word: {
+            "andromeda": {
+              "module": "pocketsphinx",
+              "phonemes": phonemes,
+              "sample_rate": 16000,
+              "threshold": sensitivity,
+              "lang": "en-us"
+            }
+          }
+    }
+    update_mycroft_config(config)
+    
+create_wakeword("andromeda", "1e-25")
         
 ```
 
-Here is some sample output
+Here is some sample output from get_phonemes
 
     hey mycroft HH EY1 . M Y K R OW F T
     hey chatterbox HH EY1 . CH AE T EH R B OW K S
     alexa AH0 L EH1 K S AH0
+
 
 ### Enclosures
 

@@ -3,6 +3,7 @@ from os.path import isfile, exists, expanduser, join, dirname, isdir
 from os import makedirs
 import json
 
+MYCROFT_SYSTEM_CONFIG = "/etc/mycroft/mycroft.conf"
 MYCROFT_USER_CONFIG = join(expanduser("~"), ".mycroft", "mycroft.conf")
 
 
@@ -113,6 +114,10 @@ class LocalConf(dict):
             store the configuration locally.
         """
         path = path or self.path
+        if not path:
+            LOG.warning("config path not set, updating user config!!")
+            update_mycroft_config(self)
+            return
         if not isdir(dirname(path)):
             makedirs(dirname(path))
         with open(path, 'w', encoding="utf-8") as f:
@@ -120,11 +125,60 @@ class LocalConf(dict):
 
     def merge(self, conf):
         merge_dict(self, conf)
+        return self
+
+
+class ReadOnlyConfig(LocalConf):
+    """ read only  """
+
+    def __init__(self, path, allow_overwrite=False):
+        self.allow_overwrite = True
+        super().__init__(path)
+        self.allow_overwrite = allow_overwrite
+
+    def __setitem__(self, key, value):
+        if not self.allow_overwrite:
+            raise PermissionError
+        super().__setitem__(key, value)
+
+    def __setattr__(self, key, value):
+        if not self.allow_overwrite:
+            raise PermissionError
+        super().__setattr__(key, value)
+
+    def merge(self, conf):
+        if not self.allow_overwrite:
+            raise PermissionError
+        super().merge(conf)
+
+    def store(self, path=None):
+        if not self.allow_overwrite:
+            raise PermissionError
+        super().store(path)
 
 
 class MycroftUserConfig(LocalConf):
     def __init__(self):
         super().__init__(MYCROFT_USER_CONFIG)
+
+
+class MycroftDefaultConfig(ReadOnlyConfig):
+    def __init__(self):
+        super().__init__("/tmp/mycroft/default_mycroft.conf")
+        # TODO actually load values
+
+
+class MycroftSystemConfig(ReadOnlyConfig):
+    def __init__(self, allow_overwrite=False):
+        super().__init__(MYCROFT_SYSTEM_CONFIG, allow_overwrite)
+
+
+def read_mycroft_config():
+    conf = LocalConf(None)
+    conf.merge(MycroftDefaultConfig)
+    conf.merge(MycroftSystemConfig)
+    conf.merge(MycroftUserConfig)
+    return conf
 
 
 def update_mycroft_config(config, path=None):
