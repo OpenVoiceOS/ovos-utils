@@ -72,7 +72,7 @@ def create_loop(target, interval, args=(), kwargs=None):
     and repeat it every interval seconds
     """
 
-    def loop():
+    def loop(*args, **kwargs):
         try:
             while True:
                 target(*args, **kwargs)
@@ -80,7 +80,7 @@ def create_loop(target, interval, args=(), kwargs=None):
         except KeyboardInterrupt:
             return
 
-    return create_daemon(loop)
+    return create_daemon(loop, args, kwargs)
 
 
 def wait_for_exit_signal():
