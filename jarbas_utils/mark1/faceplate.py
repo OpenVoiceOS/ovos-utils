@@ -4,36 +4,44 @@ import collections
 
 class FaceplateGrid(collections.MutableSequence):
     encoded = None
-    repr = None
-    width = 32
-    height = 8
+    str_grid = None
+    pad_char = "."
 
     def __init__(self, grid=None, bus=None):
         self.bus = bus
         if self.encoded:
             self.grid = self.decode(self.encoded).grid
-        elif self.repr:
-            self.grid = FaceplateGrid.from_string(self.repr).grid
+        elif self.str_grid:
+            self.grid = FaceplateGrid.from_string(self.str_grid).grid
         else:
-            self.grid = grid or [[0] * self.width] * self.height
+            self.grid = grid or [[0] * 32] * 8  # full size is 32*8
+
+    @property
+    def height(self):
+        return len(self.grid)
+
+    @property
+    def width(self):
+        return max([len(r) for r in self.grid])
 
     def display(self, invert=True, clear=True):
+        # TODO handle x, y start position
         if self.bus is None:
             self.bus = get_mycroft_bus()
         data = {"img_code": self.encode(invert),
                 "clearPrev": clear}
         self.bus.emit(Message('enclosure.mouth.display', data))
 
-    def print(self):
-        print(self.to_string())
+    def print(self, draw_padding=True):
+        print(self.to_string(draw_padding=draw_padding))
 
-    def encode(self, invert=True):
+    def encode(self, invert=False):
         # to understand how this function works you need to understand how the
         # Mark I arduino proprietary encoding works to display to the faceplate
 
         # https://mycroft-ai.gitbook.io/docs/skill-development/displaying-information/mark-1-display
 
-        # Each char value represents a width number starting with B=1
+        # Each char value str_gridesents a width number starting with B=1
         # then increment 1 for the next. ie C=2
         width_codes = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
                        'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
@@ -51,6 +59,10 @@ class FaceplateGrid(collections.MutableSequence):
         for i in range(self.width):  # pixels
             for j in range(self.height):  # lines
                 pixels = self.grid[j]
+
+                if pixels[i] is None:  # padding
+                    pixels[i] = 0
+
                 if pixels[i] != 0:
                     if invert is False:
                         binary_values.append('1')
@@ -91,7 +103,7 @@ class FaceplateGrid(collections.MutableSequence):
                 increment = 0
                 binary_code = ''
                 alternate = False
-        # Code to let the Makrk I arduino know where to place the
+        # Code to let the Mark I arduino know where to place the
         # pixels on the faceplate
         pixel_codes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
                        'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
@@ -102,10 +114,10 @@ class FaceplateGrid(collections.MutableSequence):
         return encode
 
     @staticmethod
-    def decode(encoded, invert=True, pad=True):
+    def decode(encoded, invert=False, pad=False):
         codes = list(encoded)
 
-        # Each char value represents a width number starting with B=1
+        # Each char value str_gridesents a width number starting with B=1
         # then increment 1 for the next. ie C=2
         width_codes = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
                        'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
@@ -158,51 +170,57 @@ class FaceplateGrid(collections.MutableSequence):
 
         #  handle padding
         if pad:
-            if width < FaceplateGrid.width:
-                n = int((FaceplateGrid.width - width) / 2)
+            if width < 32:
+                n = int((32 - width) / 2)
                 if invert:
                     padding = [1] * n
                 else:
                     padding = [0] * n
                 for idx, row in enumerate(grid):
                     grid[idx] = padding + row + padding
+            if height < 8:
+                pass # TODO vertical padding
         return FaceplateGrid(grid)
 
-    @staticmethod
-    def from_string(repr):
-        rows = [r for r in repr.split("\n") if len(r)]
+    def from_string(self, str_grid):
+        rows = [r for r in str_grid.split("\n") if len(r)]
         grid = []
         for r in rows:
             row = []
             for char in list(r):
                 if char == " ":
                     row.append(1)
+                elif char == FaceplateGrid.pad_char:
+                    row.append(None)
                 else:
                     row.append(0)
-            while len(row) < FaceplateGrid.width:
-                row.append(1)
+            while len(row) < self.width:
+                row.append(None)
             grid.append(row)
+        self.grid = grid
+        return self
 
-        return FaceplateGrid(grid)
-
-    def to_string(self):
-        repr = ""
+    def to_string(self, draw_padding=False):
+        str_grid = ""
         for row in self.grid:
             line = ""
             for col in row:
-                if col:
+                if col is None and draw_padding:
+                    line += self.pad_char
+                elif col == 1:
                     line += " "
-                else:
+                elif col == 0:
                     line += "X"
-            repr += line + "\n"
-        return repr
+            str_grid += line + "\n"
+        return str_grid
 
     def invert(self):
-        inverted_str = self.to_string() \
-            .replace("X", "_") \
-            .replace(" ", "X") \
-            .replace("_", " ")
-        self.grid = self.from_string(inverted_str).grid
+        for x in range(self.height):
+            for y in range(self.width):
+                if self.grid[x][y] == 0:
+                    self.grid[x][y] = 1
+                elif self.grid[x][y] == 1:
+                    self.grid[x][y] = 0
         return self
 
     def __len__(self):
@@ -223,7 +241,7 @@ class FaceplateGrid(collections.MutableSequence):
 
 
 class MusicIcon(FaceplateGrid):
-    repr = """
+    str_grid = """
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXX     XXXXXXXXXXXXX
 XXXXXXXXXXXXXX     XXXXXXXXXXXXX
@@ -240,7 +258,7 @@ XXXXXXXXXXXXX XXX XXXXXXXXXXXXXX
 
 
 class PlusIcon(FaceplateGrid):
-    repr = """ 
+    str_grid = """ 
               xxx    
               xxx    
            xxxxxxxxx 
@@ -286,29 +304,36 @@ class WindIcon(FaceplateGrid):
 
 if __name__ == "__main__":
 
-    StormIcon().invert().print()
-    StormIcon().print()
+    #StormIcon().invert().print()
+    #StormIcon().print()
 
-    repr = """
+    str_grid = """
 XXXXXXXXXXX
 XXXX   XXXX
 XXXX   XXXX
 X         X
-X         X 
+X         X
 XXXX   XXXX
 XXXX   XXXX
 XXXXXXXXXXX
 """
 
-    faceplate = FaceplateGrid.from_string(repr)
+    faceplate = FaceplateGrid().from_string(str_grid)
+    faceplate.print()  # notice padding with . . .
 
-    encoded = faceplate.encode()
+    encoded = faceplate.encode()   # padding replaced with "off"
+
     print(encoded)
 
     decoded = faceplate.decode(encoded)
-    print(decoded.encode())
+    assert decoded.encode() == encoded
+    decoded.invert()
+
     decoded.print()
 
+
+
+    exit()
     music = MusicIcon()
     print(music.encode())
     music.print()
