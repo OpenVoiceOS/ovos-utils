@@ -1,5 +1,6 @@
 from jarbas_utils.messagebus import get_mycroft_bus, Message
 import random
+from time import sleep
 import copy
 import collections
 
@@ -289,11 +290,21 @@ class FacePlateAnimation(FaceplateGrid):
     def stop(self):
         self.finished = True
 
+    def run(self, delay, callback=None):
+        self.start()
+        while not self.finished:
+            self.animate()
+            if callback:
+                callback(self)
+            sleep(delay)
+        self.stop()
+
 
 class GoL(FacePlateAnimation):
 
-    def __init__(self, grid=None, bus=None):
+    def __init__(self, entropy=0, grid=None, bus=None):
         super().__init__(grid, bus)
+        self.entropy = entropy
         if self.is_empty:
             self.randomize()
 
@@ -341,7 +352,10 @@ class GoL(FacePlateAnimation):
                 else:
                     if (neighbours < 2) or (neighbours > 3):
                         nt[y][x] = 0
+        if nt == self.grid and self.entropy <= 0:
+            self.stop()
         self.grid = nt
+        self.randomize(self.entropy)
         if self.is_empty:
             self.stop()
 
@@ -353,10 +367,11 @@ if __name__ == "__main__":
     decoded = faceplate.decode(encoded)
     assert decoded.encode() == encoded
 
-
     game_of_life = GoL()
 
-    for grid in game_of_life:
+    def handle_new_frame(grid):
         grid.print()
+
+    game_of_life.run(0.1, handle_new_frame)
 
 

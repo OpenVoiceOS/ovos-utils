@@ -29,6 +29,7 @@ current dev branch
     
 - mark1
     - FaceplateGrid 
+    - FaceplateAnimation
     - game of life
     
 ## [0.3.2]  - 2019-12-12

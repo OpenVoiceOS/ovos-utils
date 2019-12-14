@@ -1,5 +1,6 @@
 from jarbas_utils.mark1 import FaceplateGrid
 
+
 class MusicIcon(FaceplateGrid):
     str_grid = """
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
