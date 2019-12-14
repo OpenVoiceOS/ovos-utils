@@ -66,6 +66,23 @@ def create_daemon(target, args=(), kwargs=None):
     return t
 
 
+def create_loop(target, interval, args=(), kwargs=None):
+    """
+    Helper to quickly create and start a thread with daemon = True
+    and repeat it every interval seconds
+    """
+
+    def loop():
+        try:
+            while True:
+                target(*args, **kwargs)
+                sleep(interval)
+        except KeyboardInterrupt:
+            return
+
+    return create_daemon(loop)
+
+
 def wait_for_exit_signal():
     """Blocks until KeyboardInterrupt is received"""
     try:

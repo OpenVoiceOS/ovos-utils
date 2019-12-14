@@ -2,15 +2,20 @@
 
 collection of simple utilities for use across the mycroft ecosystem
 
-* [Install](#install)
-* [Usage](#usage)
+- [Jarbas - utils](#jarbas---utils)
+  * [Install](#install)
+  * [Usage](#usage)
     + [Messagebus](#messagebus)
+      - [Listening](#listening)
+      - [Sending](#sending)
+      - [Remote Websocket](#remote-websocket)
+      - [Advanced Usage](#advanced-usage)
     + [Enclosures](#enclosures)
-        - [System actions](#system-actions)
-        - [Sound](#sound)
-        - [Configuration](#configuration)
-            * [Wake words](#wake-words)
-    + [Data](#data)
+      - [System actions](#system-actions)
+      - [Configuration](#configuration)
+        * [Wake words](#wake-words)
+      - [Sound](#sound)
+  * [Data](#data)
 
 
 ## Install
@@ -35,6 +40,8 @@ The main way to interact with a mycroft instance is using the messagebus
 
     WARNING: the mycroft bus is unencrypted, be sure to secure your communications in some way before you start poking firewall ports open
 
+#### Listening
+
 Listening for events is super easy, here is a small program counting number of spoken utterances
 
 ```python
@@ -58,6 +65,8 @@ wait_for_exit_signal()  # wait for ctrl+c
 bus.remove_all_listeners("speak")
 bus.close()
 ```
+
+#### Sending
 
 Triggering events in mycroft is also trivial
 
@@ -85,6 +94,8 @@ create_daemon(did_something_happen) # check for something in background
 wait_for_exit_signal()  # wait for ctrl+c
 ```
 
+#### Remote Websocket
+
 You can also connect to a remote messagebus, here is a live translator using language utils
 
 ```python
@@ -111,6 +122,42 @@ wait_for_exit_signal()  # wait for ctrl+c
 
 bus.remove_all_listeners("speak")
 bus.close()
+```
+
+#### Advanced Usage
+
+Providing services over the messagebus
+
+```python
+from jarbas_utils.messagebus import BusFeedProvider, Message
+from datetime import datetime
+
+
+class ClockService(BusFeedProvider):
+    def __init__(self, name="clock_transmitter", bus=None):
+        trigger_message  = Message("time.request")
+        super().__init__(trigger_message, name, bus)
+        self.set_data_gatherer(self.handle_get_time)
+        
+    def handle_get_time(self, message):
+        self.update({"date": datetime.now()})
+        
+        
+clock_service = ClockService()
+```
+
+Querying services over the messagebus
+
+```python
+from jarbas_utils.messagebus import BusFeedConsumer, Message
+
+class Clock(BusFeedConsumer):
+    def __init__(self, name="clock_receiver", timeout=3, bus=None):
+        request_message = Message("time.request")
+        super().__init__(request_message, name, timeout, bus)
+
+clock = Clock()
+date = clock.request()["date"]
 ```
 
 ### Enclosures
