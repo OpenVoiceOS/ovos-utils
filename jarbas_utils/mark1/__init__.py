@@ -1,4 +1,5 @@
 from jarbas_utils.messagebus import get_mycroft_bus, Message
+from jarbas_utils import create_loop
 import random
 from time import sleep
 import copy
@@ -290,13 +291,20 @@ class FacePlateAnimation(FaceplateGrid):
     def stop(self):
         self.finished = True
 
-    def run(self, delay, callback=None):
+    def run(self, delay, callback=None, daemonic=False):
         self.start()
-        while not self.finished:
+
+        def step(callback=callback):
             self.animate()
             if callback:
                 callback(self)
-            sleep(delay)
+
+        if daemonic:
+            create_loop(step, delay)
+        else:
+            while not self.finished:
+                step()
+                sleep(delay)
         self.stop()
 
 
@@ -372,6 +380,9 @@ if __name__ == "__main__":
     def handle_new_frame(grid):
         grid.print()
 
-    game_of_life.run(0.1, handle_new_frame)
+    game_of_life.run(0.1, handle_new_frame, daemonic=True)
+
+    while True:
+        pass
 
 
