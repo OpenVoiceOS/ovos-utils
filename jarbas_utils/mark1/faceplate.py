@@ -1,4 +1,6 @@
 from jarbas_utils.messagebus import get_mycroft_bus, Message
+import random
+import copy
 import collections
 
 
@@ -11,10 +13,16 @@ class FaceplateGrid(collections.MutableSequence):
         self.bus = bus
         if self.encoded:
             self.grid = self.decode(self.encoded).grid
-        elif self.str_grid:
-            self.grid = FaceplateGrid.from_string(self.str_grid).grid
+        elif self.str_grid is not None:
+            self.grid = FaceplateGrid().from_string(self.str_grid).grid
+        elif grid is not None:
+            self.grid = grid
         else:
-            self.grid = grid or [[0] * 32] * 8  # full size is 32*8
+            self.grid = []
+            for x in range(8):
+                self.grid.append([])
+                for y in range(32):
+                    self.grid[x].append(0)
 
     @property
     def height(self):
@@ -223,6 +231,27 @@ class FaceplateGrid(collections.MutableSequence):
                     self.grid[x][y] = 0
         return self
 
+    def clear(self):
+        for x in range(self.height):
+            for y in range(self.width):
+                self.grid[x][y] = 0
+        return self
+
+    @property
+    def is_clear(self):
+        for x in range(self.height):
+            for y in range(self.width):
+                if self.grid[x][y] == 1:
+                    return False
+        return True
+
+    def randomize(self, n=200):
+        for i in range(n):
+            x = random.randint(0, self.height-1)
+            y = random.randint(0, self.width-1)
+            self.grid[x][y] = int(random.randint(0, 1))
+        return self
+
     def __len__(self):
         # number of pixels
         return self.width * self.height
@@ -302,10 +331,88 @@ class WindIcon(FaceplateGrid):
     encoded = "IIABIBIBIJIJJGJAGA"
 
 
+class GoL(FaceplateGrid):
+
+    def __init__(self, grid=None, bus=None):
+        super().__init__(grid, bus)
+        if grid is None and not self.str_grid and not self.encoded:
+            self.randomize()
+
+    def _live_neighbours(self, y, x):
+        """Returns the number of live neighbours."""
+        count = 0
+        if y > 0:
+            if self.grid[y-1][x]:
+                count = count + 1
+            if x > 0:
+                if self.grid[y-1][x-1]:
+                    count = count + 1
+            if self.width > (x + 1):
+                if self.grid[y-1][x+1]:
+                    count = count + 1
+
+        if x > 0:
+            if self.grid[y][x-1]:
+                count = count + 1
+        if self.width > (x + 1):
+            if self.grid[y][x+1]:
+                count = count + 1
+
+        if self.height > (y + 1):
+            if self.grid[y+1][x]:
+                count = count + 1
+            if x > 0:
+                if self.grid[y+1][x-1]:
+                    count = count + 1
+            if self.width > (x + 1):
+                if self.grid[y+1][x+1]:
+                    count = count + 1
+
+        return count
+
+    def animate(self):
+        """Turn"""
+        nt = copy.deepcopy(self.grid)
+        for y in range(0, self.height):
+            for x in range(0, self.width):
+                neighbours = self._live_neighbours(y, x)
+                if self.grid[y][x] == 0:
+                    if neighbours == 3:
+                        nt[y][x] = 1
+                else:
+                    if (neighbours < 2) or (neighbours > 3):
+                        nt[y][x] = 0
+        self.grid = nt
+
+    def __iter__(self):
+        # Game of life
+        while not self.is_clear:
+            self.animate()
+            yield self
+
+
+class SpaceInvader(GoL):
+    str_grid = """
+XXXXXXXXXXXX  XXX  XXXXXXXXXXXXX
+XXXXXXXXXX X X X X X XXXXXXXXXXX
+XXXXXXXX   XX  X  XX   XXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXX  XXX  XXXXXXXXXXXXX
+XXXXXXXXXXXX XXXXX XXXXXXXXXXXXX
+XXXXXXXXXXXX XXXXX XXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+"""
+
+
 if __name__ == "__main__":
 
-    #StormIcon().invert().print()
-    #StormIcon().print()
+    game_of_life = GoL()
+
+    for grid in game_of_life:
+        grid.print()
+
+    StormIcon().invert().print()
+    StormIcon().print()
 
     str_grid = """
 XXXXXXXXXXX
@@ -323,17 +430,12 @@ XXXXXXXXXXX
 
     encoded = faceplate.encode()   # padding replaced with "off"
 
-    print(encoded)
-
     decoded = faceplate.decode(encoded)
     assert decoded.encode() == encoded
     decoded.invert()
 
     decoded.print()
 
-
-
-    exit()
     music = MusicIcon()
     print(music.encode())
     music.print()
@@ -341,4 +443,7 @@ XXXXXXXXXXX
     music.invert()
     print(music.encode())
     music.print()
+
+    f = FaceplateGrid().randomize().invert()
+    f.print()
 
