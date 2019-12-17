@@ -13,8 +13,8 @@ XXXXXXXXXXXX   X   XXXXXXXXXXXXX
 XXXXXXXXXXXXX XXX XXXXXXXXXXXXXX
 """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.invert()
 
 
@@ -63,10 +63,17 @@ class WindIcon(FaceplateGrid):
     encoded = "IIABIBIBIJIJJGJAGA"
 
 
+class Boat(FaceplateGrid):
+    encoded = "QIAAABACAGIEMEOEPHAEAGACABABAAAAAA"
+
+
 if __name__ == "__main__":
 
+    Boat().invert().print()
     StormIcon().invert().print()
     StormIcon().print()
+    StormIcon().display()
+    print(SnowIcon().encode())
 
     str_grid = """
     XXXXXXXXXXX

@@ -1,5 +1,6 @@
 from jarbas_utils.messagebus import get_mycroft_bus, Message
 from jarbas_utils import create_loop
+from jarbas_utils.log import LOG
 import random
 from time import sleep
 import copy
@@ -34,12 +35,19 @@ class FaceplateGrid(collections.MutableSequence):
     def width(self):
         return max([len(r) for r in self.grid])
 
-    def display(self, invert=True, clear=True):
-        # TODO handle x, y start position
+    def display(self, invert=True, clear=True, x_offset=0, y_offset=0):
         if self.bus is None:
             self.bus = get_mycroft_bus()
+
+        # NOTE read https://github.com/MycroftAI/enclosure-mark1/blob/master/protocols.txt#L141
+        # big images need to be split
+        LOG.error("waiting for https://github.com/MycroftAI/mycroft-core/pull/2429")
+        raise RuntimeError
+
         data = {"img_code": self.encode(invert),
-                "clearPrev": clear}
+                "clearPrev": clear,
+                "xOffset": x_offset,
+                "yOffset": y_offset}
         self.bus.emit(Message('enclosure.mouth.display', data))
 
     def print(self, draw_padding=True):
@@ -291,13 +299,21 @@ class FacePlateAnimation(FaceplateGrid):
     def stop(self):
         self.finished = True
 
-    def run(self, delay, callback=None, daemonic=False):
+    def run(self, delay=0.5, callback=None, daemonic=False):
         self.start()
 
+        if delay < 0.4:
+            # writer bugs out if sending messages too rapidly
+            delay = 0.4
+
         def step(callback=callback):
-            self.animate()
-            if callback:
-                callback(self)
+            try:
+                if not self.finished:
+                    self.animate()
+                    if callback:
+                        callback(self)
+            except Exception as e:
+                LOG.error(e)
 
         if daemonic:
             create_loop(step, delay)
@@ -370,19 +386,22 @@ class GoL(FacePlateAnimation):
 
 if __name__ == "__main__":
 
-    faceplate = FaceplateGrid().randomize()
+    bus = get_mycroft_bus("192.168.1.64")
+
+    sleep(2)
+
+    faceplate = FaceplateGrid(bus=bus).randomize()
+    faceplate.display()
     encoded = faceplate.encode()
     decoded = faceplate.decode(encoded)
+
     assert decoded.encode() == encoded
 
-    game_of_life = GoL()
+    game_of_life = GoL(bus=bus)
 
     def handle_new_frame(grid):
         grid.print()
-
-    game_of_life.run(0.1, handle_new_frame, daemonic=True)
-
-    while True:
-        pass
-
+        grid.display()
+    sleep(2)
+    game_of_life.run(0.5, handle_new_frame)
 
