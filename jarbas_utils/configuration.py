@@ -12,12 +12,13 @@ class LocalConf(dict):
     """
         Config dict from file.
     """
+    allow_overwrite = True
 
     def __init__(self, path):
         super(LocalConf, self).__init__()
-        if path:
-            self.path = path
-            self.load_local(path)
+        self.path = path
+        if self.path:
+            self.load_local(self.path)
 
     def load_local(self, path):
         """
@@ -65,9 +66,7 @@ class LocalConf(dict):
 
 class ReadOnlyConfig(LocalConf):
     """ read only  """
-
     def __init__(self, path, allow_overwrite=False):
-        self.allow_overwrite = True
         super().__init__(path)
         self.allow_overwrite = allow_overwrite
 
