@@ -13,6 +13,8 @@ current dev branch
 
 - general utils
     - create_loop
+    - resolve_resource_file
+    - get_mycroft_root
     
 - security utils
     - create self signed certificate
