@@ -132,9 +132,9 @@ class MycroftSystemConfig(ReadOnlyConfig):
 
 def read_mycroft_config():
     conf = LocalConf(None)
-    conf.merge(MycroftDefaultConfig)
-    conf.merge(MycroftSystemConfig)
-    conf.merge(MycroftUserConfig)
+    conf.merge(MycroftDefaultConfig())
+    conf.merge(MycroftSystemConfig())
+    conf.merge(MycroftUserConfig())
     return conf
 
 

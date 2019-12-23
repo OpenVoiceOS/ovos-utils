@@ -33,7 +33,12 @@ current dev branch
     - FaceplateGrid 
     - FaceplateAnimation
     - game of life
-    
+ 
+### Fixed
+
+- reading config
+
+   
 ## [0.3.2]  - 2019-12-12
 
 quick bugfix for pipy package
