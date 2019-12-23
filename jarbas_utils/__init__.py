@@ -20,7 +20,6 @@ from time import sleep
 import os
 from os.path import  isdir, join
 from difflib import SequenceMatcher
-from jarbas_utils.configuration import read_mycroft_config
 
 
 def get_mycroft_root():
@@ -35,7 +34,7 @@ def get_mycroft_root():
     return None
 
 
-def resolve_resource_file(res_name):
+def resolve_resource_file(res_name, root_path=None):
     """Convert a resource into an absolute filename.
 
     Resource names are in the form: 'filename.ext'
@@ -59,6 +58,8 @@ def resolve_resource_file(res_name):
     Returns:
         str: path to resource or None if no resource found
     """
+    # TODO handle cyclic import
+    from jarbas_utils.configuration import read_mycroft_config
     config = read_mycroft_config()
 
     # First look for fully qualified file (e.g. a user setting)
@@ -82,6 +83,8 @@ def resolve_resource_file(res_name):
         "/opt/venvs/mycroft-core/lib/python3.4/site-packages/ ",  # old mark1 installs
         "/home/pi/mycroft-core"  # picroft
     ]
+    if root_path:
+        paths += [root_path]
     for p in paths:
         filename = os.path.join(p, 'mycroft', 'res', res_name)
         filename = os.path.abspath(os.path.normpath(filename))
