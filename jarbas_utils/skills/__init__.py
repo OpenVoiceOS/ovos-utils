@@ -1,7 +1,5 @@
 from jarbas_utils.log import LOG
-from jarbas_utils.messagebus import Message
-from jarbas_utils.sound import wait_while_speaking
-from jarbas_utils import get_mycroft_root, get_handler_name, dig_for_message
+from jarbas_utils import get_mycroft_root, get_handler_name
 from jarbas_utils.lang.translate import detect_lang, translate_text
 
 try:
@@ -35,7 +33,7 @@ class UniversalSkill(MycroftSkill):
         self.translate_keys = []
         self.translate_tags = True
 
-    def language_detect(self, utterance):
+    def detect_language(self, utterance):
         try:
             return detect_lang(utterance)
         except:
@@ -50,7 +48,7 @@ class UniversalSkill(MycroftSkill):
     def _translate_utterance(self, utterance="", lang=None):
         lang = lang or self.input_lang
         if utterance and lang is not None:
-            ut_lang = self.language_detect(utterance)
+            ut_lang = self.detect_language(utterance)
             if lang.split("-")[0] != ut_lang:
                 utterance = self.translate(utterance, lang)
         return utterance
@@ -78,26 +76,16 @@ class UniversalSkill(MycroftSkill):
         return universal_intent_handler
 
     def register_intent(self, intent_parser, handler):
-        handler = self.create_universal_handler
-        self.register_intent(intent_parser, handler)
+        handler = self.create_universal_handler(handler)
+        super().register_intent(intent_parser, handler)
 
     def register_intent_file(self, intent_file, handler):
-
-        handler = self.create_universal_handler
-        self.register_intent_file(intent_file, handler)
+        handler = self.create_universal_handler(handler)
+        super().register_intent_file(intent_file, handler)
 
     def speak(self, utterance, expect_response=False, wait=False):
-        # registers the skill as being active
-        self.enclosure.register(self.name)
         utterance = self._translate_utterance(utterance)
-        data = {'utterance': utterance,
-                'expect_response': expect_response}
-        message = dig_for_message()
-        m = message.reply("speak", data) if message else Message("speak", data)
-        self.bus.emit(m)
-
-        if wait:
-            wait_while_speaking()
+        super().speak(utterance, expect_response, wait)
 
 
 class UniversalFallback(UniversalSkill, FallbackSkill):
@@ -115,7 +103,7 @@ class UniversalFallback(UniversalSkill, FallbackSkill):
             return success
 
         return universal_fallback_handler
-    
+
     def register_fallback(self, handler, priority):
         handler = self.create_universal_fallback_handler(handler)
         self.instance_fallback_handlers.append(handler)

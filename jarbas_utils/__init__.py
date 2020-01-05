@@ -167,17 +167,6 @@ def wait_for_exit_signal():
         pass
 
 
-def dig_for_message():
-    """Dig Through the stack for message."""
-    stack = inspect.stack()
-    # Limit search to 10 frames back
-    stack = stack if len(stack) < 10 else stack[:10]
-    local_vars = [frame[0].f_locals for frame in stack]
-    for l in local_vars:
-        if 'message' in l and isinstance(l['message'], Message):
-            return l['message']
-
-
 def get_handler_name(handler):
     """Name (including class if available) of handler function.
 

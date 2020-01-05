@@ -27,7 +27,6 @@ current dev branch
     - resolve_resource_file
     - get_mycroft_root
     - get_handler_name
-    - dig_for_message
 
 - sound
     - is_speaking
