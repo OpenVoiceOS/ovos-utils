@@ -5,27 +5,25 @@ from jarbas_utils import get_mycroft_root, get_handler_name, dig_for_message
 from jarbas_utils.lang.translate import detect_lang, translate_text
 
 try:
-    import mycroft.skills.mycroft_skill as mycroft_skill
-    import mycroft.skills.fallback_skill as fallback_skill
+    from mycroft.skills.mycroft_skill import MycroftSkill
+    from mycroft.skills.fallback_skill import FallbackSkill
+    from mycroft.skills.common_play_skill import CommonPlaySkill
+    from mycroft.skills.common_query_skill import CommonQuerySkill
+    from mycroft.skills.common_iot_skill import CommonIoTSkill
 except ImportError:
     import sys
 
     MYCROFT_ROOT_PATH = get_mycroft_root()
     if MYCROFT_ROOT_PATH is not None:
         sys.path.append(MYCROFT_ROOT_PATH)
-        import mycroft.skills.mycroft_skill as mycroft_skill
-        import mycroft.skills.fallback_skill as fallback_skill
+        from mycroft.skills.mycroft_skill import MycroftSkill
+        from mycroft.skills.fallback_skill import FallbackSkill
+        from mycroft.skills.common_play_skill import CommonPlaySkill
+        from mycroft.skills.common_query_skill import CommonQuerySkill
+        from mycroft.skills.common_iot_skill import CommonIoTSkill
     else:
         LOG.error("Could not find mycroft root path")
         raise ImportError
-
-
-class MycroftSkill(mycroft_skill.MycroftSkill):
-    pass
-
-
-class FallbackSkill(fallback_skill.FallbackSkill):
-    pass
 
 
 class UniversalSkill(MycroftSkill):
