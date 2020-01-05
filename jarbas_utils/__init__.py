@@ -20,6 +20,7 @@ from time import sleep
 import os
 from os.path import  isdir, join
 from difflib import SequenceMatcher
+import inspect
 
 
 def get_mycroft_root():
@@ -164,3 +165,29 @@ def wait_for_exit_signal():
             sleep(100)
     except KeyboardInterrupt:
         pass
+
+
+def dig_for_message():
+    """Dig Through the stack for message."""
+    stack = inspect.stack()
+    # Limit search to 10 frames back
+    stack = stack if len(stack) < 10 else stack[:10]
+    local_vars = [frame[0].f_locals for frame in stack]
+    for l in local_vars:
+        if 'message' in l and isinstance(l['message'], Message):
+            return l['message']
+
+
+def get_handler_name(handler):
+    """Name (including class if available) of handler function.
+
+    Arguments:
+        handler (function): Function to be named
+
+    Returns:
+        string: handler name as string
+    """
+    if '__self__' in dir(handler) and 'name' in dir(handler.__self__):
+        return handler.__self__.name + '.' + handler.__name__
+    else:
+        return handler.__name__

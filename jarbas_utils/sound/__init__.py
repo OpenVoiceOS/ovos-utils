@@ -1,4 +1,5 @@
 import subprocess
+import time
 from jarbas_utils.log import LOG
 
 
@@ -79,3 +80,23 @@ def record(file_path, duration, rate, channels):
         return subprocess.Popen(
             ["arecord", "-r", str(rate), "-c", str(channels), file_path])
 
+
+def is_speaking():
+    """Determine if Text to Speech is occurring
+
+    Returns:
+        bool: True while still speaking
+    """
+    return check_for_signal("isSpeaking", -1)
+
+
+def wait_while_speaking():
+    """Pause as long as Text to Speech is still happening
+
+    Pause while Text to Speech is still happening.  This always pauses
+    briefly to ensure that any preceeding request to speak has time to
+    begin.
+    """
+    time.sleep(0.3)  # Wait briefly in for any queued speech to begin
+    while is_speaking():
+        time.sleep(0.1)

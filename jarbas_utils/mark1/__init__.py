@@ -39,11 +39,6 @@ class FaceplateGrid(collections.MutableSequence):
         if self.bus is None:
             self.bus = get_mycroft_bus()
 
-        # NOTE read https://github.com/MycroftAI/enclosure-mark1/blob/master/protocols.txt#L141
-        # big images need to be split
-        LOG.error("waiting for https://github.com/MycroftAI/mycroft-core/pull/2429")
-        raise RuntimeError
-
         data = {"img_code": self.encode(invert),
                 "clearPrev": clear,
                 "xOffset": x_offset,
@@ -386,13 +381,14 @@ class GoL(FacePlateAnimation):
 
 if __name__ == "__main__":
 
-    bus = get_mycroft_bus("192.168.1.64")
+    bus = get_mycroft_bus("192.168.1.66")
 
     sleep(2)
 
     faceplate = FaceplateGrid(bus=bus).randomize()
-    faceplate.display()
+    faceplate.display(invert=True)
     encoded = faceplate.encode()
+    print(encoded)
     decoded = faceplate.decode(encoded)
 
     assert decoded.encode() == encoded
@@ -403,5 +399,5 @@ if __name__ == "__main__":
         grid.print()
         grid.display()
     sleep(2)
-    game_of_life.run(0.5, handle_new_frame)
+    game_of_life.run(2, handle_new_frame)
 

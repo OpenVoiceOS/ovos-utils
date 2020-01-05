@@ -11,10 +11,27 @@ current dev branch
 
 ### Added
 
+- skills
+    - universal skill
+    - universal fallback
+ 
+- signal
+    - get_ipc_directory
+    - ensure_directory_exists
+    - create_file
+    - create_signal
+    - check_for_signal
+       
 - general utils
     - create_loop
     - resolve_resource_file
     - get_mycroft_root
+    - get_handler_name
+    - dig_for_message
+
+- sound
+    - is_speaking
+    - wait_while_speaking
     
 - security utils
     - create self signed certificate
