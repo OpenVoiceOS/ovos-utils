@@ -68,23 +68,23 @@ class UniversalSkill(MycroftSkill):
                 message.data["__tags__"][idx] = self._translate_utterance(token.get("key", ""))
         return message
 
-    def register_intent(self, intent_parser, handler):
+    def create_universal_handler(self, handler):
 
-        def universal_intent_handler(self, message):
+        def universal_intent_handler(message):
             message = self._translate_message(message)
             LOG.info(get_handler_name(handler))
             handler(message)
 
-        self.register_intent(intent_parser, universal_intent_handler)
+        return universal_intent_handler
+
+    def register_intent(self, intent_parser, handler):
+        handler = self.create_universal_handler
+        self.register_intent(intent_parser, handler)
 
     def register_intent_file(self, intent_file, handler):
 
-        def universal_intent_handler(self, message):
-            message = self._translate_message(message)
-            LOG.info(get_handler_name(handler))
-            handler(message)
-
-        self.register_intent_file(intent_file, universal_intent_handler)
+        handler = self.create_universal_handler
+        self.register_intent_file(intent_file, handler)
 
     def speak(self, utterance, expect_response=False, wait=False):
         # registers the skill as being active
@@ -103,15 +103,20 @@ class UniversalSkill(MycroftSkill):
 class UniversalFallback(UniversalSkill, FallbackSkill):
     ''' Fallback Skill that auto translates input/output from any language '''
 
-    def register_fallback(self, handler, priority):
-        def _universal_fallback_handler(self, message):
+    def create_universal_fallback_handler(self, handler):
+
+        def universal_fallback_handler(message):
             # auto_Translate input
             message = self._translate_message(message)
-            LOG.info(self._handler_name)
+            LOG.info(get_handler_name(handler))
             success = handler(self, message)
             if success:
                 self.make_active()
             return success
 
-        self.instance_fallback_handlers.append(_universal_fallback_handler)
-        self._register_fallback(_universal_fallback_handler, priority)
+        return universal_fallback_handler
+    
+    def register_fallback(self, handler, priority):
+        handler = self.create_universal_fallback_handler(handler)
+        self.instance_fallback_handlers.append(handler)
+        self._register_fallback(handler, priority)
