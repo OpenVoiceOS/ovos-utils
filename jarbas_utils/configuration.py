@@ -99,7 +99,21 @@ class ReadOnlyConfig(LocalConf):
 
 class MycroftUserConfig(LocalConf):
     def __init__(self):
-        super().__init__(MYCROFT_USER_CONFIG)
+        path = MYCROFT_USER_CONFIG
+        if self._is_mycroft_device():
+            path = "/home/mycroft/.mycroft/mycroft.conf"
+        super().__init__(path)
+
+    @staticmethod
+    def _is_mycroft_device():
+        paths = [
+            "/opt/venvs/mycroft-core/lib/python3.7/site-packages/",  # mark1/2
+            "/opt/venvs/mycroft-core/lib/python3.4/site-packages/ "  # old mark1 installs
+        ]
+        for p in paths:
+            if isdir(p):
+                return True
+        return False
 
 
 class MycroftDefaultConfig(ReadOnlyConfig):

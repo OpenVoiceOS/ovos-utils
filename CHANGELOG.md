@@ -52,6 +52,7 @@ current dev branch
  
 ### Fixed
 
+- support mark1/2 user config path under mycroft user
 - reading config
 
    
