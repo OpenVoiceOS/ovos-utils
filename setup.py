@@ -5,7 +5,6 @@ setup(
     version='0.4.0',
     packages=['jarbas_utils',
               'jarbas_utils.sound',
-              'jarbas_utils.database',
               'jarbas_utils.lang'],
     url='https://github.com/OpenJarbas/jarbas_utils',
     install_requires=["pronouncing",
