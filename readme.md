@@ -19,7 +19,7 @@ collection of simple utilities for use across the mycroft ecosystem
 
 ## Install
 
-stable version on pip 0.3.2
+stable version on pip 0.4.1
 
 ```bash
 pip install jarbas_utils
