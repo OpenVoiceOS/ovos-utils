@@ -44,6 +44,8 @@ class FaceplateGrid(collections.MutableSequence):
                 "xOffset": x_offset,
                 "yOffset": y_offset}
         self.bus.emit(Message('enclosure.mouth.display', data))
+        # TODO remove this warning once fixed
+        LOG.warning("There is a bug in the mark1 faceplate, display is NOT working, this warning will be removed once it has been fixed")
 
     def print(self, draw_padding=True):
         print(self.to_string(draw_padding=draw_padding))

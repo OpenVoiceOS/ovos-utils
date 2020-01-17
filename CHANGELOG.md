@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 current dev branch
 
+## [0.4.0]  - 17-01-2020
+
+
 ### Added
 
 - skills
