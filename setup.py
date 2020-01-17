@@ -2,9 +2,11 @@ from setuptools import setup
 
 setup(
     name='jarbas_utils',
-    version='0.4.0',
+    version='0.4.1',
     packages=['jarbas_utils',
               'jarbas_utils.sound',
+              'jarbas_utils.mark1',
+              'jarbas_utils.skills',
               'jarbas_utils.lang'],
     url='https://github.com/OpenJarbas/jarbas_utils',
     install_requires=["pronouncing",
