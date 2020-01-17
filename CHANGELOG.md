@@ -55,7 +55,11 @@ current dev branch
 - support mark1/2 user config path under mycroft user
 - reading config
 
-   
+
+### Changed
+
+- remove all database utils, moved to https://github.com/OpenJarbas/json_database
+
 ## [0.3.2]  - 2019-12-12
 
 quick bugfix for pipy package

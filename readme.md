@@ -15,7 +15,6 @@ collection of simple utilities for use across the mycroft ecosystem
       - [Configuration](#configuration)
         * [Wake words](#wake-words)
       - [Sound](#sound)
-  * [Data](#data)
 
 
 ## Install
@@ -331,43 +330,4 @@ class MyPretendEnclosure:
         assert 0 <= volume <= 100
         self.alsa.set_volume(volume)
 
-```
-
-## Data
-
-searching and storing data is a common operation that can be tricky
-
-i provide a simple class to handle arbitrary json serializable data
-
-```python
-from jarbas_utils.database import JsonDatabase
-
-db = JsonDatabase("users", "~/databases/users.json")
-
-class User:
-    def __init__(self, email, key=None, data=None):
-        self.email = email
-        self.secret_key = key
-        self.data = data
-
-
-user1 = User("something@mail.net",
-             data={"name": "jonas", "birthday": "12 May"})
-user2 = User("second@mail.net", "secret", 
-             data={"name": ["joe", "jony"], "age": 12})
-
-db.add_item(user1)
-db.add_item(user2)
-
-# search entries with non empty secret_key
-print(db.search_by_key("secret_key"))
-
-# search in user provided data
-print(db.search_by_key("birth", fuzzy=True))
-
-# search entries with a certain value
-print(db.search_by_value("age", 12))
-print(db.search_by_value("name", "jon", fuzzy=True))
-
-db.commit() # save
 ```
