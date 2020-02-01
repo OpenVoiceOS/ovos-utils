@@ -5,3 +5,4 @@ hyper  # optional, enables http2 for google translate which makes it faster
 googletrans
 pyalsaaudio==0.8.2
 mycroft-messagebus-client
+colour

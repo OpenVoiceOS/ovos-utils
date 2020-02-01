@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='jarbas_utils',
-    version='0.4.1',
+    version='0.4.2',
     packages=['jarbas_utils',
               'jarbas_utils.sound',
               'jarbas_utils.mark1',
@@ -12,7 +12,8 @@ setup(
     install_requires=["pronouncing",
                       "googletrans",
                       "pyalsaaudio==0.8.2",
-                      "mycroft-messagebus-client"],
+                      "mycroft-messagebus-client",
+                      "colour"],
     license='MIT',
     author='jarbasAI',
     author_email='jarbasai@mailfence.com',
