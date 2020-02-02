@@ -12,6 +12,7 @@ current dev branch
 ### Added
 
 - utils
+    - camel_case_split
     - colors
     
 ## [0.4.1]  - 17-01-2020

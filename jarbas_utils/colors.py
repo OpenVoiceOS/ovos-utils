@@ -1,5 +1,6 @@
 from colorsys import rgb_to_yiq, rgb_to_hls, yiq_to_rgb, hls_to_rgb, rgb_to_hsv, hsv_to_rgb
 from colour import Color as _Color
+from jarbas_utils import camel_case_split
 
 
 class UnrecognizedColorName(ValueError):
@@ -10,8 +11,8 @@ class Color(_Color):
     """ A well defined Color, just the way computers love colors"""
     @property
     def name(self):
-        if self.web != self.hex_l:
-            return self.web
+        if self.web != self.hex:
+            return camel_case_split(self.web)
         return None
 
     @staticmethod
@@ -111,7 +112,7 @@ class Color(_Color):
     @property
     def color_description(self):
         if self.web != self.hex:
-            return self.web
+            return camel_case_split(self.web)
         name = ""
         # light vs dark
         if self.luminance <= 0.3:
@@ -225,6 +226,16 @@ class ColorOutOfSpace(Color):
 if __name__ == "__main__":
     black = Color()
     assert black == Color("black")
+
+    # NOTE this is the web name
+    try:
+        color = Color("dark green")
+    except ValueError:
+        color = Color("DarkGreen")
+        color.from_name("dark green")  # use this one instead
+
+    assert color.web == "DarkGreen"
+    assert color.name == "Dark Green"
 
     white = Color.from_name("white")
     assert white == Color.from_rgb(255, 255, 255)

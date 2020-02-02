@@ -20,7 +20,7 @@ from time import sleep
 import os
 from os.path import  isdir, join
 from difflib import SequenceMatcher
-import inspect
+import re
 
 
 def get_mycroft_root():
@@ -180,3 +180,10 @@ def get_handler_name(handler):
         return handler.__self__.name + '.' + handler.__name__
     else:
         return handler.__name__
+
+
+def camel_case_split(identifier: str) -> str:
+    """Split camel case string"""
+    regex = '.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)'
+    matches = re.finditer(regex, identifier)
+    return ' '.join([m.group(0) for m in matches])
