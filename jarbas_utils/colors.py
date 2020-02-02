@@ -12,7 +12,7 @@ class Color(_Color):
     @property
     def name(self):
         if self.web != self.hex:
-            return camel_case_split(self.web)
+            return camel_case_split(self.web).lower()
         return None
 
     @staticmethod
@@ -112,7 +112,7 @@ class Color(_Color):
     @property
     def color_description(self):
         if self.web != self.hex:
-            return camel_case_split(self.web)
+            return camel_case_split(self.web).lower()
         name = ""
         # light vs dark
         if self.luminance <= 0.3:
@@ -235,7 +235,7 @@ if __name__ == "__main__":
         color.from_name("dark green")  # use this one instead
 
     assert color.web == "DarkGreen"
-    assert color.name == "Dark Green"
+    assert color.name == "dark green"
 
     white = Color.from_name("white")
     assert white == Color.from_rgb(255, 255, 255)
