@@ -1,6 +1,5 @@
 from colorsys import rgb_to_yiq, rgb_to_hls, yiq_to_rgb, hls_to_rgb, rgb_to_hsv, hsv_to_rgb
 from colour import Color as _Color
-from jarbas_utils.log import LOG
 
 
 class UnrecognizedColorName(ValueError):
@@ -8,12 +7,11 @@ class UnrecognizedColorName(ValueError):
 
 
 class Color(_Color):
-
+    """ A well defined Color, just the way computers love colors"""
     @property
     def name(self):
         if self.web != self.hex_l:
             return self.web
-        LOG.warning("This color is not officially named, use self.color_description")
         return None
 
     @staticmethod
@@ -66,6 +64,51 @@ class Color(_Color):
             return color
 
     @property
+    def main_color(self):
+        """
+        reduce to 1 color of the following:
+        - grey
+        - black
+        - white
+        - orange
+        - yellow
+        - green
+        - cyan
+        - blue
+        - violet
+        - red
+        """
+        if self.saturation <= 0.3:
+            return Color("grey")
+        if self.luminance <= 0.15:
+            return Color("black")
+        elif self.luminance >= 0.85:
+            return Color("white")
+
+        thresh = 0.5
+        orange = 0.10
+        yellow = 0.16
+        green = 0.33
+        cyan = 0.5
+        blue = 0.66
+        violet = 0.83
+
+        if orange - thresh <= self.hue <= orange + thresh:
+            return Color("orange")
+        elif yellow - thresh <= self.hue <= yellow + thresh:
+            return Color("yellow")
+        elif green - thresh <= self.hue <= green + thresh:
+            return Color("green")
+        elif cyan - thresh <= self.hue <= cyan + thresh:
+            return Color("cyan")
+        elif blue - thresh <= self.hue <= blue + thresh:
+            return Color("blue")
+        elif violet - thresh <= self.hue <= violet + thresh:
+            return Color("violet")
+        else:
+            return Color("red")
+
+    @property
     def color_description(self):
         if self.web != self.hex:
             return self.web
@@ -105,33 +148,7 @@ class Color(_Color):
         # saturation
         if self.saturation >= 0.85:
             name += "intense "
-        if self.saturation <= 0.3:
-            name += "grey "
-        else:
-            thresh = 0.5
-
-            orange = 0.10
-            yellow = 0.16
-            green = 0.33
-            cyan = 0.5
-            blue = 0.66
-            violet = 0.83
-
-            if orange - thresh <= self.hue <= orange + thresh:
-                name += "orange "
-            elif yellow - thresh <= self.hue <= yellow + thresh:
-                name += "yellow "
-            elif green - thresh <= self.hue <= green + thresh:
-                name += "green "
-            elif cyan - thresh <= self.hue <= cyan + thresh:
-                name += "cyan "
-            elif blue - thresh <= self.hue <= blue + thresh:
-                name += "blue "
-            elif violet - thresh <= self.hue <= violet + thresh:
-                name += "violet "
-            else:
-                name += "red "
-        name += "color"
+        name += self.main_color.name + " color"
 
         return name
 
@@ -152,7 +169,7 @@ class Color(_Color):
 
     @staticmethod
     def from_rgb(r, g, b):
-        return Color(rgb=(r/255, g/255, b/255))
+        return Color(rgb=(r / 255, g / 255, b / 255))
 
     @staticmethod
     def from_rgb_percent(r, g, b):
@@ -197,6 +214,7 @@ class Color(_Color):
 
 
 class ColorOutOfSpace(Color):
+    """ Some Human described this color, but humans suck at this"""
     @property
     def name(self):
         # H.P. Lovecraft - https://www.youtube.com/watch?v=4liRxrDzS5I
@@ -220,11 +238,10 @@ if __name__ == "__main__":
     assert color.name is None
     color.set_saturation(0.3)
     color.set_luminance(0.7)
-    assert color.color_description == "bright blue-ish grey color"
+    assert color.color_description == "bright blue-ish gray color"
     assert color.rgb255 == (156, 179, 202)
 
     aprox_color = Color.from_name("bright blue-ish grey color")
-    assert aprox_color.color_description == "bright blue-ish grey color"
+    assert aprox_color.color_description == "bright blue-ish gray color"
     assert aprox_color.rgb255 != color.rgb255
     assert aprox_color.rgb255 == (160, 161, 198)
-
