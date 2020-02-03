@@ -3,6 +3,16 @@ from socket import gethostname
 from os.path import exists, join
 from os import makedirs
 import random
+import string
+from jarbas_utils.log import LOG
+try:
+    from Crypto.Cipher import AES
+except ImportError:
+    AES = None
+try:
+    from OpenSSL import crypto
+except ImportError:
+    crypto = None
 
 
 def create_self_signed_cert(cert_dir, name="jarbas"):
@@ -10,7 +20,9 @@ def create_self_signed_cert(cert_dir, name="jarbas"):
     If name.crt and name.key don't exist in cert_dir, create a new
     self-signed cert and key pair and write them into that directory.
     """
-    from OpenSSL import crypto # TODO log instructions to install
+    if crypto is None:
+        LOG.error("run pip install pyopenssl")
+        raise ImportError
     CERT_FILE = name + ".crt"
     KEY_FILE = name + ".key"
     cert_path = join(cert_dir, CERT_FILE)
@@ -35,6 +47,7 @@ def create_self_signed_cert(cert_dir, name="jarbas"):
         cert.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
         cert.set_issuer(cert.get_subject())
         cert.set_pubkey(k)
+        # TODO don't use sha1
         cert.sign(k, 'sha1')
         if not exists(cert_dir):
             makedirs(cert_dir)
@@ -44,3 +57,34 @@ def create_self_signed_cert(cert_dir, name="jarbas"):
             crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
 
     return cert_path, key_path
+
+
+def random_key(key_lenght=16):
+    """Generate a random string of letters and digits """
+    valid_chars = string.ascii_letters + string.digits
+    return ''.join(random.choice(valid_chars) for i in range(key_lenght))
+
+
+def encrypt(key, text, nonce=None):
+    if AES is None:
+        LOG.error("run pip install pycryptodome")
+        raise ImportError
+    if not isinstance(text, bytes):
+        text = bytes(text, encoding="utf-8")
+    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+    ciphertext, tag = cipher.encrypt_and_digest(text)
+    return ciphertext, tag, cipher.nonce
+
+
+def decrypt(key, ciphertext, tag, nonce):
+    if AES is None:
+        LOG.error("run pip install pycryptodome")
+        raise ImportError
+    cipher = AES.new(key, AES.MODE_GCM, nonce)
+    try:
+        data = cipher.decrypt_and_verify(ciphertext, tag)
+        text = data.decode(encoding="utf-8")
+        return text
+    except Exception as e:
+        LOG.error("decryption failed, invalid key?")
+        raise

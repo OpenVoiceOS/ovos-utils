@@ -16,6 +16,10 @@ merged https://github.com/JarbasAl/mycroft_intent_engines into this lib
 - utils
     - camel_case_split
     - colors
+    - crypto utils
+        - encrypt
+        - decrypt
+        - generate_key
 
 - intents
     - BaseIntentEngine
