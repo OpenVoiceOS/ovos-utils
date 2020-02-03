@@ -1,4 +1,4 @@
-from jarbas_utils.intents import BaseIntentEngine
+from jarbas_utils.intents.engines import BaseIntentEngine
 from jarbas_utils.skills.intent_provider import IntentEngineSkill
 
 from mycroft.configuration.config import Configuration

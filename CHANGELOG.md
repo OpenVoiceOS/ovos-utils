@@ -22,6 +22,7 @@ merged https://github.com/JarbasAl/mycroft_intent_engines into this lib
         - generate_key
 
 - intents
+  -   IntentAPI
     - BaseIntentEngine
     
 - skills
