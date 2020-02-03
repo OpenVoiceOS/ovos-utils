@@ -9,11 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 current dev branch
 
+merged https://github.com/JarbasAl/mycroft_intent_engines into this lib
+
 ### Added
 
 - utils
     - camel_case_split
     - colors
+
+- intents
+    - BaseIntentEngine
+    
+- skills
+    - IntentEngineSkill
     
 ## [0.4.1]  - 17-01-2020
 
