@@ -23,6 +23,7 @@ merged https://github.com/JarbasAl/mycroft_intent_engines into this lib
 
 - intents
   -   IntentAPI
+    - IntentLayers
     - BaseIntentEngine
     
 - skills
