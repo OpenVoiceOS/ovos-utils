@@ -9,7 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 current dev branch
 
-merged https://github.com/JarbasAl/mycroft_intent_engines into this lib
+## [0.5.0]  - 17-01-2020
+
+Intents, colours and crypto
+
 
 ### Added
 
@@ -217,5 +220,6 @@ Released on [pypi](https://pypi.org/project/jarbas-utils/)
     - ntp sync
 
 [unreleased]: https://github.com/OpenJarbas/jarbas_utils/tree/dev
+[0.4.5]: https://github.com/OpenJarbas/jarbas_utils/tree/0.5
 [0.4.1]: https://github.com/OpenJarbas/jarbas_utils/tree/0.4
 [0.3.2]: https://github.com/OpenJarbas/jarbas_utils/tree/0.3
