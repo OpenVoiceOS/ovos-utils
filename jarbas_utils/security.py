@@ -71,6 +71,8 @@ def encrypt(key, text, nonce=None):
         raise ImportError
     if not isinstance(text, bytes):
         text = bytes(text, encoding="utf-8")
+    if not isinstance(key, bytes):
+        key = bytes(key, encoding="utf-8")
     cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
     ciphertext, tag = cipher.encrypt_and_digest(text)
     return ciphertext, tag, cipher.nonce
@@ -80,6 +82,8 @@ def decrypt(key, ciphertext, tag, nonce):
     if AES is None:
         LOG.error("run pip install pycryptodome")
         raise ImportError
+    if not isinstance(key, bytes):
+        key = bytes(key, encoding="utf-8")
     cipher = AES.new(key, AES.MODE_GCM, nonce)
     try:
         data = cipher.decrypt_and_verify(ciphertext, tag)

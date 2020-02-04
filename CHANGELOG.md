@@ -9,7 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 current dev branch
 
-## [0.5.0]  - 17-01-2020
+## [0.5.1] - 2020 - 02 -04
+
+### Fixed
+
+- security
+  -   cast encryption key to bytes
+
+## [0.5.0]
 
 Intents, colours and crypto
 
