@@ -14,11 +14,3 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 """
 
 
-if __name__ == "__main__":
-
-    game_of_life = SpaceInvader()
-
-    for grid in game_of_life:
-        grid.print()
-
-

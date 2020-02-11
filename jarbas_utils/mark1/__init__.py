@@ -44,8 +44,6 @@ class FaceplateGrid(collections.MutableSequence):
                 "xOffset": x_offset,
                 "yOffset": y_offset}
         self.bus.emit(Message('enclosure.mouth.display', data))
-        # TODO remove this warning once fixed
-        LOG.warning("There is a bug in the mark1 faceplate, display is NOT working, this warning will be removed once it has been fixed")
 
     def print(self, draw_padding=True):
         print(self.to_string(draw_padding=draw_padding))
@@ -380,26 +378,4 @@ class GoL(FacePlateAnimation):
         if self.is_empty:
             self.stop()
 
-
-if __name__ == "__main__":
-
-    bus = get_mycroft_bus("192.168.1.66")
-
-    sleep(2)
-
-    faceplate = FaceplateGrid(bus=bus).randomize()
-    faceplate.display(invert=True)
-    encoded = faceplate.encode()
-    print(encoded)
-    decoded = faceplate.decode(encoded)
-
-    assert decoded.encode() == encoded
-
-    game_of_life = GoL(bus=bus)
-
-    def handle_new_frame(grid):
-        grid.print()
-        grid.display()
-    sleep(2)
-    game_of_life.run(2, handle_new_frame)
 
