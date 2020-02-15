@@ -17,6 +17,7 @@ def merge_dict(base, delta):
             merge_dict(bv, dv)
         else:
             base[k] = dv
+    return base
 
 
 def load_commented_json(filename):

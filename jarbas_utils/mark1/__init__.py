@@ -1,381 +1,279 @@
-from jarbas_utils.messagebus import get_mycroft_bus, Message
-from jarbas_utils import create_loop
-from jarbas_utils.log import LOG
-import random
-from time import sleep
-import copy
-import collections
+from jarbas_utils.messagebus import Message, get_mycroft_bus
 
 
-class FaceplateGrid(collections.MutableSequence):
-    encoded = None
-    str_grid = None
-    pad_char = "."
+class Mark1EnclosureAPI:
+    """
+    This API is intended to be used to interface with the hardware
+    that is running Mycroft.  It exposes all possible commands which
+    can be sent to a Mycroft enclosure implementation.
 
-    def __init__(self, grid=None, bus=None):
-        self.bus = bus
-        if self.encoded:
-            self.grid = self.decode(self.encoded).grid
-        elif self.str_grid is not None:
-            self.grid = FaceplateGrid().from_string(self.str_grid).grid
-        elif grid is not None:
-            self.grid = grid
-        else:
-            self.grid = []
-            for x in range(8):
-                self.grid.append([])
-                for y in range(32):
-                    self.grid[x].append(0)
+    Different enclosure implementations may implement this differently
+    and/or may ignore certain API calls completely.  For example,
+    the eyes_color() API might be ignore on a Mycroft that uses simple
+    LEDs which only turn on/off, or not at all on an implementation
+    where there is no face at all.
+    """
 
-    @property
-    def height(self):
-        return len(self.grid)
+    def __init__(self, bus=None):
+        self.bus = bus or get_mycroft_bus()
 
-    @property
-    def width(self):
-        return max([len(r) for r in self.grid])
+    def reset(self):
+        """The enclosure should restore itself to a started state.
+        Typically this would be represented by the eyes being 'open'
+        and the mouth reset to its default (smile or blank).
+        """
+        self.bus.emit(Message("enclosure.reset"))
 
-    def display(self, invert=True, clear=True, x_offset=0, y_offset=0):
-        if self.bus is None:
-            self.bus = get_mycroft_bus()
+    def system_reset(self):
+        """The enclosure hardware should reset any CPUs, etc."""
+        self.bus.emit(Message("enclosure.system.reset"))
 
-        data = {"img_code": self.encode(invert),
-                "clearPrev": clear,
-                "xOffset": x_offset,
-                "yOffset": y_offset}
-        self.bus.emit(Message('enclosure.mouth.display', data))
+    def system_mute(self):
+        """Mute (turn off) the system speaker."""
+        self.bus.emit(Message("enclosure.system.mute"))
 
-    def print(self, draw_padding=True):
-        print(self.to_string(draw_padding=draw_padding))
+    def system_unmute(self):
+        """Unmute (turn on) the system speaker."""
+        self.bus.emit(Message("enclosure.system.unmute"))
 
-    def encode(self, invert=False):
-        # to understand how this function works you need to understand how the
-        # Mark I arduino proprietary encoding works to display to the faceplate
+    def system_blink(self, times):
+        """The 'eyes' should blink the given number of times.
+        Args:
+            times (int): number of times to blink
+        """
+        self.bus.emit(Message("enclosure.system.blink", {'times': times}))
 
-        # https://mycroft-ai.gitbook.io/docs/skill-development/displaying-information/mark-1-display
+    def eyes_on(self):
+        """Illuminate or show the eyes."""
+        self.bus.emit(Message("enclosure.eyes.on"))
 
-        # Each char value str_gridesents a width number starting with B=1
-        # then increment 1 for the next. ie C=2
-        width_codes = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
-                       'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
-                       'X', 'Y', 'Z', '[', '\\', ']', '^', '_', '`', 'a']
+    def eyes_off(self):
+        """Turn off or hide the eyes."""
+        self.bus.emit(Message("enclosure.eyes.off"))
 
-        height_codes = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
+    def eyes_blink(self, side):
+        """Make the eyes blink
+        Args:
+            side (str): 'r', 'l', or 'b' for 'right', 'left' or 'both'
+        """
+        self.bus.emit(Message("enclosure.eyes.blink", {'side': side}))
 
-        encode = width_codes[self.width - 1]
-        encode += height_codes[self.height - 1]
+    def eyes_narrow(self):
+        """Make the eyes look narrow, like a squint"""
+        self.bus.emit(Message("enclosure.eyes.narrow"))
 
-        # Turn the image pixels into binary values 1's and 0's
-        # the Mark I face plate encoding uses binary values to
-        # binary_values returns a list of 1's and 0s'. ie ['1', '1', '0', ...]
-        binary_values = []
-        for i in range(self.width):  # pixels
-            for j in range(self.height):  # lines
-                pixels = self.grid[j]
+    def eyes_look(self, side):
+        """Make the eyes look to the given side
+        Args:
+            side (str): 'r' for right
+                        'l' for left
+                        'u' for up
+                        'd' for down
+                        'c' for crossed
+        """
+        self.bus.emit(Message("enclosure.eyes.look", {'side': side}))
 
-                if pixels[i] is None:  # padding
-                    pixels[i] = 0
+    def eyes_color(self, r=255, g=255, b=255):
+        """Change the eye color to the given RGB color
+        Args:
+            r (int): 0-255, red value
+            g (int): 0-255, green value
+            b (int): 0-255, blue value
+        """
+        self.bus.emit(Message("enclosure.eyes.color",
+                              {'r': r, 'g': g, 'b': b}))
 
-                if pixels[i] != 0:
-                    if invert is False:
-                        binary_values.append('1')
-                    else:
-                        binary_values.append('0')
-                else:
-                    if invert is False:
-                        binary_values.append('0')
-                    else:
-                        binary_values.append('1')
-        # these values are used to determine how binary values
-        # needs to be grouped together
-        number_of_bottom_pixel = 0
+    def eyes_setpixel(self, idx, r=255, g=255, b=255):
+        """Set individual pixels of the Mark 1 neopixel eyes
+        Args:
+            idx (int): 0-11 for the right eye, 12-23 for the left
+            r (int): The red value to apply
+            g (int): The green value to apply
+            b (int): The blue value to apply
+        """
+        if idx < 0 or idx > 23:
+            raise ValueError('row ({}) must be between 0-23'.format(str(idx)))
+        self.bus.emit(Message("enclosure.eyes.setpixel",
+                              {'row': idx, 'r': r, 'g': g, 'b': b}))
 
-        if self.height > 4:
-            number_of_top_pixel = 4
-            number_of_bottom_pixel = self.height - 4
-        else:
-            number_of_top_pixel = self.height
+    def eyes_fill(self, percentage):
+        """Use the eyes as a type of progress meter
+        Args:
+            amount (int): 0-49 fills the right eye, 50-100 also covers left
+        """
+        if percentage < 0 or percentage > 100:
+            raise ValueError('percentage ({}) must be between 0-100'.
+                             format(str(percentage)))
+        self.bus.emit(Message("enclosure.eyes.fill",
+                              {'percentage': percentage}))
 
-        # this loop will group together the individual binary values
-        # ie. binary_list = ['1111', '001', '0101', '100']
-        binary_list = []
-        binary_code = ''
-        increment = 0
-        alternate = False
-        for val in binary_values:
-            binary_code += val
-            increment += 1
-            if increment == number_of_top_pixel and alternate is False:
-                # binary code is reversed for encoding
-                binary_list.append(binary_code[::-1])
-                increment = 0
-                binary_code = ''
-                alternate = True
-            elif increment == number_of_bottom_pixel and alternate is True:
-                binary_list.append(binary_code[::-1])
-                increment = 0
-                binary_code = ''
-                alternate = False
-        # Code to let the Mark I arduino know where to place the
-        # pixels on the faceplate
-        pixel_codes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-                       'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
-        for binary_values in binary_list:
-            number = int(binary_values, 2)
-            pixel_code = pixel_codes[number]
-            encode += pixel_code
-        return encode
+    def eyes_brightness(self, level=30):
+        """Set the brightness of the eyes in the display.
+        Args:
+            level (int): 1-30, bigger numbers being brighter
+        """
+        self.bus.emit(Message("enclosure.eyes.level", {'level': level}))
 
-    @staticmethod
-    def decode(encoded, invert=False, pad=False):
-        codes = list(encoded)
+    def eyes_reset(self):
+        """Restore the eyes to their default (ready) state."""
+        self.bus.emit(Message("enclosure.eyes.reset"))
 
-        # Each char value str_gridesents a width number starting with B=1
-        # then increment 1 for the next. ie C=2
-        width_codes = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
-                       'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
-                       'X', 'Y', 'Z', '[', '\\', ']', '^', '_', '`', 'a']
+    def eyes_spin(self):
+        """Make the eyes 'roll'
+        """
+        self.bus.emit(Message("enclosure.eyes.spin"))
 
-        height_codes = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
+    def eyes_timed_spin(self, length):
+        """Make the eyes 'roll' for the given time.
+        Args:
+            length (int): duration in milliseconds of roll, None = forever
+        """
+        self.bus.emit(Message("enclosure.eyes.timedspin",
+                              {'length': length}))
 
-        height = height_codes.index(codes[1]) + 1
-        width = width_codes.index(codes[0]) + 1
+    def eyes_volume(self, volume):
+        """Indicate the volume using the eyes
+        Args:
+            volume (int): 0 to 11
+        """
+        if volume < 0 or volume > 11:
+            raise ValueError('volume ({}) must be between 0-11'.
+                             format(str(volume)))
+        self.bus.emit(Message("enclosure.eyes.volume", {'volume': volume}))
 
-        # Code to let the Mark I arduino know where to place the
-        # pixels on the faceplate
-        pixel_codes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-                       'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
-        codes.reverse()
-        binary_list = []
-        for pixel_code in codes[:-2]:
-            number = pixel_codes.index(pixel_code.upper())
-            bin_str = str(bin(number))[2:]
-            while not len(bin_str) == 4:
-                bin_str = "0" + bin_str
-            binary_list += [bin_str]
+    def mouth_reset(self):
+        """Restore the mouth display to normal (blank)"""
+        self.bus.emit(Message("enclosure.mouth.reset"))
 
-        binary_list.reverse()
+    def mouth_talk(self):
+        """Show a generic 'talking' animation for non-synched speech"""
+        self.bus.emit(Message("enclosure.mouth.talk"))
 
-        for idx, binary_code in enumerate(binary_list):
-            # binary code is reversed for encoding
-            binary_list[idx] = binary_code[::-1]
+    def mouth_think(self):
+        """Show a 'thinking' image or animation"""
+        self.bus.emit(Message("enclosure.mouth.think"))
 
-        binary_code = "".join(binary_list)
+    def mouth_listen(self):
+        """Show a 'thinking' image or animation"""
+        self.bus.emit(Message("enclosure.mouth.listen"))
 
-        # Turn the image pixels into binary values 1's and 0's
-        # the Mark I face plate encoding uses binary values to
-        # binary_values returns a list of 1's and 0s'. ie ['1', '1', '0', ...]
-        grid = []
-        # binary_code is a sequence of column by column
-        cols = [list(binary_code)[x:x + height] for x in range(0, len(list(binary_code)), height)]
+    def mouth_smile(self):
+        """Show a 'smile' image or animation"""
+        self.bus.emit(Message("enclosure.mouth.smile"))
 
-        for x in range(height):
-            row = []
-            for y in range(width):
-                bit = int(cols[y][x])
-                if invert:
-                    if bit:
-                        bit = 0
-                    else:
-                        bit = 1
-                row.append(bit)
-            grid.append(row)
+    def mouth_viseme(self, start, viseme_pairs):
+        """ Send mouth visemes as a list in a single message.
 
-        #  handle padding
-        if pad:
-            if width < 32:
-                n = int((32 - width) / 2)
-                if invert:
-                    padding = [1] * n
-                else:
-                    padding = [0] * n
-                for idx, row in enumerate(grid):
-                    grid[idx] = padding + row + padding
-            if height < 8:
-                pass # TODO vertical padding
-        return FaceplateGrid(grid)
+            Arguments:
+                start (int):    Timestamp for start of speech
+                viseme_pairs:   Pairs of viseme id and cumulative end times
+                                (code, end time)
 
-    def from_string(self, str_grid):
-        rows = [r for r in str_grid.split("\n") if len(r)]
-        grid = []
-        for r in rows:
-            row = []
-            for char in list(r):
-                if char == " ":
-                    row.append(1)
-                elif char == FaceplateGrid.pad_char:
-                    row.append(None)
-                else:
-                    row.append(0)
-            while len(row) < self.width:
-                row.append(None)
-            grid.append(row)
-        self.grid = grid
-        return self
+                                codes:
+                                 0 = shape for sounds like 'y' or 'aa'
+                                 1 = shape for sounds like 'aw'
+                                 2 = shape for sounds like 'uh' or 'r'
+                                 3 = shape for sounds like 'th' or 'sh'
+                                 4 = neutral shape for no sound
+                                 5 = shape for sounds like 'f' or 'v'
+                                 6 = shape for sounds like 'oy' or 'ao'
+        """
+        self.bus.emit(Message("enclosure.mouth.viseme_list",
+                              {"start": start, "visemes": viseme_pairs}))
 
-    def to_string(self, draw_padding=False):
-        str_grid = ""
-        for row in self.grid:
-            line = ""
-            for col in row:
-                if col is None and draw_padding:
-                    line += self.pad_char
-                elif col == 1:
-                    line += " "
-                elif col == 0:
-                    line += "X"
-            str_grid += line + "\n"
-        return str_grid
+    def mouth_text(self, text=""):
+        """Display text (scrolling as needed)
+        Args:
+            text (str): text string to display
+        """
+        self.bus.emit(Message("enclosure.mouth.text", {'text': text}))
 
-    def invert(self):
-        for x in range(self.height):
-            for y in range(self.width):
-                if self.grid[x][y] == 0:
-                    self.grid[x][y] = 1
-                elif self.grid[x][y] == 1:
-                    self.grid[x][y] = 0
-        return self
+    def mouth_display(self, img_code="", x=0, y=0, refresh=True):
+        """Display images on faceplate.
+        Args:
+            img_code (str): text string that encodes a black and white image
+            x (int): x offset for image
+            y (int): y offset for image
+            refresh (bool): specify whether to clear the faceplate before
+                            displaying the new image or not.
+                            Useful if you'd like to display multiple images
+                            on the faceplate at once.
+        """
+        self.bus.emit(Message('enclosure.mouth.display',
+                              {'img_code': img_code,
+                               'xOffset': x,
+                               'yOffset': y,
+                               'clearPrev': refresh}))
 
-    def clear(self):
-        for x in range(self.height):
-            for y in range(self.width):
-                self.grid[x][y] = 0
-        return self
+    def mouth_display_png(self, image_absolute_path,
+                          invert=False, x=0, y=0, refresh=True):
+        """ Send an image to the enclosure.
 
-    @property
-    def is_empty(self):
-        for x in range(self.height):
-            for y in range(self.width):
-                if self.grid[x][y] == 1:
-                    return False
-        return True
+        Args:
+            image_absolute_path (string): The absolute path of the image
+            invert (bool): inverts the image being drawn.
+            x (int): x offset for image
+            y (int): y offset for image
+            refresh (bool): specify whether to clear the faceplate before
+                            displaying the new image or not.
+                            Useful if you'd like to display muliple images
+                            on the faceplate at once.
+            """
+        self.bus.emit(Message("enclosure.mouth.display_image",
+                              {'img_path': image_absolute_path,
+                               'xOffset': x,
+                               'yOffset': y,
+                               'invert': invert,
+                               'clearPrev': refresh}))
 
-    def randomize(self, n=200):
-        for i in range(n):
-            x = random.randint(0, self.height-1)
-            y = random.randint(0, self.width-1)
-            self.grid[x][y] = int(random.randint(0, 1))
-        return self
+    def weather_display(self, img_code, temp):
+        """Show a the temperature and a weather icon
 
-    def __len__(self):
-        # number of pixels
-        return self.width * self.height
+        Args:
+            img_code (char): one of the following icon codes
+                         0 = sunny
+                         1 = partly cloudy
+                         2 = cloudy
+                         3 = light rain
+                         4 = raining
+                         5 = stormy
+                         6 = snowing
+                         7 = wind/mist
+            temp (int): the temperature (either C or F, not indicated)
+        """
+        self.bus.emit(Message("enclosure.weather.display",
+                              {'img_code': img_code, 'temp': temp}))
 
-    def __delitem__(self, index):
-        self.grid.__delitem__(index)
+    def activate_mouth_events(self):
+        """Enable movement of the mouth with speech"""
+        self.bus.emit(Message('enclosure.mouth.events.activate'))
 
-    def insert(self, index, value):
-        self.grid.insert(index - 1, value)
+    def deactivate_mouth_events(self):
+        """Disable movement of the mouth with speech"""
+        self.bus.emit(Message('enclosure.mouth.events.deactivate'))
 
-    def __setitem__(self, index, value):
-        self.grid.__setitem__(index, value)
+    def get_eyes_color(self):
+        """
+        Get the eye RGB color for all pixels
 
-    def __getitem__(self, index):
-        return self.grid.__getitem__(index)
+        :returns pixels (list) - list of (r,g,b) tuples for each eye pixel
 
+        """
+        message = Message("enclosure.eyes.rgb.get",
+                          context={"source": "enclosure_api",
+                                   "destination": "enclosure"})
+        response = self.bus.wait_for_response(message, "enclosure.eyes.rgb")
+        if response:
+            return response.data["pixels"]
+        raise TimeoutError("Enclosure took too long to respond")
 
-class FacePlateAnimation(FaceplateGrid):
+    def get_eyes_pixel_color(self, idx):
+        """
+        Get the RGB color for a specific eye pixel
 
-    def __init__(self, grid=None, bus=None):
-        super().__init__(grid, bus)
-        self.finished = False
+        :returns (r,g,b) tuples for selected pixel
 
-    def animate(self):
-        raise NotImplementedError
-
-    def __iter__(self):
-        while not self.finished:
-            self.animate()
-            yield self
-
-    def start(self):
-        self.finished = False
-
-    def stop(self):
-        self.finished = True
-
-    def run(self, delay=0.5, callback=None, daemonic=False):
-        self.start()
-
-        if delay < 0.4:
-            # writer bugs out if sending messages too rapidly
-            delay = 0.4
-
-        def step(callback=callback):
-            try:
-                if not self.finished:
-                    self.animate()
-                    if callback:
-                        callback(self)
-            except Exception as e:
-                LOG.error(e)
-
-        if daemonic:
-            create_loop(step, delay)
-        else:
-            while not self.finished:
-                step()
-                sleep(delay)
-        self.stop()
-
-
-class GoL(FacePlateAnimation):
-
-    def __init__(self, entropy=0, grid=None, bus=None):
-        super().__init__(grid, bus)
-        self.entropy = entropy
-        if self.is_empty:
-            self.randomize()
-
-    def _live_neighbours(self, y, x):
-        """Returns the number of live neighbours."""
-        count = 0
-        if y > 0:
-            if self.grid[y-1][x]:
-                count = count + 1
-            if x > 0:
-                if self.grid[y-1][x-1]:
-                    count = count + 1
-            if self.width > (x + 1):
-                if self.grid[y-1][x+1]:
-                    count = count + 1
-
-        if x > 0:
-            if self.grid[y][x-1]:
-                count = count + 1
-        if self.width > (x + 1):
-            if self.grid[y][x+1]:
-                count = count + 1
-
-        if self.height > (y + 1):
-            if self.grid[y+1][x]:
-                count = count + 1
-            if x > 0:
-                if self.grid[y+1][x-1]:
-                    count = count + 1
-            if self.width > (x + 1):
-                if self.grid[y+1][x+1]:
-                    count = count + 1
-
-        return count
-
-    def animate(self):
-        """Game of Life turn"""
-        nt = copy.deepcopy(self.grid)
-        for y in range(0, self.height):
-            for x in range(0, self.width):
-                neighbours = self._live_neighbours(y, x)
-                if self.grid[y][x] == 0:
-                    if neighbours == 3:
-                        nt[y][x] = 1
-                else:
-                    if (neighbours < 2) or (neighbours > 3):
-                        nt[y][x] = 0
-        if nt == self.grid and self.entropy <= 0:
-            self.stop()
-        self.grid = nt
-        self.randomize(self.entropy)
-        if self.is_empty:
-            self.stop()
-
-
+        """
+        if idx < 0 or idx > 23:
+            raise ValueError('row ({}) must be between 0-23'.format(str(idx)))
+        return self.get_eyes_color()[idx]

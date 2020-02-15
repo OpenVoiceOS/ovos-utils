@@ -187,3 +187,7 @@ def camel_case_split(identifier: str) -> str:
     regex = '.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)'
     matches = re.finditer(regex, identifier)
     return ' '.join([m.group(0) for m in matches])
+
+
+def rotate_list(l, n=1):
+    return l[n:] + l[:n]

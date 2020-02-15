@@ -161,9 +161,9 @@ class Color(_Color):
     #### RGB ####
     @property
     def rgb255(self):
-        return (int(self.red * 256),
-                int(self.green * 256),
-                int(self.blue * 256))
+        return (int(self.red * 255),
+                int(self.green * 255),
+                int(self.blue * 255))
 
     def rgb_percent(self):
         return self.rgb
