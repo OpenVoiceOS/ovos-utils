@@ -1,24 +1,7 @@
-from jarbas_utils.mark1.faceplate import FaceplateGrid
+from jarbas_utils.mark1.faceplate import FaceplateGrid, BlackScreen
 
 
 # drawing in python
-class BlackScreen(FaceplateGrid):
-    # Basically a util class to handle
-    # inverting on __init__
-    str_grid = """
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-"""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.invert()
 
 
 class MusicIcon(BlackScreen):
@@ -34,19 +17,22 @@ XXXXXXXXXXXXX XXX XXXXXXXXXXXXXX
 """
 
 
-class PlusIcon(FaceplateGrid):
+class PlusIcon(BlackScreen):
     str_grid = """
-              xxx               
-              xxx               
-           xxxxxxxxx            
-           xxxxxxxxx            
-              xxx               
-              xxx               
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXX   XXXXXXXXXXXXXX
+XXXXXXXXXXXXXXX   XXXXXXXXXXXXXX
+XXXXXXXXXXXXX       XXXXXXXXXXXX
+XXXXXXXXXXXXX       XXXXXXXXXXXX
+XXXXXXXXXXXXX       XXXXXXXXXXXX
+XXXXXXXXXXXXXXX   XXXXXXXXXXXXXX
+XXXXXXXXXXXXXXX   XXXXXXXXXXXXXX
 """
 
 
 class HeartIcon(FaceplateGrid):
     str_grid = """
+                                
             xx   xx             
            xxxx xxxx            
            xxxxxxxxx            
@@ -59,22 +45,26 @@ class HeartIcon(FaceplateGrid):
 
 class HollowHeartIcon(FaceplateGrid):
     str_grid = """
+                                
             xx   xx             
            x  x x  x            
            x   x   x            
             x     x             
              x   x              
+              x x               
                x                
 """
 
 
 class SkullIcon(FaceplateGrid):
     str_grid = """
+                                
             xxxxxxx             
            x  xxx  x            
            xxxxxxxxx            
             xxx xxx             
              xxxxx              
+             x x x              
              x x x              
 """
 
@@ -82,16 +72,17 @@ class SkullIcon(FaceplateGrid):
 class DeadFishIcon(FaceplateGrid):
     str_grid = """
                                 
-   x            xxxx            
-    x  x x x   xx xxx           
-     xxxxxxxxxxxxxxxxx          
-    x  x x x   xxxxxx            
-   x            xxxx            
+        x          xxxx         
+         x  x x x xx xxx        
+          xxxxxxxxxxxxxxx       
+         x  x x x xxxxxx        
+        x          xxxx         
 """
 
 
 class InfoIcon(BlackScreen):
     str_grid = """
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXX   XXXXXXXXXXXXXX
 XXXXXXXXXXXXXXX   XXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -99,20 +90,6 @@ XXXXXXXXXXXXXX    XXXXXXXXXXXXXX
 XXXXXXXXXXXXXXX   XXXXXXXXXXXXXX
 XXXXXXXXXXXXXXX   XXXXXXXXXXXXXX
 XXXXXXXXXXXXXXX    XXXXXXXXXXXXX
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-"""
-
-
-class WifiIcon(BlackScreen):
-    str_grid = """
-XXXXXXXXXXXX       XXXXXXXXXXXXX
-XXXXXXXXXXX XXXXXXX XXXXXXXXXXXX
-XXXXXXXXXX XXXXXXXXX XXXXXXXXXXX
-XXXXXXXXXXXX       XXXXXXXXXXXXX
-XXXXXXXXXXX XXXXXXX XXXXXXXXXXXX
-XXXXXXXXXXXXXX   XXXXXXXXXXXXXXX
-XXXXXXXXXXXXXX   XXXXXXXXXXXXXXX
-XXXXXXXXXXXXXX   XXXXXXXXXXXXXXX
 """
 
 
@@ -136,9 +113,9 @@ XXXXXXXXXXXXXX   XXXXXXXXXXXXXXX
 XXXXXXXXXXXXX  X  XXXXXXXXXXXXXX
 XXXXXXXXXXXX  XXX  XXXXXXXXXXXXX
 XXXXXXXXXXX   XXX   XXXXXXXXXXXX
-XXXXXXXXXXX         XXXXXXXXXXXX
-XXXXXXXXXX    XXX    XXXXXXXXXXX
-XXXXXXXXXX     X     XXXXXXXXXXX
+XXXXXXXXXX           XXXXXXXXXXX
+XXXXXXXXX     XXX     XXXXXXXXXX
+XXXXXXXX       X       XXXXXXXXX
 """
 
 
@@ -168,8 +145,60 @@ XX XX   X X X    XX   X XXX X X
 """
 
 
+class SpaceInvader1(BlackScreen):
+    str_grid = """
+XXXXXXXXXXXXXX     XXXXXXXXXXXXX
+XXXXXXXXXXXXX       XXXXXXXXXXXX
+XXXXXXXXXX     x x     XXXXXXXXX
+XXXXXXXXXX XX       XX XXXXXXXXX
+XXXXXXXXXXXXXX     XXXXXXXXXXXXX
+XXXXXXXXXX             XXXXXXXXX
+XXXXXXXXXX XXXXXXXXXXX XXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+"""
+
+
+class SpaceInvader2(BlackScreen):
+    str_grid = """
+XXXXXXXXXXXXX       XXXXXXXXXXXX
+XXXXXXXXXXXX   x x   XXXXXXXXXXX
+XXXXXXXXXXXXX       XXXXXXXXXXXX
+XXXXXXXXXX X         X XXXXXXXXX
+XXXXXXXXXX             XXXXXXXXX
+XXXXXXXXXX XXX     XXX XXXXXXXXX
+XXXXXXXXXXXXXXX X XXXXXXXXXXXXXX
+XXXXXXXXXXXXXXX X XXXXXXXXXXXXXX
+"""
+
+
+class SpaceInvader3(BlackScreen):
+    str_grid = """
+XXXXXXXXXXXXX       XXXXXXXXXXXX
+XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXX
+XXXXXXXXXXXXX        XXXXXXXXXXX
+XXXXXXXXXXXX   X X   XXXXXXXXXXX
+XXXXXXXXXX             XXXXXXXXX
+XXXXXXXXXX XX  XXX  XX XXXXXXXXX
+XXXXXXXXXXXXXX     XXXXXXXXXXXXX
+XXXXXXXXXXXXX  XXX  XXXXXXXXXXXX
+"""
+
+
+class SpaceInvader4(BlackScreen):
+    str_grid = """
+XXXXXXXXXXXXX       XXXXXXXXXXXX
+XXXXXXXXXXXXXXX   XXXXXXXXXXXXXX
+XXXXXXXXXXXXX        XXXXXXXXXXX
+XXXXXXXXXXXX    X    XXXXXXXXXXX
+XXXXXXXXXX             XXXXXXXXX
+XXXXXXXXXX XX       XX XXXXXXXXX
+XXXXXXXXXXXXXX  X  XXXXXXXXXXXXX
+XXXXXXXXXXXXX  XXX  XXXXXXXXXXXX
+"""
+
+
 # Encoded icons
-class Boat(FaceplateGrid):
+class Boat(BlackScreen):
     encoded = "QIAAABACAGIEMEOEPHAEAGACABABAAAAAA"
 
 
@@ -204,4 +233,3 @@ class SnowIcon(FaceplateGrid):
 
 class WindIcon(FaceplateGrid):
     encoded = "IIABIBIBIJIJJGJAGA"
-

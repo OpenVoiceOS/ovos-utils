@@ -1,8 +1,6 @@
-from jarbas_utils.mark1.faceplate import FacePlateAnimation
-from jarbas_utils.mark1.faceplate.icons import Boat, HeartIcon, \
-    HollowHeartIcon, SkullIcon
+from jarbas_utils.mark1.faceplate import FacePlateAnimation, BlackScreen
 from jarbas_utils.mark1.faceplate.cellular_automaton import GoL, \
-    LangtonsAnt, SierpinskiTriangle
+    LangtonsAnt, SierpinskiTriangle, Rule110, SpaceInvader
 import copy
 import random
 
@@ -41,19 +39,42 @@ class VerticalScroll(FacePlateAnimation):
 
 
 class LeftRight(FacePlateAnimation):
-    def __init__(self, direction="right", grid=None, bus=None):
+    def __init__(self, direction="right", start="left", grid=None, bus=None):
         super().__init__(grid, bus)
         assert direction.startswith("r") or direction.startswith("l")
         self.direction = direction[0]
 
+        # start at right/left side/center
+        inverted = not isinstance(self, BlackScreen)
+        if start[0] == "l":
+            # left side
+            for y in range(self.height):
+                for x in range(self.width):
+                    if not inverted and self.grid[y][x] == 1:
+                        pass
+                    elif inverted and self.grid[y][x] == 0:
+                        pass
+        elif start[0] == "r":
+            pass # right side
+        else:
+            pass # center
+        print(self.grid[1])
+
     def animate(self):
         left_collision = False
         right_collision = False
+        inverted = not isinstance(self, BlackScreen)
         for y in range(self.height):
-            if self.grid[y][self.width - 1] == 1:
-                right_collision = True
-            if self.grid[y][0] == 1:
-                left_collision = True
+            if inverted:
+                if self.grid[y][self.width - 1] == 0:
+                    right_collision = True
+                if self.grid[y][0] == 0:
+                    left_collision = True
+            else:
+                if self.grid[y][self.width - 1] == 1:
+                    right_collision = True
+                if self.grid[y][0] == 1:
+                    left_collision = True
         if left_collision and right_collision:
             return  # No space left to animate
         elif right_collision:
@@ -162,45 +183,10 @@ class CollisionBox(FacePlateAnimation):
             self.stop()
 
 
-# Game Of Life!
-class SpaceInvader(GoL):
-    # This basically half "pulsar"
-    str_grid = """
-XXXXXXXXXXXX  XXX  XXXXXXXXXXXXX
-XXXXXXXXXX X X X X X XXXXXXXXXXX
-XXXXXXXX   XX  X  XX   XXXXXXXXX
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-XXXXXXXXXXXX  XXX  XXXXXXXXXXXXX
-XXXXXXXXXXXX XXXXX XXXXXXXXXXXXX
-XXXXXXXXXXXX XXXXX XXXXXXXXXXXXX
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-"""
-
-
-# Langton's Ant
-class LangtonsLineDisplacer(LangtonsAnt):
-    # see pattern here
-    # https://youtu.be/w6XQQhCgq5c?t=84
-
-    def __init__(self, continuous=True, bus=None):
-        super().__init__(0, continuous, bus=bus)
-        x = random.randint(0, self.width - 1)
-        y = random.randint(0, self.height - 1)
-        ant = self.ant_factory(x, y - 1, "u")
-        self.ants.append(ant)
-        # create initial line
-        for i in range(0, self.width):
-            self.grid[y][i] = 1
-
-
 # Ready to use animations
-class SailingBoat(Boat, HorizontalScroll):
-    pass
-
-
 class SquareWave(HorizontalScroll):
     def __init__(self, direction="r", frequency=3,
-                 amplitude=2, grid=None, bus=None):
+                 amplitude=4, grid=None, bus=None):
         super().__init__(direction, grid, bus)
         # frequency must be > 1
         # frequency is in number of pixels
@@ -214,6 +200,7 @@ class SquareWave(HorizontalScroll):
         self.amplitude = self.height - amplitude
 
         self._initial_grid()
+        self.invert()
 
     def _initial_grid(self):
         # draws the initial state
@@ -467,38 +454,31 @@ class ParticleBox(FacePlateAnimation):
         self.render_particles()
 
 
-class MovingHeart(HeartIcon, LeftRight):
-    def __init__(self, bus=None):
-        super().__init__(bus=bus)
-        self.invert()
-
-
-class MovingHeart2(HollowHeartIcon, LeftRight):
-    def __init__(self, bus=None):
-        super().__init__(bus=bus)
-        self.invert()
-
-
-class MovingSkull(SkullIcon, LeftRight):
-    def __init__(self, bus=None):
-        super().__init__(bus=bus)
-        self.invert()
-
-
 class FallingDots(FacePlateAnimation):
-    def __init__(self, bus=None):
+    def __init__(self, n=10, bus=None):
         super().__init__(bus=bus)
-        self._create = False
+        self._create = True
+        assert 0 < n < 32
+        self.n = n
+
+    @property
+    def n_dots(self):
+        n = 0
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.grid[y][x]:
+                    n += 1
+        return n
 
     def animate(self):
+        self.move_down()
         if self._create:
-            self._create = False
-            x = random.randint(0, self.width - 1)
-            self.grid[0][x] = 1
-        else:
-            self.move_down()
-            if self.is_empty:
-                self._create = True
+            if random.choice([True, False]):
+                self._create = False
+                x = random.randint(0, self.width - 1)
+                self.grid[0][x] = 1
+        if self.n_dots < self.n:
+            self._create = True
 
 
 class StraightParticleShooter(FacePlateAnimation):
@@ -585,3 +565,12 @@ class StraightParticleShooter(FacePlateAnimation):
 
 
 
+if __name__ == "__main__":
+    from jarbas_utils.messagebus import get_mycroft_bus
+    from time import sleep
+
+    bus = get_mycroft_bus("192.168.1.70")
+
+    for faceplate in ParticleBox(bus=bus):
+        faceplate.display(invert=False)
+        sleep(0.5)

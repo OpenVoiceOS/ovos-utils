@@ -9,6 +9,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 current dev branch
 
+Mark1 cellular automaton and animations
+
+### Added
+
+- enclosure base class
+- mark1 animation utils
+- mark1 animations
+    - langton's ant
+    - sierpinski triangle
+    - rule 110
+    - square wave
+    - particle box
+    - particle shooter
+- mark1 icons
+    - music icon
+    - hearth icon
+    - hollow hearth icon
+    - skull icon
+    - deadfish icon
+    - info icon
+    - arrow left icon
+    - warning icon
+    - cross icon
+    - JarbasAI logo icon
+    - SpaceInvader icons
+    
+### Changed
+
+- moved mark1 faceplate classes around
+
+### Fixed
+
+- mark1
+    - hardcoded width/height for padding in decode
+
 ## [0.5.1] - 2020 - 02 -04
 
 ### Fixed

@@ -3,6 +3,7 @@ import copy
 import random
 
 
+# Game of Life Base
 class GoL(FacePlateAnimation):
 
     def __init__(self, entropy=0, grid=None, bus=None):
@@ -64,7 +65,7 @@ class GoL(FacePlateAnimation):
 
 
 # Langtons Ant base
-class Ant:
+class _Ant:
     def __init__(self, x, y, direction, height=8, width=32):
         self.x = x
         self.y = y
@@ -113,7 +114,7 @@ class Ant:
             self.direction = "l"
 
 
-class InfiniteAnt(Ant):
+class _InfiniteAnt(_Ant):
     def move_forward(self):
         if self.direction == "r":
             self.x += 1
@@ -133,7 +134,7 @@ class InfiniteAnt(Ant):
                 self.y = self.grid_height - 1
 
 
-class ReverseAnt(Ant):
+class _ReverseAnt(_Ant):
     def turn_left(self):
         super().turn_right()
 
@@ -141,7 +142,7 @@ class ReverseAnt(Ant):
         super().turn_left()
 
 
-class ReverseInfiniteAnt(InfiniteAnt):
+class _ReverseInfiniteAnt(_InfiniteAnt):
     def turn_left(self):
         super().turn_right()
 
@@ -175,7 +176,7 @@ class LangtonsAnt(FacePlateAnimation):
             # Ant objects
             self.ants = ants
             for ant in self.ants:
-                assert isinstance(ant, Ant)
+                assert isinstance(ant, _Ant)
         else:
             raise ValueError
 
@@ -184,11 +185,11 @@ class LangtonsAnt(FacePlateAnimation):
         if self.continuous:
             # loops around the board instead of dying
             if reverse:
-                return ReverseInfiniteAnt(x, y, direction)
-            return InfiniteAnt(x, y, direction)
+                return _ReverseInfiniteAnt(x, y, direction)
+            return _InfiniteAnt(x, y, direction)
         if reverse:
-            return ReverseAnt(x, y, direction)
-        return Ant(x, y, direction)
+            return _ReverseAnt(x, y, direction)
+        return _Ant(x, y, direction)
 
     def move_ants(self):
         # copy grid, multiple ants might want to flip same square
@@ -218,68 +219,132 @@ class LangtonsAnt(FacePlateAnimation):
             self.stop()
 
 
+# Game of Life Animations
+class SpaceInvader(GoL):
+    # This basically half "pulsar"
+    str_grid = """
+XXXXXXXXXXXX  XXX  XXXXXXXXXXXXX
+XXXXXXXXXX X X X X X XXXXXXXXXXX
+XXXXXXXX   XX  X  XX   XXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXX  XXX  XXXXXXXXXXXXX
+XXXXXXXXXXXX XXXXX XXXXXXXXXXXXX
+XXXXXXXXXXXX XXXXX XXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+"""
+
+
 # Langton's Ant animations
-class TwoLangtonsAnts(LangtonsAnt):
+
+# Single Ant
+class LangtonsLineDisplacer(LangtonsAnt):
+    # see pattern here
+    # https://youtu.be/w6XQQhCgq5c?t=84
+
+    def __init__(self, x=None, y=None, continuous=True, bus=None):
+        super().__init__(0, continuous, bus=bus)
+        x = x if x is not None else random.randint(0, self.width - 1)
+        y = y if y is not None else random.randint(0, self.height - 1)
+        ant = self.ant_factory(x, y - 1, "u")
+        self.ants.append(ant)
+        # create initial line
+        for i in range(0, self.width):
+            self.grid[y][i] = 1
+
+
+# 2 Ants
+class LangtonsAntsOscillator(LangtonsAnt):
     # see pattern here
     # https://youtu.be/w6XQQhCgq5c?t=103
-    # NOTE: Because of the continuous space it looks even cooler!
-    # pass continuous=False to replicate the video
 
-    def __init__(self, dir1="u", dir2="u", continuous=True, bus=None):
-        super().__init__(0, continuous, bus=bus)
-        x = self.width // 2
-        y = self.height // 2
-        ant1 = self.ant_factory(x, y - 1, dir1)
-        ant2 = self.ant_factory(x, y, dir2)
-        self.ants.append(ant1)
-        self.ants.append(ant2)
-
-
-class LangtonsAntsOscillator(TwoLangtonsAnts):
-    def __init__(self, bus=None):
-        super().__init__("u", "d", continuous=True, bus=bus)
+    def __init__(self, x=None, y=None, bus=None):
+        super().__init__(0, bus=bus)
+        x1 = x2 = x if x is not None else self.width // 2
+        y1 = y if y is not None else self.height // 2
+        y2 = y1 - 1
+        dir1 = "d"
+        dir2 = "u"
+        ant1 = self.ant_factory(x1, y1, dir1)
+        ant2 = self.ant_factory(x2, y2, dir2)
+        self.ants += [ant1, ant2]
 
 
-class LangtonsAntsOscillator2(TwoLangtonsAnts):
-    def __init__(self, bus=None):
-        super().__init__("d", "u", continuous=True, bus=bus)
+class LangtonsAntsOscillator2(LangtonsAnt):
+    def __init__(self, x=None, y=None, bus=None):
+        super().__init__(0, bus=bus)
+        x1 = x2 = x if x is not None else self.width // 2
+        y1 = y if y is not None else self.height // 2
+        y2 = y1 - 1
+        dir1 = dir2 = "u"
+        ant1 = self.ant_factory(x1, y1, dir1)
+        ant2 = self.ant_factory(x2, y2, dir2)
+        self.ants += [ant1, ant2]
 
 
-class LangtonsAntsOscillator3(TwoLangtonsAnts):
-    def __init__(self, bus=None):
-        super().__init__("l", "r", bus=bus)
+class LangtonsAntsOscillator3(LangtonsAnt):
+    def __init__(self, x=None, y=None, bus=None):
+        super().__init__(0, bus=bus)
+        x1 = x2 = x if x is not None else self.width // 2
+        y1 = y if y is not None else self.height // 2
+        y2 = y1 - 1
+        dir1 = "l"
+        dir2 = "r"
+        ant1 = self.ant_factory(x1, y1, dir1)
+        ant2 = self.ant_factory(x2, y2, dir2)
+        self.ants += [ant1, ant2]
 
 
-class LangtonsAntsOscillator4(TwoLangtonsAnts):
-    def __init__(self, bus=None):
-        super().__init__("l", "l", bus=bus)
+class LangtonsAntsOscillator4(LangtonsAnt):
+    def __init__(self, x=None, y=None, bus=None):
+        super().__init__(0, bus=bus)
+        x1 = x2 = x if x is not None else self.width // 2
+        y1 = y if y is not None else self.height // 2
+        y2 = y1 - 1
+        dir1 = dir2 = "l"
+        ant1 = self.ant_factory(x1, y1, dir1)
+        ant2 = self.ant_factory(x2, y2, dir2)
+        self.ants += [ant1, ant2]
 
 
-class LangtonsAntAntiAnt(LangtonsAnt):
+class LangtonsAntsOscillator5(LangtonsAnt):
+    def __init__(self, x=None, y=None, bus=None):
+        super().__init__(0, bus=bus)
+        x1 = x2 = x if x is not None else self.width // 2
+        y1 = y if y is not None else self.height // 2
+        y2 = y1 - 1
+        dir1 = "u"
+        dir2 = "d"
+        ant1 = self.ant_factory(x1, y1, dir1)
+        ant2 = self.ant_factory(x2, y2, dir2)
+        self.ants += [ant1, ant2]
+
+
+class LangtonsAntTrail(LangtonsAnt):
     # see pattern here
     # https://youtu.be/w6XQQhCgq5c?t=159
 
-    def __init__(self, dir1="u", dir2="d", continuous=True, bus=None):
-        super().__init__(0, continuous, bus=bus)
-        x = random.randint(0, self.width - 1)
-        y = random.randint(0, self.height - 1)
+    def __init__(self, x=None, y=None, bus=None):
+        super().__init__(0, bus=bus)
+        x = x if x is not None else random.randint(0, self.width - 1)
+        y = y if y is not None else random.randint(0, self.height - 1)
+        dir1 = "u"
+        dir2 = "d"
         ant1 = self.ant_factory(x, y - 1, dir1)
         ant2 = self.ant_factory(x, y, dir2, reverse=True)
-        self.ants.append(ant1)
-        self.ants.append(ant2)
+        self.ants += [ant1, ant2]
 
 
-class LangtonsAntAntiAntEraser(LangtonsAnt):
+class LangtonsAntDotTransporter(LangtonsAnt):
     # https://youtu.be/w6XQQhCgq5c?t=171
 
-    def __init__(self, dir1="u", dir2="u", continuous=True, bus=None):
-        super().__init__(0, continuous, bus=bus)
-        x = random.randint(0, self.width - 1)
-        y = random.randint(0, self.height - 1)
+    def __init__(self, x=None, y=None,  bus=None):
+        super().__init__(0, bus=bus)
+        x = x if x is not None else random.randint(0, self.width - 1)
+        y = y if y is not None else random.randint(0, self.height - 1)
+        dir1 = dir2 = "u"
         ant1 = self.ant_factory(x, y, dir1)
         ant2 = self.ant_factory(x + 1, y, dir2, reverse=True)
-        self.ants.append(ant1)
-        self.ants.append(ant2)
+        self.ants += [ant1, ant2]
         # initial grid
         if y + 1 == self.height:
             self.grid[0][x + 1] = 1 # bellow anti-ant
@@ -413,11 +478,15 @@ class Rule110(ElementarAutomata):
 
 if __name__ == "__main__":
     from time import sleep
+    from jarbas_utils.messagebus import get_mycroft_bus
+    from time import sleep
 
-    seed = [random.randint(0, 1) for i in range(32)]
-    a = Rule110(seed=seed)
+    bus = get_mycroft_bus("192.168.1.70")
+
+    a = Rule110(bus=bus)
     a.print()
 
     for grid in a:
         grid.print()
-        sleep(0.1)
+        grid.display(invert=False)
+        sleep(0.5)

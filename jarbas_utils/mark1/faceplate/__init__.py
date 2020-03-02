@@ -16,19 +16,18 @@ class FaceplateGrid(collections.MutableSequence):
     def __init__(self, grid=None, bus=None):
         self.bus = bus or get_mycroft_bus()
         self._api = Mark1EnclosureAPI(self.bus)
+        self.grid = []
+        for x in range(8):
+            self.grid.append([])
+            for y in range(32):
+                self.grid[x].append(0)
         if self.encoded:
             self.grid = self.decode(self.encoded).grid
         elif self.str_grid is not None:
-            self.grid = FaceplateGrid(bus=self.bus).from_string(
-                self.str_grid).grid
+            self.grid = FaceplateGrid(bus=self.bus)\
+                .from_string(self.str_grid).grid
         elif grid is not None:
             self.grid = grid
-        else:
-            self.grid = []
-            for x in range(8):
-                self.grid.append([])
-                for y in range(32):
-                    self.grid[x].append(0)
 
     @property
     def height(self):
@@ -180,15 +179,15 @@ class FaceplateGrid(collections.MutableSequence):
 
         #  handle padding
         if pad:
-            if width < 32:
-                n = int((32 - width) / 2)
+            if width < self.width:
+                n = int((self.width - width) / 2)
                 if invert:
                     padding = [1] * n
                 else:
                     padding = [0] * n
                 for idx, row in enumerate(grid):
                     grid[idx] = padding + row + padding
-            if height < 8:
+            if height < self.height:
                 pass # TODO vertical padding
         self.grid = grid
         return self
@@ -385,3 +384,21 @@ class FacePlateAnimation(FaceplateGrid):
                 else:
                     self.grid[y][x] = old[y][x + 1]
 
+
+class BlackScreen(FaceplateGrid):
+    # Basically a util class to handle
+    # inverting on __init__
+    str_grid = """
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.invert()
