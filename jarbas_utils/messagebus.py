@@ -6,12 +6,13 @@ import time
 import json
 
 
-def get_websocket(host, port, route='/', ssl=False):
+def get_websocket(host, port, route='/', ssl=False, threaded=True):
     """
     Returns a connection to a websocket
     """
     client = MessageBusClient(host, port, route, ssl)
-    client.run_in_thread()
+    if threaded:
+        client.run_in_thread()
     return client
 
 
