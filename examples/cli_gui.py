@@ -40,8 +40,7 @@ class DummyGUI:
         while True:
             sleep(1)
             if self.buffer != last_buffer:
-                for line in self.buffer:
-                    print(line)
+                self.draw()
                 last_buffer = self.buffer
 
     @property
