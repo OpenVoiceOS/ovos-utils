@@ -41,15 +41,19 @@ class DummyGUI:
             self.gui_ws = get_websocket(host=self.mycroft_ip,
                                         port=port, route="/gui",
                                         threaded=False)
-            self.gui_ws.on("message", self.on_gui_message)
 
             def on_open(*args, **kwargs):
+                # DEBUG ME: not called
                 LOG.debug("Gui connecting open")
 
             self.gui_ws.on("open", on_open)
-            create_daemon(self.gui_ws.run_forever)
+            self.gui_ws.on("message", self.on_gui_message)
+            print("DEBUG: gui exists", self.gui_ws)
+            self.gui_ws.run_in_thread()
+            print("DEBUG: should be running")
 
     def on_gui_message(self, payload):
+        # DEBUG ME: not called
         print(payload)
         try:
             msg = json.loads(payload)
