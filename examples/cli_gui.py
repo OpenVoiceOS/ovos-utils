@@ -138,8 +138,7 @@ class DummyGUI:
 
             if self.page:
                 self.buffer.append(bcolors.OKBLUE + "Page:" + bcolors.ENDC +
-                                   bcolors.OKGREEN + basename(self.page) +
-                                   bcolors.ENDC)
+                                   basename(self.page))
             else:
                 self.buffer.append(bcolors.OKBLUE + "Page:" + bcolors.ENDC +
                                    bcolors.WARNING + "None" + bcolors.ENDC)
@@ -149,7 +148,9 @@ class DummyGUI:
                     if self.vars[self.skill][v]:
                         self.buffer.append(bcolors.OKGREEN + "{}:".format(v)
                                            + bcolors.ENDC)
-                        self.buffer.append(pformat(self.vars[self.skill][v]))
+                        pretty = pformat(self.vars[self.skill][v])
+                        for l in pretty.split("\n"):
+                            self.buffer.append("    " + l)
 
     def draw(self):
         for line in self.buffer:
