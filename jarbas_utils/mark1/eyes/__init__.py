@@ -305,6 +305,8 @@ class Eyes(list):
         while True:
             values = rotate_list(values, -1)
             for idx, value in enumerate(values):
+                for pixel in self:
+                    print(pixel)
                 self.left[idx].set_hue(value)
                 sleep(0.03)
                 self.right[idx].set_hue(value)
@@ -506,5 +508,5 @@ class Eyes(list):
 
 if __name__ == "__main__":
     bus = get_mycroft_bus("192.168.1.70")
-    eyes = Eyes(bus, "blue")
-    eyes.api.reset()
+    eyes = Eyes(bus)
+    eyes.hue_spin()

@@ -1,4 +1,5 @@
 import time
+import socket
 from jarbas_utils.log import LOG
 from jarbas_utils.messagebus import Message, get_mycroft_bus
 
