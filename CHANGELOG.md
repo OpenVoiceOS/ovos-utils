@@ -17,10 +17,12 @@ Parsing, cellular automaton and Mark1 animations
 
 - jarbas_utils.parse
     - remove_parentheses
+    - split_sentences
     - summarize
     - singularize
-    - extract_sentences
-    - extract_paragraphs
+    - search_in_text
+        - extract_sentences
+        - extract_paragraphs
 - enclosure base class
 - mark1 animation utils
 - mark1 animations
