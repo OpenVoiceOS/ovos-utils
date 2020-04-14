@@ -1,7 +1,7 @@
 from threading import Event
 from time import time as get_time, sleep
 from jarbas_utils import get_mycroft_root
-from jarbas_utils.intents import BaseIntentEngine
+from jarbas_utils.intents.engines import BaseIntentEngine
 from jarbas_utils.log import LOG
 from jarbas_utils.configuration import update_mycroft_config, read_mycroft_config
 from jarbas_utils.messagebus import Message

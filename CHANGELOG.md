@@ -13,6 +13,12 @@ Mark1 cellular automaton and animations
 
 ### Added
 
+. jarbas_utils.parse
+    - remove_parentheses
+    - summarize
+    - singularize
+    - extract_sentences
+    - extract_paragraphs
 - enclosure base class
 - mark1 animation utils
 - mark1 animations

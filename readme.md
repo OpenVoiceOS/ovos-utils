@@ -240,7 +240,7 @@ if not config.get("lang"):
     config["lang"] = "pt"
     config.store() # now changes are saved
 
-config.merge({"host": "http://somedomain.net"})
+config.merge({mycroft_ip: "http://somedomain.net"})
 config.reload() # now changes are gone
 
 ```
