@@ -15,7 +15,7 @@ Parsing, cellular automaton and Mark1 animations
 
 ### Added
 
-. jarbas_utils.parse
+- jarbas_utils.parse
     - remove_parentheses
     - summarize
     - singularize
