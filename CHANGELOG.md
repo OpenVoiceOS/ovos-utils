@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 current dev branch
 
-Mark1 cellular automaton and animations
+## [0.6.1] - 2020 - 04 -14
+
+Parsing, cellular automaton and Mark1 animations
 
 ### Added
 
@@ -44,6 +46,7 @@ Mark1 cellular automaton and animations
 ### Changed
 
 - moved mark1 faceplate classes around
+- moved fuzzy matching util to jarbas_utils.parse
 
 ### Fixed
 
@@ -268,6 +271,7 @@ Released on [pypi](https://pypi.org/project/jarbas-utils/)
     - ntp sync
 
 [unreleased]: https://github.com/OpenJarbas/jarbas_utils/tree/dev
-[0.4.5]: https://github.com/OpenJarbas/jarbas_utils/tree/0.5
+[0.6.1]: https://github.com/OpenJarbas/jarbas_utils/tree/0.6
+[0.5.0]: https://github.com/OpenJarbas/jarbas_utils/tree/0.5
 [0.4.1]: https://github.com/OpenJarbas/jarbas_utils/tree/0.4
 [0.3.2]: https://github.com/OpenJarbas/jarbas_utils/tree/0.3
