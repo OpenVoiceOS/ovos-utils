@@ -159,3 +159,31 @@ def update_mycroft_config(config, path=None):
     conf.merge(config)
     conf.store()
     return conf
+
+
+def blacklist_skill(skill):
+    blacklisted_skills = read_mycroft_config()["skills"]["blacklisted_skills"]
+    if skill not in blacklist_skills:
+        blacklisted_skills.append(skill)
+        conf = {
+            "skills": {
+                "blacklisted_skills": blacklisted_skills
+            }
+        }
+        update_mycroft_config(conf)
+        return True
+    return False
+
+
+def whitelist_skill(skill):
+    blacklisted_skills = read_mycroft_config()["skills"]["blacklisted_skills"]
+    if skill in blacklist_skills:
+        blacklisted_skills.pop(skill)
+        conf = {
+            "skills": {
+                "blacklisted_skills": blacklisted_skills
+            }
+        }
+        update_mycroft_config(conf)
+        return True
+    return False
