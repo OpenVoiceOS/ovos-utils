@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='jarbas_utils',
-    version='0.6.1',
+    version='0.6.5',
     packages=['jarbas_utils',
               'jarbas_utils.sound',
               'jarbas_utils.mark1',
@@ -11,7 +11,6 @@ setup(
     url='https://github.com/OpenJarbas/jarbas_utils',
     install_requires=["pronouncing",
                       "googletrans",
-                      "pyalsaaudio==0.8.2",
                       "mycroft-messagebus-client",
                       "inflection",
                       "colour"],

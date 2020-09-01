@@ -12,12 +12,12 @@ def etree2dict(t):
                 dd[k].append(v)
         d = {t.tag: {k: v[0] if len(v) == 1 else v for k, v in dd.items()}}
     if t.attrib:
-        d[t.tag].update(('@' + k, v) for k, v in t.attrib.items())
+        d[t.tag].update((k, v) for k, v in t.attrib.items())
     if t.text:
         text = t.text.strip()
         if children or t.attrib:
             if text:
-                d[t.tag]['#text'] = text
+                d[t.tag]['text'] = text
         else:
             d[t.tag] = text
     return d
@@ -29,7 +29,7 @@ def xml2dict(xml_string):
                                         "")
         e = ET.XML(xml_string)
         d = etree2dict(e)
-        return _clean_dict(d)
+        return d
     except:
         return {}
 
@@ -37,25 +37,7 @@ def xml2dict(xml_string):
 def load_xml2dict(xml_path):
     tree = ET.parse(xml_path)
     d = etree2dict(tree.getroot())
-    return _clean_dict(d)["xml"]
-
-
-def _clean_dict(d):
-    cleaned = {}
-    for k in d:
-        if isinstance(d[k], dict):
-            d[k] = _clean_dict(d[k])
-
-        if isinstance(d[k], list):
-            for idx, entry in enumerate(d[k]):
-                if isinstance(entry, dict):
-                    d[k][idx] = _clean_dict(entry)
-
-        n = k
-        if k.startswith("@") or k.startswith("#"):
-            n = k[1:]
-        cleaned[n] = d[k]
-    return cleaned
+    return d["xml"]
 
 
 def dict2xml(d, root="xml"):

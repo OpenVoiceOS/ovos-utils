@@ -1,13 +1,20 @@
-from alsaaudio import Mixer, mixers as alsa_mixers
+try:
+    import alsaaudio
+except ImportError:
+    alsaaudio = None
 from jarbas_utils.log import LOG
 
 
-class AlsaControl(object):
+class AlsaControl:
     _mixer = None
 
     def __init__(self, control=None):
+        if alsaaudio is None:
+            LOG.error("pyalsaaudio not installed")
+            LOG.info("Run pip install pyalsaaudio==0.8.2")
+            raise ImportError
         if control is None:
-            control = alsa_mixers()[0]
+            control = alsaaudio.mixers()[0]
         self.get_mixer(control)
 
     @property
@@ -17,16 +24,16 @@ class AlsaControl(object):
     def get_mixer(self, control="Master"):
         if self._mixer is None:
             try:
-                mixer = Mixer(control)
+                mixer = alsaaudio.Mixer(control)
             except Exception as e:
                 try:
-                    mixer = Mixer(control)
+                    mixer = alsaaudio.Mixer(control)
                 except Exception as e:
                     try:
                         if control != "Master":
                             LOG.warning("could not allocate requested mixer, "
                                         "falling back to 'Master'")
-                            mixer = Mixer("Master")
+                            mixer = alsaaudio.Mixer("Master")
                         else:
                             raise
                     except Exception as e:

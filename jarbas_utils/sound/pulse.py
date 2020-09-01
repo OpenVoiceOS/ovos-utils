@@ -3,7 +3,7 @@ import re
 import collections
 
 
-class PulseAudio(object):
+class PulseAudio:
     volume_re = re.compile('^set-sink-volume ([^ ]+) (.*)')
     mute_re = re.compile('^set-sink-mute ([^ ]+) ((?:yes)|(?:no))')
 

@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 current dev branch
 
+## [0.6.2] - 2020 - 07 -06
+
+### Added
+
+- blacklist/whitelist skills util
+
 ## [0.6.1] - 2020 - 04 -14
 
 Parsing, cellular automaton and Mark1 animations
@@ -54,7 +60,7 @@ Parsing, cellular automaton and Mark1 animations
 
 - mark1
     - hardcoded width/height for padding in decode
-
+wo
 ## [0.5.1] - 2020 - 02 -04
 
 ### Fixed

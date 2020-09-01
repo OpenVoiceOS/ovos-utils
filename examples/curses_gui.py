@@ -3,9 +3,11 @@ from os.path import basename
 import json
 from time import sleep
 from pprint import pformat
+import curses
+import logging
+logging.getLogger("mycroft_bus_client.client.client").setLevel("ERROR")
 
 try:
-    from jarbas_utils.log import LOG
     from jarbas_utils.messagebus import get_mycroft_bus, MessageBusClient,\
         Message
 except ImportError:
@@ -23,21 +25,9 @@ def get_websocket(host, port, route='/', ssl=False, threaded=False):
     return client
 
 
-# helper to print in color
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
-
-class DummyGUI:
-    def __init__(self, host="0.0.0.0", port=8181, name=None, debug=False):
-        self.bus = get_mycroft_bus(host, port)
+class CursesGUI:
+    def __init__(self, host="0.0.0.0", port=8181, name=None, debug=0,
+                 refresh_rate=0.5):
         self.loaded = []
         self.skill = None
         self.page = None
@@ -48,27 +38,46 @@ class DummyGUI:
         self.debug = debug
         self.connected = False
         self.buffer = []
+        self._debug_msg = []
+        self._init_curses()
+        self.refresh_rate = refresh_rate
+        self.bus = get_mycroft_bus(host, port)
+
+    def _init_curses(self):
+        # init curses
+        self.window = curses.initscr()
+        curses.noecho()
+        curses.cbreak()
+        self.window.keypad(1)
+        curses.curs_set(0)
 
     def run(self):
-        last_buffer = []
+
+        self.window.clrtobot()
+        self.window.refresh()
+        # process GUI input
         if not self.connected:
             self.connect()
         while True:
-            sleep(1)
-            if self.buffer != last_buffer:
-                self.draw()
-                last_buffer = self.buffer
+            sleep(self.refresh_rate)
+            self.draw()
 
     @property
     def gui_id(self):
         return self.name + "_" + str(getpid())
 
     def connect(self):
-        LOG.debug("Announcing GUI")
+        self._log_debug("Announcing GUI")
         self.bus.on('mycroft.gui.port', self._connect_to_gui)
         self.bus.emit(Message("mycroft.gui.connected",
                               {"gui_id": self.gui_id}))
         self.connected = True
+
+    def _log_debug(self, log_msg):
+        if self.debug > 0:
+            self._debug_msg += ["[DEBUG] " + log_msg]
+            if len(self._debug_msg) > self.debug:
+                self._debug_msg = self._debug_msg[-self.debug:]
 
     def _connect_to_gui(self, msg):
         # Attempt to connect to the port
@@ -80,7 +89,7 @@ class DummyGUI:
         # Create the websocket for GUI communications
         port = msg.data.get("port")
         if port:
-            LOG.info("Connecting GUI on " + str(port))
+            self._log_debug("Connecting GUI on " + str(port))
             self.gui_ws = get_websocket(host=self.mycroft_ip,
                                         port=port, route="/gui")
             self.gui_ws.on("open", self.on_open)
@@ -88,13 +97,12 @@ class DummyGUI:
             self.gui_ws.run_in_thread()
 
     def on_open(self, message):
-        LOG.debug("Gui connection open")
+        self._log_debug("Gui connection open")
 
     def on_gui_message(self, payload):
         try:
             msg = json.loads(payload)
-            if self.debug:
-                LOG.debug("Msg: " + str(payload))
+            self._log_debug("Msg: " + str(payload))
             msg_type = msg.get("type")
             if msg_type == "mycroft.session.set":
                 self.skill = msg.get("namespace")
@@ -137,40 +145,39 @@ class DummyGUI:
 
             self._draw_buffer()
         except Exception as e:
-            if self.debug:
-                LOG.exception(e)
-                LOG.error("Invalid JSON: " + str(payload))
+            self._log_debug("Invalid JSON: " + str(payload))
 
     def _draw_buffer(self):
         self.buffer = []
         if self.skill:
-            self.buffer.append(
-                bcolors.HEADER + "######################################" +
-                bcolors.ENDC)
-            self.buffer.append(
-                bcolors.OKBLUE + "Active Skill:" + bcolors.ENDC + self.skill)
+            self.buffer.append("Active Skill:" + self.skill)
 
             if self.page:
-                self.buffer.append(bcolors.OKBLUE + "Page:" + bcolors.ENDC +
-                                   basename(self.page))
+                self.buffer.append("Page:" + basename(self.page))
             else:
-                self.buffer.append(bcolors.OKBLUE + "Page:" + bcolors.ENDC +
-                                   bcolors.WARNING + "None" + bcolors.ENDC)
+                self.buffer.append("Page: None")
 
             if self.skill in self.vars:
                 for v in dict(self.vars[self.skill]):
                     if self.vars[self.skill][v]:
-                        self.buffer.append(bcolors.OKGREEN + "{}:".format(v)
-                                           + bcolors.ENDC)
+                        self.buffer.append("{}:".format(v))
                         pretty = pformat(self.vars[self.skill][v])
                         for l in pretty.split("\n"):
                             self.buffer.append("    " + l)
 
     def draw(self):
-        for line in self.buffer:
-            print(line)
+        try:
+            debug = "\n".join(self._debug_msg) + "\n" + 80 * "#"
+            message = "\n".join(self.buffer)
+            if self.debug > 0:
+                message = debug + "\n" + message
+            self.window.addstr(0, 0, message)
+        except:
+            pass
+        self.window.clrtobot()
+        self.window.refresh()
 
 
 if __name__ == "__main__":
-    gui = DummyGUI()
+    gui = CursesGUI(debug=0)
     gui.run()
