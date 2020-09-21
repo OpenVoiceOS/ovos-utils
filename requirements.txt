@@ -6,3 +6,4 @@ googletrans
 mycroft-messagebus-client
 colour
 inflection
+pexpect

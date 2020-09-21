@@ -1,10 +1,12 @@
-
+import platform, os
+import pexpect
 from socket import gethostname
 from os.path import exists, join
 from os import makedirs
 import random
 import string
 from jarbas_utils.log import LOG
+
 try:
     from Crypto.Cipher import AES
 except ImportError:
@@ -92,3 +94,21 @@ def decrypt(key, ciphertext, tag, nonce):
     except Exception as e:
         LOG.error("decryption failed, invalid key?")
         raise
+
+
+def sudo_exec(cmdline, passwd="root"):
+    osname = platform.system()
+    if osname == 'Linux':
+        prompt = r'\[sudo\] password for %s: ' % os.environ['USER']
+    elif osname == 'Darwin':
+        prompt = 'Password:'
+    else:
+        raise SystemError("Unsupported platform")
+
+    child = pexpect.spawn(cmdline)
+    idx = child.expect([prompt, pexpect.EOF], 3)
+    if idx == 0:  # if prompted for the sudo password
+        LOG.debug('sudo password was asked.')
+        child.sendline(passwd)
+        child.expect(pexpect.EOF)
+    return child.before

@@ -13,7 +13,7 @@ setup(
                       "googletrans",
                       "mycroft-messagebus-client",
                       "inflection",
-                      "colour"],
+                      "colour", "pexpect"],
     license='MIT',
     author='jarbasAI',
     author_email='jarbasai@mailfence.com',
