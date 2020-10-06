@@ -14,7 +14,7 @@ setup(
                       "mycroft-messagebus-client",
                       "inflection",
                       "colour", "pexpect"],
-    license='MIT',
+    license='Apache',
     author='jarbasAI',
     author_email='jarbasai@mailfence.com',
     description='collection of simple utilities for use across the mycroft ecosystem'
