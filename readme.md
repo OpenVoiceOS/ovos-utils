@@ -1,8 +1,8 @@
-# Jarbas - utils
+# OVOS - utils
 
 collection of simple utilities for use across the mycroft ecosystem
 
-- [Jarbas - utils](#jarbas---utils)
+- [OVOS - utils](#jarbas---utils)
   * [Install](#install)
   * [Usage](#usage)
     + [Messagebus](#messagebus)
@@ -19,16 +19,10 @@ collection of simple utilities for use across the mycroft ecosystem
 
 ## Install
 
-stable version on pip 0.4.1
-
-```bash
-pip install jarbas_utils
-```
-
 dev version
 
 ```bash
-pip install git+https://github.com/OpenJarbas/jarbas_utils
+pip install git+https://github.com/OpenVoiceOS/ovos_utils
 ```
 
 ## Usage
@@ -331,3 +325,6 @@ class MyPretendEnclosure:
         self.alsa.set_volume(volume)
 
 ```
+## Credits
+
+[@JarbasAl](https://github.com/JarbasAl) - original jarbas_utils repo [here](https://github.com/OpenJarbas/jarbas_utils)
