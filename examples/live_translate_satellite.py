@@ -1,9 +1,9 @@
-from jarbas_utils.messagebus import get_mycroft_bus, listen_for_message
-from jarbas_utils import wait_for_exit_signal
-from jarbas_utils.lang.translate import say_in_language
+from ovos_utils.messagebus import get_mycroft_bus, listen_for_message
+from ovos_utils import wait_for_exit_signal
+from ovos_utils.lang.translate import say_in_language
 
-# from jarbas_utils.lang.translate import translate_to_mp3
-# from jarbas_utils.sound import play_mp3
+# from ovos_utils.lang.translate import translate_to_mp3
+# from ovos_utils.sound import play_mp3
 
 bus_ip = "0.0.0.0"  # enter a remote ip here, remember bus is unencrypted! careful with opening firewalls
 bus = get_mycroft_bus(host=bus_ip)

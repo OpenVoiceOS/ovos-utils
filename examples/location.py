@@ -1,4 +1,4 @@
-from jarbas_utils.location import geolocate, reverse_geolocate
+from ovos_utils.location import geolocate, reverse_geolocate
 from pprint import pprint
 
 

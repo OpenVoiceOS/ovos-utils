@@ -1,5 +1,5 @@
-from jarbas_utils.mark1.icons import FaceplateGrid
-from jarbas_utils.messagebus import get_mycroft_bus
+from ovos_utils.mark1.icons import FaceplateGrid
+from ovos_utils.messagebus import get_mycroft_bus
 from time import sleep
 
 

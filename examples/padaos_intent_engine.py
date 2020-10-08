@@ -1,5 +1,5 @@
-from jarbas_utils.intents.engines import BaseIntentEngine
-from jarbas_utils.skills.intent_provider import IntentEngineSkill
+from ovos_utils.intents.engines import BaseIntentEngine
+from ovos_utils.skills.intent_provider import IntentEngineSkill
 
 from mycroft.configuration.config import Configuration
 from mycroft.skills.core import MycroftSkill, Message

@@ -1,7 +1,7 @@
-from jarbas_utils.messagebus import send_message, listen_for_message
-from jarbas_utils.lang.translate import translate_text
-from jarbas_utils.lang.detect import detect_lang
-from jarbas_utils.log import LOG
+from ovos_utils.messagebus import send_message, listen_for_message
+from ovos_utils.lang.translate import translate_text
+from ovos_utils.lang.detect import detect_lang
+from ovos_utils.log import LOG
 
 
 OUTPUT_LANG = "pt"  # received messages will be in this language

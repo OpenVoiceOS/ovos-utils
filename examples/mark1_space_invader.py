@@ -1,5 +1,5 @@
-from jarbas_utils.mark1.animations import SpaceInvader
-from jarbas_utils.messagebus import get_mycroft_bus
+from ovos_utils.mark1.animations import SpaceInvader
+from ovos_utils.messagebus import get_mycroft_bus
 from time import sleep
 
 bus = get_mycroft_bus("192.168.1.70")

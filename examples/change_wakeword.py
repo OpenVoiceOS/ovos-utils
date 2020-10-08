@@ -1,5 +1,5 @@
-from jarbas_utils.configuration import update_mycroft_config
-from jarbas_utils.lang.phonemes import get_phonemes
+from ovos_utils.configuration import update_mycroft_config
+from ovos_utils.lang.phonemes import get_phonemes
 
 
 def create_wakeword(word, sensitivity):

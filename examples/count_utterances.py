@@ -1,6 +1,6 @@
-from jarbas_utils.messagebus import listen_for_message
-from jarbas_utils.log import LOG
-from jarbas_utils import wait_for_exit_signal
+from ovos_utils.messagebus import listen_for_message
+from ovos_utils.log import LOG
+from ovos_utils import wait_for_exit_signal
 
 heard = 0
 spoken = 0

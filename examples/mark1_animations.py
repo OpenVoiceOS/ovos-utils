@@ -1,6 +1,6 @@
-from jarbas_utils.mark1.faceplate.icons import HollowHeartIcon, HeartIcon, \
+from ovos_utils.mark1.faceplate.icons import HollowHeartIcon, HeartIcon, \
     SkullIcon, Boat
-from jarbas_utils.mark1.faceplate.animations import LeftRight, HorizontalScroll
+from ovos_utils.mark1.faceplate.animations import LeftRight, HorizontalScroll
 
 
 class SailingBoat(Boat, HorizontalScroll):

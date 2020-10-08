@@ -1,6 +1,6 @@
-from jarbas_utils.messagebus import send_message
-from jarbas_utils.log import LOG
-from jarbas_utils import create_daemon, wait_for_exit_signal
+from ovos_utils.messagebus import send_message
+from ovos_utils.log import LOG
+from ovos_utils import create_daemon, wait_for_exit_signal
 import random
 from time import sleep
 
