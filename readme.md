@@ -327,4 +327,4 @@ class MyPretendEnclosure:
 ```
 ## Credits
 
-[@JarbasAl](https://github.com/JarbasAl) - original jarbas_utils repo [here](https://github.com/OpenJarbas/ovos_utils)
+[@JarbasAl](https://github.com/JarbasAl) - original jarbas_utils repo [here](https://github.com/OpenJarbas/jarbas_utils)
