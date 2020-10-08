@@ -38,9 +38,9 @@ The main way to interact with a mycroft instance is using the messagebus
 Listening for events is super easy, here is a small program counting number of spoken utterances
 
 ```python
-from jarbas_utils.messagebus import listen_for_message
-from jarbas_utils.log import LOG
-from jarbas_utils import wait_for_exit_signal
+from ovos_utils.messagebus import listen_for_message
+from ovos_utils.log import LOG
+from ovos_utils import wait_for_exit_signal
 
 spoken = 0
 
@@ -64,9 +64,9 @@ bus.close()
 Triggering events in mycroft is also trivial
 
 ```python
-from jarbas_utils.messagebus import send_message
-from jarbas_utils.log import LOG
-from jarbas_utils import create_daemon, wait_for_exit_signal
+from ovos_utils.messagebus import send_message
+from ovos_utils.log import LOG
+from ovos_utils import create_daemon, wait_for_exit_signal
 import random
 from time import sleep
 
@@ -92,9 +92,9 @@ wait_for_exit_signal()  # wait for ctrl+c
 You can also connect to a remote messagebus, here is a live translator using language utils
 
 ```python
-from jarbas_utils.messagebus import get_mycroft_bus, listen_for_message
-from jarbas_utils import wait_for_exit_signal
-from jarbas_utils.lang.translate import say_in_language
+from ovos_utils.messagebus import get_mycroft_bus, listen_for_message
+from ovos_utils import wait_for_exit_signal
+from ovos_utils.lang.translate import say_in_language
 
 
 bus_ip = "0.0.0.0"  # enter a remote ip here, remember bus is unencrypted! careful with opening firewalls
@@ -122,7 +122,7 @@ bus.close()
 Providing services over the messagebus
 
 ```python
-from jarbas_utils.messagebus import BusFeedProvider, Message
+from ovos_utils.messagebus import BusFeedProvider, Message
 from datetime import datetime
 
 
@@ -142,7 +142,7 @@ clock_service = ClockService()
 Querying services over the messagebus
 
 ```python
-from jarbas_utils.messagebus import BusFeedConsumer, Message
+from ovos_utils.messagebus import BusFeedConsumer, Message
 
 class Clock(BusFeedConsumer):
     def __init__(self, name="clock_receiver", timeout=3, bus=None):
@@ -160,9 +160,9 @@ If you are making a system enclosure you will likely need to handle system actio
 #### System actions
 
 ```python
-from jarbas_utils.system import system_reboot, system_shutdown, ssh_enable, ssh_disable
-from jarbas_utils.log import LOG
-from jarbas_utils.messagebus import get_mycroft_bus, Message
+from ovos_utils.system import system_reboot, system_shutdown, ssh_enable, ssh_disable
+from ovos_utils.log import LOG
+from ovos_utils.messagebus import get_mycroft_bus, Message
 
 
 class MyEnclosureClass:
@@ -190,7 +190,7 @@ utils are provided to manipulate the user config
 NOTE: this assumes you are running this code on the same machine as mycroft, it manipulates files directly in your system
 
 ```python
-from jarbas_utils.configuration import read_mycroft_config
+from ovos_utils.configuration import read_mycroft_config
 
 config = read_mycroft_config()
 stt = config["stt"]["module"]
@@ -198,8 +198,8 @@ stt = config["stt"]["module"]
 
 individual configs can also be manipulated
 ```python
-from jarbas_utils.configuration import MycroftUserConfig, MycroftSystemConfig, MycroftDefaultConfig
-from jarbas_utils.log import LOG
+from ovos_utils.configuration import MycroftUserConfig, MycroftSystemConfig, MycroftDefaultConfig
+from ovos_utils.log import LOG
 
 config = MycroftUserConfig()
 config["lang"] = "pt"
@@ -221,7 +221,7 @@ except PermissionError:
 
 you can also use the LocalConf class with your own path for other use cases
 ```python
-from jarbas_utils.configuration import LocalConf
+from ovos_utils.configuration import LocalConf
 
 MY_CONFIG = "~/.projectX/projectX.conf"
 
@@ -244,8 +244,8 @@ config.reload() # now changes are gone
 when defining pocketsphinx wake words you often need to know the phonemes
 
 ```python
-from jarbas_utils.configuration import update_mycroft_config
-from jarbas_utils.lang.phonemes import get_phonemes
+from ovos_utils.configuration import update_mycroft_config
+from ovos_utils.lang.phonemes import get_phonemes
 
 
 def create_wakeword(word, sensitivity):
@@ -284,10 +284,10 @@ Here is some sample output from get_phonemes
 Volume control is also a common thing you need to handle
 
 ```python
-from jarbas_utils.sound.alsa import AlsaControl
-#from jarbas_utils.sound.pulse import PulseAudio
-from jarbas_utils.log import LOG
-from jarbas_utils.messagebus import get_mycroft_bus, Message
+from ovos_utils.sound.alsa import AlsaControl
+#from ovos_utils.sound.pulse import PulseAudio
+from ovos_utils.log import LOG
+from ovos_utils.messagebus import get_mycroft_bus, Message
 
 
 class MyPretendEnclosure:
@@ -327,4 +327,4 @@ class MyPretendEnclosure:
 ```
 ## Credits
 
-[@JarbasAl](https://github.com/JarbasAl) - original jarbas_utils repo [here](https://github.com/OpenJarbas/jarbas_utils)
+[@JarbasAl](https://github.com/JarbasAl) - original jarbas_utils repo [here](https://github.com/OpenJarbas/ovos_utils)
