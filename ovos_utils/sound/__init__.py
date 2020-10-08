@@ -1,6 +1,6 @@
 import subprocess
 import time
-from jarbas_utils.log import LOG
+from ovos_utils.log import LOG
 
 
 def play_audio(uri, play_cmd="play %1"):

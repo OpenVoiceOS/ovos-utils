@@ -1,5 +1,5 @@
-from jarbas_utils.log import LOG
-from jarbas_utils.json_helper import merge_dict, load_commented_json
+from ovos_utils.log import LOG
+from ovos_utils.json_helper import merge_dict, load_commented_json
 from os.path import isfile, exists, expanduser, join, dirname, isdir
 from os import makedirs
 import json

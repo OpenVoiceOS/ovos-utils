@@ -1,4 +1,4 @@
-from jarbas_utils.configuration import read_mycroft_config
+from ovos_utils.configuration import read_mycroft_config
 
 
 class BaseIntentEngine:

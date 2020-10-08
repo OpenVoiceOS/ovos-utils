@@ -5,7 +5,7 @@ from os.path import exists, join
 from os import makedirs
 import random
 import string
-from jarbas_utils.log import LOG
+from ovos_utils.log import LOG
 
 try:
     from Crypto.Cipher import AES

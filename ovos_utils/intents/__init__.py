@@ -1,5 +1,5 @@
-from jarbas_utils.log import LOG
-from jarbas_utils.messagebus import get_mycroft_bus, Message
+from ovos_utils.log import LOG
+from ovos_utils.messagebus import get_mycroft_bus, Message
 import time
 from os.path import isfile
 

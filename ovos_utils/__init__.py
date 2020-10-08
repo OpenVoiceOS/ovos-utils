@@ -70,7 +70,7 @@ def resolve_resource_file(res_name, root_path=None):
         str: path to resource or None if no resource found
     """
     # TODO handle cyclic import
-    from jarbas_utils.configuration import read_mycroft_config
+    from ovos_utils.configuration import read_mycroft_config
     config = read_mycroft_config()
 
     # First look for fully qualified file (e.g. a user setting)

@@ -1,4 +1,4 @@
-from jarbas_utils.enclosure import EnclosureAPI
+from ovos_utils.enclosure import EnclosureAPI
 
 
 class Mark1EnclosureAPI(EnclosureAPI):

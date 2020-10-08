@@ -1,7 +1,7 @@
 from mycroft_bus_client import MessageBusClient, Message
-from jarbas_utils.log import LOG
-from jarbas_utils.configuration import read_mycroft_config
-from jarbas_utils import create_loop
+from ovos_utils.log import LOG
+from ovos_utils.configuration import read_mycroft_config
+from ovos_utils import create_loop
 import time
 import json
 

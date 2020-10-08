@@ -1,10 +1,10 @@
 from threading import Event
 from time import time as get_time, sleep
-from jarbas_utils import get_mycroft_root
-from jarbas_utils.intents.engines import BaseIntentEngine
-from jarbas_utils.log import LOG
-from jarbas_utils.configuration import update_mycroft_config, read_mycroft_config
-from jarbas_utils.messagebus import Message
+from ovos_utils import get_mycroft_root
+from ovos_utils.intents.engines import BaseIntentEngine
+from ovos_utils.log import LOG
+from ovos_utils.configuration import update_mycroft_config, read_mycroft_config
+from ovos_utils.messagebus import Message
 
 try:
     from mycroft.skills.fallback_skill import FallbackSkill

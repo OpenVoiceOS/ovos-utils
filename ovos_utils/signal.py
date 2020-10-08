@@ -4,8 +4,8 @@ import time
 import os
 import os.path
 
-from jarbas_utils.configuration import read_mycroft_config
-from jarbas_utils.log import LOG
+from ovos_utils.configuration import read_mycroft_config
+from ovos_utils.log import LOG
 
 
 def get_ipc_directory(domain=None):

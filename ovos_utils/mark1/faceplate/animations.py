@@ -1,5 +1,5 @@
-from jarbas_utils.mark1.faceplate import FacePlateAnimation, BlackScreen
-from jarbas_utils.mark1.faceplate.cellular_automaton import GoL, \
+from ovos_utils.mark1.faceplate import FacePlateAnimation, BlackScreen
+from ovos_utils.mark1.faceplate.cellular_automaton import GoL, \
     LangtonsAnt, SierpinskiTriangle, Rule110, SpaceInvader
 import copy
 import random
@@ -566,7 +566,7 @@ class StraightParticleShooter(FacePlateAnimation):
 
 
 if __name__ == "__main__":
-    from jarbas_utils.messagebus import get_mycroft_bus
+    from ovos_utils.messagebus import get_mycroft_bus
     from time import sleep
 
     bus = get_mycroft_bus("192.168.1.70")

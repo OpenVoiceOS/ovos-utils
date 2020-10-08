@@ -1,6 +1,6 @@
-from jarbas_utils.log import LOG
-from jarbas_utils import get_mycroft_root, get_handler_name
-from jarbas_utils.lang.translate import detect_lang, translate_text
+from ovos_utils.log import LOG
+from ovos_utils import get_mycroft_root, get_handler_name
+from ovos_utils.lang.translate import detect_lang, translate_text
 
 try:
     from mycroft.skills.mycroft_skill import MycroftSkill

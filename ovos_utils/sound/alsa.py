@@ -2,7 +2,7 @@ try:
     import alsaaudio
 except ImportError:
     alsaaudio = None
-from jarbas_utils.log import LOG
+from ovos_utils.log import LOG
 
 
 class AlsaControl:

@@ -1,7 +1,7 @@
 from googletrans import Translator
-from jarbas_utils.sound import play_mp3
-from jarbas_utils.lang.detect import detect_lang
-from jarbas_utils.lang import get_tts
+from ovos_utils.sound import play_mp3
+from ovos_utils.lang.detect import detect_lang
+from ovos_utils.lang import get_tts
 import logging
 
 logging.getLogger("hyper").setLevel("ERROR")

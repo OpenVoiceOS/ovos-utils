@@ -1,6 +1,6 @@
 from colorsys import rgb_to_yiq, rgb_to_hls, yiq_to_rgb, hls_to_rgb, rgb_to_hsv, hsv_to_rgb
 from colour import Color as _Color
-from jarbas_utils import camel_case_split
+from ovos_utils import camel_case_split
 
 
 class UnrecognizedColorName(ValueError):

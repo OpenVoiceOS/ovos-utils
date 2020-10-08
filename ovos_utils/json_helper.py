@@ -1,5 +1,5 @@
 import json
-from jarbas_utils.parse import fuzzy_match
+from ovos_utils.parse import fuzzy_match
 
 
 def merge_dict(base, delta):

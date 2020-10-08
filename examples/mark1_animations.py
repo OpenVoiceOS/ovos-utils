@@ -20,7 +20,7 @@ class MovingSkull(SkullIcon, LeftRight):
 
 
 from time import sleep
-from jarbas_utils.messagebus import get_mycroft_bus
+from ovos_utils.messagebus import get_mycroft_bus
 
 
 bus = get_mycroft_bus("192.168.1.70")

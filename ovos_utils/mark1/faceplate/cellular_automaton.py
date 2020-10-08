@@ -1,4 +1,4 @@
-from jarbas_utils.mark1.faceplate import FacePlateAnimation
+from ovos_utils.mark1.faceplate import FacePlateAnimation
 import copy
 import random
 
@@ -478,7 +478,7 @@ class Rule110(ElementarAutomata):
 
 if __name__ == "__main__":
     from time import sleep
-    from jarbas_utils.messagebus import get_mycroft_bus
+    from ovos_utils.messagebus import get_mycroft_bus
     from time import sleep
 
     bus = get_mycroft_bus("192.168.1.70")

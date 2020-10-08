@@ -1,7 +1,7 @@
-from jarbas_utils.mark1 import Mark1EnclosureAPI
-from jarbas_utils.messagebus import get_mycroft_bus
-from jarbas_utils.colors import Color
-from jarbas_utils import rotate_list
+from ovos_utils.mark1 import Mark1EnclosureAPI
+from ovos_utils.messagebus import get_mycroft_bus
+from ovos_utils.colors import Color
+from ovos_utils import rotate_list
 from time import sleep
 
 
