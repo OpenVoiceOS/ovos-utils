@@ -1,14 +1,14 @@
 from setuptools import setup
 
 setup(
-    name='jarbas_utils',
-    version='0.6.5',
-    packages=['jarbas_utils',
-              'jarbas_utils.sound',
-              'jarbas_utils.mark1',
-              'jarbas_utils.skills',
-              'jarbas_utils.lang'],
-    url='https://github.com/OpenJarbas/jarbas_utils',
+    name='ovos_utils',
+    version='0.0.1',
+    packages=['ovos_utils',
+              'ovos_utils.sound',
+              'ovos_utils.mark1',
+              'ovos_utils.skills',
+              'ovos_utils.lang'],
+    url='https://github.com/OpenVoiceOS/ovos_utils',
     install_requires=["pronouncing",
                       "googletrans",
                       "mycroft-messagebus-client",
