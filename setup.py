@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='ovos_utils',
-    version='0.0.1',
+    version='0.0.2',
     packages=['ovos_utils',
               'ovos_utils.sound',
               'ovos_utils.mark1',
