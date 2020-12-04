@@ -6,3 +6,4 @@ mycroft-messagebus-client
 colour
 inflection
 pexpect
+requests
