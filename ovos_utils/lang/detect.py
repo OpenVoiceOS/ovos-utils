@@ -1,4 +1,8 @@
-from googletrans import Translator
+
+try:
+    from googletrans import Translator
+except ImportError:
+    Translator = None
 
 try:
     import pycld2 as cld2
@@ -97,6 +101,8 @@ def detect_lang_neural(text, return_multiple=False, return_dict=False,
 
 
 def detect_lang_google(text, return_dict=False):
+    if Translator is None:
+        raise ImportError("googletrans not installed")
     translator = Translator()
     tx = translator.detect(text)
     if return_dict:

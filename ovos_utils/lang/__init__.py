@@ -2,7 +2,8 @@ from os.path import expanduser, isdir, dirname
 from os import system, makedirs
 
 
-def get_tts(sentence, lang="en-us", mp3_file="/tmp/chatterbox/tts.mp3"):
+def get_tts(sentence, lang="en-us", mp3_file="/tmp/google_tx_tts.mp3"):
+    # TODO privacy issues - https://github.com/OpenVoiceOS/ovos_utils/issues/2
     ext = "mp3"
     if not mp3_file.endswith(ext):
         mp3_file += "." + ext

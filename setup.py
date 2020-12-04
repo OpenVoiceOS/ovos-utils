@@ -10,7 +10,6 @@ setup(
               'ovos_utils.lang'],
     url='https://github.com/OpenVoiceOS/ovos_utils',
     install_requires=["pronouncing",
-                      "googletrans",
                       "mycroft-messagebus-client",
                       "inflection",
                       "colour", "pexpect"],
