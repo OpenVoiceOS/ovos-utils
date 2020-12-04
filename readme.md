@@ -22,7 +22,7 @@ collection of simple utilities for use across the mycroft ecosystem
 dev version
 
 ```bash
-pip install git+https://github.com/OpenVoiceOS/ovos_utils
+pip install ovos_utils
 ```
 
 ## Usage
