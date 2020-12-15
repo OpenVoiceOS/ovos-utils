@@ -6,13 +6,12 @@ from ovos_utils.log import LOG
 import requests
 
 try:
-    from googletrans import Translator
+    from google_trans_new import google_translator
 except ImportError:
-    Translator = None
+    google_translator = None
 
 import logging
 
-logging.getLogger("hyper").setLevel("ERROR")
 logging.getLogger("hpack").setLevel("ERROR")
 logging.getLogger("chardet").setLevel("ERROR")
 
@@ -50,13 +49,15 @@ def translate_apertium(text, lang="en-us", source_lang=None):
 
 
 def translate_google(text, lang="en-us", source_lang=None):
-    if Translator is None:
-        raise ImportError("googletrans not installed")
-    translator = Translator()
+    if google_translator is None:
+        LOG.debug("run pip install google_trans_new")
+        raise ImportError("google_trans_new not installed")
+    translator = google_translator()
     lang = lang.split("-")[0]
     if source_lang:
         source_lang = source_lang.split("-")[0]
-        tx = translator.translate(text, src=source_lang, dest=lang)
+        tx = translator.translate(text, lang_src=source_lang, lang_tgt=lang)
     else:
-        tx = translator.translate(text,  dest=lang)
-    return tx.text
+        tx = translator.translate(text,  lang_tgt=lang)
+    return tx
+

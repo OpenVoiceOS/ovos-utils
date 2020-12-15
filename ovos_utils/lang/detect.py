@@ -1,8 +1,9 @@
+from ovos_utils.log import LOG
 
 try:
-    from googletrans import Translator
+    from google_trans_new import google_translator
 except ImportError:
-    Translator = None
+    google_translator = None
 
 try:
     import pycld2 as cld2
@@ -33,6 +34,7 @@ def detect_lang_naive(text, return_multiple=False, return_dict=False,
     :return:
     """
     if cld2 is None:
+        LOG.debug("run pip install pycld2")
         raise ImportError("pycld2 not installed")
     isReliable, textBytesFound, details = cld2.detect(text, hintLanguage=hint_language)
     languages = []
@@ -64,6 +66,7 @@ def detect_lang_naive(text, return_multiple=False, return_dict=False,
 def detect_lang_neural(text, return_multiple=False, return_dict=False,
                        hint_language=None, filter_unreliable=False):
     if cld3 is None:
+        LOG.debug("run pip install pycld3")
         raise ImportError("pycld3 not installed")
     languages = []
     if return_multiple or hint_language:
@@ -101,13 +104,14 @@ def detect_lang_neural(text, return_multiple=False, return_dict=False,
 
 
 def detect_lang_google(text, return_dict=False):
-    if Translator is None:
-        raise ImportError("googletrans not installed")
-    translator = Translator()
+    if google_translator is None:
+        LOG.debug("run pip install google_trans_new")
+        raise ImportError("google_trans_new not installed")
+    translator = google_translator()
     tx = translator.detect(text)
     if return_dict:
-        return {"lang_code": tx.lang, "conf": tx.confidence, "lang": code_to_name(tx.lang)}
-    return tx.lang
+        return {"lang_code": tx[0], "lang": tx[1]}
+    return tx[0]
 
 
 def detect_lang(text, return_dict=False):
@@ -117,6 +121,7 @@ def detect_lang(text, return_dict=False):
 
 
 if __name__ == "__main__":
+    assert detect_lang_google("olá eu chamo-me joaquim") == "pt"
     assert detect_lang_naive("olá eu chamo-me joaquim", return_dict=True) == \
            {'lang': 'Portuguese', 'lang_code': 'pt', 'conf': 0.96}
 
