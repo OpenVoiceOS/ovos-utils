@@ -1,6 +1,3 @@
-START_OF_SEQ = "~"
-END_OF_SEQ = "[END]"
-
 import random
 import json
 
@@ -9,6 +6,8 @@ class MarkovChain:
     """
     Simple Markov Chain Class
     """
+    START_OF_SEQ = "~"
+    END_OF_SEQ = "[END]"
 
     def __init__(self, order=1, pad=True, records=None):
         """
@@ -27,7 +26,8 @@ class MarkovChain:
         :return: None
         """
         if self.pad:
-            tokens = [START_OF_SEQ] * self.order + tokens + [END_OF_SEQ]
+            tokens = [self.START_OF_SEQ] * self.order + tokens + [
+                self.END_OF_SEQ]
 
         for i in range(len(tokens) - self.order):
             current_state = tuple(tokens[i:i + self.order])
@@ -73,7 +73,7 @@ class MarkovChain:
             next_token = self.sample(current_state)
             sequence.append(next_token)
 
-            if next_token == END_OF_SEQ:
+            if next_token == self.END_OF_SEQ:
                 return sequence
 
         return sequence

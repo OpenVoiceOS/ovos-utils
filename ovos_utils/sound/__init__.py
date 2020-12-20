@@ -1,6 +1,7 @@
 import subprocess
 import time
 from ovos_utils.log import LOG
+from ovos_utils.signal import check_for_signal
 
 
 def play_audio(uri, play_cmd="play %1"):

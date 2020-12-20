@@ -1,5 +1,4 @@
 import time
-import socket
 from ovos_utils.log import LOG
 from ovos_utils.messagebus import Message, get_mycroft_bus
 

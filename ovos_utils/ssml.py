@@ -1,7 +1,7 @@
 import re
 
 
-class SSMLBuilder(object):
+class SSMLBuilder:
     def __init__(self, ssml_tag=False, speak_tag=True):
         self.text = ""
         self.ssml_tags = ["speak", "ssml", "phoneme", "voice", "audio", "sub",

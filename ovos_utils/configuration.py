@@ -7,6 +7,8 @@ import json
 MYCROFT_SYSTEM_CONFIG = "/etc/mycroft/mycroft.conf"
 MYCROFT_USER_CONFIG = join(expanduser("~"), ".mycroft", "mycroft.conf")
 
+# TODO use json_database
+
 
 class LocalConf(dict):
     """

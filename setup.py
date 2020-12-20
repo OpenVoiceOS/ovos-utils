@@ -2,14 +2,14 @@ from setuptools import setup
 
 setup(
     name='ovos_utils',
-    version='0.0.2',
+    version='0.0.3',
     packages=['ovos_utils',
               'ovos_utils.sound',
               'ovos_utils.mark1',
               'ovos_utils.skills',
               'ovos_utils.lang'],
     url='https://github.com/OpenVoiceOS/ovos_utils',
-    install_requires=["pronouncing",
+    install_requires=["phoneme_guesser",
                       "mycroft-messagebus-client",
                       "inflection",
                       "colour",

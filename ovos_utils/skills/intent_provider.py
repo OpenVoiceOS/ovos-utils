@@ -25,7 +25,7 @@ class IntentEngineSkill(FallbackSkill):
         FallbackSkill.__init__(self)
         self.engine = None
         self.config = {}
-        self.priority = 4
+        self.priority = 1
 
     def initialize(self):
         engine = BaseIntentEngine("dummy")

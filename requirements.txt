@@ -1,7 +1,7 @@
 pycld2 # optional, needed for lang detection
 pycld3 # optional, needed for lang detection
 google_trans_new # optional, used for lang detection / translation
-pronouncing
+phoneme_guesser
 mycroft-messagebus-client
 colour
 inflection
