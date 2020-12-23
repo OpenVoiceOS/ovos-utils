@@ -14,23 +14,21 @@ def merge_dict(base, delta, merge_lists=False, skip_empty=False, no_dupes=True):
             no_dupes: when merging lists deduplicate entries
     """
 
-    for k, dv in delta.items():
-        bv = base.get(k)
-        if isinstance(dv, dict) and isinstance(bv, dict):
-            merge_dict(bv, dv)
+    for k, d in delta.items():
+        b = base.get(k)
+        if isinstance(d, dict) and isinstance(b, dict):
+            merge_dict(b, d)
         else:
-            if skip_empty and not dv:
+            if skip_empty and not d:
                 # dont replace if new entry is empty
                 pass
-            elif merge_lists and \
-                    isinstance(base[k], list) and \
-                    isinstance(dv, list):
-                base[k] += dv
+            elif all((isinstance(b, list), isinstance(d, list), merge_lists)):
+                base[k] += d
                 if no_dupes:
                     # deduplicate
                     base[k] = list(set(base[k]))
             else:
-                base[k] = dv
+                base[k] = d
     return base
 
 
