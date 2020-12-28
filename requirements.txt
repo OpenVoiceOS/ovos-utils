@@ -7,3 +7,4 @@ colour
 inflection
 pexpect
 requests
+json_database

@@ -14,6 +14,7 @@ setup(
                       "inflection",
                       "colour",
                       "pexpect",
+                      "json_database",
                       "requests"],
     license='Apache',
     author='jarbasAI',
