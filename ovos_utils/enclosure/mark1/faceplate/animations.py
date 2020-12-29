@@ -1,6 +1,4 @@
-from ovos_utils.mark1.faceplate import FacePlateAnimation, BlackScreen
-from ovos_utils.mark1.faceplate.cellular_automaton import GoL, \
-    LangtonsAnt, SierpinskiTriangle, Rule110, SpaceInvader
+from ovos_utils.enclosure.mark1.faceplate import FacePlateAnimation, BlackScreen
 import copy
 import random
 

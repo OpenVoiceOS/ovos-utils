@@ -1,4 +1,4 @@
-from ovos_utils.mark1.faceplate.animations import GoL
+from ovos_utils.enclosure.mark1.faceplate.cellular_automaton import GoL
 from ovos_utils.messagebus import get_mycroft_bus
 
 bus = get_mycroft_bus("192.168.1.70")

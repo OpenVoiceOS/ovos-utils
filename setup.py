@@ -2,10 +2,14 @@ from setuptools import setup
 
 setup(
     name='ovos_utils',
-    version='0.0.3',
+    version='0.0.4',
     packages=['ovos_utils',
               'ovos_utils.sound',
-              'ovos_utils.mark1',
+              'ovos_utils.misc',
+              "ovos_utils.enclosure",
+              'ovos_utils.enclosure.mark1',
+              'ovos_utils.enclosure.mark1.eyes',
+              'ovos_utils.enclosure.mark1.faceplate',
               'ovos_utils.skills',
               'ovos_utils.lang'],
     url='https://github.com/OpenVoiceOS/ovos_utils',

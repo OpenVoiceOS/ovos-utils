@@ -1,4 +1,4 @@
-from ovos_utils.mark1 import Mark1EnclosureAPI
+from ovos_utils.enclosure.mark1 import Mark1EnclosureAPI
 from ovos_utils.messagebus import get_mycroft_bus
 from ovos_utils.colors import Color
 from ovos_utils import rotate_list

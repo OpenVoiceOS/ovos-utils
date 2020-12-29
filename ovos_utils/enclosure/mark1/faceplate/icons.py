@@ -1,4 +1,4 @@
-from ovos_utils.mark1.faceplate import FaceplateGrid, BlackScreen
+from ovos_utils.enclosure.mark1.faceplate import FaceplateGrid, BlackScreen
 
 
 # drawing in python

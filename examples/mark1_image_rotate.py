@@ -1,4 +1,4 @@
-from ovos_utils.mark1.faceplate.icons import Boat, MusicIcon, StormIcon, \
+from ovos_utils.enclosure.mark1.faceplate.icons import Boat, MusicIcon, StormIcon, \
     SnowIcon, SunnyIcon, PartlyCloudyIcon, PlusIcon, SkullIcon, CrossIcon, \
     HollowHeartIcon, HeartIcon, DeadFishIcon, InfoIcon, \
     ArrowLeftIcon, JarbasAI, WarningIcon
@@ -24,7 +24,7 @@ images = [Boat(bus=bus),
           InfoIcon(bus=bus),
           DeadFishIcon(bus=bus)]
 
-from ovos_utils.mark1.faceplate.icons import SpaceInvader1, \
+from ovos_utils.enclosure.mark1.faceplate.icons import SpaceInvader1, \
     SpaceInvader2, SpaceInvader3, SpaceInvader4
 images = [SpaceInvader1(bus=bus),
           SpaceInvader2(bus=bus),

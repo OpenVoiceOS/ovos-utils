@@ -1,6 +1,7 @@
-from ovos_utils.mark1.faceplate.icons import HollowHeartIcon, HeartIcon, \
-    SkullIcon, Boat
-from ovos_utils.mark1.faceplate.animations import LeftRight, HorizontalScroll
+from ovos_utils.enclosure.mark1.faceplate.icons import HollowHeartIcon, \
+    HeartIcon, SkullIcon, Boat
+from ovos_utils.enclosure.mark1.faceplate.animations import LeftRight, \
+    HorizontalScroll
 
 
 class SailingBoat(Boat, HorizontalScroll):

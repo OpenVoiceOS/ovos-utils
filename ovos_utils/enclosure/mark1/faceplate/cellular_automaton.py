@@ -1,4 +1,4 @@
-from ovos_utils.mark1.faceplate import FacePlateAnimation
+from ovos_utils.enclosure.mark1.faceplate import FacePlateAnimation
 import copy
 import random
 

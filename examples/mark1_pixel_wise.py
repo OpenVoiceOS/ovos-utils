@@ -1,4 +1,4 @@
-from ovos_utils.mark1.icons import FaceplateGrid
+from ovos_utils.enclosure.mark1.faceplate.icons import FaceplateGrid
 from ovos_utils.messagebus import get_mycroft_bus
 from time import sleep
 

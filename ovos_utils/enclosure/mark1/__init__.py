@@ -1,4 +1,4 @@
-from ovos_utils.enclosure import EnclosureAPI
+from ovos_utils.enclosure.api import EnclosureAPI
 
 
 class Mark1EnclosureAPI(EnclosureAPI):

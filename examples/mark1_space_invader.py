@@ -1,4 +1,5 @@
-from ovos_utils.mark1.animations import SpaceInvader
+from ovos_utils.enclosure.mark1.faceplate.cellular_automaton import \
+    SpaceInvader
 from ovos_utils.messagebus import get_mycroft_bus
 from time import sleep
 
