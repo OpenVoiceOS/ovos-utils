@@ -59,5 +59,5 @@ def translate_google(text, lang="en-us", source_lang=None):
         tx = translator.translate(text, lang_src=source_lang, lang_tgt=lang)
     else:
         tx = translator.translate(text,  lang_tgt=lang)
-    return tx
+    return tx.strip()
 

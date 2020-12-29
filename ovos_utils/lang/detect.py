@@ -17,6 +17,11 @@ except ImportError:
 
 
 def code_to_name(lang_code):
+    lang_code = lang_code.lower()
+    for name, code in cld2.LANGUAGES:
+        if code == lang_code:
+            return name.lower().capitalize()
+    lang_code = lang_code.split("-")[0]
     for name, code in cld2.LANGUAGES:
         if code == lang_code:
             return name.lower().capitalize()
