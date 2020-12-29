@@ -1,23 +1,11 @@
 from threading import Event
 from time import time as get_time, sleep
-from ovos_utils import get_mycroft_root
-from ovos_utils.intents.engines import BaseIntentEngine
 from ovos_utils.log import LOG
-from ovos_utils.configuration import update_mycroft_config, read_mycroft_config
+from ovos_utils.configuration import update_mycroft_config
 from ovos_utils.messagebus import Message
+from ovos_utils.waiting_for_mycroft.base_skill import FallbackSkill
 
-try:
-    from mycroft.skills.fallback_skill import FallbackSkill
-except ImportError:
-    import sys
-
-    MYCROFT_ROOT_PATH = get_mycroft_root()
-    if MYCROFT_ROOT_PATH is not None:
-        sys.path.append(MYCROFT_ROOT_PATH)
-        from mycroft.skills.fallback_skill import FallbackSkill
-    else:
-        LOG.error("Could not find mycroft root path")
-        raise ImportError
+from ovos_utils.configuration import read_mycroft_config
 
 
 class BaseIntentEngine:

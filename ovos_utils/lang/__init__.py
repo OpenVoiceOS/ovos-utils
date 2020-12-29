@@ -1,5 +1,5 @@
-from os.path import expanduser, isdir, dirname
-from os import system, makedirs
+from os.path import expanduser, isdir, dirname, join
+from os import system, makedirs, listdir
 
 
 def get_tts(sentence, lang="en-us", mp3_file="/tmp/google_tx_tts.mp3"):
@@ -15,3 +15,28 @@ def get_tts(sentence, lang="en-us", mp3_file="/tmp/google_tx_tts.mp3"):
                    lang + '&q=' + sentence + '&client=tw-ob' + '"'
     system(get_sentence)
     return mp3_file
+
+
+def get_language_dir(base_path, lang="en-us"):
+    """ checks for all language variations and returns best path """
+    lang_path = join(base_path, lang)
+    # base_path/en-us
+    if isdir(lang_path):
+        return lang_path
+    if "-" in lang:
+        main = lang.split("-")[0]
+        # base_path/en
+        general_lang_path = join(base_path, main)
+        if isdir(general_lang_path):
+            return general_lang_path
+    else:
+        main = lang
+    # base_path/en-uk, base_path/en-au...
+    if isdir(base_path):
+        candidates = [join(base_path, f)
+                      for f in listdir(base_path) if f.startswith(main)]
+        paths = [p for p in candidates if isdir(p)]
+        # TODO how to choose best local dialect?
+        if len(paths):
+            return paths[0]
+    return join(base_path, lang)

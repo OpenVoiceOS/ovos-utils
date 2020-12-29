@@ -19,7 +19,7 @@ from threading import Thread
 from time import sleep
 import requests
 import os
-from os.path import  isdir, join
+from os.path import  isdir, join, dirname
 import re
 import socket
 from inflection import camelize, titleize, transliterate, parameterize, ordinalize
@@ -41,6 +41,22 @@ def get_ip():
 
 def get_external_ip():
     return requests.get('https://api.ipify.org').text
+
+
+def resolve_ovos_resource_file(res_name):
+    """Convert a resource into an absolute filename.
+    used internally for ovos resources
+    """
+    # First look for fully qualified file (e.g. a user setting)
+    if os.path.isfile(res_name):
+        return res_name
+
+    # now look in bundled ovos resources
+    filename = join(dirname(__file__), "res", res_name)
+    if os.path.isfile(filename):
+        return filename
+
+    return None  # Resource cannot be resolved
 
 
 def get_mycroft_root():
@@ -97,6 +113,11 @@ def resolve_resource_file(res_name, root_path=None):
     filename = os.path.expanduser(os.path.join(data_dir, res_name))
     if os.path.isfile(filename):
         return filename
+
+    # look in ovos_utils package itself
+    found = resolve_ovos_resource_file(res_name)
+    if found:
+        return found
 
     # Finally look for it in the source package
     paths = [
