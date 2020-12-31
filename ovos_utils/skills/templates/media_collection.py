@@ -2,9 +2,7 @@ from ovos_utils.waiting_for_mycroft.common_play import CommonPlaySkill, \
     CPSMatchLevel, CPSTrackStatus, CPSMatchType
 from os.path import join, dirname, basename
 import random
-import re
-import datetime
-from ovos_utils import get_mycroft_root
+from ovos_utils import get_mycroft_root, datestr2ts
 from ovos_utils.log import LOG
 from ovos_utils.parse import fuzzy_match
 from json_database import JsonStorageXDG
@@ -25,15 +23,7 @@ try:
     from pyvod import Collection, Media
 except ImportError:
     LOG.error("py_VOD not installed!")
-    LOG.debug("py_VOD>=0.3.1")
-
-
-def datestr2ts(datestr):
-    y = int(datestr[:4])
-    m = int(datestr[4:6])
-    d = int(datestr[-2:])
-    dt = datetime.datetime(y, m, d)
-    return dt.timestamp()
+    LOG.debug("py_VOD>=0.4.0")
 
 
 class MediaCollectionSkill(CommonPlaySkill):
@@ -126,8 +116,14 @@ class MediaCollectionSkill(CommonPlaySkill):
         videos = [v for v in videos if not v.get("is_live")]
 
         # filter by duration
-        videos = [v for v in videos if int(v.get("duration", 0)) >=
-                  self.settings["min_duration"]]
+        if self.settings["min_duration"] > 0 or \
+                self.settings["max_duration"] > 0:
+            videos = [v for v in videos if
+                      v.get("duration")]  # might be missing
+
+        if self.settings["min_duration"] > 0:
+            videos = [v for v in videos if int(v.get("duration", 0)) >=
+                      self.settings["min_duration"]]
         if self.settings["max_duration"] > 0:
             videos = [v for v in videos if int(v.get("duration", 0)) <=
                       self.settings["max_duration"]]
@@ -237,22 +233,6 @@ class MediaCollectionSkill(CommonPlaySkill):
                 best_score = score
                 leftover_text = phrase.replace(title, "")
         return match, best_score, best_video, leftover_text
-
-    def remove_voc(self, utt, voc_filename, lang=None):
-        lang = lang or self.lang
-        cache_key = lang + voc_filename
-
-        if cache_key not in self.voc_match_cache:
-            # trigger caching
-            self.voc_match(utt, voc_filename, lang)
-
-        if utt:
-            # Check for matches against complete words
-            for i in self.voc_match_cache[cache_key]:
-                # Substitute only whole words matching the token
-                utt = re.sub(r'\b' + i + r"\b", "", utt)
-
-        return utt
 
     def normalize_title(self, title):
         title = title.lower().strip()

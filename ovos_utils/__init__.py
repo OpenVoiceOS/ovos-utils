@@ -22,6 +22,7 @@ import os
 from os.path import  isdir, join, dirname
 import re
 import socket
+import datetime
 from inflection import camelize, titleize, transliterate, parameterize, ordinalize
 
 
@@ -195,3 +196,10 @@ def camel_case_split(identifier: str) -> str:
 def rotate_list(l, n=1):
     return l[n:] + l[:n]
 
+
+def datestr2ts(datestr):
+    y = int(datestr[:4])
+    m = int(datestr[4:6])
+    d = int(datestr[-2:])
+    dt = datetime.datetime(y, m, d)
+    return dt.timestamp()

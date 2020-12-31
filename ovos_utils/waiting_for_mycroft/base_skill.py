@@ -275,6 +275,23 @@ class MycroftSkill(_MycroftSkill):
         else:
             return False
 
+    # PR not yet made
+    def remove_voc(self, utt, voc_filename, lang=None):
+        """ removes any entry in .voc file from the utterance """
+        lang = lang or self.lang
+        cache_key = lang + voc_filename
+
+        if cache_key not in self.voc_match_cache:
+            self.voc_match(utt, voc_filename, lang)
+
+        if utt:
+            # Check for matches against complete words
+            for i in self.voc_match_cache[cache_key]:
+                # Substitute only whole words matching the token
+                utt = re.sub(r'\b' + i + r"\b", "", utt)
+
+        return utt
+
 
 class FallbackSkill(MycroftSkill, _FallbackSkill):
     """ """
