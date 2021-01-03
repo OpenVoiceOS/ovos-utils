@@ -151,7 +151,8 @@ class MycroftDefaultConfig(ReadOnlyConfig):
                     "configuration", "mycroft.conf")
         super().__init__(path)
         if not self.path or not isfile(self.path):
-            LOG.warning("mycroft root path not found")
+            LOG.error("mycroft root path not found, could not load default "
+                      ".conf")
 
     def set_root_config_path(self, root_config):
         # in case we got it wrong / non standard

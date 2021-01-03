@@ -1,4 +1,5 @@
 from ovos_utils.system import MycroftRootLocations
+from ovos_utils.log import LOG
 from enum import Enum
 from os.path import exists
 
@@ -27,7 +28,8 @@ def enclosure2rootdir(enclosure=None):
         return MycroftRootLocations.OVOS
     elif enclosure == MycroftEnclosures.BIGSCREEN:
         return MycroftRootLocations.BIGSCREEN
-    raise EnvironmentError
+    LOG.warning("Assuming mycroft-core location is ~/mycroft-core")
+    return MycroftRootLocations.HOME
 
 
 def detect_enclosure():
