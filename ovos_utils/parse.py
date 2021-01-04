@@ -56,13 +56,8 @@ def fuzzy_match(x, against, strategy=MatchStrategy.SIMPLE_RATIO):
         score = rapidfuzz.fuzz.quick_lev_ratio(x, against) / 100
     else:
         score = SequenceMatcher(None, x, against).ratio()
-    # very simple heuristic to penalize scores based on string length
-    # eg, for phonemes, cat compared to fat / crap, would otherwise have
-    # same score
-    penalty = 0
-    if len(x) != len(against):
-        penalty = 0.1 * (1 / ((len(x) / len(against)) * len(x)))
-    return score - penalty
+
+    return score
 
 
 def match_one(query, choices, match_func=None, strategy=MatchStrategy.SIMPLE_RATIO):
