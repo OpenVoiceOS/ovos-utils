@@ -1,7 +1,8 @@
 from ovos_utils.log import LOG
-from ovos_utils.enclosure import enclosure2rootdir, detect_enclosure
+from ovos_utils.enclosure import detect_enclosure
 from ovos_utils.enclosure import MycroftEnclosures
 from ovos_utils.json_helper import merge_dict, load_commented_json
+from ovos_utils.system import search_mycroft_core_location
 from os.path import isfile, exists, expanduser, join, dirname, isdir
 from os import makedirs
 import json
@@ -147,7 +148,10 @@ class MycroftUserConfig(LocalConf):
 
 class MycroftDefaultConfig(ReadOnlyConfig):
     def __init__(self):
-        path = join(enclosure2rootdir(), "mycroft",
+        mycroft_root = search_mycroft_core_location()
+        if not mycroft_root:
+            raise FileNotFoundError("Couldn't find mycroft core root folder.")
+        path = join(mycroft_root, "mycroft",
                     "configuration", "mycroft.conf")
         super().__init__(path)
         if not self.path or not isfile(self.path):

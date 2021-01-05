@@ -4,10 +4,12 @@ import os
 import subprocess
 import re
 import shutil
+import sys
+import sysconfig
 from enum import Enum
 import platform
 import socket
-from os.path import expanduser
+from os.path import expanduser, exists, join
 
 
 class MycroftRootLocations(str, Enum):
@@ -20,10 +22,36 @@ class MycroftRootLocations(str, Enum):
     HOME = expanduser("~/mycroft-core")
 
 
+def find_root_from_sys_path():
+    """Find mycroft root folder from sys.path, eg. venv site-packages."""
+    for p in [path for path in sys.path if path != '']:
+        if exists(join(p, 'mycroft', 'configuration', 'mycroft.conf')):
+            return p
+    else:
+        return None
+
+
+def find_root_from_sitepackages():
+    """Find root from system or venv's sitepackages."""
+    site = sysconfig.get_paths()['platlib']
+    if exists(join(site, 'mycroft', 'configuration', 'mycroft.conf')):
+        return site
+    else:
+        return None
+
+
+
 def search_mycroft_core_location():
+    """Check known mycroft locations followed by python system locations."""
     for p in MycroftRootLocations:
         if os.path.isdir(p):
             return p
+
+    if find_root_from_sys_path():
+        return find_root_from_sys_path()
+    elif find_root_from_sitepackages():
+        return find_root_from_sitepackages()
+
     return None
 
 
