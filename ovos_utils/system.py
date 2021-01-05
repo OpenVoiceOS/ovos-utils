@@ -15,11 +15,11 @@ from os.path import expanduser, exists, join
 class MycroftRootLocations(str, Enum):
     PICROFT = "/home/pi/mycroft-core"
     BIGSCREEN = "/home/mycroft/mycroft-core"
-    OVOS = "/home/mycroft/mycroft-core"  # TODO ovos here
-    OLD_MARK1 = "/opt/venvs/mycroft-core/lib/python3.4/site-packages/"
-    MARK1 = "/opt/venvs/mycroft-core/lib/python3.7/site-packages/"
+    OVOS = "/usr/lib/python3.9/site-packages"
+    OLD_MARK1 = "/opt/venvs/mycroft-core/lib/python3.4/site-packages"
+    MARK1 = "/opt/venvs/mycroft-core/lib/python3.7/site-packages"
     MARK2 = "/home/mycroft/mycroft-core"  # TODO mark2 here
-    HOME = expanduser("~/mycroft-core")
+    HOME = expanduser("~/mycroft-core")  # git clones
 
 
 def find_root_from_sys_path():
@@ -38,7 +38,6 @@ def find_root_from_sitepackages():
         return site
     else:
         return None
-
 
 
 def search_mycroft_core_location():
@@ -68,13 +67,16 @@ def get_desktop_environment():
         desktop_session = os.environ.get("DESKTOP_SESSION")
         if desktop_session is not None:  # easier to match if we doesn't have  to deal with character cases
             desktop_session = desktop_session.lower()
-            if desktop_session in ["gnome", "unity", "cinnamon", "mate", "xfce4", "lxde", "fluxbox",
-                                   "blackbox", "openbox", "icewm", "jwm", "afterstep", "trinity", "kde"]:
+            if desktop_session in ["gnome", "unity", "cinnamon", "mate",
+                                   "xfce4", "lxde", "fluxbox",
+                                   "blackbox", "openbox", "icewm", "jwm",
+                                   "afterstep", "trinity", "kde"]:
                 return desktop_session
             # Special cases
             # Canonical sets $DESKTOP_SESSION to Lubuntu rather than LXDE if using LXDE.
             # There is no guarantee that they will not do the same with the other desktop environments.
-            elif "xfce" in desktop_session or desktop_session.startswith("xubuntu"):
+            elif "xfce" in desktop_session or desktop_session.startswith(
+                    "xubuntu"):
                 return "xfce4"
             elif desktop_session.startswith("ubuntu"):
                 return "unity"
@@ -187,4 +189,3 @@ def ssh_disable():
     # Permanently block SSH access from the outside
     subprocess.call('sudo systemctl stop ssh.service', shell=True)
     subprocess.call('sudo systemctl disable ssh.service', shell=True)
-
