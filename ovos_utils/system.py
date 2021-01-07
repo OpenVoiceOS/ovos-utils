@@ -18,7 +18,7 @@ class MycroftRootLocations(str, Enum):
     OVOS = "/usr/lib/python3.9/site-packages"
     OLD_MARK1 = "/opt/venvs/mycroft-core/lib/python3.4/site-packages"
     MARK1 = "/opt/venvs/mycroft-core/lib/python3.7/site-packages"
-    MARK2 = "/home/mycroft/mycroft-core"  # TODO mark2 here
+    MARK2 = "/opt/mycroft"
     HOME = expanduser("~/mycroft-core")  # git clones
 
 

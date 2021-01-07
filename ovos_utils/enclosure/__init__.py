@@ -29,8 +29,7 @@ def enclosure2rootdir(enclosure=None):
     elif enclosure == MycroftEnclosures.BIGSCREEN:
         return MycroftRootLocations.BIGSCREEN
 
-    LOG.warning("Assuming mycroft-core location is ~/mycroft-core")
-    return MycroftRootLocations.HOME
+    return None
 
 
 def detect_enclosure():
