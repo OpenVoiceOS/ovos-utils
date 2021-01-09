@@ -1,5 +1,15 @@
 from ovos_utils.configuration import read_mycroft_config, update_mycroft_config
+from ovos_utils.messagebus import wait_for_reply
 from os.path import join
+
+
+def skills_loaded(bus=None):
+    reply = wait_for_reply('mycroft.skills.all_loaded',
+                           'mycroft.skills.all_loaded.response',
+                           bus=bus)
+    if reply:
+        return reply.data['status']
+    return False
 
 
 def blacklist_skill(skill):
