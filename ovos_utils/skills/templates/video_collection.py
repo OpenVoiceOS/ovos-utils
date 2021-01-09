@@ -2,7 +2,7 @@ from ovos_utils.waiting_for_mycroft.common_play import CommonPlaySkill, \
     CPSMatchLevel, CPSTrackStatus, CPSMatchType
 from os.path import join, dirname, basename
 import random
-from ovos_utils import get_mycroft_root, datestr2ts
+from ovos_utils import get_mycroft_root, datestr2ts, resolve_ovos_resource_file
 from ovos_utils.log import LOG
 from ovos_utils.parse import fuzzy_match
 from json_database import JsonStorageXDG
@@ -20,13 +20,14 @@ except ImportError:
         raise ImportError
 
 try:
-    from pyvod import Collection, Media
+    import pyvod
 except ImportError:
     LOG.error("py_VOD not installed!")
     LOG.debug("py_VOD>=0.4.0")
+    pyvod = None
 
 
-class MediaCollectionSkill(CommonPlaySkill):
+class VideoCollectionSkill(CommonPlaySkill):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -42,14 +43,19 @@ class MediaCollectionSkill(CommonPlaySkill):
             self.settings["filter_live"] = False
         if "filter_date" not in self.settings:
             self.settings["filter_date"] = False
-        default_logo = "https://github.com/OpenVoiceOS/ovos_assets/raw" \
-                       "/master/Logo/ovos-logo-mono-256.png"
-        self.supported_media = [CPSMatchType.GENERIC, CPSMatchType.VIDEO]
+
+        if pyvod is None:
+            LOG.error("py_VOD not installed!")
+            LOG.info("pip install py_VOD>=0.4.0")
+            raise ImportError
+        self.default_bg = "https://github.com/OpenVoiceOS/ovos_assets/raw/master/Logo/ovos-logo-512.png"
+        self.default_image = resolve_ovos_resource_file("ui/images/moviesandfilms.png")
         db_path = join(dirname(__file__), "res", self.name + ".jsondb")
         self.message_namespace = basename(dirname(__file__)) + ".ovos_utils"
-        self.media_collection = Collection(self.name,
-                                           logo=default_logo,
+        self.media_collection = pyvod.Collection(self.name,
+                                           logo=self.default_image,
                                            db_path=db_path)
+
 
     def initialize(self):
         self.initialize_media_commons()
@@ -302,7 +308,7 @@ class MediaCollectionSkill(CommonPlaySkill):
         score = base_score + best_score
         score = self.calc_final_score(phrase, score, match)
         if isinstance(score, float):
-            if score >= 0.85:
+            if score >= 0.9:
                 match = CPSMatchLevel.EXACT
             elif score >= 0.7:
                 match = CPSMatchLevel.MULTI_KEY
@@ -311,7 +317,7 @@ class MediaCollectionSkill(CommonPlaySkill):
         else:
             score, match = score
 
-        self.log.debug("Best video: " + best_video["title"])
+        self.log.info("Best video: " + best_video["title"])
 
         if match is not None:
             return (leftover_text, match, best_video)
@@ -327,31 +333,24 @@ class MediaCollectionSkill(CommonPlaySkill):
     def CPS_start(self, phrase, data):
         self.play_video(data)
 
-    def play_video(self, video_data):
-        # TODO audio only
-        # if self.gui.connected:
-        #    ...
-        # else:
-        #    self.audioservice.play(video_data["url"])
-        # add to playback history
+    def play_video(self, data):
+        self.add_to_history(data)
+        bg = data.get("background") or self.default_bg
+        image = data.get("image") or self.default_image
 
-        self.add_to_history(video_data)
-        # play video
-        try:
-            # uses youtube-dl to extract all sorts of streams
-            video = Media.from_json(video_data)
-            url = str(video.streams[0])
-            self.gui.play_video(url, video.name)
-        except Exception as e:
-            # TODO improve this exception, check for file extensions and
-            #  skip youtube-dl
-            if len(video_data.get("streams", [])):
-                url = video_data["streams"][0]
-            else:
-                url = video_data.get("stream") or video_data.get("url")
-            self.gui.play_video(url, video_data.get("title") or
-                                video_data.get("name"))
+        if len(data.get("streams", [])):
+            url = data["streams"][0]
+        else:
+            url = data.get("stream") or data.get("url")
 
+        title = data.get("name") or self.name
+        self.CPS_send_status(uri=url,
+                             image=image,
+                             background_image=bg,
+                             playlist_position=0,
+                             status=CPSTrackStatus.PLAYING_GUI)
+        self.gui.play_video(pyvod.utils.get_video_stream(url), title)
 
-def create_skill():
-    return MediaCollectionSkill()
+    def stop(self):
+        self.gui.release()
+
