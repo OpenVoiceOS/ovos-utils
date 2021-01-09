@@ -4,7 +4,7 @@ import time
 import os
 import os.path
 
-from ovos_utils.configuration import read_mycroft_config
+
 from ovos_utils.log import LOG
 
 
@@ -21,6 +21,7 @@ def get_ipc_directory(domain=None):
     Returns:
         str: a path to the IPC directory
     """
+    from ovos_utils.configuration import read_mycroft_config
     config = read_mycroft_config()
     path = config.get("ipc_path")
     if not path:
