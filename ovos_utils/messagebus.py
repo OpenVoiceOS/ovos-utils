@@ -6,6 +6,105 @@ import time
 import json
 
 
+class FakeBus:
+    def __init__(self, *args, **kwargs):
+        self.events = {}
+        self.once_events = {}
+        self.received_msgs = []
+
+    def on(self, msg_type, handler):
+        if msg_type not in self.events:
+            self.events[msg_type] = []
+        self.events[msg_type].append(handler)
+
+    def once(self, msg_type, handler):
+        if msg_type not in self.once_events:
+            self.once_events[msg_type] = []
+        self.once_events[msg_type].append(handler)
+
+    def emit(self, message):
+        self.received_msgs.append(message)
+        if message.msg_type in self.events:
+            for handler in self.events[message.msg_type]:
+                handler(message)
+        if message.msg_type in self.once_events:
+            for handler in self.once_events[message.msg_type]:
+                handler(message)
+            self.once_events.pop(message.msg_type)
+
+    def wait_for_message(self, message_type, timeout=3.0):
+        """Wait for a message of a specific type.
+
+        Arguments:
+            message_type (str): the message type of the expected message
+            timeout: seconds to wait before timeout, defaults to 3
+
+        Returns:
+            The received message or None if the response timed out
+        """
+        start = time.monotonic()
+        while time.monotonic() - start <= timeout:
+            time.sleep(0.1)
+            for m in self.received_msgs:
+                if m.msg_type == message_type:
+                    return m
+        return None
+
+    def wait_for_response(self, message, reply_type=None, timeout=3.0):
+        """Send a message and wait for a response.
+
+        Arguments:
+            message (Message): message to send
+            reply_type (str): the message type of the expected reply.
+                              Defaults to "<message.msg_type>.response".
+            timeout: seconds to wait before timeout, defaults to 3
+
+        Returns:
+            The received message or None if the response timed out
+        """
+        start = time.monotonic()
+        reply_type = reply_type or message.msg_type + ".response"
+        self.emit(message)
+        while time.monotonic() - start <= timeout:
+            time.sleep(0.1)
+            for m in self.received_msgs:
+                if m.msg_type == reply_type:
+                    return m
+        return None
+
+    def remove(self, msg_type, handler):
+        if msg_type in self.events:
+            if handler in self.events[msg_type]:
+                self.events[msg_type].remove(handler)
+        if msg_type in self.once_events:
+            if handler in self.once_events[msg_type]:
+                self.once_events[msg_type].remove(handler)
+
+    def remove_all_listeners(self, event_name):
+        if event_name in self.events:
+            self.events.pop(event_name)
+        if event_name in self.once_events:
+            self.once_events.pop(event_name)
+
+    def create_client(self):
+        return self
+
+    def on_error(self, error):
+        pass
+
+    def on_open(self):
+        pass
+
+    def on_close(self):
+        pass
+
+    def run_forever(self):
+        pass
+
+    def close(self):
+        pass
+
+
 def get_websocket(host, port, route='/', ssl=False, threaded=True):
     """
     Returns a connection to a websocket
