@@ -41,16 +41,19 @@ def find_root_from_sitepackages():
 
 
 def search_mycroft_core_location():
-    """Check known mycroft locations followed by python system locations."""
+    """Check python path (.venv), system packages and finally known mycroft
+    locations."""
+    # if we are in a .venv that should take precedence over everything else
+    if find_root_from_sitepackages():
+        return find_root_from_sitepackages()
+    # if there is a system wide install that should take precedence over
+    # hardcoded locations
+    elif find_root_from_sys_path():
+        return find_root_from_sys_path()
+    # finally look at default locations
     for p in MycroftRootLocations:
         if os.path.isdir(p):
             return p
-
-    if find_root_from_sys_path():
-        return find_root_from_sys_path()
-    elif find_root_from_sitepackages():
-        return find_root_from_sitepackages()
-
     return None
 
 
