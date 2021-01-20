@@ -22,6 +22,7 @@ setup(
                       "colour",
                       "pexpect",
                       "PyYAML",
+                      "kthread",
                       "json_database",
                       "requests"],
     include_package_data=True,

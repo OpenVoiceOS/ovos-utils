@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-#
-# Copyright 2017 Mycroft AI Inc.
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,16 +10,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 from threading import Thread
 from time import sleep
 import requests
 import os
-from os.path import  isdir, join, dirname
+from os.path import isdir, join, dirname
 import re
 import socket
 import datetime
-from inflection import camelize, titleize, transliterate, parameterize, ordinalize
+import kthread
+from inflection import camelize, titleize, transliterate, parameterize, \
+    ordinalize
+
+
+def ensure_mycroft_import():
+    try:
+        import mycroft
+    except ImportError:
+        import sys
+        from ovos_utils import get_mycroft_root
+        MYCROFT_ROOT_PATH = get_mycroft_root()
+        if MYCROFT_ROOT_PATH is not None:
+            sys.path.append(MYCROFT_ROOT_PATH)
+        else:
+            raise
 
 
 def get_ip():
@@ -137,11 +147,21 @@ def resolve_resource_file(res_name, root_path=None):
     return None  # Resource cannot be resolved
 
 
-def create_daemon(target, args=(), kwargs=None):
+def create_killable_daemon(target, args=(), kwargs=None, autostart=True):
+    """Helper to quickly create and start a thread with daemon = True"""
+    t = kthread.KThread(target=target, args=args, kwargs=kwargs)
+    t.daemon = True
+    if autostart:
+        t.start()
+    return t
+
+
+def create_daemon(target, args=(), kwargs=None, autostart=True):
     """Helper to quickly create and start a thread with daemon = True"""
     t = Thread(target=target, args=args, kwargs=kwargs)
     t.daemon = True
-    t.start()
+    if autostart:
+        t.start()
     return t
 
 
