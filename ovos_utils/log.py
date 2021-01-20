@@ -55,7 +55,7 @@ class LOG:
         logger = logging.getLogger(name)
         logger.propagate = False
         # also log to stdout
-        if tostdout:
+        if tostdout or cls.base_path == "stdout":
             stdout_handler = logging.StreamHandler(sys.stdout)
             stdout_handler.setFormatter(cls.formatter)
             logger.addHandler(stdout_handler)
