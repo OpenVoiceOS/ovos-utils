@@ -26,8 +26,9 @@ def merge_dict(base, delta, merge_lists=False, skip_empty=False,
         else:
             if new_only and k in base:
                 continue
-            if skip_empty and not d and d is not False:
+            if skip_empty and d in [None, "", []]:
                 # dont replace if new entry is empty
+                # False and 0 should still be replaced
                 pass
             elif all((isinstance(b, list), isinstance(d, list), merge_lists)):
                 if no_dupes:
