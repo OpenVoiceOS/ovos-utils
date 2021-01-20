@@ -9,9 +9,14 @@ import string
 from ovos_utils.log import LOG
 
 try:
-    from Crypto.Cipher import AES
+    # pycryptodomex
+    from Cryptodome.Cipher import AES
 except ImportError:
-    AES = None
+    # pycrypto + pycryptodome
+    try:
+        from Crypto.Cipher import AES
+    except:
+        AES = None
 try:
     from OpenSSL import crypto
 except ImportError:
