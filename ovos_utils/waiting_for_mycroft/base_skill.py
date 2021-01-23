@@ -91,7 +91,8 @@ def killable_event(msg="mycroft.skills.abort_execution", exc=AbortEvent,
                 # this is the only killable daemon that core itself will
                 # create, users should also account for this condition with
                 # callbacks if using the decorator for other purposes
-                skill._response = None
+                skill._handle_killed_wait_response()
+
                 try:
                     while t.is_alive():
                         t.raise_exc(exc)
@@ -127,6 +128,7 @@ class MycroftSkill(_MycroftSkill):
         self.public_api = {}  # pull/1822
         self.gui = SkillGUI(self)  # pull/2683
         self._threads = []
+        self._original_converse = self.converse
 
     # TODO PR for core - stops skill executing gracefully
     # this method can probably use a better refactor, we are only changing one
@@ -195,11 +197,9 @@ class MycroftSkill(_MycroftSkill):
 
         """
         self._response = False
-        default_converse = self.converse  # backup original method
         self._real_wait_response(is_cancel, validator, on_fail, num_retries)
         while self._response is False:
             time.sleep(0.1)
-        self.converse = default_converse  # restore original method
         return self._response
 
     def __get_response(self):
@@ -217,7 +217,7 @@ class MycroftSkill(_MycroftSkill):
         self.make_active()
         converse.finished = False
         converse.response = None
-        self.converse = converse  # restored after returning from method
+        self.converse = converse
 
         # 10 for listener, 5 for SST, then timeout
         # NOTE a threading event is not used otherwise we can't raise the
@@ -231,10 +231,12 @@ class MycroftSkill(_MycroftSkill):
                     self.log.debug("get_response aborted")
                 converse.finished = True
                 converse.response = self._response  # external override
+        self.converse = self._original_converse
         return converse.response
 
     def _handle_killed_wait_response(self):
         self._response = None
+        self.converse = self._original_converse
 
     @killable_event("mycroft.skills.abort_question", exc=AbortQuestion,
                     callback=_handle_killed_wait_response, react_to_stop=True)
@@ -274,7 +276,7 @@ class MycroftSkill(_MycroftSkill):
                     return
 
             num_fails += 1
-            if 0 < num_retries < num_fails:
+            if 0 < num_retries < num_fails or self._response is not False:
                 self._response = None
                 return
 
