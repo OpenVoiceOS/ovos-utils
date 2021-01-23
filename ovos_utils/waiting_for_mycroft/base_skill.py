@@ -21,7 +21,8 @@ ensure_mycroft_import()
 
 from mycroft.skills.mycroft_skill import MycroftSkill as _MycroftSkill
 from mycroft.skills.fallback_skill import FallbackSkill as _FallbackSkill
-from mycroft.skills.skill_data import read_vocab_file, load_vocabulary, load_regex
+from mycroft.skills.skill_data import read_vocab_file, load_vocabulary, \
+    load_regex
 from mycroft.dialog import load_dialogs
 from mycroft import dialog
 from mycroft.util import resolve_resource_file
@@ -67,13 +68,15 @@ class AbortQuestion(AbortEvent):
 
 
 def killable_intent(msg="mycroft.skills.abort_execution",
-                    callback=None, react_to_stop=True, call_stop=True):
-    return killable_event(msg, AbortIntent, callback, react_to_stop, call_stop)
+                    callback=None, react_to_stop=True, call_stop=True,
+                    stop_tts=True):
+    return killable_event(msg, AbortIntent, callback, react_to_stop,
+                          call_stop, stop_tts)
 
 
 def killable_event(msg="mycroft.skills.abort_execution", exc=AbortEvent,
-                   callback=None, react_to_stop=False, call_stop=False):
-
+                   callback=None, react_to_stop=False, call_stop=False,
+                   stop_tts=False):
     # Begin wrapper
     def create_killable(func):
 
@@ -83,6 +86,10 @@ def killable_event(msg="mycroft.skills.abort_execution", exc=AbortEvent,
             t = create_killable_daemon(func, args, kwargs, autostart=False)
 
             def abort(_):
+                if not t.is_alive():
+                    return
+                if stop_tts:
+                    skill.bus.emit(Message("mycroft.audio.speech.stop"))
                 if call_stop:
                     # call stop on parent skill
                     skill.stop()
@@ -107,6 +114,7 @@ def killable_event(msg="mycroft.skills.abort_execution", exc=AbortEvent,
                         callback(args[0])
                     else:
                         callback()
+
             # save reference to threads so they can be killed later
             skill._threads.append(t)
             skill.bus.once(msg, abort)
@@ -208,6 +216,7 @@ class MycroftSkill(_MycroftSkill):
         Returns:
             str: user's response or None on a timeout
         """
+
         def converse(utterances, lang=None):
             converse.response = utterances[0] if utterances else None
             converse.finished = True
