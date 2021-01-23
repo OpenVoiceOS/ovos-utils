@@ -17,7 +17,9 @@ logging.getLogger("chardet").setLevel("ERROR")
 
 
 def translate_text(text, lang="en-us", source_lang=None):
-    tx = translate_apertium(text, lang, source_lang)
+    tx = None
+    if source_lang:
+        tx = translate_libretranslate(text, lang, source_lang)
     if not tx:
         LOG.warning("Falling back to google translate")
         return translate_google(text, lang, source_lang)
@@ -58,6 +60,19 @@ def translate_google(text, lang="en-us", source_lang=None):
         source_lang = source_lang.split("-")[0]
         tx = translator.translate(text, lang_src=source_lang, lang_tgt=lang)
     else:
-        tx = translator.translate(text,  lang_tgt=lang)
+        tx = translator.translate(text, lang_tgt=lang)
     return tx.strip()
 
+
+def translate_libretranslate(text, lang="en-us", source_lang=None,
+                             url="https://libretranslate.com/translate"):
+    # host it yourself https://github.com/uav4geo/LibreTranslate
+    lang = lang.split("-")[0]
+    if source_lang:
+        source_lang = source_lang.split("-")[0]
+    r = requests.post(url, params={"q": text,
+                                   "source": source_lang,
+                                   "target": lang}).json()
+    if r.get("error"):
+        return None
+    return r["translatedText"]
