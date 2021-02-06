@@ -191,7 +191,7 @@ class MycroftSkill(_MycroftSkill):
 
     def __handle_stop(self, _):
         self.bus.emit(Message(self.skill_id + ".stop"))
-        super().__handle_stop()
+        super().__handle_stop(_)
 
     # TODO PR for core - abort get_response gracefully
     def _wait_response(self, is_cancel, validator, on_fail, num_retries):
