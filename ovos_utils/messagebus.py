@@ -149,7 +149,7 @@ def listen_once_for_message(msg_type, handler, bus=None):
     return bus
 
 
-def wait_for_reply(message, reply_type=None, timeout=None, bus=None):
+def wait_for_reply(message, reply_type=None, timeout=3.0, bus=None):
     """Send a message and wait for a response.
 
     Args:
