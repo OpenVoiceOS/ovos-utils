@@ -17,6 +17,7 @@ def get_ipc_directory(domain=None, config=None):
     Args:
         domain (str): The IPC domain.  Basically a subdirectory to prevent
             overlapping signal filenames.
+        config (dict): mycroft.conf, to read ipc directory from
 
     Returns:
         str: a path to the IPC directory
@@ -75,22 +76,24 @@ def create_file(filename):
         f.write('')
 
 
-def create_signal(signal_name):
+def create_signal(signal_name, config=None):
     """Create a named signal
 
     Args:
         signal_name (str): The signal's name.  Must only contain characters
             valid in filenames.
+        config (dict): mycroft.conf, to read ipc directory from
     """
     try:
-        path = os.path.join(get_ipc_directory(), "signal", signal_name)
+        path = os.path.join(get_ipc_directory(config=config),
+                            "signal", signal_name)
         create_file(path)
         return os.path.isfile(path)
     except IOError:
         return False
 
 
-def check_for_signal(signal_name, sec_lifetime=0):
+def check_for_signal(signal_name, sec_lifetime=0, config=None):
     """See if a named signal exists
 
     Args:
@@ -99,11 +102,13 @@ def check_for_signal(signal_name, sec_lifetime=0):
         sec_lifetime (int, optional): How many seconds the signal should
             remain valid.  If 0 or not specified, it is a single-use signal.
             If -1, it never expires.
+        config (dict): mycroft.conf, to read ipc directory from
 
     Returns:
         bool: True if the signal is defined, False otherwise
     """
-    path = os.path.join(get_ipc_directory(), "signal", signal_name)
+    path = os.path.join(get_ipc_directory(config=config),
+                        "signal", signal_name)
     if os.path.isfile(path):
         if sec_lifetime == 0:
             # consume this single-use signal

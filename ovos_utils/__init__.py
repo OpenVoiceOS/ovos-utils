@@ -103,6 +103,7 @@ def resolve_resource_file(res_name, root_path=None, config=None):
 
     Args:
         res_name (str): a resource path/name
+        config (dict): mycroft.conf, to read data directory from
     Returns:
         str: path to resource or None if no resource found
     """

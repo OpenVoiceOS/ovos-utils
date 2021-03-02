@@ -169,10 +169,10 @@ class TTS(metaclass=ABCMeta):
         self.spellings = self.load_spellings()
         self.tts_name = type(self).__name__
 
-    def load_spellings(self):
+    def load_spellings(self, config=None):
         """Load phonetic spellings of words as dictionary."""
         path = join('text', self.lang.lower(), 'phonetic_spellings.txt')
-        spellings_file = resolve_resource_file(path)
+        spellings_file = resolve_resource_file(path, config=config)
         if not spellings_file:
             return {}
         try:
