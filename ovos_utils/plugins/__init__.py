@@ -20,3 +20,43 @@ movements for all TTS engines (only mimic implements this in upstream)
     engine.get_tts("hello world", "hello_world." + engine.audio_ext)
     engine.playback.stop() # if you dont call this it will hang here forever
 """
+import pkg_resources
+
+from ovos_utils.log import LOG
+
+
+def find_plugins(plug_type):
+    """Finds all plugins matching specific entrypoint type.
+
+    Arguments:
+        plug_type (str): plugin entrypoint string to retrieve
+
+    Returns:
+        dict mapping plugin names to plugin entrypoints
+    """
+    return {
+        entry_point.name: entry_point.load()
+        for entry_point
+        in pkg_resources.iter_entry_points(plug_type)
+    }
+
+
+def load_plugin(plug_type, plug_name):
+    """Load a specific plugin from a specific plugin type.
+
+    Arguments:
+        plug_type: (str) plugin type name. Ex. "mycroft.plugin.tts".
+        plug_name: (str) specific plugin name
+
+    Returns:
+        Loaded plugin Object or None if no matching object was found.
+    """
+    plugins = find_plugins(plug_type)
+    if plug_name in plugins:
+        ret = plugins[plug_name]
+    else:
+        LOG.warning('Could not find the plugin {}.{}'.format(plug_type,
+                                                             plug_name))
+        ret = None
+
+    return ret
