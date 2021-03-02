@@ -12,8 +12,9 @@ def skills_loaded(bus=None):
     return False
 
 
-def blacklist_skill(skill):
-    skills_config = read_mycroft_config().get("skills", {})
+def blacklist_skill(skill, config=None):
+    config = config or read_mycroft_config()
+    skills_config = config.get("skills", {})
     blacklisted_skills = skills_config.get("blacklisted_skills", [])
     if skill not in blacklisted_skills:
         blacklisted_skills.append(skill)
@@ -27,8 +28,9 @@ def blacklist_skill(skill):
     return False
 
 
-def whitelist_skill(skill):
-    skills_config = read_mycroft_config().get("skills", {})
+def whitelist_skill(skill, config=None):
+    config = config or read_mycroft_config()
+    skills_config = config.get("skills", {})
     blacklisted_skills = skills_config.get("blacklisted_skills", [])
     if skill in blacklisted_skills:
         blacklisted_skills.pop(skill)
@@ -42,8 +44,9 @@ def whitelist_skill(skill):
     return False
 
 
-def make_priority_skill(skill):
-    skills_config = read_mycroft_config().get("skills", {})
+def make_priority_skill(skill, config=None):
+    config = config or read_mycroft_config()
+    skills_config = config.get("skills", {})
     priority_skills = skills_config.get("priority_skills", [])
     if skill not in priority_skills:
         priority_skills.append(skill)
@@ -57,8 +60,8 @@ def make_priority_skill(skill):
     return False
 
 
-def get_skills_folder():
-    config = read_mycroft_config()
+def get_skills_folder(config=None):
+    config = config or read_mycroft_config()
     data_dir = config["data_dir"]
     skill_folder = config["skills"]["msm"]["directory"]
     return join(data_dir, skill_folder)

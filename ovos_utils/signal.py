@@ -8,7 +8,7 @@ import os.path
 from ovos_utils.log import LOG
 
 
-def get_ipc_directory(domain=None):
+def get_ipc_directory(domain=None, config=None):
     """Get the directory used for Inter Process Communication
 
     Files in this folder can be accessed by different processes on the
@@ -21,8 +21,9 @@ def get_ipc_directory(domain=None):
     Returns:
         str: a path to the IPC directory
     """
-    from ovos_utils.configuration import read_mycroft_config
-    config = read_mycroft_config()
+    if config is None:
+        from ovos_utils.configuration import read_mycroft_config
+        config = read_mycroft_config()
     path = config.get("ipc_path")
     if not path:
         # If not defined, use /tmp/mycroft/ipc

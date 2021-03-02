@@ -9,9 +9,10 @@ from ovos_utils.configuration import read_mycroft_config
 
 
 class BaseIntentEngine:
-    def __init__(self, name):
+    def __init__(self, name, config=None):
         self.name = name.lower()
-        self.config = read_mycroft_config().get(self.name, {})
+        config = config or read_mycroft_config()
+        self.config = config.get(self.name, {})
         self.intent_samples = {}
         self.entity_samples = {}
         self.regex_samples = {}

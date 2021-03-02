@@ -264,7 +264,7 @@ class BusFeedProvider:
 
     """
 
-    def __init__(self, trigger_message, name=None, bus=None):
+    def __init__(self, trigger_message, name=None, bus=None, config=None):
         """
            initialize responder
 
@@ -272,13 +272,14 @@ class BusFeedProvider:
                 name(str): name identifier for .conf settings
                 bus (WebsocketClient): mycroft messagebus websocket
         """
+        config = config or read_mycroft_config()
         self.trigger_message = trigger_message
         self.name = name or self.__class__.__name__
         self.bus = bus or get_mycroft_bus()
         self.callback = None
         self.service = None
         self._daemon = None
-        self.config = read_mycroft_config().get(self.name, {})
+        self.config = config.get(self.name, {})
 
     def update(self, data):
         """
@@ -407,12 +408,14 @@ class BusFeedConsumer:
 
     """
 
-    def __init__(self, query_message, name=None, timeout=5, bus=None):
+    def __init__(self, query_message, name=None, timeout=5, bus=None,
+                 config=None):
         self.query_message = query_message
         self.query_message.context["source"] = self.name
         self.name = name or self.__class__.__name__
         self.bus = bus or get_mycroft_bus()
-        self.config = read_mycroft_config().get(self.name, {})
+        config = config or read_mycroft_config()
+        self.config = config.get(self.name, {})
         self.timeout = timeout
         self.query = None
         self.valid_responses = []

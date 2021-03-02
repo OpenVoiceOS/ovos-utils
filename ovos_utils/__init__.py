@@ -82,7 +82,7 @@ def get_mycroft_root():
     return None
 
 
-def resolve_resource_file(res_name, root_path=None):
+def resolve_resource_file(res_name, root_path=None, config=None):
     """Convert a resource into an absolute filename.
 
     Resource names are in the form: 'filename.ext'
@@ -106,9 +106,9 @@ def resolve_resource_file(res_name, root_path=None):
     Returns:
         str: path to resource or None if no resource found
     """
-    # TODO handle cyclic import
-    from ovos_utils.configuration import read_mycroft_config
-    config = read_mycroft_config()
+    if config is None:
+        from ovos_utils.configuration import read_mycroft_config
+        config = read_mycroft_config()
 
     # First look for fully qualified file (e.g. a user setting)
     if os.path.isfile(res_name):

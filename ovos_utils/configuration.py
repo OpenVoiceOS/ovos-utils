@@ -11,8 +11,8 @@ MYCROFT_SYSTEM_CONFIG = "/etc/mycroft/mycroft.conf"
 MYCROFT_USER_CONFIG = join(expanduser("~"), ".mycroft", "mycroft.conf")
 
 
-def get_config_fingerprint():
-    conf = read_mycroft_config()
+def get_config_fingerprint(config=None):
+    conf = config or read_mycroft_config()
     listener_conf = conf.get("listener", {})
     skills_conf = conf.get("skills", {})
     return {
