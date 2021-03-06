@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='ovos_utils',
-    version='0.0.6',
+    version='0.0.7',
     packages=['ovos_utils',
               'ovos_utils.waiting_for_mycroft',
               'ovos_utils.misc',
