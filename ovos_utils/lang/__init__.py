@@ -1,5 +1,7 @@
 from os.path import expanduser, isdir, dirname, join
 from os import system, makedirs, listdir
+from ovos_utils.lang.detect import detect_lang
+from ovos_utils.lang.translate import translate_text
 
 
 def get_tts(sentence, lang="en-us", mp3_file="/tmp/google_tx_tts.mp3"):
