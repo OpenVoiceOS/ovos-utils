@@ -75,7 +75,7 @@ def random_key(key_lenght=16):
 
 def encrypt(key, text, nonce=None):
     if AES is None:
-        LOG.error("run pip install pycryptodome")
+        LOG.error("run pip install pycryptodomex")
         raise ImportError
     if not isinstance(text, bytes):
         text = bytes(text, encoding="utf-8")
@@ -88,7 +88,7 @@ def encrypt(key, text, nonce=None):
 
 def decrypt(key, ciphertext, tag, nonce):
     if AES is None:
-        LOG.error("run pip install pycryptodome")
+        LOG.error("run pip install pycryptodomex")
         raise ImportError
     if not isinstance(key, bytes):
         key = bytes(key, encoding="utf-8")
