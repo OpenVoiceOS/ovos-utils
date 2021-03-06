@@ -281,7 +281,7 @@ class SkillGUI(_SkillGUI):
         self.clear()
         self.remove_page("SYSTEM_SkillSettings.qml")
 
-    # everything above is a new method, everything bellow is partial overrides
+    # everything above is a new method, everything below is partial overrides
     # these unfortunately require implementing the full method, may get out
     # of sync over time
     def show_pages(self, page_names, index=0, override_idle=None,
