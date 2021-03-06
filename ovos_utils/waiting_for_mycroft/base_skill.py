@@ -7,7 +7,6 @@ from copy import deepcopy
 from ovos_utils.lang import get_language_dir
 from ovos_utils.intents import ConverseTracker
 from ovos_utils.waiting_for_mycroft.skill_gui import SkillGUI
-from ovos_utils.waiting_for_mycroft.skill_api import SkillApi
 from ovos_utils.log import LOG
 from ovos_utils import camel_case_split, get_handler_name, \
     create_killable_daemon, ensure_mycroft_import
@@ -393,7 +392,6 @@ class MycroftSkill(_MycroftSkill):
         """
         pass
 
-    # https://github.com/MycroftAI/mycroft-core/pull/1822
     # https://github.com/MycroftAI/mycroft-core/pull/1468
     def bind(self, bus):
         if bus and not isinstance(self.gui, SkillGUI):
@@ -404,63 +402,9 @@ class MycroftSkill(_MycroftSkill):
             self.gui = SkillGUI(self)  # pull/2683
         super().bind(bus)
         if bus:
-            SkillApi.connect_bus(self.bus)  # pull/1822
-            self._register_public_api()
             ConverseTracker.connect_bus(self.bus)  # pull/1468
             self.add_event("converse.skill.deactivated",
                            self._deactivate_skill)
-
-    def _send_public_api(self, message):
-        """Respond with the skill's public api."""
-        self.bus.emit(message.response(data=self.public_api))
-
-    def _register_public_api(self):
-        """ Find and register api methods.
-        Api methods has been tagged with the api_method member, for each
-        method where this is found the method a message bus handler is
-        registered.
-        Finally create a handler for fetching the api info from any requesting
-        skill.
-        """
-
-        def wrap_method(func):
-            """Boiler plate for returning the response to the sender."""
-
-            def wrapper(message):
-                result = func(*message.data['args'], **message.data['kwargs'])
-                self.bus.emit(message.response(data={'result': result}))
-
-            return wrapper
-
-        methods = [attr_name for attr_name in get_non_properties(self)
-                   if hasattr(getattr(self, attr_name), '__name__')]
-
-        for attr_name in methods:
-            method = getattr(self, attr_name)
-
-            if hasattr(method, 'api_method'):
-                doc = method.__doc__ or ''
-                name = method.__name__
-                self.public_api[name] = {
-                    'help': doc,
-                    'type': '{}.{}'.format(self.skill_id, name),
-                    'func': method
-                }
-        for key in self.public_api:
-            if ('type' in self.public_api[key] and
-                    'func' in self.public_api[key]):
-                LOG.debug('Adding api method: '
-                          '{}'.format(self.public_api[key]['type']))
-
-                # remove the function member since it shouldn't be
-                # reused and can't be sent over the messagebus
-                func = self.public_api[key].pop('func')
-                self.add_event(self.public_api[key]['type'],
-                               wrap_method(func))
-
-        if self.public_api:
-            self.add_event('{}.public_api'.format(self.skill_id),
-                           self._send_public_api)
 
     # https://github.com/MycroftAI/mycroft-core/pull/2675
     def voc_match(self, utt, voc_filename, lang=None, exact=False):
@@ -490,8 +434,7 @@ class MycroftSkill(_MycroftSkill):
                                                  voc_filename + '.voc'))
 
             if not voc or not exists(voc):
-                raise FileNotFoundError(
-                    'Could not find {}.voc file'.format(voc_filename))
+                return False
             # load vocab and flatten into a simple list
             vocab = read_vocab_file(voc)
             self.voc_match_cache[cache_key] = list(chain(*vocab))
