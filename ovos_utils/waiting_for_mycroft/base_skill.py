@@ -11,6 +11,7 @@ from ovos_utils.log import LOG
 from ovos_utils import camel_case_split, get_handler_name, \
     create_killable_daemon, ensure_mycroft_import
 from ovos_utils.messagebus import Message
+from ovos_utils.skills.settings import PrivateSettings
 import threading
 from inspect import signature
 from functools import wraps
@@ -136,6 +137,7 @@ class MycroftSkill(_MycroftSkill):
         self.gui = SkillGUI(self)  # pull/2683
         self._threads = []
         self._original_converse = self.converse
+        self.private_settings = None  # TODO make a PR in mycroft-core ?
 
     # TODO PR for core - stops skill executing gracefully
     # this method can probably use a better refactor, we are only changing one
@@ -405,6 +407,8 @@ class MycroftSkill(_MycroftSkill):
             ConverseTracker.connect_bus(self.bus)  # pull/1468
             self.add_event("converse.skill.deactivated",
                            self._deactivate_skill)
+            # here to ensure self.skill_id is populated
+            self.private_settings = PrivateSettings(self.skill_id)
 
     # https://github.com/MycroftAI/mycroft-core/pull/2675
     def voc_match(self, utt, voc_filename, lang=None, exact=False):
