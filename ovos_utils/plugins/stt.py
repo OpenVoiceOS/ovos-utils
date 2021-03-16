@@ -1,6 +1,8 @@
 """
 This is here to allow importing this module outside mycroft-core, plugins
-using this import instead of mycroft can be used in ANY place
+using this import instead of mycroft can be used
+
+The main use case is for plugins to be used across different projects
 """
 import json
 from abc import ABCMeta, abstractmethod

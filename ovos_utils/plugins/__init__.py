@@ -5,6 +5,10 @@ this module is meant to enable usage of mycroft plugins inside and outside
 mycroft, importing from here will make things work as planned in mycroft,
 but if outside mycroft things will still work
 
+The main use case is for plugins to be used across different projects
+
+## Differences from upstream
+
 TTS:
 - added automatic guessing of phonemes/visime calculation, enabling mouth
 movements for all TTS engines (only mimic implements this in upstream)
