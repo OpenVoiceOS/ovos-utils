@@ -93,3 +93,39 @@ def uncomment_json(commented_json_str):
 
     return " ".join(nocomment)
 
+
+def is_compatible_dict(base, delta):
+    """
+    returns False if any key common to base/delta has a different type,
+    except for None values, dicts are evaluated recursively
+    """
+    common_keys = [k for k in base if k in delta]
+    for k in common_keys:
+        if base[k] is None or delta[k] is None:
+            continue
+        elif isinstance(base[k], dict) and isinstance(delta[k], dict):
+            if not is_compatible_dict(delta[k], base[k]):
+                return False
+        elif type(base[k]) != type(delta[k]):
+            return False
+    return True
+
+
+def delete_key_from_dict(key, dictionary):
+    """Recursivily find nested key in a dict and delete it.
+    Arguments:
+        key (str): a period separated list of nested keys to remove
+                   eg "nested.dict.keys"
+        dictionary (dict): the dictionary to remove keys from
+    Returns:
+        Dict: original dictionary with specified keys deleted.
+    """
+    modified_dict = dict(dictionary)
+    key_list = key.split('.')
+    if len(key_list) == 1 and modified_dict.get(key) is not None:
+        del modified_dict[key]
+    elif len(key_list) > 1:
+        remaining_keys = '.'.join(key_list[1:])
+        if modified_dict.get(key_list[0]) is not None:
+            modified_dict[key_list[0]] = delete_key_from_dict(remaining_keys, modified_dict[key_list[0]])
+    return modified_dict

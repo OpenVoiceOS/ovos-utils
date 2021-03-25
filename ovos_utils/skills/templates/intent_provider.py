@@ -3,8 +3,7 @@ from time import time as get_time, sleep
 from ovos_utils.log import LOG
 from ovos_utils.configuration import update_mycroft_config
 from ovos_utils.messagebus import Message
-from ovos_utils.waiting_for_mycroft.base_skill import FallbackSkill
-
+from ovos_utils.skills.templates import OVOSFallbackSkill
 from ovos_utils.configuration import read_mycroft_config
 
 
@@ -50,9 +49,9 @@ class BaseIntentEngine:
         return data
 
 
-class IntentEngineSkill(FallbackSkill):
-    def __init__(self):
-        FallbackSkill.__init__(self)
+class IntentEngineSkill(OVOSFallbackSkill):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.engine = None
         self.config = {}
         self.priority = 1

@@ -1,39 +1,16 @@
-# Copyright 2018 Mycroft AI Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 from inspect import signature
 from enum import IntEnum
 from abc import abstractmethod
 from ovos_utils.waiting_for_mycroft.base_skill import MycroftSkill
+from ovos_utils import ensure_mycroft_import
 
-try:
-    from mycroft.skills.common_play_skill import CommonPlaySkill as _CommonPlaySkill
-except ImportError:
-    import sys
-    from ovos_utils.log import LOG
-    from ovos_utils import get_mycroft_root
-    MYCROFT_ROOT_PATH = get_mycroft_root()
-    if MYCROFT_ROOT_PATH is not None:
-        sys.path.append(MYCROFT_ROOT_PATH)
-        from mycroft.skills.common_play_skill import CommonPlaySkill as _CommonPlaySkill
-    else:
-        LOG.error("Could not find mycroft root path")
-        raise ImportError
+ensure_mycroft_import()
+
+from mycroft.skills.common_play_skill import CommonPlaySkill as _CommonPlaySkill
+
 
 # implementation of
 # https://github.com/MycroftAI/mycroft-core/pull/2660
-
-
 class CPSMatchLevel(IntEnum):
     EXACT = 1
     MULTI_KEY = 2

@@ -1,20 +1,11 @@
 import re
 from os.path import join, exists
 import os
-import time
 from itertools import chain
-from copy import deepcopy
 from ovos_utils.lang import get_language_dir
 from ovos_utils.intents import ConverseTracker
-from ovos_utils.waiting_for_mycroft.skill_gui import SkillGUI
 from ovos_utils.log import LOG
-from ovos_utils import camel_case_split, get_handler_name, \
-    create_killable_daemon, ensure_mycroft_import
-from ovos_utils.messagebus import Message
-from ovos_utils.skills.settings import PrivateSettings
-import threading
-from inspect import signature
-from functools import wraps
+from ovos_utils import ensure_mycroft_import
 
 # ensure mycroft can be imported
 ensure_mycroft_import()
@@ -24,10 +15,12 @@ from mycroft.skills.fallback_skill import FallbackSkill as _FallbackSkill
 from mycroft.skills.skill_data import read_vocab_file, load_vocabulary, \
     load_regex
 from mycroft.dialog import load_dialogs
-from mycroft import dialog
 from mycroft.util import resolve_resource_file
-from mycroft.skills.mycroft_skill.event_container import create_wrapper
-from mycroft.skills.settings import get_local_settings, save_settings
+from ovos_utils.waiting_for_mycroft.skill_gui import SkillGUI
+
+# backwards compat imports TODO Remove ?
+from ovos_utils.skills.settings import PrivateSettings
+from ovos_utils.skills.decorators import *
 
 
 def get_non_properties(obj):
@@ -55,246 +48,12 @@ def get_non_properties(obj):
     return set(check_class(obj.__class__))
 
 
-class AbortEvent(StopIteration):
-    """ abort bus event handler """
-
-
-class AbortIntent(AbortEvent):
-    """ abort intent parsing """
-
-
-class AbortQuestion(AbortEvent):
-    """ gracefully abort get_response queries """
-
-
-def killable_intent(msg="mycroft.skills.abort_execution",
-                    callback=None, react_to_stop=True, call_stop=True,
-                    stop_tts=True):
-    return killable_event(msg, AbortIntent, callback, react_to_stop,
-                          call_stop, stop_tts)
-
-
-def killable_event(msg="mycroft.skills.abort_execution", exc=AbortEvent,
-                   callback=None, react_to_stop=False, call_stop=False,
-                   stop_tts=False):
-    # Begin wrapper
-    def create_killable(func):
-
-        @wraps(func)
-        def call_function(*args, **kwargs):
-            skill = args[0]
-            t = create_killable_daemon(func, args, kwargs, autostart=False)
-
-            def abort(_):
-                if not t.is_alive():
-                    return
-                if stop_tts:
-                    skill.bus.emit(Message("mycroft.audio.speech.stop"))
-                if call_stop:
-                    # call stop on parent skill
-                    skill.stop()
-
-                # ensure no orphan get_response daemons
-                # this is the only killable daemon that core itself will
-                # create, users should also account for this condition with
-                # callbacks if using the decorator for other purposes
-                skill._handle_killed_wait_response()
-
-                try:
-                    while t.is_alive():
-                        t.raise_exc(exc)
-                        time.sleep(0.1)
-                except threading.ThreadError:
-                    pass  # already killed
-                except AssertionError:
-                    pass  # could not determine thread id ?
-                if callback is not None:
-                    if len(signature(callback).parameters) == 1:
-                        # class method, needs self
-                        callback(args[0])
-                    else:
-                        callback()
-
-            # save reference to threads so they can be killed later
-            skill._threads.append(t)
-            skill.bus.once(msg, abort)
-            if react_to_stop:
-                skill.bus.once(args[0].skill_id + ".stop", abort)
-            t.start()
-            return t
-
-        return call_function
-
-    return create_killable
-
-
 class MycroftSkill(_MycroftSkill):
     monkey_patched = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.public_api = {}  # pull/1822
         self.gui = SkillGUI(self)  # pull/2683
-        self._threads = []
-        self._original_converse = self.converse
-        self.private_settings = None  # TODO make a PR in mycroft-core ?
-
-    # TODO PR for core - stops skill executing gracefully
-    # this method can probably use a better refactor, we are only changing one
-    # of the internal callbacks
-    def add_event(self, name, handler, handler_info=None, once=False):
-        """Create event handler for executing intent or other event.
-
-        Arguments:
-            name (string): IntentParser name
-            handler (func): Method to call
-            handler_info (string): Base message when reporting skill event
-                                   handler status on messagebus.
-            once (bool, optional): Event handler will be removed after it has
-                                   been run once.
-        """
-        skill_data = {'name': get_handler_name(handler)}
-
-        def on_error(e):
-            """Speak and log the error."""
-            if not isinstance(e, AbortEvent):
-                # Convert "MyFancySkill" to "My Fancy Skill" for speaking
-                handler_name = camel_case_split(self.name)
-                msg_data = {'skill': handler_name}
-                msg = dialog.get('skill.error', self.lang, msg_data)
-                self.speak(msg)
-                LOG.exception(msg)
-            else:
-                LOG.info("Skill execution aborted")
-            # append exception information in message
-            skill_data['exception'] = repr(e)
-
-        def on_start(message):
-            """Indicate that the skill handler is starting."""
-            if handler_info:
-                # Indicate that the skill handler is starting if requested
-                msg_type = handler_info + '.start'
-                self.bus.emit(message.forward(msg_type, skill_data))
-
-        def on_end(message):
-            """Store settings and indicate that the skill handler has completed
-            """
-            if self.settings != self._initial_settings:
-                save_settings(self.settings_write_path, self.settings)
-                self._initial_settings = deepcopy(self.settings)
-            if handler_info:
-                msg_type = handler_info + '.complete'
-                self.bus.emit(message.forward(msg_type, skill_data))
-
-        wrapper = create_wrapper(handler, self.skill_id,
-                                 on_start, on_end, on_error)
-        return self.events.add(name, wrapper, once)
-
-    def __handle_stop(self, _):
-        self.bus.emit(Message(self.skill_id + ".stop"))
-        super().__handle_stop(_)
-
-    # TODO PR for core - abort get_response gracefully
-    def _wait_response(self, is_cancel, validator, on_fail, num_retries):
-        """Loop until a valid response is received from the user or the retry
-        limit is reached.
-
-        Arguments:
-            is_cancel (callable): function checking cancel criteria
-            validator (callbale): function checking for a valid response
-            on_fail (callable): function handling retries
-
-        """
-        self._response = False
-        self._real_wait_response(is_cancel, validator, on_fail, num_retries)
-        while self._response is False:
-            time.sleep(0.1)
-        return self._response
-
-    def __get_response(self):
-        """Helper to get a reponse from the user
-
-        Returns:
-            str: user's response or None on a timeout
-        """
-
-        def converse(utterances, lang=None):
-            converse.response = utterances[0] if utterances else None
-            converse.finished = True
-            return True
-
-        # install a temporary conversation handler
-        self.make_active()
-        converse.finished = False
-        converse.response = None
-        self.converse = converse
-
-        # 10 for listener, 5 for SST, then timeout
-        # NOTE a threading event is not used otherwise we can't raise the
-        # AbortEvent exception to kill the thread
-        start = time.time()
-        while time.time() - start <= 15 and not converse.finished:
-            time.sleep(0.1)
-            if self._response is not False:
-                if self._response is None:
-                    # aborted externally (if None)
-                    self.log.debug("get_response aborted")
-                converse.finished = True
-                converse.response = self._response  # external override
-        self.converse = self._original_converse
-        return converse.response
-
-    def _handle_killed_wait_response(self):
-        self._response = None
-        self.converse = self._original_converse
-
-    @killable_event("mycroft.skills.abort_question", exc=AbortQuestion,
-                    callback=_handle_killed_wait_response, react_to_stop=True)
-    def _real_wait_response(self, is_cancel, validator, on_fail, num_retries):
-        """Loop until a valid response is received from the user or the retry
-        limit is reached.
-
-        Arguments:
-            is_cancel (callable): function checking cancel criteria
-            validator (callbale): function checking for a valid response
-            on_fail (callable): function handling retries
-
-        """
-        num_fails = 0
-        while True:
-            if self._response is not False:
-                # usually None when aborted externally
-                # also allows overriding returned result from other events
-                return self._response
-
-            response = self.__get_response()
-
-            if response is None:
-                # if nothing said, prompt one more time
-                num_none_fails = 1 if num_retries < 0 else num_retries
-                if num_fails >= num_none_fails:
-                    self._response = None
-                    return
-            else:
-                if validator(response):
-                    self._response = response
-                    return
-
-                # catch user saying 'cancel'
-                if is_cancel(response):
-                    self._response = None
-                    return
-
-            num_fails += 1
-            if 0 < num_retries < num_fails or self._response is not False:
-                self._response = None
-                return
-
-            line = on_fail(response)
-            if line:
-                self.speak(line, expect_response=True)
-            else:
-                self.bus.emit(Message('mycroft.mic.listen'))
 
     # https://github.com/MycroftAI/mycroft-core/pull/1335
     def init_dialog(self, root_directory):
@@ -407,8 +166,6 @@ class MycroftSkill(_MycroftSkill):
             ConverseTracker.connect_bus(self.bus)  # pull/1468
             self.add_event("converse.skill.deactivated",
                            self._deactivate_skill)
-            # here to ensure self.skill_id is populated
-            self.private_settings = PrivateSettings(self.skill_id)
 
     # https://github.com/MycroftAI/mycroft-core/pull/2675
     def voc_match(self, utt, voc_filename, lang=None, exact=False):
@@ -465,7 +222,7 @@ class MycroftSkill(_MycroftSkill):
 
         if utt:
             # Check for matches against complete words
-            for i in self.voc_match_cache[cache_key]:
+            for i in self.voc_match_cache.get(cache_key) or []:
                 # Substitute only whole words matching the token
                 utt = re.sub(r'\b' + i + r"\b", "", utt)
 

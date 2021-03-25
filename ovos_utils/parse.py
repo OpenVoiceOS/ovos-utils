@@ -19,7 +19,6 @@ class MatchStrategy(IntEnum):
     PARTIAL_TOKEN_RATIO = auto()
     PARTIAL_TOKEN_SORT_RATIO = auto()
     PARTIAL_TOKEN_SET_RATIO = auto()
-    QUICK_LEV_RATIO = auto()
 
 
 def _validate_matching_strategy(strategy):
@@ -52,8 +51,6 @@ def fuzzy_match(x, against, strategy=MatchStrategy.SIMPLE_RATIO):
         score = rapidfuzz.fuzz.partial_token_set_ratio(x, against) / 100
     elif strategy == MatchStrategy.PARTIAL_TOKEN_RATIO:
         score = rapidfuzz.fuzz.partial_token_ratio(x, against) / 100
-    elif strategy == MatchStrategy.QUICK_LEV_RATIO:
-        score = rapidfuzz.fuzz.quick_lev_ratio(x, against) / 100
     else:
         score = SequenceMatcher(None, x, against).ratio()
 

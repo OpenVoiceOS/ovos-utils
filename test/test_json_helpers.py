@@ -1,6 +1,6 @@
 import unittest
 from copy import deepcopy
-from ovos_utils.json_helper import merge_dict
+from ovos_utils.json_helper import merge_dict, is_compatible_dict, delete_key_from_dict
 
 
 class TestJsonHelpers(unittest.TestCase):
@@ -10,6 +10,29 @@ class TestJsonHelpers(unittest.TestCase):
                           "four": ["foo", "bar", "baz"], "five": 50}
         self.delta_dict = {"two": 2, "three": 30,
                            "four": [4, 5, 6, "foo"], "five": None}
+
+    def test_delete_key_from_dict(self):
+        dct = {'a': 1, 'b': {'c': 1, 'd': 2}}
+        self.assertEqual(delete_key_from_dict("b", dct), {'a': 1})
+        self.assertEqual(delete_key_from_dict("a", dct),
+                         {'b': {'c': 1, 'd': 2}})
+        self.assertEqual(delete_key_from_dict("b.c", dct),
+                         {'a': 1, 'b': {'d': 2}})
+        self.assertEqual(delete_key_from_dict("b.d", dct),
+                         {'a': 1, 'b': {'c': 1}})
+
+    def test_compatible_dict(self):
+        d0 = {"k2": 2, "k3": [0, 0], "k4": {"not": "yeah"}}
+        d1 = {"k": "val", "k2": 1, "k3": [], "k5": None}
+        d2 = {"k4": {"a": 0}}
+        d3 = {"k2": "2", "k4": {"a": ["type_changed"]}}
+
+        self.assertEqual(is_compatible_dict(d0, d1), True)
+        self.assertEqual(is_compatible_dict(d0, d2), True)
+        self.assertEqual(is_compatible_dict(d1, d2), True)
+        self.assertEqual(is_compatible_dict(d0, d3), False) # k2 type changed
+        self.assertEqual(is_compatible_dict(d1, d3), False) # k4 type changed
+        self.assertEqual(is_compatible_dict(d2, d3), False) # k4 dicts incompatible
 
     def test_merge_dict(self):
         self.assertEqual(

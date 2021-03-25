@@ -1,7 +1,7 @@
-from ovos_utils.waiting_for_mycroft.base_skill import MycroftSkill
+from ovos_utils.skills.templates import OVOSSkill
 
 
-class ActiveSkill(MycroftSkill):
+class ActiveSkill(OVOSSkill):
     def bind(self, bus):
         super(ActiveSkill, self).bind(bus)
         if bus:
