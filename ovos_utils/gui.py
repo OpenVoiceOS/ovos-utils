@@ -1,8 +1,11 @@
 from ovos_utils.system import is_installed, has_screen
+from ovos_utils import resolve_ovos_resource_file, resolve_resource_file
 from ovos_utils.messagebus import wait_for_reply, get_mycroft_bus, Message
 from ovos_utils.log import LOG
 from collections import namedtuple
 import time
+from os.path import join
+from enum import IntEnum
 
 
 def can_display():
@@ -22,6 +25,13 @@ def is_gui_connected(bus=None):
     if response:
         return response.data["connected"]
     return False
+
+
+class GUIPlaybackStatus(IntEnum):
+    STOPPED = 0
+    PLAYING = 1
+    PAUSED = 2
+    UNDEFINED = 3
 
 
 class GUITracker:
@@ -369,8 +379,447 @@ class GUITracker:
         self._is_idle = True
 
 
+class GUIInterface:
+    """Interface to the Graphical User Interface, allows interaction with
+    the mycroft-gui from anywhere
+
+    Values set in this class are synced to the GUI, accessible within QML
+    via the built-in sessionData mechanism.  For example, in Python you can
+    write in a skill:
+        self.gui['temp'] = 33
+        self.gui.show_page('Weather.qml')
+    Then in the Weather.qml you'd access the temp via code such as:
+        text: sessionData.time
+    """
+
+    def __init__(self, skill_id, bus=None, remote_server=None):
+        self.bus = bus or get_mycroft_bus()
+        self.__session_data = {}  # synced to GUI for use by this skill's pages
+        self.page = None  # the active GUI page (e.g. QML template) to show
+        self.skill_id = skill_id
+        self.on_gui_changed_callback = None
+        self.remote_url = remote_server
+        self._events = []
+        self.video_info = None
+        self.setup_default_handlers()
+
+    @property
+    def connected(self):
+        """Returns True if at least 1 gui is connected, else False"""
+        return is_gui_connected(self.bus)
+
+    # events
+    def setup_default_handlers(self):
+        """Sets the handlers for the default messages."""
+        self.register_handler('set', self.handle_gui_set)
+        # should be emitted by self.play_video
+        self.register_handler('playback.ended',
+                              self.handle_gui_stop)
+
+    def register_handler(self, event, handler):
+        """Register a handler for GUI events.
+
+        will be prepended with self.skill_id.XXX if missing in event
+
+        When using the triggerEvent method from Qt
+        triggerEvent("event", {"data": "cool"})
+
+        Arguments:
+            event (str):    event to catch
+            handler:        function to handle the event
+        """
+        if not event.startswith(f'{self.skill_id}.'):
+            event = f'{self.skill_id}.' + event
+        self._events.append((event, handler))
+        self.bus.on(event, handler)
+
+    def set_on_gui_changed(self, callback):
+        """Registers a callback function to run when a value is
+        changed from the GUI.
+
+        Arguments:
+            callback:   Function to call when a value is changed
+        """
+        self.on_gui_changed_callback = callback
+
+    def send_event(self, event_name, params=None):
+        """Trigger a gui event.
+
+        Arguments:
+            event_name (str): name of event to be triggered
+            params: json serializable object containing any parameters that
+                    should be sent along with the request.
+        """
+        params = params or {}
+        self.bus.emit(Message("gui.event.send",
+                              {"__from": self.skill_id,
+                               "event_name": event_name,
+                               "params": params}))
+
+    # internals
+    def handle_gui_stop(self, message):
+        """Stop video playback in gui"""
+        self.stop_video()
+
+    def handle_gui_set(self, message):
+        """Handler catching variable changes from the GUI.
+
+        Arguments:
+            message: Messagebus message
+        """
+        for key in message.data:
+            self[key] = message.data[key]
+        if self.on_gui_changed_callback:
+            self.on_gui_changed_callback()
+
+    def __setitem__(self, key, value):
+        """Implements set part of dict-like behaviour with named keys."""
+        self.__session_data[key] = value
+
+        if self.page:
+            # emit notification (but not needed if page has not been shown yet)
+            data = self.__session_data.copy()
+            data.update({'__from': self.skill_id})
+            self.bus.emit(Message("gui.value.set", data))
+
+    def __getitem__(self, key):
+        """Implements get part of dict-like behaviour with named keys."""
+        return self.__session_data[key]
+
+    def get(self, *args, **kwargs):
+        """Implements the get method for accessing dict keys."""
+        return self.__session_data.get(*args, **kwargs)
+
+    def __contains__(self, key):
+        """Implements the "in" operation."""
+        return self.__session_data.__contains__(key)
+
+    def _pages2uri(self, page_names):
+        # Convert pages to full reference
+        page_urls = []
+        for name in page_names:
+            page = resolve_resource_file(name) or \
+                   resolve_resource_file(join('ui', name)) or \
+                   resolve_ovos_resource_file(name) or \
+                   resolve_ovos_resource_file(join('ui', name))
+
+            if page:
+                if self.remote_url:
+                    page_urls.append(self.remote_url + "/" + page)
+                elif page.startswith("file://"):
+                    page_urls.append(page)
+                else:
+                    page_urls.append("file://" + page)
+            else:
+                LOG.error("Unable to find page: {}".format(name))
+        return page_urls
+
+    def shutdown(self):
+        """Shutdown gui interface.
+
+        Clear pages loaded through this interface and remove the bus events
+        """
+        self.release()
+        self.video_info = None
+        for event, handler in self._events:
+            self.bus.remove(event, handler)
+
+    # base gui interactions
+    def show_page(self, name, override_idle=None,
+                  override_animations=False):
+        """Begin showing the page in the GUI
+
+        Arguments:
+            name (str): Name of page (e.g "mypage.qml") to display
+            override_idle (boolean, int):
+                True: Takes over the resting page indefinitely
+                (int): Delays resting page for the specified number of
+                       seconds.
+            override_animations (boolean):
+                True: Disables showing all platform skill animations.
+                False: 'Default' always show animations.
+        """
+        self.show_pages([name], 0, override_idle, override_animations)
+
+    def show_pages(self, page_names, index=0, override_idle=None,
+                   override_animations=False):
+        """Begin showing the list of pages in the GUI.
+
+        Arguments:
+            page_names (list): List of page names (str) to display, such as
+                               ["Weather.qml", "Forecast.qml", "Details.qml"]
+            index (int): Page number (0-based) to show initially.  For the
+                         above list a value of 1 would start on "Forecast.qml"
+            override_idle (boolean, int):
+                True: Takes over the resting page indefinitely
+                (int): Delays resting page for the specified number of
+                       seconds.
+            override_animations (boolean):
+                True: Disables showing all platform skill animations.
+                False: 'Default' always show animations.
+        """
+        if not isinstance(page_names, list):
+            raise ValueError('page_names must be a list')
+
+        if index > len(page_names):
+            raise ValueError('Default index is larger than page list length')
+
+        self.page = page_names[index]
+
+        # First sync any data...
+        data = self.__session_data.copy()
+        data.update({'__from': self.skill_id})
+        self.bus.emit(Message("gui.value.set", data))
+        page_urls = self._pages2uri(page_names)
+        self.bus.emit(Message("gui.page.show",
+                              {"page": page_urls,
+                               "index": index,
+                               "__from": self.skill_id,
+                               "__idle": override_idle,
+                               "__animations": override_animations}))
+
+    def remove_page(self, page):
+        """Remove a single page from the GUI.
+
+        Arguments:
+            page (str): Page to remove from the GUI
+        """
+        return self.remove_pages([page])
+
+    def remove_pages(self, page_names):
+        """Remove a list of pages in the GUI.
+
+        Arguments:
+            page_names (list): List of page names (str) to display, such as
+                               ["Weather.qml", "Forecast.qml", "Other.qml"]
+        """
+        if not isinstance(page_names, list):
+            page_names = [page_names]
+        page_urls = self._pages2uri(page_names)
+        self.bus.emit(Message("gui.page.delete",
+                              {"page": page_urls,
+                               "__from": self.skill_id}))
+
+    def clear(self):
+        """Reset the value dictionary, and remove namespace from GUI.
+
+        This method does not close the GUI for a Skill. For this purpose see
+        the `release` method.
+        """
+        self.__session_data = {}
+        self.page = None
+        self.bus.emit(Message("gui.clear.namespace",
+                              {"__from": self.skill_id}))
+
+    def release(self):
+        """Signal that this skill is no longer using the GUI,
+        allow different platforms to properly handle this event.
+        Also calls self.clear() to reset the state variables
+        Platforms can close the window or go back to previous page"""
+        self.clear()
+        self.bus.emit(Message("mycroft.gui.screen.close",
+                              {"skill_id": self.skill_id}))
+
+    # Utils / Templates
+    def show_text(self, text, title=None, override_idle=None,
+                  override_animations=False):
+        """Display a GUI page for viewing simple text.
+
+        Arguments:
+            text (str): Main text content.  It will auto-paginate
+            title (str): A title to display above the text content.
+            override_idle (boolean, int):
+                True: Takes over the resting page indefinitely
+                (int): Delays resting page for the specified number of
+                       seconds.
+            override_animations (boolean):
+                True: Disables showing all platform skill animations.
+                False: 'Default' always show animations.
+        """
+        self["text"] = text
+        self["title"] = title
+        self.show_page("SYSTEM_TextFrame.qml", override_idle,
+                       override_animations)
+
+    def show_image(self, url, caption=None,
+                   title=None, fill=None,
+                   override_idle=None, override_animations=False):
+        """Display a GUI page for viewing an image.
+
+        Arguments:
+            url (str): Pointer to the image
+            caption (str): A caption to show under the image
+            title (str): A title to display above the image content
+            fill (str): Fill type supports 'PreserveAspectFit',
+            'PreserveAspectCrop', 'Stretch'
+            override_idle (boolean, int):
+                True: Takes over the resting page indefinitely
+                (int): Delays resting page for the specified number of
+                       seconds.
+            override_animations (boolean):
+                True: Disables showing all platform skill animations.
+                False: 'Default' always show animations.
+        """
+        self["image"] = url
+        self["title"] = title
+        self["caption"] = caption
+        self["fill"] = fill
+        self.show_page("SYSTEM_ImageFrame.qml", override_idle,
+                       override_animations)
+
+    def show_animated_image(self, url, caption=None,
+                            title=None, fill=None,
+                            override_idle=None, override_animations=False):
+        """Display a GUI page for viewing an image.
+
+        Arguments:
+            url (str): Pointer to the .gif image
+            caption (str): A caption to show under the image
+            title (str): A title to display above the image content
+            fill (str): Fill type supports 'PreserveAspectFit',
+            'PreserveAspectCrop', 'Stretch'
+            override_idle (boolean, int):
+                True: Takes over the resting page indefinitely
+                (int): Delays resting page for the specified number of
+                       seconds.
+            override_animations (boolean):
+                True: Disables showing all platform skill animations.
+                False: 'Default' always show animations.
+        """
+        self["image"] = url
+        self["title"] = title
+        self["caption"] = caption
+        self["fill"] = fill
+        self.show_page("SYSTEM_AnimatedImageFrame.qml", override_idle,
+                       override_animations)
+
+    def show_html(self, html, resource_url=None, override_idle=None,
+                  override_animations=False):
+        """Display an HTML page in the GUI.
+
+        Arguments:
+            html (str): HTML text to display
+            resource_url (str): Pointer to HTML resources
+            override_idle (boolean, int):
+                True: Takes over the resting page indefinitely
+                (int): Delays resting page for the specified number of
+                       seconds.
+            override_animations (boolean):
+                True: Disables showing all platform skill animations.
+                False: 'Default' always show animations.
+        """
+        self["html"] = html
+        self["resourceLocation"] = resource_url
+        self.show_page("SYSTEM_HtmlFrame.qml", override_idle,
+                       override_animations)
+
+    def show_url(self, url, override_idle=None,
+                 override_animations=False):
+        """Display an HTML page in the GUI.
+
+        Arguments:
+            url (str): URL to render
+            override_idle (boolean, int):
+                True: Takes over the resting page indefinitely
+                (int): Delays resting page for the specified number of
+                       seconds.
+            override_animations (boolean):
+                True: Disables showing all platform skill animations.
+                False: 'Default' always show animations.
+        """
+        self["url"] = url
+        self.show_page("SYSTEM_UrlFrame.qml", override_idle,
+                       override_animations)
+
+    def show_confirmation_status(self, text="", override_idle=False,
+                                 override_animations=False):
+        # NOT YET PRed to mycroft-core, taken from gez-mycroft wifi GUI test skill
+        self.clear()
+        self["icon"] = resolve_ovos_resource_file("ui/icons/check-circle.svg")
+        self["label"] = text
+        self["bgColor"] = "#40DBB0"
+        self.show_page("SYSTEM_status.qml", override_idle=override_idle,
+                       override_animations=override_animations)
+
+    def show_error_status(self, text="", override_idle=False,
+                          override_animations=False):
+        # NOT YET PRed to mycroft-core, taken from gez-mycroft wifi GUI test skill
+        self.clear()
+        self["icon"] = resolve_ovos_resource_file("ui/icons/times-circle.svg")
+        self["label"] = text
+        self["bgColor"] = "#FF0000"
+        self.show_page("SYSTEM_status.qml", override_idle=override_idle,
+                       override_animations=override_animations)
+
+    # Media playback interactions
+    def play_video(self, url, title="", repeat=None, override_idle=True,
+                   override_animations=True):
+        """ Play video stream
+
+        Arguments:
+            url (str): URL of video source
+            title (str): Title of media to be displayed
+            repeat (boolean, int):
+                True: Infinitly loops the current video track
+                (int): Loops the video track for specified number of
+                times.
+            override_idle (boolean, int):
+                True: Takes over the resting page indefinitely
+                (int): Delays resting page for the specified number of
+                       seconds.
+            override_animations (boolean):
+                True: Disables showing all platform skill animations.
+                False: 'Default' always show animations.
+        """
+        self["playStatus"] = "play"
+        self["video"] = url
+        self["title"] = title
+        self["playerRepeat"] = repeat
+        self.video_info = {"title": title, "url": url}
+        self.show_page("SYSTEM_VideoPlayer.qml",
+                       override_idle=override_idle,
+                       override_animations=override_animations)
+
+    @property
+    def is_video_displayed(self):
+        """Returns whether the gui is in a video playback state.
+        Eg if the video is paused, it would still be displayed on screen
+        but the video itself is not "playing" so to speak"""
+        return self.video_info is not None
+
+    @property
+    def playback_status(self):
+        """Returns gui playback status,
+        indicates if gui is playing, paused or stopped"""
+        if self.__session_data.get("playStatus", -1) == "play":
+            return GUIPlaybackStatus.PLAYING
+        if self.__session_data.get("playStatus", -1) == "pause":
+            return GUIPlaybackStatus.PAUSED
+        if self.__session_data.get("playStatus", -1) == "stop":
+            return GUIPlaybackStatus.STOPPED
+        return GUIPlaybackStatus.UNDEFINED
+
+    def pause_video(self):
+        """Pause video playback."""
+        if self.is_video_displayed:
+            self["playStatus"] = "pause"
+
+    def stop_video(self):
+        """Stop video playback."""
+        if self.is_video_displayed:
+            self["playStatus"] = "stop"
+            self.release()
+        self.video_info = None
+
+    def resume_video(self):
+        """Resume paused video playback."""
+        if self.__session_data.get("playStatus", "stop") == "pause":
+            self["playStatus"] = "play"
+
+
 if __name__ == "__main__":
     from ovos_utils import wait_for_exit_signal
+
     LOG.set_level("DEBUG")
     g = GUITracker()
     wait_for_exit_signal()
