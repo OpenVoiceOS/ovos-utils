@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='ovos_utils',
-    version='0.0.8',
+    version='0.0.9a1',
     packages=['ovos_utils',
               'ovos_utils.intents',
               'ovos_utils.sound',
@@ -22,7 +22,7 @@ setup(
         "requests",
         "inflection"],
     extras_require={
-        "extras": ["phoneme_guesser", "colour"]
+        "extras": ["phoneme_guesser", "colour", "rapidfuzz"]
     },
     include_package_data=True,
     license='Apache',

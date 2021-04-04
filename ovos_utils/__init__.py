@@ -67,6 +67,18 @@ def resolve_ovos_resource_file(res_name):
     if os.path.isfile(filename):
         return filename
 
+    # let's look in ovos_workshop if it's installed
+    try:
+        import ovos_workshop
+        pkg_dir = dirname(ovos_workshop.__file__)
+        filename = join(pkg_dir, "res", res_name)
+        if os.path.isfile(filename):
+            return filename
+        filename = join(pkg_dir, "res", "ui", res_name)
+        if os.path.isfile(filename):
+            return filename
+    except:
+        pass
     return None  # Resource cannot be resolved
 
 
@@ -224,3 +236,4 @@ def datestr2ts(datestr):
     d = int(datestr[-2:])
     dt = datetime.datetime(y, m, d)
     return dt.timestamp()
+
