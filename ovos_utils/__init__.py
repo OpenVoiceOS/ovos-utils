@@ -12,13 +12,12 @@
 #
 from threading import Thread
 from time import sleep
-import requests
 import os
 from os.path import isdir, join, dirname
 import re
-import socket
 import datetime
 import kthread
+from ovos_utils.network_utils import *
 from inflection import camelize, titleize, transliterate, parameterize, \
     ordinalize
 
@@ -34,24 +33,6 @@ def ensure_mycroft_import():
             sys.path.append(MYCROFT_ROOT_PATH)
         else:
             raise
-
-
-def get_ip():
-    # taken from https://stackoverflow.com/a/28950776/13703283
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        # doesn't even have to be reachable
-        s.connect(('10.255.255.255', 1))
-        IP = s.getsockname()[0]
-    except Exception:
-        IP = '127.0.0.1'
-    finally:
-        s.close()
-    return IP
-
-
-def get_external_ip():
-    return requests.get('https://api.ipify.org').text
 
 
 def resolve_ovos_resource_file(res_name):
