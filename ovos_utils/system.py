@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-import sys
 import os
 import subprocess
 import re
@@ -9,7 +7,8 @@ import sysconfig
 from enum import Enum
 import platform
 import socket
-from os.path import expanduser, exists, join
+from xdg import BaseDirectory as XDG
+from os.path import expanduser, exists, join, isfile
 
 
 class MycroftRootLocations(str, Enum):
@@ -22,6 +21,37 @@ class MycroftRootLocations(str, Enum):
     HOME = expanduser("~/mycroft-core")  # git clones
 
 
+# system utils
+def ntp_sync():
+    # Force the system clock to synchronize with internet time servers
+    subprocess.call('service ntp stop', shell=True)
+    subprocess.call('ntpd -gq', shell=True)
+    subprocess.call('service ntp start', shell=True)
+
+
+def system_shutdown():
+    # Turn the system completely off (with no option to inhibit it)
+    subprocess.call('sudo systemctl poweroff -i', shell=True)
+
+
+def system_reboot():
+    # Shut down and restart the system
+    subprocess.call('sudo systemctl reboot -i', shell=True)
+
+
+def ssh_enable():
+    # Permanently allow SSH access
+    subprocess.call('sudo systemctl enable ssh.service', shell=True)
+    subprocess.call('sudo systemctl start ssh.service', shell=True)
+
+
+def ssh_disable():
+    # Permanently block SSH access from the outside
+    subprocess.call('sudo systemctl stop ssh.service', shell=True)
+    subprocess.call('sudo systemctl disable ssh.service', shell=True)
+
+
+# platform fingerprinting
 def find_root_from_sys_path():
     """Find mycroft root folder from sys.path, eg. venv site-packages."""
     for p in [path for path in sys.path if path != '']:
@@ -161,34 +191,88 @@ def get_platform_fingerprint():
         "can_display": has_screen(),
         "is_gui_installed": is_installed("mycroft-gui-app"),
         "is_vlc_installed": is_installed("vlc"),
-        "pulseaudio_running": is_process_running("pulseaudio")
+        "pulseaudio_running": is_process_running("pulseaudio"),
+        "core_supports_xdg": core_supports_xdg(),
+        "core_version": {
+            "version_str": get_mycroft_version(),
+            "is_chatterbox_core": is_chatterbox_core(),
+            "is_neon_core": is_neon_core(),
+            "is_holmes": is_holmes(),
+            "is_ovos": is_ovos(),
+            "is_mycroft_core": is_mycroft_core()
+        }
     }
 
 
-def ntp_sync():
-    # Force the system clock to synchronize with internet time servers
-    subprocess.call('service ntp stop', shell=True)
-    subprocess.call('ntpd -gq', shell=True)
-    subprocess.call('service ntp start', shell=True)
+def get_mycroft_version():
+    try:
+        from mycroft.version import CORE_VERSION_STR
+        return CORE_VERSION_STR
+    except:
+        pass
+
+    root = search_mycroft_core_location()
+    if root:
+        version_file = join(root, "version", "__init__.py")
+        if not isfile(version_file):
+            version_file = join(root, "mycroft", "version", "__init__.py")
+        if isfile(version_file):
+            version = []
+            with open(version_file) as f:
+                text = f.read()
+                version.append(
+                    text.split("CORE_VERSION_MAJOR =")[-1].split("\n")[0].strip())
+                version.append(
+                    text.split("CORE_VERSION_MINOR =")[-1].split("\n")[0].strip())
+                version.append(
+                    text.split("CORE_VERSION_BUILD =")[-1].split("\n")[0].strip())
+                version = ".".join(version)
+                if "CORE_VERSION_STR = '.'.join(map(str, " \
+                   "CORE_VERSION_TUPLE)) + " in text:
+                    version += text.split(
+                        "CORE_VERSION_STR = '.'.join(map(str, "
+                        "CORE_VERSION_TUPLE)) + ")[-1].split("\n")[0][1:-1]
+                return version
+        return None
 
 
-def system_shutdown():
-    # Turn the system completely off (with no option to inhibit it)
-    subprocess.call('sudo systemctl poweroff -i', shell=True)
+def is_chatterbox_core():
+    try:
+        import chatterbox
+        return True
+    except ImportError:
+        return False
 
 
-def system_reboot():
-    # Shut down and restart the system
-    subprocess.call('sudo systemctl reboot -i', shell=True)
+def is_neon_core():
+    try:
+        import neon_core
+        return True
+    except ImportError:
+        return False
 
 
-def ssh_enable():
-    # Permanently allow SSH access
-    subprocess.call('sudo systemctl enable ssh.service', shell=True)
-    subprocess.call('sudo systemctl start ssh.service', shell=True)
+def is_mycroft_core():
+    try:
+        import mycroft
+        return True
+    except ImportError:
+        return False
 
 
-def ssh_disable():
-    # Permanently block SSH access from the outside
-    subprocess.call('sudo systemctl stop ssh.service', shell=True)
-    subprocess.call('sudo systemctl disable ssh.service', shell=True)
+def is_holmes():
+    return "HolmesV" in (get_mycroft_version() or "")
+
+
+def is_ovos():
+    return "OpenVoiceOS" in (get_mycroft_version() or "")
+
+
+def core_supports_xdg():
+    if any((is_holmes(), is_ovos(), is_neon_core(), is_chatterbox_core())):
+        return True
+    # mycroft-core does not support XDG as of 10 may 2021
+    # however there are patched versions out there, eg, alpine package
+    # check if the .conf exists in new location
+    # TODO deprecate
+    return isfile(join(XDG.save_config_path('mycroft'), 'mycroft.conf'))

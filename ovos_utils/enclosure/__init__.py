@@ -1,7 +1,6 @@
 from ovos_utils.system import MycroftRootLocations
-from ovos_utils.log import LOG
 from enum import Enum
-from os.path import exists, join
+from os.path import exists
 
 
 class MycroftEnclosures(str, Enum):
@@ -11,6 +10,7 @@ class MycroftEnclosures(str, Enum):
     OLD_MARK1 = "mycroft_mark_1(old)"
     MARK1 = "mycroft_mark_1"
     MARK2 = "mycroft_mark_2"
+    GENERIC = "generic"  # default value for HolmesV derivatives
     OTHER = "unknown"
 
 
@@ -54,5 +54,7 @@ def detect_enclosure():
         return MycroftEnclosures.MARK2
     elif fingerprint == "picroft":
         return MycroftEnclosures.PICROFT
+    elif fingerprint == "generic":
+        return MycroftEnclosures.GENERIC
 
     return MycroftEnclosures.OTHER
