@@ -1,14 +1,21 @@
-from ovos_utils.log import LOG
-from ovos_utils.enclosure import detect_enclosure
-from ovos_utils.enclosure import MycroftEnclosures
-from ovos_utils.json_helper import merge_dict, load_commented_json
-from ovos_utils.system import search_mycroft_core_location
 from os.path import isfile, exists, expanduser, join, dirname, isdir
 from os import makedirs
 import json
 
+from ovos_utils.log import LOG
+from ovos_utils.json_helper import merge_dict, load_commented_json
+from ovos_utils.system import search_mycroft_core_location, core_supports_xdg
+from xdg import BaseDirectory as XDG
+
+
 MYCROFT_SYSTEM_CONFIG = "/etc/mycroft/mycroft.conf"
-MYCROFT_USER_CONFIG = join(expanduser("~"), ".mycroft", "mycroft.conf")
+MYCROFT_OLD_USER_CONFIG = join(expanduser("~"), ".mycroft", "mycroft.conf")
+MYCROFT_XDG_USER_CONFIG = join(XDG.save_config_path('mycroft'), 'mycroft.conf')
+
+if core_supports_xdg():
+    MYCROFT_USER_CONFIG = MYCROFT_XDG_USER_CONFIG
+else:
+    MYCROFT_USER_CONFIG = MYCROFT_OLD_USER_CONFIG
 
 
 def get_config_fingerprint(config=None):
@@ -46,7 +53,7 @@ def update_mycroft_config(config, path=None):
     return conf
 
 
-# TODO use json_database.JsonStorage
+# TODO consider using json_database.JsonStorage
 class LocalConf(dict):
     """
         Config dict from file.
@@ -138,11 +145,28 @@ class ReadOnlyConfig(LocalConf):
 
 class MycroftUserConfig(LocalConf):
     def __init__(self):
-        path = MYCROFT_USER_CONFIG
-        enclosure = detect_enclosure()
-        if enclosure == MycroftEnclosures.MARK1 or \
-                enclosure == MycroftEnclosures.OLD_MARK1:
-            path = "/home/mycroft/.mycroft/mycroft.conf"
+        if core_supports_xdg():
+            path = MYCROFT_XDG_USER_CONFIG
+        else:
+            path = MYCROFT_USER_CONFIG
+
+            # mark1 runs as a different user
+            try:
+                from ovos_utils.enclosure import detect_enclosure
+                from ovos_utils.enclosure import MycroftEnclosures
+                enclosure = detect_enclosure()
+                if enclosure == MycroftEnclosures.MARK1 or \
+                        enclosure == MycroftEnclosures.OLD_MARK1:
+                    path = "/home/mycroft/.mycroft/mycroft.conf"
+            except Exception as e:
+                pass
+
+        if not isfile(path) and isfile(MYCROFT_OLD_USER_CONFIG):
+            # xdg might be disabled in HolmesV compatibility mode
+            # or migration might be in progress
+            # (user action required when updated from a no xdg install)
+            path = MYCROFT_OLD_USER_CONFIG
+
         super().__init__(path)
 
 
@@ -169,4 +193,7 @@ class MycroftSystemConfig(ReadOnlyConfig):
         super().__init__(MYCROFT_SYSTEM_CONFIG, allow_overwrite)
 
 
-
+class MycroftXDGConfig(LocalConf):
+    def __init__(self):
+        path = MYCROFT_XDG_USER_CONFIG
+        super().__init__(path)
