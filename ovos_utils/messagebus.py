@@ -5,33 +5,26 @@ from ovos_utils import create_loop
 from ovos_utils.json_helper import merge_dict
 import time
 import json
+from pyee import BaseEventEmitter
+from threading import Event
 
 
 class FakeBus:
     def __init__(self, *args, **kwargs):
-        self.events = {}
-        self.once_events = {}
-        self.received_msgs = []
+        self.started_running = False
+        self.ee = kwargs.get("emitter") or BaseEventEmitter()
+        self.ee.on("error", self.on_error)
+        self.on_open()
 
     def on(self, msg_type, handler):
-        if msg_type not in self.events:
-            self.events[msg_type] = []
-        self.events[msg_type].append(handler)
+        self.ee.on(msg_type, handler)
 
     def once(self, msg_type, handler):
-        if msg_type not in self.once_events:
-            self.once_events[msg_type] = []
-        self.once_events[msg_type].append(handler)
+        self.ee.once(msg_type, handler)
 
     def emit(self, message):
-        self.received_msgs.append(message)
-        if message.msg_type in self.events:
-            for handler in self.events[message.msg_type]:
-                handler(message)
-        if message.msg_type in self.once_events:
-            for handler in self.once_events[message.msg_type]:
-                handler(message)
-            self.once_events.pop(message.msg_type)
+        self.ee.emit("message", message.serialize())
+        self.ee.emit(message.msg_type, message)
 
     def wait_for_message(self, message_type, timeout=3.0):
         """Wait for a message of a specific type.
@@ -43,13 +36,19 @@ class FakeBus:
         Returns:
             The received message or None if the response timed out
         """
-        start = time.monotonic()
-        while time.monotonic() - start <= timeout:
-            time.sleep(0.1)
-            for m in self.received_msgs:
-                if m.msg_type == message_type:
-                    return m
-        return None
+        received_event = Event()
+        received_event.clear()
+
+        msg = None
+
+        def rcv(m):
+            nonlocal msg
+            msg = m
+            received_event.set()
+
+        self.ee.once(message_type, rcv)
+        received_event.wait(timeout)
+        return msg
 
     def wait_for_response(self, message, reply_type=None, timeout=3.0):
         """Send a message and wait for a response.
@@ -63,35 +62,36 @@ class FakeBus:
         Returns:
             The received message or None if the response timed out
         """
-        start = time.monotonic()
         reply_type = reply_type or message.msg_type + ".response"
+        received_event = Event()
+        received_event.clear()
+
+        msg = None
+
+        def rcv(m):
+            nonlocal msg
+            msg = m
+            received_event.set()
+
+        self.ee.once(reply_type, rcv)
         self.emit(message)
-        while time.monotonic() - start <= timeout:
-            time.sleep(0.1)
-            for m in self.received_msgs:
-                if m.msg_type == reply_type:
-                    return m
-        return None
+        received_event.wait(timeout)
+        return msg
 
     def remove(self, msg_type, handler):
-        if msg_type in self.events:
-            if handler in self.events[msg_type]:
-                self.events[msg_type].remove(handler)
-        if msg_type in self.once_events:
-            if handler in self.once_events[msg_type]:
-                self.once_events[msg_type].remove(handler)
+        try:
+            self.ee.remove_listener(msg_type, handler)
+        except:
+            pass
 
     def remove_all_listeners(self, event_name):
-        if event_name in self.events:
-            self.events.pop(event_name)
-        if event_name in self.once_events:
-            self.once_events.pop(event_name)
+        self.ee.remove_all_listeners(event_name)
 
     def create_client(self):
         return self
 
     def on_error(self, error):
-        pass
+        LOG.error(error)
 
     def on_open(self):
         pass
@@ -100,10 +100,13 @@ class FakeBus:
         pass
 
     def run_forever(self):
-        pass
+        self.started_running = True
+
+    def run_in_thread(self):
+        self.run_forever()
 
     def close(self):
-        pass
+        self.on_close()
 
 
 def get_websocket(host, port, route='/', ssl=False, threaded=True):
