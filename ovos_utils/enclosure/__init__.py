@@ -1,16 +1,19 @@
 from ovos_utils.system import MycroftRootLocations
+from ovos_utils.fingerprinting import detect_platform, MycroftPlatform
 from enum import Enum
 from os.path import exists
 
 
 class MycroftEnclosures(str, Enum):
     PICROFT = "picroft"
-    BIGSCREEN = "mycroft_mark_2"  # TODO handle bigscreen
+    BIGSCREEN = "kde"
     OVOS = "OpenVoiceOS"
     OLD_MARK1 = "mycroft_mark_1(old)"
     MARK1 = "mycroft_mark_1"
     MARK2 = "mycroft_mark_2"
-    GENERIC = "generic"  # default value for HolmesV derivatives
+    HOLMESV = "HolmesV"
+    OLD_HOLMES = "mycroft-lib"
+    GENERIC = "generic"
     OTHER = "unknown"
 
 
@@ -23,38 +26,31 @@ def enclosure2rootdir(enclosure=None):
     elif enclosure == MycroftEnclosures.MARK2:
         return MycroftRootLocations.MARK2
     elif enclosure == MycroftEnclosures.PICROFT:
-        return MycroftRootLocations.PICROFT
+        return MycroftPlatform.PICROFT
     elif enclosure == MycroftEnclosures.OVOS:
-        return MycroftRootLocations.OVOS
+        return MycroftPlatform.OVOS
     elif enclosure == MycroftEnclosures.BIGSCREEN:
-        return MycroftRootLocations.BIGSCREEN
-
+        return MycroftPlatform.BIGSCREEN
     return None
 
 
 def detect_enclosure():
-    # TODO avoid circular import better
-    # this is the only safe import to use from ovos_utils.configuration,
-    # other methods are NOT, because they depend on this method directly,
-    # ie, configuration objects use detect_enclosure
-    from ovos_utils.configuration import MycroftSystemConfig
-
-    # TODO very naive check, improve this
-    # use db of reference fingerprints
-    fingerprint = MycroftSystemConfig()\
-        .get("enclosure", {}).get("platform", "unknown")
-    if fingerprint == "OpenVoiceOS":
-        return MycroftEnclosures.OVOS
-    elif fingerprint == "mycroft_mark_1":
+    platform = detect_platform()
+    if platform == MycroftPlatform.MARK1:
         if exists(MycroftRootLocations.OLD_MARK1):
             return MycroftEnclosures.OLD_MARK1
         return MycroftEnclosures.MARK1
-    elif fingerprint == "mycroft_mark_2":
-        # TODO bigscreen also reports this...
+    elif platform == MycroftPlatform.MARK2:
         return MycroftEnclosures.MARK2
-    elif fingerprint == "picroft":
+    elif platform == MycroftPlatform.PICROFT:
         return MycroftEnclosures.PICROFT
-    elif fingerprint == "generic":
-        return MycroftEnclosures.GENERIC
+    elif platform == MycroftPlatform.OVOS:
+        return MycroftEnclosures.OVOS
+    elif platform == MycroftPlatform.BIGSCREEN:
+        return MycroftEnclosures.BIGSCREEN
+    elif platform == MycroftPlatform.HOLMESV:
+        return MycroftEnclosures.HOLMESV
+    elif platform == MycroftPlatform.OLD_HOLMES:
+        return MycroftEnclosures.OLD_HOLMES
 
     return MycroftEnclosures.OTHER

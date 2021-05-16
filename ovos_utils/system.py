@@ -5,10 +5,9 @@ import shutil
 import sys
 import sysconfig
 from enum import Enum
-import platform
-import socket
-from xdg import BaseDirectory as XDG
+
 from os.path import expanduser, exists, join, isfile
+from ovos_utils.log import LOG
 
 
 class MycroftRootLocations(str, Enum):
@@ -19,6 +18,9 @@ class MycroftRootLocations(str, Enum):
     MARK1 = "/opt/venvs/mycroft-core/lib/python3.7/site-packages"
     MARK2 = "/opt/mycroft"
     HOME = expanduser("~/mycroft-core")  # git clones
+
+
+_USER_DEFINED_ROOT = None
 
 
 # system utils
@@ -52,6 +54,12 @@ def ssh_disable():
 
 
 # platform fingerprinting
+def set_root_path(path):
+    global _USER_DEFINED_ROOT
+    _USER_DEFINED_ROOT = path
+    LOG.info(f"mycroft root set to {path}")
+
+
 def find_root_from_sys_path():
     """Find mycroft root folder from sys.path, eg. venv site-packages."""
     for p in [path for path in sys.path if path != '']:
@@ -73,6 +81,9 @@ def find_root_from_sitepackages():
 def search_mycroft_core_location():
     """Check python path (.venv), system packages and finally known mycroft
     locations."""
+    # downstream wants to override the root location
+    if _USER_DEFINED_ROOT:
+        return _USER_DEFINED_ROOT
     # if we are in a .venv that should take precedence over everything else
     if find_root_from_sitepackages():
         return find_root_from_sitepackages()
@@ -177,102 +188,5 @@ def has_screen():
     return have_display
 
 
-def get_platform_fingerprint():
-    return {
-        "hostname": socket.gethostname(),
-        "platform": platform.platform(),
-        "python_version": platform.python_version(),
-        "system": platform.system(),
-        "version": platform.version(),
-        "arch": platform.machine(),
-        "release": platform.release(),
-        "desktop_env": get_desktop_environment(),
-        "mycroft_core_location": search_mycroft_core_location(),
-        "can_display": has_screen(),
-        "is_gui_installed": is_installed("mycroft-gui-app"),
-        "is_vlc_installed": is_installed("vlc"),
-        "pulseaudio_running": is_process_running("pulseaudio"),
-        "core_supports_xdg": core_supports_xdg(),
-        "core_version": {
-            "version_str": get_mycroft_version(),
-            "is_chatterbox_core": is_chatterbox_core(),
-            "is_neon_core": is_neon_core(),
-            "is_holmes": is_holmes(),
-            "is_ovos": is_ovos(),
-            "is_mycroft_core": is_mycroft_core()
-        }
-    }
 
 
-def get_mycroft_version():
-    try:
-        from mycroft.version import CORE_VERSION_STR
-        return CORE_VERSION_STR
-    except:
-        pass
-
-    root = search_mycroft_core_location()
-    if root:
-        version_file = join(root, "version", "__init__.py")
-        if not isfile(version_file):
-            version_file = join(root, "mycroft", "version", "__init__.py")
-        if isfile(version_file):
-            version = []
-            with open(version_file) as f:
-                text = f.read()
-                version.append(
-                    text.split("CORE_VERSION_MAJOR =")[-1].split("\n")[0].strip())
-                version.append(
-                    text.split("CORE_VERSION_MINOR =")[-1].split("\n")[0].strip())
-                version.append(
-                    text.split("CORE_VERSION_BUILD =")[-1].split("\n")[0].strip())
-                version = ".".join(version)
-                if "CORE_VERSION_STR = '.'.join(map(str, " \
-                   "CORE_VERSION_TUPLE)) + " in text:
-                    version += text.split(
-                        "CORE_VERSION_STR = '.'.join(map(str, "
-                        "CORE_VERSION_TUPLE)) + ")[-1].split("\n")[0][1:-1]
-                return version
-        return None
-
-
-def is_chatterbox_core():
-    try:
-        import chatterbox
-        return True
-    except ImportError:
-        return False
-
-
-def is_neon_core():
-    try:
-        import neon_core
-        return True
-    except ImportError:
-        return False
-
-
-def is_mycroft_core():
-    try:
-        import mycroft
-        return True
-    except ImportError:
-        return False
-
-
-def is_holmes():
-    return "HolmesV" in (get_mycroft_version() or "")
-
-
-def is_ovos():
-    return "OpenVoiceOS" in (get_mycroft_version() or "")
-
-
-def core_supports_xdg():
-    if any((is_holmes(), is_ovos(), is_neon_core(), is_chatterbox_core())):
-        return True
-    # mycroft-core does not support XDG as of 10 may 2021
-    # however there are patched versions out there, eg, alpine package
-    # check if the .conf exists in new location
-    # TODO deprecate
-    return isfile(join(XDG.save_config_path('mycroft'), 'mycroft.conf'))
