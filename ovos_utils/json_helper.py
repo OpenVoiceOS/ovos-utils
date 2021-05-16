@@ -1,7 +1,72 @@
 import json
+from copy import copy
 from json_database.utils import is_jsonifiable, get_key_recursively, \
     get_key_recursively_fuzzy, get_value_recursively_fuzzy, \
     get_value_recursively, jsonify_recursively
+
+
+def nested_get(base, key_list):
+    """Access a nested object in base by item sequence."""
+    if not len(key_list):
+        return None
+    val = copy(base)
+    for key in key_list:
+        if key not in val:
+            return None
+        val = val[key]
+    return val
+
+
+def nested_set(base, key_list, value):
+    """Set a value in a nested object in base by item sequence."""
+    for key in key_list[:-1]:
+        base = base.setdefault(key, {})
+    base[key_list[-1]] = value
+    return base
+
+
+def nested_delete(base, key_list):
+    """Delete a value in a nested object in base by item sequence."""
+    if not len(key_list):
+        return base
+    d = base
+    for key in key_list[:-1]:
+        if key not in base:
+            return base
+        d = d[key]
+    d.pop(key_list[-1])
+    return base
+
+
+def flatten_dict(base, separator=":"):
+    new_dict = {}
+    for key, value in base.items():
+        if isinstance(value, dict):
+            new_dict.update(
+                {separator.join([key, k]): v
+                 for k, v in flatten_dict(value).items()}
+            )
+        else:
+            new_dict[key] = value
+    return new_dict
+
+
+def flattened_get(base, key, separator=":"):
+    return flatten_dict(base, separator=separator).get(key)
+
+
+def flattened_set(base, key, value, separator=":"):
+    keys = key.split(separator)
+    return nested_set(base, keys, value)
+
+
+def flattened_delete(base, key, separator=":"):
+    keys = key.split(separator)
+    return nested_delete(base, keys)
+
+
+def invert_dict(base):
+    return {v: k for k, v in base.items()}
 
 
 def merge_dict(base, delta, merge_lists=False, skip_empty=False,
@@ -109,23 +174,3 @@ def is_compatible_dict(base, delta):
         elif type(base[k]) != type(delta[k]):
             return False
     return True
-
-
-def delete_key_from_dict(key, dictionary):
-    """Recursivily find nested key in a dict and delete it.
-    Arguments:
-        key (str): a period separated list of nested keys to remove
-                   eg "nested.dict.keys"
-        dictionary (dict): the dictionary to remove keys from
-    Returns:
-        Dict: original dictionary with specified keys deleted.
-    """
-    modified_dict = dict(dictionary)
-    key_list = key.split('.')
-    if len(key_list) == 1 and modified_dict.get(key) is not None:
-        del modified_dict[key]
-    elif len(key_list) > 1:
-        remaining_keys = '.'.join(key_list[1:])
-        if modified_dict.get(key_list[0]) is not None:
-            modified_dict[key_list[0]] = delete_key_from_dict(remaining_keys, modified_dict[key_list[0]])
-    return modified_dict
