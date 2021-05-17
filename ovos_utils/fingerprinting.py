@@ -83,7 +83,7 @@ def core_supports_xdg():
     # however there are patched versions out there, eg, alpine package
     # check if the .conf exists in new location
     # TODO deprecate
-    return isfile(join(XDG.save_config_path('mycroft'), 'mycroft.conf'))
+    return isfile(join(XDG.xdg_config_home, 'mycroft', 'mycroft.conf'))
 
 
 def get_mycroft_version():

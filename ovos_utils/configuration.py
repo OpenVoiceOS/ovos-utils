@@ -13,7 +13,7 @@ MYCROFT_DEFAULT_CONFIG = join("{ROOT_PATH}", "mycroft",
                               "configuration", "mycroft.conf")
 MYCROFT_SYSTEM_CONFIG = "/etc/mycroft/mycroft.conf"
 MYCROFT_OLD_USER_CONFIG = join(expanduser("~"), ".mycroft", "mycroft.conf")
-MYCROFT_XDG_USER_CONFIG = join(XDG.save_config_path('mycroft'), 'mycroft.conf')
+MYCROFT_XDG_USER_CONFIG = join(XDG.xdg_config_home, 'mycroft', 'mycroft.conf')
 MYCROFT_USER_CONFIG = MYCROFT_XDG_USER_CONFIG
 
 
@@ -27,7 +27,7 @@ def set_config_name(name, core_folder=None):
                                   "configuration", f"{name}.conf")
     MYCROFT_SYSTEM_CONFIG = f"/etc/{name}/{name}.conf"
     MYCROFT_OLD_USER_CONFIG = join(expanduser("~"), f".{name}", f"{name}.conf")
-    MYCROFT_XDG_USER_CONFIG = join(XDG.save_config_path(name), f'{name}.conf')
+    MYCROFT_XDG_USER_CONFIG = join(XDG.xdg_config_home, name, f'{name}.conf')
     MYCROFT_USER_CONFIG = MYCROFT_XDG_USER_CONFIG
     LOG.info("config paths changed:\n"
              f"DEFAULT: {MYCROFT_DEFAULT_CONFIG}\n"
