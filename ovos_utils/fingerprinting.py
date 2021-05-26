@@ -26,8 +26,10 @@ def detect_platform():
 
 
 def get_config_fingerprint(config=None):
-    from ovos_utils.configuration import read_mycroft_config
-    conf = config or read_mycroft_config()
+    if not config:
+        from ovos_utils.configuration import read_mycroft_config
+        config = read_mycroft_config()
+    conf = config
     listener_conf = conf.get("listener", {})
     skills_conf = conf.get("skills", {})
     return {

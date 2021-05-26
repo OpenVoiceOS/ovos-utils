@@ -5,8 +5,7 @@ from ovos_utils.log import LOG
 from ovos_utils.json_helper import merge_dict, load_commented_json
 from ovos_utils.system import search_mycroft_core_location
 from xdg import BaseDirectory as XDG
-from ovos_utils.fingerprinting import core_supports_xdg, \
-    detect_platform, MycroftPlatform, get_config_fingerprint
+from ovos_utils.fingerprinting import core_supports_xdg
 
 
 MYCROFT_DEFAULT_CONFIG = join("{ROOT_PATH}", "mycroft",
@@ -152,7 +151,9 @@ class MycroftUserConfig(LocalConf):
         else:
             path = MYCROFT_USER_CONFIG
             # mark1 runs as a different user
-            if detect_platform() == MycroftPlatform.MARK1:
+            sysconfig = MycroftSystemConfig()
+            platform_str = sysconfig.get("enclosure", {}).get("platform", "")
+            if platform_str == "mycroft_mark_1":
                 path = "/home/mycroft/.mycroft/mycroft.conf"
 
         if not isfile(path) and isfile(MYCROFT_OLD_USER_CONFIG):
