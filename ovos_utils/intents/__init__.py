@@ -275,7 +275,6 @@ class ConverseTracker:
         WARNING
             we don't have the timestamps so order might be messed up!!
             avoid calling this until
-            https://github.com/MycroftAI/mycroft-core/pull/2786 is merged
         """
         skill_ids = cls.intent_api.get_active_skills(include_timestamps=True)
         if skill_ids:

@@ -114,7 +114,7 @@ def resolve_resource_file(res_name, root_path=None, config=None):
         return filename
 
     # Next look for /opt/mycroft/res/res_name
-    data_dir = os.path.expanduser(config['data_dir'])
+    data_dir = os.path.expanduser(config.get('data_dir', "/opt/mycroft"))
     filename = os.path.expanduser(os.path.join(data_dir, res_name))
     if os.path.isfile(filename):
         return filename
