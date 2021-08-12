@@ -180,13 +180,13 @@ class LocalConf(dict):
                 config = load_commented_json(path)
                 for key in config:
                     self.__setitem__(key, config[key])
-
-                LOG.debug("Configuration {} loaded".format(path))
+                #LOG.debug("Configuration {} loaded".format(path))
             except Exception as e:
                 LOG.error("Error loading configuration '{}'".format(path))
                 LOG.error(repr(e))
         else:
-            LOG.debug("Configuration '{}' not defined, skipping".format(path))
+            pass
+            #LOG.debug("Configuration '{}' not defined, skipping".format(path))
 
     def reload(self):
         self.load_local(self.path)
