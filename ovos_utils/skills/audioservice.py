@@ -13,16 +13,17 @@
 # limitations under the License.
 #
 
-# This file is directly copied from mycroft-core, it's a simple utility to
+# This file is directly copied from HolmesV, it's a simple utility to
 # interface with the AudioService via messagebus outside core
 from os.path import abspath
+from datetime import timedelta
 from ovos_utils.messagebus import Message, get_mycroft_bus
 
 
 def ensure_uri(s):
     """Interprete paths as file:// uri's.
 
-    Arguments:
+    Args:
         s: string to be checked
 
     Returns:
@@ -45,7 +46,7 @@ def ensure_uri(s):
 class AudioServiceInterface:
     """AudioService class for interacting with the audio subsystem
 
-    Arguments:
+    Args:
         bus: Mycroft messagebus connection
     """
 
@@ -55,7 +56,7 @@ class AudioServiceInterface:
     def queue(self, tracks=None):
         """Queue up a track to playing playlist.
 
-        Arguments:
+        Args:
             tracks: track uri or list of track uri's
                     Each track can be added as a tuple with (uri, mime)
                     to give a hint of the mime type to the system
@@ -72,7 +73,7 @@ class AudioServiceInterface:
     def play(self, tracks=None, utterance=None, repeat=None):
         """Start playback.
 
-        Arguments:
+        Args:
             tracks: track uri or list of track uri's
                     Each track can be added as a tuple with (uri, mime)
                     to give a hint of the mime type to the system
@@ -115,44 +116,45 @@ class AudioServiceInterface:
 
     def get_track_length(self):
         """
-        getting the duration of the audio in mlilliseconds
+        getting the duration of the audio in seconds
         """
+        length = 0
         info = self.bus.wait_for_response(
             Message('mycroft.audio.service.get_track_length'),
             timeout=1)
         if info:
-            return info.data.get("length")
-        return 0
+            length = info.data.get("length") or 0
+        return length / 1000  # convert to seconds
 
     def get_track_position(self):
         """
-        get current position in milliseconds
-
-          Args:
-                seconds (int): number of seconds of final position
+        get current position in seconds
         """
+        pos = 0
         info = self.bus.wait_for_response(
             Message('mycroft.audio.service.get_track_position'),
             timeout=1)
         if info:
-            return info.data.get("position")
-        return 0
+            pos = info.data.get("position") or 0
+        return pos / 1000  # convert to seconds
 
-    def set_track_position(self, seconds=1):
+    def set_track_position(self, seconds):
         """Seek X seconds.
 
         Arguments:
             seconds (int): number of seconds to seek, if negative rewind
         """
         self.bus.emit(Message('mycroft.audio.service.set_track_position',
-                              {"seconds": seconds}))
+                              {"position": seconds * 1000}))  # convert to ms
 
     def seek(self, seconds=1):
         """Seek X seconds.
 
-        Arguments:
+        Args:
             seconds (int): number of seconds to seek, if negative rewind
         """
+        if isinstance(seconds, timedelta):
+            seconds = seconds.total_seconds()
         if seconds < 0:
             self.seek_backward(abs(seconds))
         else:
@@ -161,18 +163,22 @@ class AudioServiceInterface:
     def seek_forward(self, seconds=1):
         """Skip ahead X seconds.
 
-        Arguments:
+        Args:
             seconds (int): number of seconds to skip
         """
+        if isinstance(seconds, timedelta):
+            seconds = seconds.total_seconds()
         self.bus.emit(Message('mycroft.audio.service.seek_forward',
                               {"seconds": seconds}))
 
     def seek_backward(self, seconds=1):
         """Rewind X seconds
 
-         Arguments:
+         Args:
             seconds (int): number of seconds to rewind
         """
+        if isinstance(seconds, timedelta):
+            seconds = seconds.total_seconds()
         self.bus.emit(Message('mycroft.audio.service.seek_backward',
                               {"seconds": seconds}))
 
