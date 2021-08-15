@@ -103,6 +103,10 @@ class GUITracker:
     def is_gui_installed():
         return is_gui_installed()
 
+    @staticmethod
+    def is_gui_running():
+        return is_gui_running()
+
     def is_gui_connected(self):
         return is_gui_connected(self.bus)
 
@@ -432,8 +436,9 @@ class GUIInterface:
 
     @property
     def connected(self):
-        """Returns True if at least 1 gui is connected, else False"""
-        return is_gui_connected(self.bus)
+        """Returns True if at least 1 remote gui is connected or if gui is
+        installed and running locally, else False"""
+        return can_use_gui(self.bus)
 
     def build_message_type(self, event):
         """Builds a message matching the output from the enclosure."""
