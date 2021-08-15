@@ -1,11 +1,12 @@
-from ovos_utils.system import is_installed, has_screen
-from ovos_utils import resolve_ovos_resource_file, resolve_resource_file
-from ovos_utils.messagebus import wait_for_reply, get_mycroft_bus, Message
-from ovos_utils.log import LOG
-from collections import namedtuple
 import time
-from os.path import join
+from collections import namedtuple
 from enum import IntEnum
+from os.path import join
+
+from ovos_utils import resolve_ovos_resource_file, resolve_resource_file
+from ovos_utils.log import LOG
+from ovos_utils.messagebus import wait_for_reply, get_mycroft_bus, Message
+from ovos_utils.system import is_installed, has_screen
 
 
 def can_display():
@@ -278,7 +279,8 @@ class GUITracker:
                     self.__move_namespace(index, 0)
 
                 # Find if any new pages needs to be inserted
-                new_pages = [p for p in pages if p not in self._loaded[0].pages]
+                new_pages = [p for p in pages if
+                             p not in self._loaded[0].pages]
                 if new_pages:
                     self.__insert_pages(namespace, new_pages)
         except Exception as e:
@@ -379,6 +381,18 @@ class GUITracker:
         self._is_idle = True
 
 
+class _GUIDict(dict):
+    """ this is an helper dictionay subclass, it ensures that value changed
+    in it are propagated to the GUI service real time"""
+    def __init__(self, gui, **kwargs):
+        self.gui = gui
+        super().__init__(**kwargs)
+
+    def __setitem__(self, key, value):
+        super(_GUIDict, self).__setitem__(key, value)
+        self.gui._sync_data()
+
+
 class GUIInterface:
     """Interface to the Graphical User Interface, allows interaction with
     the mycroft-gui from anywhere
@@ -392,7 +406,7 @@ class GUIInterface:
         text: sessionData.time
     """
 
-    def __init__(self, skill_id, bus=None, remote_server=None):
+    def __init__(self, skill_id, bus=None, remote_server=None, config=None):
         self.bus = bus or get_mycroft_bus()
         self.__session_data = {}  # synced to GUI for use by this skill's pages
         self.page = None  # the active GUI page (e.g. QML template) to show
@@ -400,7 +414,6 @@ class GUIInterface:
         self.on_gui_changed_callback = None
         self.remote_url = remote_server
         self._events = []
-        self.video_info = None
         self.setup_default_handlers()
 
     @property
@@ -408,13 +421,18 @@ class GUIInterface:
         """Returns True if at least 1 gui is connected, else False"""
         return is_gui_connected(self.bus)
 
+    def build_message_type(self, event):
+        """Builds a message matching the output from the enclosure."""
+        if not event.startswith(f'{self.skill_id}.'):
+            event = f'{self.skill_id}.' + event
+        return event
+
     # events
     def setup_default_handlers(self):
         """Sets the handlers for the default messages."""
-        self.register_handler('set', self.handle_gui_set)
-        # should be emitted by self.play_video
-        self.register_handler('playback.ended',
-                              self.handle_gui_stop)
+        msg_type = self.build_message_type('set')
+        self.bus.on(msg_type, self.gui_set)
+        self._events.append((msg_type, self.gui_set))
 
     def register_handler(self, event, handler):
         """Register a handler for GUI events.
@@ -424,12 +442,11 @@ class GUIInterface:
         When using the triggerEvent method from Qt
         triggerEvent("event", {"data": "cool"})
 
-        Arguments:
+        Args:
             event (str):    event to catch
             handler:        function to handle the event
         """
-        if not event.startswith(f'{self.skill_id}.'):
-            event = f'{self.skill_id}.' + event
+        event = self.build_message_type(event)
         self._events.append((event, handler))
         self.bus.on(event, handler)
 
@@ -441,6 +458,59 @@ class GUIInterface:
             callback:   Function to call when a value is changed
         """
         self.on_gui_changed_callback = callback
+
+    # internals
+    def gui_set(self, message):
+        """Handler catching variable changes from the GUI.
+
+        Arguments:
+            message: Messagebus message
+        """
+        for key in message.data:
+            self[key] = message.data[key]
+        if self.on_gui_changed_callback:
+            self.on_gui_changed_callback()
+
+    def _sync_data(self):
+        data = self.__session_data.copy()
+        data.update({'__from': self.skill_id})
+        self.bus.emit(Message("gui.value.set", data))
+
+    def __setitem__(self, key, value):
+        """Implements set part of dict-like behaviour with named keys."""
+
+        # cast to helper dict subclass that syncs data
+        if isinstance(value, dict) and not isinstance(value, _GUIDict):
+            value = _GUIDict(self, **value)
+
+        self.__session_data[key] = value
+
+        # emit notification (but not needed if page has not been shown yet)
+        if self.page:
+            self._sync_data()
+
+    def __getitem__(self, key):
+        """Implements get part of dict-like behaviour with named keys."""
+        return self.__session_data[key]
+
+    def get(self, *args, **kwargs):
+        """Implements the get method for accessing dict keys."""
+        return self.__session_data.get(*args, **kwargs)
+
+    def __contains__(self, key):
+        """Implements the "in" operation."""
+        return self.__session_data.__contains__(key)
+
+    def clear(self):
+        """Reset the value dictionary, and remove namespace from GUI.
+
+        This method does not close the GUI for a Skill. For this purpose see
+        the `release` method.
+        """
+        self.__session_data = {}
+        self.page = None
+        self.bus.emit(Message("gui.clear.namespace",
+                              {"__from": self.skill_id}))
 
     def send_event(self, event_name, params=None):
         """Trigger a gui event.
@@ -455,44 +525,6 @@ class GUIInterface:
                               {"__from": self.skill_id,
                                "event_name": event_name,
                                "params": params}))
-
-    # internals
-    def handle_gui_stop(self, message):
-        """Stop video playback in gui"""
-        self.stop_video()
-
-    def handle_gui_set(self, message):
-        """Handler catching variable changes from the GUI.
-
-        Arguments:
-            message: Messagebus message
-        """
-        for key in message.data:
-            self[key] = message.data[key]
-        if self.on_gui_changed_callback:
-            self.on_gui_changed_callback()
-
-    def __setitem__(self, key, value):
-        """Implements set part of dict-like behaviour with named keys."""
-        self.__session_data[key] = value
-
-        if self.page:
-            # emit notification (but not needed if page has not been shown yet)
-            data = self.__session_data.copy()
-            data.update({'__from': self.skill_id})
-            self.bus.emit(Message("gui.value.set", data))
-
-    def __getitem__(self, key):
-        """Implements get part of dict-like behaviour with named keys."""
-        return self.__session_data[key]
-
-    def get(self, *args, **kwargs):
-        """Implements the get method for accessing dict keys."""
-        return self.__session_data.get(*args, **kwargs)
-
-    def __contains__(self, key):
-        """Implements the "in" operation."""
-        return self.__session_data.__contains__(key)
 
     def _pages2uri(self, page_names):
         # Convert pages to full reference
@@ -513,16 +545,6 @@ class GUIInterface:
             else:
                 LOG.error("Unable to find page: {}".format(name))
         return page_urls
-
-    def shutdown(self):
-        """Shutdown gui interface.
-
-        Clear pages loaded through this interface and remove the bus events
-        """
-        self.release()
-        self.video_info = None
-        for event, handler in self._events:
-            self.bus.remove(event, handler)
 
     # base gui interactions
     def show_page(self, name, override_idle=None,
@@ -558,11 +580,14 @@ class GUIInterface:
                 True: Disables showing all platform skill animations.
                 False: 'Default' always show animations.
         """
+        if isinstance(page_names, str):
+            page_names = [page_names]
         if not isinstance(page_names, list):
             raise ValueError('page_names must be a list')
 
         if index > len(page_names):
-            raise ValueError('Default index is larger than page list length')
+            LOG.error('Default index is larger than page list length')
+            index = len(page_names) - 1
 
         self.page = page_names[index]
 
@@ -599,26 +624,6 @@ class GUIInterface:
         self.bus.emit(Message("gui.page.delete",
                               {"page": page_urls,
                                "__from": self.skill_id}))
-
-    def clear(self):
-        """Reset the value dictionary, and remove namespace from GUI.
-
-        This method does not close the GUI for a Skill. For this purpose see
-        the `release` method.
-        """
-        self.__session_data = {}
-        self.page = None
-        self.bus.emit(Message("gui.clear.namespace",
-                              {"__from": self.skill_id}))
-
-    def release(self):
-        """Signal that this skill is no longer using the GUI,
-        allow different platforms to properly handle this event.
-        Also calls self.clear() to reset the state variables
-        Platforms can close the window or go back to previous page"""
-        self.clear()
-        self.bus.emit(Message("mycroft.gui.screen.close",
-                              {"skill_id": self.skill_id}))
 
     # Utils / Templates
     def show_text(self, text, title=None, override_idle=None,
@@ -672,7 +677,7 @@ class GUIInterface:
                             override_idle=None, override_animations=False):
         """Display a GUI page for viewing an image.
 
-        Arguments:
+        Args:
             url (str): Pointer to the .gif image
             caption (str): A caption to show under the image
             title (str): A title to display above the image content
@@ -697,7 +702,7 @@ class GUIInterface:
                   override_animations=False):
         """Display an HTML page in the GUI.
 
-        Arguments:
+        Args:
             html (str): HTML text to display
             resource_url (str): Pointer to HTML resources
             override_idle (boolean, int):
@@ -717,7 +722,7 @@ class GUIInterface:
                  override_animations=False):
         """Display an HTML page in the GUI.
 
-        Arguments:
+        Args:
             url (str): URL to render
             override_idle (boolean, int):
                 True: Takes over the resting page indefinitely
@@ -731,90 +736,23 @@ class GUIInterface:
         self.show_page("SYSTEM_UrlFrame.qml", override_idle,
                        override_animations)
 
-    def show_confirmation_status(self, text="", override_idle=False,
-                                 override_animations=False):
-        # NOT YET PRed to mycroft-core, taken from gez-mycroft wifi GUI test skill
+    def release(self):
+        """Signal that this skill is no longer using the GUI,
+        allow different platforms to properly handle this event.
+        Also calls self.clear() to reset the state variables
+        Platforms can close the window or go back to previous page"""
         self.clear()
-        self["icon"] = resolve_ovos_resource_file("ui/icons/check-circle.svg")
-        self["label"] = text
-        self["bgColor"] = "#40DBB0"
-        self.show_page("SYSTEM_status.qml", override_idle=override_idle,
-                       override_animations=override_animations)
+        self.bus.emit(Message("mycroft.gui.screen.close",
+                              {"skill_id": self.skill_id}))
 
-    def show_error_status(self, text="", override_idle=False,
-                          override_animations=False):
-        # NOT YET PRed to mycroft-core, taken from gez-mycroft wifi GUI test skill
-        self.clear()
-        self["icon"] = resolve_ovos_resource_file("ui/icons/times-circle.svg")
-        self["label"] = text
-        self["bgColor"] = "#FF0000"
-        self.show_page("SYSTEM_status.qml", override_idle=override_idle,
-                       override_animations=override_animations)
+    def shutdown(self):
+        """Shutdown gui interface.
 
-    # Media playback interactions
-    def play_video(self, url, title="", repeat=None, override_idle=True,
-                   override_animations=True):
-        """ Play video stream
-
-        Arguments:
-            url (str): URL of video source
-            title (str): Title of media to be displayed
-            repeat (boolean, int):
-                True: Infinitly loops the current video track
-                (int): Loops the video track for specified number of
-                times.
-            override_idle (boolean, int):
-                True: Takes over the resting page indefinitely
-                (int): Delays resting page for the specified number of
-                       seconds.
-            override_animations (boolean):
-                True: Disables showing all platform skill animations.
-                False: 'Default' always show animations.
+        Clear pages loaded through this interface and remove the bus events
         """
-        self["playStatus"] = "play"
-        self["video"] = url
-        self["title"] = title
-        self["playerRepeat"] = repeat
-        self.video_info = {"title": title, "url": url}
-        self.show_page("SYSTEM_VideoPlayer.qml",
-                       override_idle=override_idle,
-                       override_animations=override_animations)
-
-    @property
-    def is_video_displayed(self):
-        """Returns whether the gui is in a video playback state.
-        Eg if the video is paused, it would still be displayed on screen
-        but the video itself is not "playing" so to speak"""
-        return self.video_info is not None
-
-    @property
-    def playback_status(self):
-        """Returns gui playback status,
-        indicates if gui is playing, paused or stopped"""
-        if self.__session_data.get("playStatus", -1) == "play":
-            return GUIPlaybackStatus.PLAYING
-        if self.__session_data.get("playStatus", -1) == "pause":
-            return GUIPlaybackStatus.PAUSED
-        if self.__session_data.get("playStatus", -1) == "stop":
-            return GUIPlaybackStatus.STOPPED
-        return GUIPlaybackStatus.UNDEFINED
-
-    def pause_video(self):
-        """Pause video playback."""
-        if self.is_video_displayed:
-            self["playStatus"] = "pause"
-
-    def stop_video(self):
-        """Stop video playback."""
-        if self.is_video_displayed:
-            self["playStatus"] = "stop"
-            self.release()
-        self.video_info = None
-
-    def resume_video(self):
-        """Resume paused video playback."""
-        if self.__session_data.get("playStatus", "stop") == "pause":
-            self["playStatus"] = "play"
+        self.release()
+        for event, handler in self._events:
+            self.bus.remove(event, handler)
 
 
 if __name__ == "__main__":
