@@ -6,7 +6,7 @@ from os.path import join
 from ovos_utils import resolve_ovos_resource_file, resolve_resource_file
 from ovos_utils.log import LOG
 from ovos_utils.messagebus import wait_for_reply, get_mycroft_bus, Message
-from ovos_utils.system import is_installed, has_screen
+from ovos_utils.system import is_installed, has_screen, is_process_running
 
 
 def can_display():
@@ -15,6 +15,10 @@ def can_display():
 
 def is_gui_installed():
     return is_installed("mycroft-gui-app")
+
+
+def is_gui_running():
+    return is_process_running("mycroft-gui-app")
 
 
 def is_gui_connected(bus=None):
@@ -26,6 +30,16 @@ def is_gui_connected(bus=None):
     if response:
         return response.data["connected"]
     return False
+
+
+def can_use_local_gui():
+    if can_display() and is_gui_installed() and is_gui_running():
+        return True
+    return False
+
+
+def can_use_gui(bus=None, local=False):
+    return can_use_local_gui() or is_gui_connected(bus)
 
 
 class GUIPlaybackStatus(IntEnum):
