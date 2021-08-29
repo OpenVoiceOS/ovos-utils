@@ -659,9 +659,9 @@ class GUIInterface:
                 transient: 'Default' displays a notification with a timeout.
                 sticky: displays a notification that sticks to the screen.
         """
-        self.skill.bus.emit(Message("homescreen.notification.set",
+        self.bus.emit(Message("homescreen.notification.set",
                                     data={
-                                        "sender": self.skill.skill_id,
+                                        "sender": self.skill_id,
                                         "text": content,
                                         "action": action,
                                         "type": noticetype
