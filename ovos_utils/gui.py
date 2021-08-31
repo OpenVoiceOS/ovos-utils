@@ -18,7 +18,8 @@ def is_gui_installed():
 
 
 def is_gui_running():
-    return is_process_running("mycroft-gui-app")
+    return is_process_running("mycroft-gui-app") or \
+           is_process_running("mycroft-embedded-shell")
 
 
 def is_gui_connected(bus=None):
