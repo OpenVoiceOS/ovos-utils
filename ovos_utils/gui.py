@@ -39,6 +39,8 @@ def can_use_local_gui():
 
 
 def can_use_gui(bus=None, local=False):
+    if local:
+        return can_use_local_gui()
     return can_use_local_gui() or is_gui_connected(bus)
 
 
