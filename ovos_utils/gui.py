@@ -14,7 +14,8 @@ def can_display():
 
 
 def is_gui_installed():
-    return is_installed("mycroft-gui-app")
+    return is_installed("mycroft-gui-app") or \
+           is_installed("mycroft-embedded-shell")
 
 
 def is_gui_running():
