@@ -431,12 +431,18 @@ class GUIInterface:
     def __init__(self, skill_id, bus=None, remote_server=None, config=None):
         self.bus = bus or get_mycroft_bus()
         self.__session_data = {}  # synced to GUI for use by this skill's pages
-        self.page = None  # the active GUI page (e.g. QML template) to show
+        self.pages = []
+        self.current_page_idx = -1
         self.skill_id = skill_id
         self.on_gui_changed_callback = None
         self.remote_url = remote_server
         self._events = []
         self.setup_default_handlers()
+
+    @property
+    def page(self):
+        # the active GUI page (e.g. QML template) to show
+        return self.pages[self.current_page_idx] if len(self.pages) else None
 
     @property
     def connected(self):
@@ -531,7 +537,8 @@ class GUIInterface:
         the `release` method.
         """
         self.__session_data = {}
-        self.page = None
+        self.pages = []
+        self.current_page_idx = -1
         self.bus.emit(Message("gui.clear.namespace",
                               {"__from": self.skill_id}))
 
@@ -612,7 +619,8 @@ class GUIInterface:
             LOG.error('Default index is larger than page list length')
             index = len(page_names) - 1
 
-        self.page = page_names[index]
+        self.pages = page_names
+        self.current_page_idx = index
 
         # First sync any data...
         data = self.__session_data.copy()
