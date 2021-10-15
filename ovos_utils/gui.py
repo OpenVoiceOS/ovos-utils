@@ -429,7 +429,7 @@ class GUIInterface:
     """
 
     def __init__(self, skill_id, bus=None, remote_server=None, config=None):
-        self.bus = bus or get_mycroft_bus()
+        self.bus = bus
         self.__session_data = {}  # synced to GUI for use by this skill's pages
         self.pages = []
         self.current_page_idx = -1
@@ -437,6 +437,11 @@ class GUIInterface:
         self.on_gui_changed_callback = None
         self.remote_url = remote_server
         self._events = []
+        if bus:
+            self.set_bus(bus)
+
+    def set_bus(self, bus=None):
+        self.bus = bus or get_mycroft_bus()
         self.setup_default_handlers()
 
     @property
@@ -448,6 +453,8 @@ class GUIInterface:
     def connected(self):
         """Returns True if at least 1 remote gui is connected or if gui is
         installed and running locally, else False"""
+        if not self.bus:
+            return False
         return can_use_gui(self.bus)
 
     def build_message_type(self, event):
@@ -475,6 +482,8 @@ class GUIInterface:
             event (str):    event to catch
             handler:        function to handle the event
         """
+        if not self.bus:
+            raise RuntimeError("bus not set, did you call self.bind() ?")
         event = self.build_message_type(event)
         self._events.append((event, handler))
         self.bus.on(event, handler)
@@ -501,6 +510,8 @@ class GUIInterface:
             self.on_gui_changed_callback()
 
     def _sync_data(self):
+        if not self.bus:
+            raise RuntimeError("bus not set, did you call self.bind() ?")
         data = self.__session_data.copy()
         data.update({'__from': self.skill_id})
         self.bus.emit(Message("gui.value.set", data))
@@ -539,6 +550,8 @@ class GUIInterface:
         self.__session_data = {}
         self.pages = []
         self.current_page_idx = -1
+        if not self.bus:
+            raise RuntimeError("bus not set, did you call self.bind() ?")
         self.bus.emit(Message("gui.clear.namespace",
                               {"__from": self.skill_id}))
 
@@ -551,6 +564,8 @@ class GUIInterface:
                     should be sent along with the request.
         """
         params = params or {}
+        if not self.bus:
+            raise RuntimeError("bus not set, did you call self.bind() ?")
         self.bus.emit(Message("gui.event.send",
                               {"__from": self.skill_id,
                                "event_name": event_name,
@@ -610,6 +625,8 @@ class GUIInterface:
                 True: Disables showing all platform skill animations.
                 False: 'Default' always show animations.
         """
+        if not self.bus:
+            raise RuntimeError("bus not set, did you call self.bind() ?")
         if isinstance(page_names, str):
             page_names = [page_names]
         if not isinstance(page_names, list):
@@ -649,6 +666,8 @@ class GUIInterface:
             page_names (list): List of page names (str) to display, such as
                                ["Weather.qml", "Forecast.qml", "Other.qml"]
         """
+        if not self.bus:
+            raise RuntimeError("bus not set, did you call self.bind() ?")
         if not isinstance(page_names, list):
             page_names = [page_names]
         page_urls = self._pages2uri(page_names)
@@ -671,6 +690,8 @@ class GUIInterface:
                 transient: 'Default' displays a notification with a timeout.
                 sticky: displays a notification that sticks to the screen.
         """
+        if not self.bus:
+            raise RuntimeError("bus not set, did you call self.bind() ?")
         self.bus.emit(Message("homescreen.notification.set",
                                     data={
                                         "sender": self.skill_id,
@@ -794,6 +815,8 @@ class GUIInterface:
         allow different platforms to properly handle this event.
         Also calls self.clear() to reset the state variables
         Platforms can close the window or go back to previous page"""
+        if not self.bus:
+            raise RuntimeError("bus not set, did you call self.bind() ?")
         self.clear()
         self.bus.emit(Message("mycroft.gui.screen.close",
                               {"skill_id": self.skill_id}))
@@ -803,9 +826,10 @@ class GUIInterface:
 
         Clear pages loaded through this interface and remove the bus events
         """
-        self.release()
-        for event, handler in self._events:
-            self.bus.remove(event, handler)
+        if self.bus:
+            self.release()
+            for event, handler in self._events:
+                self.bus.remove(event, handler)
 
 
 if __name__ == "__main__":

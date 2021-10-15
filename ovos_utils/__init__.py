@@ -12,14 +12,14 @@
 #
 from threading import Thread
 from time import sleep
-import os
-from os.path import isdir, join, dirname
+from os.path import isdir, join
 import re
 import datetime
 import kthread
 from ovos_utils.network_utils import *
 from inflection import camelize, titleize, transliterate, parameterize, \
     ordinalize
+from ovos_utils.file_utils import resolve_ovos_resource_file, resolve_resource_file
 
 
 def ensure_mycroft_import():
@@ -35,33 +35,6 @@ def ensure_mycroft_import():
             raise
 
 
-def resolve_ovos_resource_file(res_name):
-    """Convert a resource into an absolute filename.
-    used internally for ovos resources
-    """
-    # First look for fully qualified file (e.g. a user setting)
-    if os.path.isfile(res_name):
-        return res_name
-
-    # now look in bundled ovos resources
-    filename = join(dirname(__file__), "res", res_name)
-    if os.path.isfile(filename):
-        return filename
-
-    # let's look in ovos_workshop if it's installed
-    try:
-        import ovos_workshop
-        pkg_dir = dirname(ovos_workshop.__file__)
-        filename = join(pkg_dir, "res", res_name)
-        if os.path.isfile(filename):
-            return filename
-        filename = join(pkg_dir, "res", "ui", res_name)
-        if os.path.isfile(filename):
-            return filename
-    except:
-        pass
-    return None  # Resource cannot be resolved
-
 
 def get_mycroft_root():
     paths = [
@@ -74,71 +47,6 @@ def get_mycroft_root():
             return p
     return None
 
-
-def resolve_resource_file(res_name, root_path=None, config=None):
-    """Convert a resource into an absolute filename.
-
-    Resource names are in the form: 'filename.ext'
-    or 'path/filename.ext'
-
-    The system wil look for ~/.mycroft/res_name first, and
-    if not found will look at /opt/mycroft/res_name,
-    then finally it will look for res_name in the 'mycroft/res'
-    folder of the source code package.
-
-    Example:
-    With mycroft running as the user 'bob', if you called
-        resolve_resource_file('snd/beep.wav')
-    it would return either '/home/bob/.mycroft/snd/beep.wav' or
-    '/opt/mycroft/snd/beep.wav' or '.../mycroft/res/snd/beep.wav',
-    where the '...' is replaced by the path where the package has
-    been installed.
-
-    Args:
-        res_name (str): a resource path/name
-        config (dict): mycroft.conf, to read data directory from
-    Returns:
-        str: path to resource or None if no resource found
-    """
-    if config is None:
-        from ovos_utils.configuration import read_mycroft_config
-        config = read_mycroft_config()
-
-    # First look for fully qualified file (e.g. a user setting)
-    if os.path.isfile(res_name):
-        return res_name
-
-    # Now look for ~/.mycroft/res_name (in user folder)
-    filename = os.path.expanduser("~/.mycroft/" + res_name)
-    if os.path.isfile(filename):
-        return filename
-
-    # Next look for /opt/mycroft/res/res_name
-    data_dir = os.path.expanduser(config.get('data_dir', "/opt/mycroft"))
-    filename = os.path.expanduser(os.path.join(data_dir, res_name))
-    if os.path.isfile(filename):
-        return filename
-
-    # look in ovos_utils package itself
-    found = resolve_ovos_resource_file(res_name)
-    if found:
-        return found
-
-    # Finally look for it in the source package
-    paths = [
-        "/opt/venvs/mycroft-core/lib/python3.7/site-packages/",  # mark1/2
-        "/opt/venvs/mycroft-core/lib/python3.4/site-packages/ ",  # old mark1 installs
-        "/home/pi/mycroft-core"  # picroft
-    ]
-    if root_path:
-        paths += [root_path]
-    for p in paths:
-        filename = os.path.join(p, 'mycroft', 'res', res_name)
-        filename = os.path.abspath(os.path.normpath(filename))
-        if os.path.isfile(filename):
-            return filename
-
-    return None  # Resource cannot be resolved
 
 
 def create_killable_daemon(target, args=(), kwargs=None, autostart=True):

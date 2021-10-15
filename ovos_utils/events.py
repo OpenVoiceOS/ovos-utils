@@ -1,8 +1,80 @@
-from ovos_utils.log import LOG
-from ovos_utils.messagebus import Message, FakeBus
 import time
 from datetime import datetime, timedelta
 from inspect import signature
+
+from ovos_utils.intents.intent_service_interface import to_alnum
+from ovos_utils.log import LOG
+from ovos_utils.messagebus import Message, FakeBus
+
+
+def unmunge_message(message, skill_id):
+    """Restore message keywords by removing the Letterified skill ID.
+    Args:
+        message (Message): Intent result message
+        skill_id (str): skill identifier
+    Returns:
+        Message without clear keywords
+    """
+    if isinstance(message, Message) and isinstance(message.data, dict):
+        skill_id = to_alnum(skill_id)
+        for key in list(message.data.keys()):
+            if key.startswith(skill_id):
+                # replace the munged key with the real one
+                new_key = key[len(skill_id):]
+                message.data[new_key] = message.data.pop(key)
+
+    return message
+
+
+def get_handler_name(handler):
+    """Name (including class if available) of handler function.
+
+    Args:
+        handler (function): Function to be named
+
+    Returns:
+        string: handler name as string
+    """
+    if '__self__' in dir(handler) and 'name' in dir(handler.__self__):
+        return handler.__self__.name + '.' + handler.__name__
+    else:
+        return handler.__name__
+
+
+def create_wrapper(handler, skill_id, on_start, on_end, on_error):
+    """Create the default skill handler wrapper.
+
+    This wrapper handles things like metrics, reporting handler start/stop
+    and errors.
+        handler (callable): method/function to call
+        skill_id: skill_id for associated skill
+        on_start (function): function to call before executing the handler
+        on_end (function): function to call after executing the handler
+        on_error (function): function to call for error reporting
+    """
+
+    def wrapper(message):
+        try:
+            message = unmunge_message(message, skill_id)
+            if on_start:
+                on_start(message)
+
+            if len(signature(handler).parameters) == 0:
+                handler()
+            else:
+                handler(message)
+
+        except Exception as e:
+            if on_error:
+                if len(signature(on_error).parameters) == 2:
+                    on_error(e, message)
+                else:
+                    on_error(e)
+        finally:
+            if on_end:
+                on_end(message)
+
+    return wrapper
 
 
 def create_basic_wrapper(handler, on_error=None):
@@ -18,6 +90,7 @@ def create_basic_wrapper(handler, on_error=None):
     Returns:
         Wrapped callable
     """
+
     def wrapper(message):
         try:
             if len(signature(handler).parameters) == 0:
@@ -37,6 +110,7 @@ class EventContainer:
     This container tracks events added by a skill, allowing unregistering
     all events on shutdown.
     """
+
     def __init__(self, bus=None):
         self.bus = bus or FakeBus()
         self.events = []
@@ -53,6 +127,7 @@ class EventContainer:
             once (bool, optional): Event handler will be removed after it has
                                    been run once.
         """
+
         def once_wrapper(message):
             # Remove registered one-time handler before invoking,
             # allowing them to re-schedule themselves.
@@ -113,6 +188,7 @@ class EventContainer:
 
 class EventSchedulerInterface:
     """Interface for accessing the event scheduler over the message bus."""
+
     def __init__(self, name, sched_id=None, bus=None):
         self.name = name
         self.sched_id = sched_id

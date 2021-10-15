@@ -2,6 +2,7 @@ from os.path import expanduser, isdir, dirname, join
 from os import system, makedirs, listdir
 from ovos_utils.lang.detect import detect_lang
 from ovos_utils.lang.translate import translate_text
+from ovos_utils.file_utils import resolve_resource_file
 
 
 def get_tts(sentence, lang="en-us", mp3_file="/tmp/google_tx_tts.mp3"):
@@ -42,3 +43,28 @@ def get_language_dir(base_path, lang="en-us"):
         if len(paths):
             return paths[0]
     return join(base_path, lang)
+
+
+def translate_word(name, lang='en-us'):
+    """ Helper to get word translations
+    Args:
+        name (str): Word name. Returned as the default value if not translated
+        lang (str, optional): an optional BCP-47 language code, if omitted
+                              the default language will be used.
+    Returns:
+        str: translated version of resource name
+    """
+    filename = resolve_resource_file(join("text", lang, name + ".word"))
+    if filename:
+        # open the file
+        try:
+            with open(filename, 'r', encoding='utf8') as f:
+                for line in f:
+                    word = line.strip()
+                    if word.startswith("#"):
+                        continue  # skip comment lines
+                    return word
+        except Exception:
+            pass
+    return name  # use resource name as the word
+
