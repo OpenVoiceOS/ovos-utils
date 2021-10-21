@@ -27,20 +27,20 @@ jobs:
 
       - name: Test Utils
         run: |
-          pytest tests/test_utils.py
+          pytest test/test_utils.py
 
       - name: Test Color Utils
         run: |
-          pytest tests/test_color.py
+          pytest test/test_color.py
 
       - name: Test Json Helpers
         run: |
-          pytest tests/test_json_helpers.py
+          pytest test/test_json_helpers.py
 
       - name: Test Parse Utils
         run: |
-          pytest tests/test_parse.py
+          pytest test/test_parse.py
 
       - name: Test SSML Utils
         run: |
-          pytest tests/test_ssml.py
+          pytest test/test_ssml.py
