@@ -21,6 +21,7 @@ setup(
         "kthread",
         "json_database",
         "requests",
+        "colour",
         "inflection"],
     extras_require={
         "extras": ["phoneme_guesser", "colour", "rapidfuzz"]
