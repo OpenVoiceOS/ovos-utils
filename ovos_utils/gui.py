@@ -15,12 +15,14 @@ def can_display():
 
 def is_gui_installed():
     return is_installed("mycroft-gui-app") or \
-           is_installed("mycroft-embedded-shell")
+           is_installed("mycroft-embedded-shell") or \
+           is_installed("plasmashell")
 
 
 def is_gui_running():
     return is_process_running("mycroft-gui-app") or \
-           is_process_running("mycroft-embedded-shell")
+           is_process_running("mycroft-embedded-shell") or \
+           is_process_running("plasmashell")
 
 
 def is_gui_connected(bus=None):
