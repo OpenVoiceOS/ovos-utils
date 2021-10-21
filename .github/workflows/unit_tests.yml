@@ -34,13 +34,13 @@ jobs:
           pytest tests/test_color.py
 
       - name: Test Json Helpers
-          run: |
-            pytest tests/test_json_helpers.py
+        run: |
+          pytest tests/test_json_helpers.py
 
       - name: Test Parse Utils
-          run: |
-            pytest tests/test_parse.py
+        run: |
+          pytest tests/test_parse.py
 
       - name: Test SSML Utils
-          run: |
-            pytest tests/test_ssml.py
+        run: |
+          pytest tests/test_ssml.py
