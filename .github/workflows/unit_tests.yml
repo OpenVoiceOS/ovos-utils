@@ -4,6 +4,8 @@ name: Run Unit Tests
 on:
   pull_request:
   push:
+    branches:
+      - dev
   workflow_dispatch:
 
 jobs:
@@ -22,25 +24,15 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install .
+          python -m pip install .
           pip install pytest pytest-timeout pytest-cov
 
-      - name: Test Utils
+      - name: Run unit tests
         run: |
-          pytest test/test_utils.py
+          python3 -m pytest --cov-report xml --cov=ovos_utils test/
 
-      - name: Test Color Utils
-        run: |
-          pytest test/test_color.py
-
-      - name: Test Json Helpers
-        run: |
-          pytest test/test_json_helpers.py
-
-      - name: Test Parse Utils
-        run: |
-          pytest test/test_parse.py
-
-      - name: Test SSML Utils
-        run: |
-          pytest test/test_ssml.py
+      - name: Upload coverage
+        env:
+          CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
+        uses:
+          codecov/codecov-action@v2
