@@ -1,7 +1,8 @@
 import requests
 import json
 from os.path import join, expanduser, exists
-from json_database import JsonStorageXDG
+from json_database import JsonStorageXDG, JsonStorage
+from ovos_utils.log import LOG
 
 
 def settings2meta(settings, section_name="Skill Settings"):
@@ -87,3 +88,33 @@ def get_all_remote_settings(identity_file=None, backend_url=None):
               "Content-Type": "application/json"
               }
     return requests.get(url, headers=params).json()
+
+
+def get_local_settings(skill_dir, skill_name=None) -> dict:
+    """Build a JsonStorage using the JSON string stored in settings.json."""
+    if skill_name:
+        LOG.warning("skill_name is an unused legacy argument, will be removed in 0.0.3 or later")
+    if skill_dir.endswith("/settings.json"):
+        settings_path = skill_dir
+    else:
+        settings_path = join(skill_dir, 'settings.json')
+    LOG.info(settings_path)
+    return JsonStorage(settings_path)
+
+
+def save_settings(skill_dir, skill_settings):
+    """Save skill settings to file."""
+    if skill_dir.endswith("/settings.json"):
+        settings_path = skill_dir
+    else:
+        settings_path = join(skill_dir, 'settings.json')
+
+    settings = JsonStorage(settings_path)
+    for k, v in skill_settings.items():
+        settings[k] = v
+    try:
+        settings.store()
+    except Exception:
+        LOG.error(f'error saving skill settings to {settings_path}')
+    else:
+        LOG.info(f'Skill settings successfully saved to {settings_path}')
