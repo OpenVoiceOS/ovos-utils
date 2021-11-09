@@ -681,7 +681,7 @@ class GUIInterface:
 
     # backport - PR https://github.com/MycroftAI/mycroft-core/pull/2862
     def show_notification(self, content, action=None,
-                          noticetype="transient"):
+                          noticetype="transient", style="info"):
         """Display a Notification on homepage in the GUI.
         Arguments:
             content (str): Main text content of a notification, Limited
@@ -691,15 +691,21 @@ class GUIInterface:
             noticetype (str):
                 transient: 'Default' displays a notification with a timeout.
                 sticky: displays a notification that sticks to the screen.
+            style (str):
+                info: 'Default' displays a notification with information styling
+                warning: displays a notification with warning styling
+                success: displays a notification with success styling
+                error: displays a notification with error styling
         """
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
-        self.bus.emit(Message("homescreen.notification.set",
+        self.bus.emit(Message("ovos.notification.api.set",
                                     data={
                                         "sender": self.skill_id,
                                         "text": content,
                                         "action": action,
-                                        "type": noticetype
+                                        "type": noticetype,
+                                        "style": style
                                     }))
 
     def show_text(self, text, title=None, override_idle=None,
