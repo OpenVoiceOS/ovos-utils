@@ -4,9 +4,48 @@ import re
 import os
 from os import walk
 from os.path import splitext, join, dirname
-
+import tempfile
 from ovos_utils.bracket_expansion import expand_options
 from ovos_utils.log import LOG
+
+
+def get_temp_path(*args):
+    """Generate a valid path in the system temp directory.
+
+    This method accepts one or more strings as arguments. The arguments are
+    joined and returned as a complete path inside the systems temp directory.
+    Importantly, this will not create any directories or files.
+
+    Example usage: get_temp_path('mycroft', 'audio', 'example.wav')
+    Will return the equivalent of: '/tmp/mycroft/audio/example.wav'
+
+    Args:
+        path_element (str): directories and/or filename
+
+    Returns:
+        (str) a valid path in the systems temp directory
+    """
+    try:
+        path = os.path.join(tempfile.gettempdir(), *args)
+    except TypeError:
+        raise TypeError("Could not create a temp path, get_temp_path() only "
+                        "accepts Strings")
+    return path
+
+
+def get_cache_directory(folder):
+    # optional import to use ram for cache
+    # does not work in windows!
+    try:
+        from memory_tempfile import MemoryTempfile
+    except ImportError:
+        MemoryTempfile = None
+    if os.name == 'nt' or not MemoryTempfile:
+        path = get_temp_path(folder)
+    else:
+        path = join(MemoryTempfile(fallback=True).gettempdir(), folder)
+    os.makedirs(path, exist_ok=True)
+    return path
 
 
 def resolve_ovos_resource_file(res_name):
