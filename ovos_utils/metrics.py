@@ -13,6 +13,7 @@ class Stopwatch:
         """
             Start a time measurement
         """
+        self.time = None
         self.timestamp = time.time()
 
     def lap(self):
@@ -21,6 +22,13 @@ class Stopwatch:
         self.timestamp = cur_time
         return cur_time - start_time
 
+    @property
+    def delta(self):
+        if not self.timestamp:
+            # stopped or not started
+            return self.time or 0
+        return time.time() - self.timestamp
+
     def stop(self):
         """
             Stop a running time measurement. returns the measured time
@@ -28,6 +36,7 @@ class Stopwatch:
         cur_time = time.time()
         start_time = self.timestamp
         self.time = cur_time - start_time
+        self.timestamp = None
         return self.time
 
     def __enter__(self):
