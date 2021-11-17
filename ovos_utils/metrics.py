@@ -25,7 +25,8 @@ class Stopwatch:
     @property
     def delta(self):
         if not self.timestamp:
-            return 0
+            # stopped or not started
+            return self.time or 0
         return time.time() - self.timestamp
 
     def stop(self):
