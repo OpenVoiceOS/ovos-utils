@@ -1,120 +1,147 @@
-import json
-import os
-from os import makedirs
-from os.path import isfile, exists, expanduser, join, dirname, isdir
+from importlib.util import find_spec
+from os.path import isfile, join
 
+import xdg.BaseDirectory
+from json_database import JsonStorage
 from xdg import BaseDirectory as XDG
 
-from ovos_utils.fingerprinting import core_supports_xdg
-from ovos_utils.json_helper import merge_dict, load_commented_json
+from ovos_utils.json_helper import load_commented_json, merge_dict
 from ovos_utils.log import LOG
 from ovos_utils.system import search_mycroft_core_location
 
-# for downstream support, all XDG paths should respect this
-_BASE_FOLDER = "mycroft"
-_CONFIG_FILE_NAME = "mycroft.conf"
 
-_DEFAULT_CONFIG = None
-_SYSTEM_CONFIG = os.environ.get('MYCROFT_SYSTEM_CONFIG',
-                                f'/etc/{_BASE_FOLDER}/{_CONFIG_FILE_NAME}')
-# Make sure we support the old location until mycroft moves to XDG
-_OLD_USER_CONFIG = join(expanduser('~'), '.' + _BASE_FOLDER, _CONFIG_FILE_NAME)
-_USER_CONFIG = join(XDG.xdg_config_home, _BASE_FOLDER, _CONFIG_FILE_NAME)
-_WEB_CONFIG_CACHE = join(XDG.xdg_config_home, _BASE_FOLDER, 'web_cache.json')
+def get_ovos_config():
+    config = {"xdg": True,
+              "base_folder": "mycroft",
+              "config_filename": "mycroft.conf",
+              "default_config_path": find_default_config()}
+
+    try:
+        if isfile("/etc/OpenVoiceOS/ovos.conf"):
+            config = merge_dict(config,
+                                load_commented_json(
+                                    "/etc/OpenVoiceOS/ovos.conf"))
+        elif isfile("/etc/mycroft/ovos.conf"):
+            config = merge_dict(config,
+                                load_commented_json("/etc/mycroft/ovos.conf"))
+    except:
+        # tolerate bad json TODO proper exception (?)
+        pass
+
+    # This includes both the user config and
+    # /etc/xdg/OpenVoiceOS/ovos.conf
+    for p in xdg.BaseDirectory.load_config_paths("OpenVoiceOS"):
+        if isfile(join(p, "ovos.conf")):
+            try:
+                xdg_cfg = load_commented_json(join(p, "ovos.conf"))
+                config = merge_dict(config, xdg_cfg)
+            except:
+                # tolerate bad json TODO proper exception (?)
+                pass
+
+    # let's check for derivatives specific configs
+    # the assumption is that these cores are exclusive to each other,
+    # this will never find more than one override
+    # TODO this works if using dedicated .venvs what about system installs?
+    cores = config.get("module_overrides") or {}
+    for k in cores:
+        if find_spec(k):
+            config = merge_dict(config, cores[k])
+            break
+    else:
+        subcores = config.get("submodule_mappings") or {}
+        for k in subcores:
+            if find_spec(k):
+                config = merge_dict(config, cores[subcores[k]])
+                break
+
+    return config
+
+
+def is_using_xdg():
+    return get_ovos_config().get("xdg", True)
 
 
 def get_xdg_base():
-    global _BASE_FOLDER
-    return _BASE_FOLDER
+    return get_ovos_config().get("base_folder") or "mycroft"
+
+
+def save_ovos_core_config(new_config):
+    OVOS_CONFIG = join(xdg.BaseDirectory.save_config_path("OpenVoiceOS"),
+                       "ovos.conf")
+    cfg = JsonStorage(OVOS_CONFIG)
+    cfg.update(new_config)
+    cfg.store()
+    return cfg
 
 
 def set_xdg_base(folder_name):
-    global _BASE_FOLDER, _WEB_CONFIG_CACHE
     LOG.info(f"XDG base folder set to: '{folder_name}'")
-    _BASE_FOLDER = folder_name
-    _WEB_CONFIG_CACHE = join(XDG.xdg_config_home, _BASE_FOLDER,
-                             'web_cache.json')
+    save_ovos_core_config({"base_folder": folder_name})
 
 
 def set_config_filename(file_name, core_folder=None):
-    global _CONFIG_FILE_NAME, _SYSTEM_CONFIG, _OLD_USER_CONFIG, _USER_CONFIG, \
-        _BASE_FOLDER
     if core_folder:
-        _BASE_FOLDER = core_folder
         set_xdg_base(core_folder)
     LOG.info(f"config filename set to: '{file_name}'")
-    _CONFIG_FILE_NAME = file_name
-    _SYSTEM_CONFIG = os.environ.get('MYCROFT_SYSTEM_CONFIG',
-                                    f'/etc/{_BASE_FOLDER}/{_CONFIG_FILE_NAME}')
-    # Make sure we support the old location still
-    # Deprecated and will be removed eventually
-    _OLD_USER_CONFIG = join(expanduser('~'), '.' + _BASE_FOLDER,
-                            _CONFIG_FILE_NAME)
-    _USER_CONFIG = join(XDG.xdg_config_home, _BASE_FOLDER, _CONFIG_FILE_NAME)
+    save_ovos_core_config({"config_filename": file_name})
 
 
 def set_default_config(file_path=None):
-    global _DEFAULT_CONFIG
-    _DEFAULT_CONFIG = file_path or find_default_config()
+    file_path = file_path or find_default_config()
     LOG.info(f"default config file changed to: {file_path}")
+    save_ovos_core_config({"default_config_path": file_path})
 
 
 def find_default_config():
-    if _DEFAULT_CONFIG:
-        # previously set, otherwise None
-        return _DEFAULT_CONFIG
     mycroft_root = search_mycroft_core_location()
     if not mycroft_root:
         raise FileNotFoundError("Couldn't find mycroft core root folder.")
-    return join(mycroft_root, _BASE_FOLDER, "configuration", _CONFIG_FILE_NAME)
+    return join(mycroft_root, "mycroft", "configuration", "mycroft.conf")
 
 
 def find_user_config():
-    # ideally it will have been set by downstream using util methods
+    if is_using_xdg():
+        path = join(XDG.xdg_config_home, get_xdg_base(), get_config_filename())
+        if isfile(path):
+            return path
     old, path = get_config_locations(default=False, web_cache=False,
                                      system=False, old_user=True,
                                      user=True)
     if isfile(path):
         return path
-
-    if core_supports_xdg():
-        path = join(XDG.xdg_config_home, _BASE_FOLDER, _CONFIG_FILE_NAME)
-    else:
-        path = old
-        # mark1 runs as a different user
-        sysconfig = MycroftSystemConfig()
-        platform_str = sysconfig.get("enclosure", {}).get("platform", "")
-        if platform_str == "mycroft_mark_1":
-            path = "/home/mycroft/.mycroft/mycroft.conf"
-
-    if not isfile(path) and isfile(old):
-        # xdg might be disabled in HolmesV compatibility mode
-        # or migration might be in progress
-        # (user action required when updated from a no xdg install)
-        path = old
-
+    if isfile(old):
+        return old
+    # mark1 runs as a different user
+    sysconfig = MycroftSystemConfig()
+    platform_str = sysconfig.get("enclosure", {}).get("platform", "")
+    if platform_str == "mycroft_mark_1":
+        path = "/home/mycroft/.mycroft/mycroft.conf"
     return path
 
 
 def get_config_locations(default=True, web_cache=True, system=True,
                          old_user=True, user=True):
     locs = []
+    ovos_cfg = get_ovos_config()
     if default:
-        locs.append(_DEFAULT_CONFIG)
+        locs.append(ovos_cfg["default_config_path"])
     if system:
-        locs.append(_SYSTEM_CONFIG)
+        locs.append(f"/etc/{ovos_cfg['base_folder']}/{ovos_cfg['config_filename']}")
     if web_cache:
-        locs.append(_WEB_CONFIG_CACHE)
+        locs.append(f"{XDG.xdg_config_home}/{ovos_cfg['base_folder']}/web_cache.json")
     if old_user:
-        locs.append(_OLD_USER_CONFIG)
+        locs.append(f"~/.{ovos_cfg['base_folder']}/{ovos_cfg['config_filename']}")
     if user:
-        locs.append(_USER_CONFIG)
-
+        if is_using_xdg():
+            locs.append(f"{XDG.xdg_config_home}/{ovos_cfg['base_folder']}/{ovos_cfg['config_filename']}")
+        else:
+            locs.append(f"~/.{ovos_cfg['base_folder']}/{ovos_cfg['config_filename']}")
     return locs
 
 
 def get_webcache_location():
-    return join(XDG.xdg_config_home, _BASE_FOLDER, _CONFIG_FILE_NAME)
+    return join(XDG.xdg_config_home, get_xdg_base(), 'web_cache.json')
 
 
 def get_xdg_config_locations():
@@ -128,7 +155,7 @@ def get_xdg_config_locations():
 
 
 def get_config_filename():
-    return _CONFIG_FILE_NAME
+    return get_ovos_config().get("config_filename") or "mycroft.conf"
 
 
 def set_config_name(name, core_folder=None):
@@ -155,60 +182,11 @@ def update_mycroft_config(config, path=None):
     return conf
 
 
-class LocalConf(dict):
+class LocalConf(JsonStorage):
     """
         Config dict from file.
     """
     allow_overwrite = True
-
-    def __init__(self, path):
-        super(LocalConf, self).__init__()
-        self.path = path
-        if self.path:
-            self.load_local(self.path)
-
-    def load_local(self, path):
-        """
-            Load local json file into self.
-
-            Args:
-                path (str): file to load
-        """
-        path = expanduser(path)
-        if exists(path) and isfile(path):
-            try:
-                config = load_commented_json(path)
-                for key in config:
-                    self.__setitem__(key, config[key])
-                #LOG.debug("Configuration {} loaded".format(path))
-            except Exception as e:
-                LOG.error("Error loading configuration '{}'".format(path))
-                LOG.error(repr(e))
-        else:
-            pass
-            #LOG.debug("Configuration '{}' not defined, skipping".format(path))
-
-    def reload(self):
-        self.load_local(self.path)
-
-    def store(self, path=None):
-        """
-            store the configuration locally.
-        """
-        path = path or self.path
-        if not path:
-            LOG.warning("config path not set, updating user config!!")
-            update_mycroft_config(self)
-            return
-        path = expanduser(path)
-        if not isdir(dirname(path)):
-            makedirs(dirname(path))
-        with open(path, 'w', encoding="utf-8") as f:
-            json.dump(self, f, indent=4, ensure_ascii=False)
-
-    def merge(self, conf):
-        merge_dict(self, conf)
-        return self
 
 
 class ReadOnlyConfig(LocalConf):
@@ -234,10 +212,10 @@ class ReadOnlyConfig(LocalConf):
             raise PermissionError
         super().__setattr__(key, value)
 
-    def merge(self, conf):
+    def merge(self, *args, **kwargs):
         if not self.allow_overwrite:
             raise PermissionError
-        super().merge(conf)
+        super().merge(*args, **kwargs)
 
     def store(self, path=None):
         if not self.allow_overwrite:
@@ -253,7 +231,7 @@ class MycroftUserConfig(LocalConf):
 
 class MycroftDefaultConfig(ReadOnlyConfig):
     def __init__(self):
-        path = find_default_config()
+        path = get_ovos_config()["default_config_path"]
         super().__init__(path)
         if not self.path or not isfile(self.path):
             LOG.debug(f"mycroft root path not found, could not load default .conf: {self.path}")

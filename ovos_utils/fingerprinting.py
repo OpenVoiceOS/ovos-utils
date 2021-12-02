@@ -2,15 +2,16 @@ import platform
 import socket
 from enum import Enum
 from os.path import join, isfile
-from xdg import BaseDirectory as XDG
 from ovos_utils.system import is_installed, has_screen, \
     get_desktop_environment, search_mycroft_core_location, is_process_running
+from ovos_utils.configuration import is_using_xdg
 
 
 class MycroftPlatform(str, Enum):
     PICROFT = "picroft"
     BIGSCREEN = "kde"
     OVOS = "OpenVoiceOS"
+    HIVEMIND = "HiveMind"
     MARK1 = "mycroft_mark_1"
     MARK2 = "mycroft_mark_2"
     HOLMESV = "HolmesV"
@@ -79,13 +80,9 @@ def get_fingerprint():
 
 
 def core_supports_xdg():
-    if any((is_holmes(), is_ovos(), is_neon_core(), is_chatterbox_core())):
+    if any((is_holmes(), is_chatterbox_core())):
         return True
-    # mycroft-core does not support XDG as of 10 may 2021
-    # however there are patched versions out there, eg, alpine package
-    # check if the .conf exists in new location
-    # TODO deprecate
-    return isfile(join(XDG.xdg_config_home, 'mycroft', 'mycroft.conf'))
+    return is_using_xdg()
 
 
 def get_mycroft_version():
