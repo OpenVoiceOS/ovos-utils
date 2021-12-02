@@ -1,26 +1,3 @@
-try:
-    from phoneme_guesser import guess_phonemes as _guess_phonemes, \
-        get_phonemes as _get_phonemes
-
-
-    def guess_phonemes(word, lang="en-us"):
-        return _guess_phonemes(word, lang)
-
-
-    def get_phonemes(name, lang="en-us"):
-        return _get_phonemes(name, lang)
-
-except ImportError:
-    from ovos_utils.log import LOG
-
-    LOG.warning("phoneme_guesser optional import is not available")
-
-    def guess_phonemes(word, lang="en-us"):
-        raise ImportError("pip install phoneme_guesser")
-
-    def get_phonemes(name, lang="en-us"):
-        raise ImportError("pip install phoneme_guesser")
-
 ########################################################################
 # ARPABET was invented for English.
 # The standard dictionary written in ARPABET is the CMU dictionary.
