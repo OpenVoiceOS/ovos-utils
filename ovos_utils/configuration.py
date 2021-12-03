@@ -165,7 +165,7 @@ def set_config_name(name, core_folder=None):
 
 
 def read_mycroft_config():
-    conf = LocalConf(None)
+    conf = LocalConf("tmp/dummy.conf")
     conf.merge(MycroftDefaultConfig())
     conf.merge(MycroftSystemConfig())
     conf.merge(MycroftUserConfig())
@@ -187,6 +187,8 @@ class LocalConf(JsonStorage):
         Config dict from file.
     """
     allow_overwrite = True
+    def __init__(self, path=None):
+        super(LocalConf, self).__init__(path)
 
 
 class ReadOnlyConfig(LocalConf):
