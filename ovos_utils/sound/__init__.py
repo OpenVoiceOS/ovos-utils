@@ -10,7 +10,6 @@ def play_audio(uri, play_cmd=None):
 
         Returns: subprocess.Popen object
     """
-
     sox_play = find_executable("play")
     pulse_play = find_executable("paplay")
     alsa_play = find_executable("aplay")
@@ -18,11 +17,11 @@ def play_audio(uri, play_cmd=None):
 
     player = play_cmd
 
-    # Replace file:// uri's with normal paths
-    uri = uri.replace('file://', '')
     # NOTE: some urls like youtube streams will cause extension detection to fail
     # let's handle it explicitly
     ext = uri.split("?")[0].split(".")[-1]
+    # Replace file:// uri's with normal paths
+    uri = uri.replace('file://', '')
 
     # sox should handle almost every format, but fails in some urls
     if sox_play:
@@ -39,7 +38,7 @@ def play_audio(uri, play_cmd=None):
         elif mpg123_play:
             player = mpg123_play + " %1"
 
-    if not play_cmd:
+    if not player:
         LOG.error(f"Failed to play: No playback functionality available")
         return None
 
