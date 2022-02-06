@@ -2,22 +2,57 @@ import subprocess
 import time
 from ovos_utils.log import LOG
 from ovos_utils.signal import check_for_signal
+from distutils.spawn import find_executable
 
 
-def play_audio(uri, play_cmd="play %1"):
+def play_audio(uri, play_cmd=None):
     """ Play a audio file.
 
         Returns: subprocess.Popen object
     """
-    play_wav_cmd = str(play_cmd).split(" ")
-    for index, cmd in enumerate(play_wav_cmd):
+    sox_play = find_executable("play")
+    pulse_play = find_executable("paplay")
+    alsa_play = find_executable("aplay")
+    mpg123_play = find_executable("mpg123")
+
+    player = play_cmd
+
+    # NOTE: some urls like youtube streams will cause extension detection to fail
+    # let's handle it explicitly
+    ext = uri.split("?")[0].split(".")[-1]
+    # Replace file:// uri's with normal paths
+    uri = uri.replace('file://', '')
+
+    # sox should handle almost every format, but fails in some urls
+    if sox_play:
+        player = sox_play + f" --type {ext} %1"
+    # determine best available player
+    else:
+        # wav file
+        if 'wav' in ext:
+            if pulse_play:
+                player = pulse_play + " %1"
+            elif alsa_play:
+                player = alsa_play + " %1"
+        # guess mp3
+        elif mpg123_play:
+            player = mpg123_play + " %1"
+
+    if not player:
+        LOG.error(f"Failed to play: No playback functionality available")
+        return None
+
+    play_cmd = player.split(" ")
+
+    for index, cmd in enumerate(play_cmd):
         if cmd == "%1":
-            play_wav_cmd[index] = uri
+            play_cmd[index] = uri
+
     try:
-        return subprocess.Popen(play_wav_cmd)
+        return subprocess.Popen(play_cmd)
     except Exception as e:
-        LOG.error("Failed to launch WAV: {}".format(play_wav_cmd))
-        LOG.debug("Error: {}".format(repr(e)), exc_info=True)
+        LOG.error(f"Failed to play: {play_cmd}")
+        LOG.exception(e)
         return None
 
 
