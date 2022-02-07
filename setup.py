@@ -30,7 +30,7 @@ setup(
     url='https://github.com/OpenVoiceOS/ovos_utils',
     install_requires=required("requirements/requirements.txt"),
     extras_require={
-        "extras": required("requirements/requirements.txt")
+        "extras": required("requirements/extras.txt")
     },
     include_package_data=True,
     license='Apache',
