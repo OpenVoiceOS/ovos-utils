@@ -1,0 +1,3 @@
+phoneme_guesser~=0.1
+colour~=0.1
+rapidfuzz~=1.0
