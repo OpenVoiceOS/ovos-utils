@@ -16,6 +16,7 @@ import logging
 import sys
 from os.path import join
 from logging.handlers import RotatingFileHandler
+from mycroft_bus_client import dig_for_message
 
 
 class LOG:
@@ -38,6 +39,7 @@ class LOG:
     backup_count = 3
     name = 'OVOS'
     level = "DEBUG"
+    diagnostic_mode = False
     _loggers = {}
 
     @classmethod
@@ -46,7 +48,8 @@ class LOG:
         cls.base_path = config.get("path", "stdout")
         cls.max_bytes = config.get("max_bytes", 50000000)
         cls.backup_count = config.get("backup_count", 3)
-        cls.level = config.get("level", "DEBUG")
+        cls.level = config.get("level", "INFO")
+        cls.diagnostic_mode = config.get("diagnostic", False)
 
     @classmethod
     def create_logger(cls, name, tostdout=False):
@@ -100,7 +103,12 @@ class LOG:
         module_name = mod.__name__ if mod else ''
         name += module_name + ':' + record[3] + ':' + str(record[2])
 
-        return cls.create_logger(name)
+        logger = cls.create_logger(name)
+        if cls.diagnostic_mode:
+            msg = dig_for_message()
+            if msg:
+                logger.debug(f"DIAGNOSTIC - source bus message {msg.serialize()}")
+        return logger
 
     @classmethod
     def info(cls, *args, **kwargs):
