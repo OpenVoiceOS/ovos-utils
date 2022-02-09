@@ -29,10 +29,6 @@ jobs:
         run: |
           pytest test/test_utils.py
 
-      - name: Test Color Utils
-        run: |
-          pytest test/test_color.py
-
       - name: Test Json Helpers
         run: |
           pytest test/test_json_helpers.py
