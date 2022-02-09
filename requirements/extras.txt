@@ -1,2 +1,1 @@
-colour~=0.1
 rapidfuzz~=1.0
