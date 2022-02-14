@@ -17,7 +17,7 @@ def required(requirements_file):
 
 setup(
     name='ovos_utils',
-    version='0.0.14a5',
+    version='0.0.14a7',
     packages=['ovos_utils',
               'ovos_utils.intents',
               'ovos_utils.sound',
