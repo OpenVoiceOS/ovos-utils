@@ -17,8 +17,6 @@ import re
 import datetime
 import kthread
 from ovos_utils.network_utils import *
-from inflection import camelize, titleize, transliterate, parameterize, \
-    ordinalize
 from ovos_utils.file_utils import resolve_ovos_resource_file, resolve_resource_file
 
 

@@ -1,6 +1,5 @@
 from difflib import SequenceMatcher
 import re
-from inflection import singularize as _singularize_en
 from enum import IntEnum, auto
 from ovos_utils.log import LOG
 
@@ -101,8 +100,6 @@ def match_all(query, choices, match_func=None, strategy=MatchStrategy.SIMPLE_RAT
 
 
 def singularize(word, lang="en"):
-    if lang.startswith("en"):
-        return _singularize_en(word)
     return word.rstrip("s")
 
 
@@ -252,61 +249,3 @@ def extract_paragraphs(query, text, lang="en"):
     return search_in_text(query, text, lang,
                           all_matches=True, paragraphs=True)
 
-
-if __name__ == "__main__":
-
-
-    print("## Searching: intent")
-    for sent, score in extract_sentences("intent", wiki_dump):
-        if score > 0.3:
-            print(sent)
-
-    print("## Searching: precise")
-    for sent, score in extract_paragraphs("precise", wiki_dump):
-        if score > 0.3:
-            print(sent)
-    exit(0)
-    s = "hello. He said"
-    for s in split_sentences(s):
-        print(s)
-    s = "hello . He said"
-    for s in split_sentences(s):
-        print(s)
-
-    # no splitting
-    s = "hello.com"
-    for s in split_sentences(s):
-        print(s)
-    s = "A.E:I.O.U"
-    for s in split_sentences(s):
-        print(s)
-
-    # ambiguous, but will split
-    s = "hello.He said"
-    for s in split_sentences(s):
-        print(s)
-
-    # ambiguous, no split
-    s = "hello. he said"  # could be "Jones Jr. thinks ..."
-    for s in split_sentences(s):
-        print(s)
-    s = "hello.he said"  # could be  "www.hello.com"
-    for s in split_sentences(s):
-        print(s)
-    s = "hello . he said"  # TODO maybe split this one?
-    for s in split_sentences(s):
-        print(s)
-
-    # test all
-    s = "Mr. Smith bought cheapsite.com for 1.5 million dollars, i.e. he paid a lot for it. Did he mind? Adam Jones Jr. thinks he didn't. In any case, this isn't true... Well, with a probability of .9 it isn't.I know right\nOK"
-    print(summarize(s))
-    for s in split_sentences(s):
-        print(s)
-
-    s = "this is {remove me}     the first sentence "
-    print(summarize(s))
-    s = "       this is (remove me) second. and the 3rd"
-    print(summarize(s))
-    s = "this       is [remove me] number 4! number5? number6. number 7 \n " \
-        "number N"
-    print(summarize(s))
