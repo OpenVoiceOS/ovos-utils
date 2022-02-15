@@ -16,7 +16,7 @@ from os.path import isdir, join
 import re
 import datetime
 import kthread
-from ovos_utils.network_utils import *
+from ovos_utils.network_utils import get_ip, get_external_ip, is_connected_dns, is_connected_http, is_connected
 from ovos_utils.file_utils import resolve_ovos_resource_file, resolve_resource_file
 
 

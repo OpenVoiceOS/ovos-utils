@@ -1,9 +1,7 @@
-from ovos_utils.configuration import read_mycroft_config, \
-    update_mycroft_config, get_xdg_base
+from ovos_utils.configuration import read_mycroft_config, update_mycroft_config, get_xdg_data_save_path
 from ovos_utils.messagebus import wait_for_reply
 from os.path import join, isdir, isfile
 from os import listdir
-from xdg import BaseDirectory as XDG
 
 
 def skills_loaded(bus=None):
@@ -67,7 +65,7 @@ def get_skills_folder(config=None):
     # once XDG PR is merged skills folder will no longer be configurable,
     # skills are moved automatically to new locations
     # this is already live in mycroft-lib
-    xdg_skills = join(XDG.xdg_data_home, get_xdg_base(), 'skills')
+    xdg_skills = join(get_xdg_data_save_path(), 'skills')
     if isdir(xdg_skills):
         return xdg_skills
 
