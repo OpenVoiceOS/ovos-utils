@@ -43,8 +43,12 @@ def get_xdg_cache_save_path(folder=None):
 def get_ovos_config():
     config = {"xdg": True,
               "base_folder": "mycroft",
-              "config_filename": "mycroft.conf",
-              "default_config_path": find_default_config()}
+              "config_filename": "mycroft.conf"}
+
+    try:
+        config["default_config_path"] = find_default_config()
+    except FileNotFoundError:
+        pass  # not a mycroft device
 
     try:
         if isfile("/etc/OpenVoiceOS/ovos.conf"):

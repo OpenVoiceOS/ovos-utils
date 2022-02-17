@@ -1,2 +1,2 @@
 recursive-include ovos_utils/res *
-recursive-include requirements *
+recursive-include requirements/ *
