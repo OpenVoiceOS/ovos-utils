@@ -1,5 +1,5 @@
 from importlib.util import find_spec
-from os.path import isfile, join, isdir
+from os.path import isfile, join, isdir, dirname
 
 from json_database import JsonStorage
 
@@ -48,7 +48,8 @@ def get_ovos_config():
     try:
         config["default_config_path"] = find_default_config()
     except FileNotFoundError:
-        pass  # not a mycroft device
+        # not a mycroft device
+        config["default_config_path"] = join(dirname(__file__), "res", "fallback_mycroft.conf")
 
     try:
         if isfile("/etc/OpenVoiceOS/ovos.conf"):
