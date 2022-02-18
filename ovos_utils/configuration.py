@@ -17,6 +17,8 @@ from ovos_utils.xdg_utils import (
 
 def get_xdg_config_dirs(folder=None):
     folder = folder or get_xdg_base()
+    paths = xdg_config_dirs()
+    paths.append(xdg_config_home())
     return [join(path, folder) for path in xdg_config_dirs() if isdir(join(path, folder))]
 
 
