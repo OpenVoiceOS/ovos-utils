@@ -15,9 +15,18 @@ def required(requirements_file):
                 if pkg.strip() and not pkg.startswith("#")]
 
 
+def _get_version():
+    with open('ovos_utils/versioning/outils_versions.py') as versions:
+        for line in versions:
+            if line.startswith('CURRENT_OUTILS_VERSION'):
+                # CURRENT_OSM_VERSION = "0.0.10a9" --> "0.0.10a9"
+                return line.replace('"','').strip('\n').split('= ')[1]
+
+
+
 setup(
     name='ovos_utils',
-    version='0.0.15',
+    version=_get_version(),
     packages=['ovos_utils',
               'ovos_utils.intents',
               'ovos_utils.sound',
