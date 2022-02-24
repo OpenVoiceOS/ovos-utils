@@ -1,3 +1,4 @@
+import sys
 from importlib.util import find_spec
 from os.path import isfile, join, isdir, dirname
 
@@ -17,14 +18,13 @@ from ovos_utils.xdg_utils import (
 
 def get_xdg_config_dirs(folder=None):
     folder = folder or get_xdg_base()
-    paths = xdg_config_dirs()
-    paths.append(xdg_config_home())
-    return [join(path, folder) for path in paths if isdir(join(path, folder))]
+    xdg_dirs = xdg_config_dirs() + [xdg_config_home()]
+    return [join(path, folder) for path in xdg_dirs]
 
 
 def get_xdg_data_dirs(folder=None):
     folder = folder or get_xdg_base()
-    return [join(path, folder) for path in xdg_data_dirs() if isdir(join(path, folder))]
+    return [join(path, folder) for path in xdg_data_dirs()]
 
 
 def get_xdg_config_save_path(folder=None):
@@ -42,39 +42,31 @@ def get_xdg_cache_save_path(folder=None):
     return join(xdg_cache_home(), folder)
 
 
+def _is_running_from_module(module_name):
+    #is_installed = find_spec(module_name) is not None
+    #if not is_installed:
+    #    return False
+    in_path = any([p.endswith(f"/{module_name}") for p in sys.path])
+    return in_path
+
+
 def get_ovos_config():
+    # populate default values
     config = {"xdg": True,
               "base_folder": "mycroft",
               "config_filename": "mycroft.conf"}
-
     try:
         config["default_config_path"] = find_default_config()
-    except FileNotFoundError:
-        # not a mycroft device
+    except FileNotFoundError: # not a mycroft device
         config["default_config_path"] = join(dirname(__file__), "res", "fallback_mycroft.conf")
 
-    try:
-        if isfile("/etc/OpenVoiceOS/ovos.conf"):
-            config = merge_dict(config,
-                                load_commented_json(
-                                    "/etc/OpenVoiceOS/ovos.conf"))
-        elif isfile("/etc/mycroft/ovos.conf"):
-            config = merge_dict(config,
-                                load_commented_json("/etc/mycroft/ovos.conf"))
-    except:
-        # tolerate bad json TODO proper exception (?)
-        pass
-
-    # This includes both the user config and
-    # /etc/xdg/OpenVoiceOS/ovos.conf
-    for p in get_xdg_config_dirs("OpenVoiceOS"):
-        if isfile(join(p, "ovos.conf")):
-            try:
-                xdg_cfg = load_commented_json(join(p, "ovos.conf"))
-                config = merge_dict(config, xdg_cfg)
-            except:
-                # tolerate bad json TODO proper exception (?)
-                pass
+    # load ovos.conf
+    for path in get_ovos_default_config_paths():
+        try:
+            config = merge_dict(config, load_commented_json(path))
+        except:
+            # tolerate bad json TODO proper exception (?)
+            pass
 
     # let's check for derivatives specific configs
     # the assumption is that these cores are exclusive to each other,
@@ -82,17 +74,36 @@ def get_ovos_config():
     # TODO this works if using dedicated .venvs what about system installs?
     cores = config.get("module_overrides") or {}
     for k in cores:
-        if find_spec(k):
+        if _is_running_from_module(k):
             config = merge_dict(config, cores[k])
             break
     else:
         subcores = config.get("submodule_mappings") or {}
         for k in subcores:
-            if find_spec(k):
+            if _is_running_from_module(k):
                 config = merge_dict(config, cores[subcores[k]])
                 break
 
     return config
+
+
+def get_ovos_default_config_paths():
+    paths = []
+    if isfile("/etc/OpenVoiceOS/ovos.conf"):
+        paths.append("/etc/OpenVoiceOS/ovos.conf")
+    elif isfile("/etc/mycroft/ovos.conf"):
+        LOG.warning("found /etc/mycroft/ovos.conf\n"
+                    "This location has been DEPRECATED!\n"
+                    "Please move your config to /etc/OpenVoiceOS/ovos.conf")
+        paths.append("/etc/mycroft/ovos.conf")
+
+    # This includes both the user config and
+    # /etc/xdg/OpenVoiceOS/ovos.conf
+    for p in get_xdg_config_dirs("OpenVoiceOS"):
+        if isfile(join(p, "ovos.conf")):
+            paths.append(join(p, "ovos.conf"))
+
+    return paths
 
 
 def is_using_xdg():
