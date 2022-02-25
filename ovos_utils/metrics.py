@@ -34,7 +34,7 @@ class Stopwatch:
             Stop a running time measurement. returns the measured time
         """
         cur_time = time.time()
-        start_time = self.timestamp
+        start_time = self.timestamp or cur_time
         self.time = cur_time - start_time
         self.timestamp = None
         return self.time
