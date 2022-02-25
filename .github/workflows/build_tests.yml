@@ -14,8 +14,8 @@ jobs:
     steps:
       - name: debug output
         run: |
-          echo ${{github.pull_request.head.repo.full_name}}
-          echo ${{github.pull_request}}
+          echo ${{github.event.pull_request.head.repo.full_name}}
+          echo ${{github.event.pull_request}}
       - name: Checkout from runner repo
         uses: actions/checkout@v2
         with:
@@ -24,7 +24,7 @@ jobs:
       - name: Checkout from PR origin repo
         uses: actions/checkout@v2
         with:
-          repository: ${{github.pull_request.head.repo.full_name}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
           ref: ${{ github.head_ref }}
         if: github.event_name == 'pull_request'
       - name: Setup Python
