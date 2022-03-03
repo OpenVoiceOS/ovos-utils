@@ -23,6 +23,31 @@ class MycroftRootLocations(str, Enum):
 _USER_DEFINED_ROOT = None
 
 
+def is_running_from_module(module_name):
+    # Stack:
+    # [0] - _log()
+    # [1] - debug(), info(), warning(), or error()
+    # [2] - caller
+    stack = inspect.stack()
+
+    # Record:
+    # [0] - frame object
+    # [1] - filename
+    # [2] - line number
+    # [3] - function
+    # ...
+    for idx, record in enumerate(stack[2:10]):
+        idx += 2
+        mod = inspect.getmodule(record[0])
+        name = mod.__name__ if mod else ''
+        # module name in file path of caller
+        # or import name matches module name
+        if f"/{module_name}/" in record[1] or \
+                name.startswith(module_name.replace("-", "_").replace(" ", "_")):
+            return True
+    return False
+
+
 # system utils
 def ntp_sync():
     # Force the system clock to synchronize with internet time servers
