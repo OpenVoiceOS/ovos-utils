@@ -1,12 +1,9 @@
-import sys
-from importlib.util import find_spec
-from os.path import isfile, join, isdir, dirname
+from os.path import isfile, join, dirname
 
 from json_database import JsonStorage
-
 from ovos_utils.json_helper import load_commented_json, merge_dict
 from ovos_utils.log import LOG
-from ovos_utils.system import search_mycroft_core_location
+from ovos_utils.system import search_mycroft_core_location, is_running_from_module
 from ovos_utils.xdg_utils import (
     xdg_config_home,
     xdg_config_dirs,
@@ -42,14 +39,6 @@ def get_xdg_cache_save_path(folder=None):
     return join(xdg_cache_home(), folder)
 
 
-def _is_running_from_module(module_name):
-    #is_installed = find_spec(module_name) is not None
-    #if not is_installed:
-    #    return False
-    in_path = any([p.endswith(f"/{module_name}") for p in sys.path])
-    return in_path
-
-
 def get_ovos_config():
     # populate default values
     config = {"xdg": True,
@@ -57,7 +46,7 @@ def get_ovos_config():
               "config_filename": "mycroft.conf"}
     try:
         config["default_config_path"] = find_default_config()
-    except FileNotFoundError: # not a mycroft device
+    except FileNotFoundError:  # not a mycroft device
         config["default_config_path"] = join(dirname(__file__), "res", "fallback_mycroft.conf")
 
     # load ovos.conf
@@ -74,7 +63,7 @@ def get_ovos_config():
     # TODO this works if using dedicated .venvs what about system installs?
     cores = config.get("module_overrides") or {}
     for k in cores:
-        if _is_running_from_module(k):
+        if is_running_from_module(k):
             config = merge_dict(config, cores[k])
             break
     else:

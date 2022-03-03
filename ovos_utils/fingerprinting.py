@@ -2,7 +2,7 @@ import platform
 import socket
 from enum import Enum
 from os.path import join, isfile
-from ovos_utils.system import is_installed, has_screen, \
+from ovos_utils.system import is_installed, is_running_from_module, has_screen, \
     get_desktop_environment, search_mycroft_core_location, is_process_running
 from ovos_utils.configuration import is_using_xdg
 
@@ -143,6 +143,9 @@ def is_mycroft_core():
     except ImportError:
         return False
 
+def is_vanilla_mycroft_core():
+    return is_mycroft_core() and not is_ovos()
+
 
 def is_holmes():
     return "HolmesV" in (get_mycroft_version() or "") or is_mycroft_lib()
@@ -153,7 +156,7 @@ def is_mycroft_lib():
 
 
 def is_ovos():
-    return "OpenVoiceOS" in (get_mycroft_version() or "")
+    return is_running_from_module("ovos-core")
 
 
 def classify_platform_print(fingerprint=None):
