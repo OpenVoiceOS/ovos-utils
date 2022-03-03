@@ -1,12 +1,13 @@
+import inspect
 import os
-import subprocess
 import re
 import shutil
+import subprocess
 import sys
 import sysconfig
 from enum import Enum
+from os.path import expanduser, exists, join
 
-from os.path import expanduser, exists, join, isfile
 from ovos_utils.log import LOG
 
 
@@ -210,7 +211,3 @@ def has_screen():
         except ImportError:
             pass
     return have_display
-
-
-
-
