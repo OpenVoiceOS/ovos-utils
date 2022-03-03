@@ -1,43 +1,72 @@
+import sys
 from importlib.util import find_spec
-from os.path import isfile, join
+from os.path import isfile, join, isdir, dirname
 
-import xdg.BaseDirectory
 from json_database import JsonStorage
-from xdg import BaseDirectory as XDG
 
 from ovos_utils.json_helper import load_commented_json, merge_dict
 from ovos_utils.log import LOG
 from ovos_utils.system import search_mycroft_core_location
+from ovos_utils.xdg_utils import (
+    xdg_config_home,
+    xdg_config_dirs,
+    xdg_data_home,
+    xdg_data_dirs,
+    xdg_cache_home
+)
+
+
+def get_xdg_config_dirs(folder=None):
+    folder = folder or get_xdg_base()
+    xdg_dirs = xdg_config_dirs() + [xdg_config_home()]
+    return [join(path, folder) for path in xdg_dirs]
+
+
+def get_xdg_data_dirs(folder=None):
+    folder = folder or get_xdg_base()
+    return [join(path, folder) for path in xdg_data_dirs()]
+
+
+def get_xdg_config_save_path(folder=None):
+    folder = folder or get_xdg_base()
+    return join(xdg_config_home(), folder)
+
+
+def get_xdg_data_save_path(folder=None):
+    folder = folder or get_xdg_base()
+    return join(xdg_data_home(), folder)
+
+
+def get_xdg_cache_save_path(folder=None):
+    folder = folder or get_xdg_base()
+    return join(xdg_cache_home(), folder)
+
+
+def _is_running_from_module(module_name):
+    #is_installed = find_spec(module_name) is not None
+    #if not is_installed:
+    #    return False
+    in_path = any([p.endswith(f"/{module_name}") for p in sys.path])
+    return in_path
 
 
 def get_ovos_config():
+    # populate default values
     config = {"xdg": True,
               "base_folder": "mycroft",
-              "config_filename": "mycroft.conf",
-              "default_config_path": find_default_config()}
-
+              "config_filename": "mycroft.conf"}
     try:
-        if isfile("/etc/OpenVoiceOS/ovos.conf"):
-            config = merge_dict(config,
-                                load_commented_json(
-                                    "/etc/OpenVoiceOS/ovos.conf"))
-        elif isfile("/etc/mycroft/ovos.conf"):
-            config = merge_dict(config,
-                                load_commented_json("/etc/mycroft/ovos.conf"))
-    except:
-        # tolerate bad json TODO proper exception (?)
-        pass
+        config["default_config_path"] = find_default_config()
+    except FileNotFoundError: # not a mycroft device
+        config["default_config_path"] = join(dirname(__file__), "res", "fallback_mycroft.conf")
 
-    # This includes both the user config and
-    # /etc/xdg/OpenVoiceOS/ovos.conf
-    for p in xdg.BaseDirectory.load_config_paths("OpenVoiceOS"):
-        if isfile(join(p, "ovos.conf")):
-            try:
-                xdg_cfg = load_commented_json(join(p, "ovos.conf"))
-                config = merge_dict(config, xdg_cfg)
-            except:
-                # tolerate bad json TODO proper exception (?)
-                pass
+    # load ovos.conf
+    for path in get_ovos_default_config_paths():
+        try:
+            config = merge_dict(config, load_commented_json(path))
+        except:
+            # tolerate bad json TODO proper exception (?)
+            pass
 
     # let's check for derivatives specific configs
     # the assumption is that these cores are exclusive to each other,
@@ -45,17 +74,36 @@ def get_ovos_config():
     # TODO this works if using dedicated .venvs what about system installs?
     cores = config.get("module_overrides") or {}
     for k in cores:
-        if find_spec(k):
+        if _is_running_from_module(k):
             config = merge_dict(config, cores[k])
             break
     else:
         subcores = config.get("submodule_mappings") or {}
         for k in subcores:
-            if find_spec(k):
+            if _is_running_from_module(k):
                 config = merge_dict(config, cores[subcores[k]])
                 break
 
     return config
+
+
+def get_ovos_default_config_paths():
+    paths = []
+    if isfile("/etc/OpenVoiceOS/ovos.conf"):
+        paths.append("/etc/OpenVoiceOS/ovos.conf")
+    elif isfile("/etc/mycroft/ovos.conf"):
+        LOG.warning("found /etc/mycroft/ovos.conf\n"
+                    "This location has been DEPRECATED!\n"
+                    "Please move your config to /etc/OpenVoiceOS/ovos.conf")
+        paths.append("/etc/mycroft/ovos.conf")
+
+    # This includes both the user config and
+    # /etc/xdg/OpenVoiceOS/ovos.conf
+    for p in get_xdg_config_dirs("OpenVoiceOS"):
+        if isfile(join(p, "ovos.conf")):
+            paths.append(join(p, "ovos.conf"))
+
+    return paths
 
 
 def is_using_xdg():
@@ -67,7 +115,7 @@ def get_xdg_base():
 
 
 def save_ovos_core_config(new_config):
-    OVOS_CONFIG = join(xdg.BaseDirectory.save_config_path("OpenVoiceOS"),
+    OVOS_CONFIG = join(get_xdg_config_save_path("OpenVoiceOS"),
                        "ovos.conf")
     cfg = JsonStorage(OVOS_CONFIG)
     cfg.update(new_config)
@@ -102,7 +150,7 @@ def find_default_config():
 
 def find_user_config():
     if is_using_xdg():
-        path = join(XDG.xdg_config_home, get_xdg_base(), get_config_filename())
+        path = join(get_xdg_config_save_path(), get_config_filename())
         if isfile(path):
             return path
     old, path = get_config_locations(default=False, web_cache=False,
@@ -129,19 +177,19 @@ def get_config_locations(default=True, web_cache=True, system=True,
     if system:
         locs.append(f"/etc/{ovos_cfg['base_folder']}/{ovos_cfg['config_filename']}")
     if web_cache:
-        locs.append(f"{XDG.xdg_config_home}/{ovos_cfg['base_folder']}/web_cache.json")
+        locs.append(get_webcache_location())
     if old_user:
         locs.append(f"~/.{ovos_cfg['base_folder']}/{ovos_cfg['config_filename']}")
     if user:
         if is_using_xdg():
-            locs.append(f"{XDG.xdg_config_home}/{ovos_cfg['base_folder']}/{ovos_cfg['config_filename']}")
+            locs.append(f"{get_xdg_config_save_path()}/{ovos_cfg['config_filename']}")
         else:
             locs.append(f"~/.{ovos_cfg['base_folder']}/{ovos_cfg['config_filename']}")
     return locs
 
 
 def get_webcache_location():
-    return join(XDG.xdg_config_home, get_xdg_base(), 'web_cache.json')
+    return join(get_xdg_config_save_path(), 'web_cache.json')
 
 
 def get_xdg_config_locations():
@@ -149,7 +197,7 @@ def get_xdg_config_locations():
     # /etc/xdg/mycroft/mycroft.conf
     xdg_paths = list(reversed(
         [join(p, get_config_filename())
-         for p in XDG.load_config_paths(get_xdg_base())]
+         for p in get_xdg_config_dirs()]
     ))
     return xdg_paths
 
@@ -187,6 +235,7 @@ class LocalConf(JsonStorage):
         Config dict from file.
     """
     allow_overwrite = True
+
     def __init__(self, path=None):
         super(LocalConf, self).__init__(path)
 

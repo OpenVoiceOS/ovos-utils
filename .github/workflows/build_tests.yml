@@ -1,15 +1,39 @@
 name: Run Build Tests
 on:
   push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - dev
+    paths-ignore:
+      - 'ovos_utils/version.py'
+      - 'test/**'
+      - 'examples/**'
+      - '.github/**'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'CHANGELOG.md'
+      - 'MANIFEST.in'
+      - 'readme.md'
+      - 'scripts/**'
   workflow_dispatch:
 
 jobs:
   build_tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout from runner repo
+        uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
+        if: github.event_name != 'pull_request'
+      - name: Checkout from PR origin repo
+        uses: actions/checkout@v2
+        with:
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+          ref: ${{ github.head_ref }}
+        if: github.event_name == 'pull_request'
       - name: Setup Python
         uses: actions/setup-python@v1
         with:
