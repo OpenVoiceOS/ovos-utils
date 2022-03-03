@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.17a6...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.19a2...HEAD)
+
+**Fixed bugs:**
+
+- fix/platform\_detect [\#33](https://github.com/OpenVoiceOS/ovos_utils/pull/33) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.19a2](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.19a2) (2022-03-03)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.17a6...V0.0.19a2)
 
 **Breaking changes:**
 
