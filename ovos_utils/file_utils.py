@@ -7,6 +7,7 @@ from os.path import splitext, join, dirname
 import tempfile
 from ovos_utils.bracket_expansion import expand_options
 from ovos_utils.log import LOG
+from ovos_utils.system import search_mycroft_core_location
 
 
 def get_temp_path(*args):
@@ -61,18 +62,12 @@ def resolve_ovos_resource_file(res_name):
     if os.path.isfile(filename):
         return filename
 
-    # let's look in ovos_workshop if it's installed
-    try:
-        import ovos_workshop
-        pkg_dir = dirname(ovos_workshop.__file__)
-        filename = join(pkg_dir, "res", res_name)
+    # let's look in mycroft/ovos-core if it's installed
+    path = search_mycroft_core_location()
+    if path:
+        filename = join(path, "mycroft", "res", res_name)
         if os.path.isfile(filename):
             return filename
-        filename = join(pkg_dir, "res", "ui", res_name)
-        if os.path.isfile(filename):
-            return filename
-    except:
-        pass
     return None  # Resource cannot be resolved
 
 
@@ -124,21 +119,6 @@ def resolve_resource_file(res_name, root_path=None, config=None):
     found = resolve_ovos_resource_file(res_name)
     if found:
         return found
-
-    # Finally look for it in the source package
-    paths = [
-        "/opt/venvs/mycroft-core/lib/python3.7/site-packages/",  # mark1/2
-        "/opt/venvs/mycroft-core/lib/python3.4/site-packages/ ",
-        # old mark1 installs
-        "/home/pi/mycroft-core"  # picroft
-    ]
-    if root_path:
-        paths += [root_path]
-    for p in paths:
-        filename = os.path.join(p, 'mycroft', 'res', res_name)
-        filename = os.path.abspath(os.path.normpath(filename))
-        if os.path.isfile(filename):
-            return filename
 
     return None  # Resource cannot be resolved
 

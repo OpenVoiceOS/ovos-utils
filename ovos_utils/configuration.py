@@ -69,7 +69,7 @@ def get_ovos_config():
     else:
         subcores = config.get("submodule_mappings") or {}
         for k in subcores:
-            if _is_running_from_module(k):
+            if is_running_from_module(k):
                 config = merge_dict(config, cores[subcores[k]])
                 break
 
