@@ -1,9 +1,6 @@
-import sys
-from importlib.util import find_spec
-from os.path import isfile, join, isdir, dirname
-import inspect
-from json_database import JsonStorage
+from os.path import isfile, join, dirname
 
+from json_database import JsonStorage
 from ovos_utils.json_helper import load_commented_json, merge_dict
 from ovos_utils.log import LOG
 from ovos_utils.system import search_mycroft_core_location, is_running_from_module
@@ -49,7 +46,7 @@ def get_ovos_config():
               "config_filename": "mycroft.conf"}
     try:
         config["default_config_path"] = find_default_config()
-    except FileNotFoundError: # not a mycroft device
+    except FileNotFoundError:  # not a mycroft device
         config["default_config_path"] = join(dirname(__file__), "res", "fallback_mycroft.conf")
 
     # load ovos.conf
@@ -299,5 +296,3 @@ class MycroftXDGConfig(LocalConf):
                                     system=False, old_user=False,
                                     user=True)[0]
         super().__init__(path)
-
-
