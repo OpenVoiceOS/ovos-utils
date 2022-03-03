@@ -36,8 +36,7 @@ def is_running_from_module(module_name):
     # [2] - line number
     # [3] - function
     # ...
-    for idx, record in enumerate(stack[2:10]):
-        idx += 2
+    for record in stack[2:]:
         mod = inspect.getmodule(record[0])
         name = mod.__name__ if mod else ''
         # module name in file path of caller
