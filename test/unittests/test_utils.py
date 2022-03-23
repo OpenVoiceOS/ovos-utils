@@ -1,5 +1,6 @@
 import unittest
-from ovos_utils import rotate_list, camel_case_split, get_handler_name
+
+from ovos_utils import rotate_list, camel_case_split, get_handler_name, flatten_list
 
 
 class TestHelpers(unittest.TestCase):
@@ -14,6 +15,7 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(camel_case_split("MyAwesomeSkill"),
                          "My Awesome Skill")
 
+    def test_list_utils(self):
         self.assertEqual(rotate_list([1, 2, 3]), [2, 3, 1])
         self.assertEqual(rotate_list([1, 2, 3], 2), [3, 1, 2])
         self.assertEqual(rotate_list([1, 2, 3], 3), [1, 2, 3])
@@ -21,3 +23,14 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(rotate_list([1, 2, 3], -1), [3, 1, 2])
         self.assertEqual(rotate_list([1, 2, 3], -2), [2, 3, 1])
         self.assertEqual(rotate_list([1, 2, 3], -3), [1, 2, 3])
+
+        self.assertEqual(
+            flatten_list([["A", "B"], ["C"]]), ["A", "B", "C"]
+        )
+        self.assertEqual(
+            flatten_list([("A", "B")]), ["A", "B"]
+        )
+        self.assertEqual(
+            flatten_list([("A", "B"), ["C"], [["D", ["E", ["F"]]]]]),
+            ["A", "B", "C", "D", "E", "F"]
+        )
