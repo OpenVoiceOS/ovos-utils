@@ -2,7 +2,19 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.20a2...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.20a3...HEAD)
+
+**Implemented enhancements:**
+
+- Adds ovos service api [\#38](https://github.com/OpenVoiceOS/ovos_utils/pull/38) ([AIIX](https://github.com/AIIX))
+
+**Merged pull requests:**
+
+- notify matrix chat on PR merged [\#37](https://github.com/OpenVoiceOS/ovos_utils/pull/37) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.20a3](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.20a3) (2022-03-23)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.20a2...V0.0.20a3)
 
 **Implemented enhancements:**
 
