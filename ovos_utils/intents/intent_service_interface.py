@@ -1,6 +1,6 @@
 from os.path import exists, isfile
 
-from adapt.intent import Intent
+
 from mycroft_bus_client import MessageBusClient
 from mycroft_bus_client.message import Message, dig_for_message
 from ovos_utils import create_daemon
@@ -502,6 +502,9 @@ class IntentQueryApi:
 
 def open_intent_envelope(message):
     """Convert dictionary received over messagebus to Intent."""
+    # TODO can this method be fully removed from ovos_utils ?
+    from adapt.intent import Intent
+
     intent_dict = message.data
     return Intent(intent_dict.get('name'),
                   intent_dict.get('requires'),
