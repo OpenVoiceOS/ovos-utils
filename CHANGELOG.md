@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.21a2...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.21a3...HEAD)
+
+**Merged pull requests:**
+
+- refactor/migrate\_adapt\_boilerplate [\#42](https://github.com/OpenVoiceOS/ovos_utils/pull/42) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.21a3](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.21a3) (2022-05-07)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.21a2...V0.0.21a3)
 
 **Merged pull requests:**
 
