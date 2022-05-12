@@ -53,15 +53,15 @@ class GUIWidgets:
         self.bus = bus or get_mycroft_bus()
 
     def show_widget(self, widget_type, widget_data):
-        LOG.info("Showing widget: " + widget_type)
+        LOG.debug("Showing widget: " + widget_type)
         self.bus.emit(Message("ovos.widgets.display", {"type": widget_type, "data": widget_data}))
 
     def remove_widget(self, widget_type, widget_data):
-        LOG.info("Removing widget: " + widget_type)
+        LOG.debug("Removing widget: " + widget_type)
         self.bus.emit(Message("ovos.widgets.remove", {"type": widget_type, "data": widget_data}))
 
     def update_widget(self, widget_type, widget_data):
-        LOG.info("Updating widget: " + widget_type)
+        LOG.debug("Updating widget: " + widget_type)
         self.bus.emit(Message("ovos.widgets.update", {"type": widget_type, "data": widget_data}))
 
 
