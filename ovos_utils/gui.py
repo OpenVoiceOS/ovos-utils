@@ -48,6 +48,23 @@ def can_use_gui(bus=None, local=False):
     return can_use_local_gui() or is_gui_connected(bus)
 
 
+class GUIWidgets:
+    def __init__(self, bus=None):
+        self.bus = bus or get_mycroft_bus()
+
+    def show_widget(self, widget_type, widget_data):
+        LOG.debug("Showing widget: " + widget_type)
+        self.bus.emit(Message("ovos.widgets.display", {"type": widget_type, "data": widget_data}))
+
+    def remove_widget(self, widget_type, widget_data):
+        LOG.debug("Removing widget: " + widget_type)
+        self.bus.emit(Message("ovos.widgets.remove", {"type": widget_type, "data": widget_data}))
+
+    def update_widget(self, widget_type, widget_data):
+        LOG.debug("Updating widget: " + widget_type)
+        self.bus.emit(Message("ovos.widgets.update", {"type": widget_type, "data": widget_data}))
+
+
 class GUIPlaybackStatus(IntEnum):
     STOPPED = 0
     PLAYING = 1
