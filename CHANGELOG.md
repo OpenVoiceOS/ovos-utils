@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.21a3...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.21a4...HEAD)
+
+**Merged pull requests:**
+
+- Add widgets helper [\#43](https://github.com/OpenVoiceOS/ovos_utils/pull/43) ([AIIX](https://github.com/AIIX))
+
+## [V0.0.21a4](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.21a4) (2022-05-09)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.21a3...V0.0.21a4)
 
 **Merged pull requests:**
 
