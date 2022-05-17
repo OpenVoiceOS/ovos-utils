@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.21...HEAD)
+
+**Implemented enhancements:**
+
+- support ovos-shell [\#45](https://github.com/OpenVoiceOS/ovos_utils/pull/45) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.21](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.21) (2022-05-17)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.21a6...V0.0.21)
+
 ## [V0.0.21a6](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.21a6) (2022-05-17)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.21a5...V0.0.21a6)
@@ -12,7 +24,7 @@
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.21a4...V0.0.21a5)
 
-**Merged pull requests:**
+**Implemented enhancements:**
 
 - Add widgets helper [\#43](https://github.com/OpenVoiceOS/ovos_utils/pull/43) ([AIIX](https://github.com/AIIX))
 
