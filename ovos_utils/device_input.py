@@ -86,3 +86,11 @@ class InputDeviceHelper:
                 return True
 
         return False
+
+
+def can_use_touch_mouse():
+    return InputDeviceHelper().can_use_touch_mouse()
+
+
+def can_use_keyboard():
+    return InputDeviceHelper().can_use_keyboard()
