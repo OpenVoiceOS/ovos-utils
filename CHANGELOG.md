@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.21a4...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.21a5...HEAD)
+
+**Implemented enhancements:**
+
+- add InputDeviceHelper to detect available inputs on current system [\#44](https://github.com/OpenVoiceOS/ovos_utils/pull/44) ([AIIX](https://github.com/AIIX))
+
+## [V0.0.21a5](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.21a5) (2022-05-12)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.21a4...V0.0.21a5)
 
 **Merged pull requests:**
 
