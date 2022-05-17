@@ -1,9 +1,12 @@
 import subprocess
+from distutils.spawn import find_executable
 
 
 class InputDeviceHelper:
     def __init__(self) -> None:
         self.input_devices_list = []
+        if not find_executable("libinput"):
+            raise Exception("libinput executable not found")
 
     # ToDo: add support for discovring the input device based of a connected
     # monitors, currently linux only supports input listing directly from the
@@ -66,12 +69,20 @@ class InputDeviceHelper:
         self.build_input_devices_list()
         return self.input_devices_list
 
-    def inputs_support_touch_mouse(self):
+    def can_use_touch_mouse(self):
         # check if any of the devices support touch or mouse
         self.build_input_devices_list()
         for device in self.input_devices_list:
             if "touch" in device["Capabilities"] or "mouse" in device[
                     "Capabilities"] or "tablet" in device["Capabilities"] or "gesture" in device["Capabilities"]:
+                return True
+
+        return False
+
+    def can_use_keyboard(self):
+        self.build_input_devices_list()
+        for device in self.input_devices_list:
+            if "keyboard" in device["Capabilities"]:
                 return True
 
         return False
