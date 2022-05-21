@@ -13,6 +13,7 @@
 #
 import inspect
 import logging
+import os
 import sys
 from os.path import join
 from logging.handlers import RotatingFileHandler
@@ -52,8 +53,8 @@ class LOG:
         cls.diagnostic_mode = config.get("diagnostic", False)
 
     @classmethod
-    def create_logger(cls, name, tostdout=False):
-        if name in cls._loggers:
+    def create_logger(cls, name, tostdout=False, override=False, make_log_dir=False):
+        if name in cls._loggers and not override:
             return cls._loggers[name]
         logger = logging.getLogger(name)
         logger.propagate = False
@@ -64,7 +65,10 @@ class LOG:
             logger.addHandler(stdout_handler)
         # log to file
         if cls.base_path != "stdout":
-            path = join(cls.base_path,
+            _log_base_path = os.path.expanduser(cls.base_path)
+            if make_log_dir:
+                os.makedirs(_log_base_path, exist_ok=True)
+            path = join(_log_base_path,
                         cls.name.lower().strip() + ".log")
             handler = RotatingFileHandler(path, maxBytes=cls.max_bytes,
                                           backupCount=cls.backup_count)
