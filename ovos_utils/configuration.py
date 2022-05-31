@@ -12,6 +12,11 @@ from ovos_utils.xdg_utils import (
     xdg_cache_home
 )
 
+try:
+    from lingua_franca.lang import get_default_lang as _lf_get_default_lang
+except ImportError:
+    _lf_get_default_lang = None
+
 
 def get_xdg_config_dirs(folder=None):
     folder = folder or get_xdg_base()
@@ -37,6 +42,20 @@ def get_xdg_data_save_path(folder=None):
 def get_xdg_cache_save_path(folder=None):
     folder = folder or get_xdg_base()
     return join(xdg_cache_home(), folder)
+
+
+def get_default_lang(config=None):
+    """Get the default language from lingua_franca or from mycroft.conf
+    Args:
+        config (dict): mycroft.conf data, if not set read_mycroft_config() is used
+    Returns:
+        The language code for the default language.
+    """
+    if _lf_get_default_lang:
+        return _lf_get_default_lang()
+    config = config or read_mycroft_config()
+    default_lang = config.get("lang") or "en-us"
+    return default_lang
 
 
 def get_ovos_config():
