@@ -1,6 +1,7 @@
-from mycroft_bus_client import MessageBusClient, Message
+from mycroft_bus_client import MessageBusClient
+from mycroft_bus_client.message import dig_for_message, Message
 from ovos_utils.log import LOG
-from ovos_utils.configuration import read_mycroft_config
+from ovos_utils.configuration import read_mycroft_config, get_default_lang
 from ovos_utils import create_loop
 from ovos_utils.json_helper import merge_dict
 import time
@@ -107,6 +108,21 @@ class FakeBus:
 
     def close(self):
         self.on_close()
+
+
+def get_message_lang(message=None):
+    """Get the language from the message or the default language.
+    Args:
+        message: message to check for language code.
+    Returns:
+        The language code from the message or the default language.
+    """
+    message = message or dig_for_message()
+    default_lang = get_default_lang()
+    if not message:
+        return default_lang
+    lang = message.data.get("lang") or message.context.get("lang") or default_lang
+    return lang.lower()
 
 
 def get_websocket(host, port, route='/', ssl=False, threaded=True):
