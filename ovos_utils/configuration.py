@@ -13,7 +13,7 @@ from ovos_utils.xdg_utils import (
 )
 
 try:
-    from lingua_franca.lang import get_default_lang as _lf_get_default_lang
+    from lingua_franca import get_default_loc as _lf_get_default_lang
 except ImportError:
     _lf_get_default_lang = None
 
