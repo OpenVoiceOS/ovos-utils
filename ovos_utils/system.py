@@ -199,8 +199,18 @@ def is_installed(executable):
 
 def has_screen():
     have_display = "DISPLAY" in os.environ
+    # X server not running
     if not have_display:
-        # fallback check using matplotlib if available
+        # raspberry pi specific check
+        try:
+            have_display = b"device_name=" in subprocess.check_output("tvservice -n 2>&1", shell=True)
+        except Exception as e:
+            pass
+        
+    # fallback check using matplotlib if available
+    # seems to be foolproof and OS agnostic 
+    # but do not want to drag the dependency
+    if not have_display:
         try:
             import matplotlib.pyplot as plt
             try:
