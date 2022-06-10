@@ -52,9 +52,10 @@ def get_default_lang(config=None):
         The language code for the default language.
     """
     if _lf_get_default_lang:
-        return _lf_get_default_lang()
-    config = config or read_mycroft_config()
-    default_lang = config.get("lang") or "en-us"
+        default_lang = _lf_get_default_lang()
+    if not default_lang:
+        config = config or read_mycroft_config()
+        default_lang = config.get("lang") or "en-us"
     return default_lang
 
 
