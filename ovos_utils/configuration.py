@@ -51,11 +51,13 @@ def get_default_lang(config=None):
     Returns:
         The language code for the default language.
     """
+    default_lang = None
     if _lf_get_default_lang:
-        return _lf_get_default_lang()
-    config = config or read_mycroft_config()
-    default_lang = config.get("lang") or "en-us"
-    return default_lang
+        default_lang = _lf_get_default_lang()
+    if not default_lang:
+        config = config or read_mycroft_config()
+        default_lang = config.get("lang")
+    return default_lang or "en-us"
 
 
 def get_ovos_config():
