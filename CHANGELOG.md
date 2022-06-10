@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.22...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23a1...HEAD)
+
+**Fixed bugs:**
+
+- fix/allow\_LF\_lang\_to\_be\_None [\#50](https://github.com/OpenVoiceOS/ovos_utils/pull/50) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.23a1](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.23a1) (2022-06-07)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.22...V0.0.23a1)
 
 **Fixed bugs:**
 
