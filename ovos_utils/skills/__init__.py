@@ -97,8 +97,9 @@ def get_skills_folder(config=None):
     # read user defined location
     config = config or read_mycroft_config()
     if config:
-        skill_folder = config["skills"]["msm"]["directory"]
-        return join(config["data_dir"], skill_folder)
+        skill_folder = config["skills"].get("msm", {}).get("directory")
+        if skill_folder:
+            return join(config["data_dir"], skill_folder)
 
     # check if default path exists
     elif isdir("/opt/mycroft/skills"):
