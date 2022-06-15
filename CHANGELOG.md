@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23a1...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23a2...HEAD)
+
+**Fixed bugs:**
+
+- Prevent raising exception when msm config not present [\#51](https://github.com/OpenVoiceOS/ovos_utils/pull/51) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.23a2](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.23a2) (2022-06-10)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23a1...V0.0.23a2)
 
 **Fixed bugs:**
 
