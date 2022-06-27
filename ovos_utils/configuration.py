@@ -1,5 +1,7 @@
-from os.path import isfile, join, dirname
-from ovos_config.config import LocalConf
+from os import makedirs
+from os.path import isfile, join, dirname, expanduser, exists, isdir
+
+from json_database import JsonStorage
 from ovos_utils.json_helper import load_commented_json, merge_dict
 from ovos_utils.log import LOG
 from ovos_utils.system import search_mycroft_core_location, is_running_from_module
@@ -126,7 +128,7 @@ def get_xdg_base():
 def save_ovos_core_config(new_config):
     OVOS_CONFIG = join(get_xdg_config_save_path("OpenVoiceOS"),
                        "ovos.conf")
-    cfg = LocalConf(OVOS_CONFIG)
+    cfg = JsonStorage(OVOS_CONFIG)
     cfg.update(new_config)
     cfg.store()
     return cfg
@@ -252,6 +254,51 @@ def update_mycroft_config(config, path=None):
     conf.merge(config)
     conf.store()
     return conf
+
+
+class LocalConf(JsonStorage):
+    """
+        Config dict from file.
+    """
+    allow_overwrite = True
+
+    def _load_yaml(self, path):
+        import yaml
+        with self.lock:
+            path = expanduser(path)
+            if exists(path) and isfile(path):
+                self.clear()
+                try:
+                    with open(path) as f:
+                        config = yaml.safe_load(f)
+                    for key in config:
+                        self[key] = config[key]
+                    LOG.debug(f"Yaml loaded {path}")
+                except Exception as e:
+                    LOG.exception(e)
+            else:
+                LOG.debug(f"Invalid file requested: {path}")
+
+    def _store_yaml(self, path=None):
+        import yaml
+        with self.lock:
+            path = path or self.path
+            if not path:
+                LOG.warning("yaml path not set")
+                return
+            path = expanduser(path)
+            if dirname(path) and not isdir(dirname(path)):
+                makedirs(dirname(path))
+            with open(path, 'w', encoding="utf-8") as f:
+                yaml.dump(dict(self), f, allow_unicode=True,
+                          default_flow_style=False, sort_keys=False)
+
+    def __init__(self, path=None):
+        if _get_file_format(path) == "yaml":
+            self.load_local = self._load_yaml
+            self.store = self._store_yaml
+            LOG.warning("Overriding methods for yaml config")
+        super(LocalConf, self).__init__(path)
 
 
 class ReadOnlyConfig(LocalConf):
