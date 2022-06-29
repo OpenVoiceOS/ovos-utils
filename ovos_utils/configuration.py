@@ -223,23 +223,6 @@ def set_config_name(name, core_folder=None):
     set_config_filename(name, core_folder)
 
 
-def _get_file_format(path=None):
-    """The config file format
-    supported file extensions:
-    - json (.json)
-    - commented json (.conf)
-    - yaml (.yaml/.yml)
-
-    returns "yaml" or "json"
-    """
-    if not path:
-        return "dict"
-    if path.endswith(".yml") or path.endswith(".yaml"):
-        return "yaml"
-    else:
-        return "json"
-
-
 def read_mycroft_config():
     from ovos_config.config import Configuration
     # Cast config to dict for backwards-compat.
@@ -262,42 +245,7 @@ class LocalConf(JsonStorage):
     """
     allow_overwrite = True
 
-    def _load_yaml(self, path):
-        import yaml
-        with self.lock:
-            path = expanduser(path)
-            if exists(path) and isfile(path):
-                self.clear()
-                try:
-                    with open(path) as f:
-                        config = yaml.safe_load(f)
-                    for key in config:
-                        self[key] = config[key]
-                    LOG.debug(f"Yaml loaded {path}")
-                except Exception as e:
-                    LOG.exception(e)
-            else:
-                LOG.debug(f"Invalid file requested: {path}")
-
-    def _store_yaml(self, path=None):
-        import yaml
-        with self.lock:
-            path = path or self.path
-            if not path:
-                LOG.warning("yaml path not set")
-                return
-            path = expanduser(path)
-            if dirname(path) and not isdir(dirname(path)):
-                makedirs(dirname(path))
-            with open(path, 'w', encoding="utf-8") as f:
-                yaml.dump(dict(self), f, allow_unicode=True,
-                          default_flow_style=False, sort_keys=False)
-
     def __init__(self, path=None):
-        if _get_file_format(path) == "yaml":
-            self.load_local = self._load_yaml
-            self.store = self._store_yaml
-            LOG.warning("Overriding methods for yaml config")
         super(LocalConf, self).__init__(path)
 
 
