@@ -18,6 +18,9 @@ try:
 except ImportError:
     _lf_get_default_lang = None
 
+LOG.warning("configuration moved to the `ovos_config` package. This submodule "
+            "will be removed in ovos_utils 0.1.0")
+
 
 def get_xdg_config_dirs(folder=None):
     folder = folder or get_xdg_base()
