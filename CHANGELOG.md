@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23a3...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23a4...HEAD)
+
+**Implemented enhancements:**
+
+- port/file\_watcher [\#54](https://github.com/OpenVoiceOS/ovos_utils/pull/54) ([NeonJarbas](https://github.com/NeonJarbas))
+
+## [V0.0.23a4](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.23a4) (2022-07-06)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23a3...V0.0.23a4)
 
 **Merged pull requests:**
 
