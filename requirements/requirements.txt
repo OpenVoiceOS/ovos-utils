@@ -3,5 +3,5 @@ pexpect~=4.8
 requests~=2.26
 json_database~=0.7
 kthread~=0.2
+ovos_config~=0.0,>=0.0.3
 watchdog
-ovos_config~=0.0
