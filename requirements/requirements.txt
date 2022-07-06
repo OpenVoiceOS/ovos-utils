@@ -1,4 +1,4 @@
-mycroft-messagebus-client~=0.9.1,!=0.9.2,!=0.9.3
+mycroft-messagebus-client~=0.9,!=0.9.2,!=0.9.3
 pexpect~=4.8
 requests~=2.26
 json_database~=0.7
