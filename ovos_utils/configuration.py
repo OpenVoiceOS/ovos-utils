@@ -11,6 +11,7 @@ from ovos_utils.log import LOG
 from ovos_config.locations import (
     get_xdg_config_dirs,
     get_xdg_data_dirs,
+    get_xdg_data_save_path,
     get_xdg_config_save_path,
     get_xdg_cache_save_path,
     find_default_config,
