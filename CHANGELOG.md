@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23a2...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23a3...HEAD)
+
+**Merged pull requests:**
+
+- Loosen mycroft-messagebus-client dependency to allow 0.10.0 [\#53](https://github.com/OpenVoiceOS/ovos_utils/pull/53) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.23a3](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.23a3) (2022-06-15)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23a2...V0.0.23a3)
 
 **Fixed bugs:**
 
