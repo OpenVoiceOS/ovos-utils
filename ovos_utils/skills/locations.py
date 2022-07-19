@@ -17,7 +17,8 @@ def get_installed_skill_ids(conf: Optional[dict] = None) -> List[str]:
     _, skill_ids = get_plugin_skills()
     for d in get_skill_directories(conf):
         for skill_dir in listdir(d):
-            if isdir(skill_dir) and isfile(join(d, skill_dir, "__init__.py")):
+            if isdir(join(d, skill_dir)) and isfile(join(d, skill_dir,
+                                                         "__init__.py")):
                 if skill_dir in skill_ids:
                     LOG.info(f"{skill_dir} installed as plugin and local dir")
                     continue
