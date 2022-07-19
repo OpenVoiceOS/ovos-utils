@@ -75,11 +75,10 @@ def get_skill_directories(conf: Optional[dict] = None) -> List[str]:
     # extra_directories is a list of directories containing skill subdirectories
     # NOT a list of individual skill folders
     # preserve order while removing any duplicate entries
-    extra_dirs = [expanduser(d) for d in
-                  list(dict.fromkeys(conf.get("extra_directories") or []))]
-    valid_extra_dirs = [d for d in extra_dirs if isdir(d) and
-                        d not in skill_locations]
-    skill_locations += valid_extra_dirs
+    extra_dirs = (expanduser(d) for d in conf.get("extra_directories") or [])
+    for d in extra_dirs:
+        if isdir(d) and d not in skill_locations:
+            skill_locations.append(d)
     return skill_locations
 
 
