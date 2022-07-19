@@ -6,21 +6,26 @@ from ovos_config.config import Configuration
 from ovos_utils.log import LOG
 
 
-def get_installed_skill_ids(config=None) -> List[str]:
+def get_installed_skill_ids(conf: Optional[dict] = None) -> List[str]:
     """
     Gets a list of `skill_id`s for all installed skills
-    @param config:
-    @return:
+    Args:
+        conf: Configuration, else loads from ovos_config.config.Configuration
+    Returns:
+        list of `skill_id` strings for all installed skills
     """
-    skill_ids = get_plugin_skill_dirs()
-    for d in get_skill_directories(config):
+    _, skill_ids = get_plugin_skills()
+    for d in get_skill_directories(conf):
         for skill_dir in listdir(d):
             if isdir(skill_dir) and isfile(join(d, skill_dir, "__init__.py")):
+                if skill_dir in skill_ids:
+                    LOG.info(f"{skill_dir} installed as plugin and local dir")
+                    continue
                 skill_ids.append(skill_dir)
     return skill_ids
 
 
-def get_skill_directories(config=None) -> List[str]:
+def get_skill_directories(conf: Optional[dict] = None) -> List[str]:
     """ returns list of skill directories ordered by expected loading order
     This corresponds to:
     - XDG_DATA_DIRS
@@ -41,18 +46,21 @@ def get_skill_directories(config=None) -> List[str]:
         }
     }
     Args:
-        conf (dict): mycroft.conf dict, will be loaded automatically if None
+        conf: Configuration, else loads from ovos_config.config.Configuration
+    Returns:
+        list of fully-qualified directories containing non-plugin skills
     """
     # the contents of each skills directory must be individual skill folders
     # we are still dependent on the mycroft-core structure of skill_id/__init__.py
 
-    conf = config or Configuration()
+    conf = conf or Configuration()
 
     # load all valid XDG paths
     # NOTE: skills are actually code, but treated as user data!
     # they should be considered applets rather than full applications
     skill_locations = list(reversed(
-        [join(p, "skills") for p in get_xdg_data_dirs()]
+        [join(p, "skills") for p in get_xdg_data_dirs() if
+         isdir(join(p, "skills"))]
     ))
 
     # load the default skills folder
@@ -65,11 +73,18 @@ def get_skill_directories(config=None) -> List[str]:
     conf = conf.get("skills") or {}
     # extra_directories is a list of directories containing skill subdirectories
     # NOT a list of individual skill folders
-    skill_locations += conf.get("extra_directories") or []
+    # preserve order while removing any duplicate entries
+    extra_dirs = [expanduser(d) for d in
+                  list(dict.fromkeys(conf.get("extra_directories")))
+                  if isdir(expanduser(d)) and
+                  expanduser(d) not in skill_locations] if \
+        conf.get("extra_directories") and len(conf["extra_directories"]) > 0 \
+        else []
+    skill_locations += extra_dirs
     return skill_locations
 
 
-def get_default_skills_directory(conf=None):
+def get_default_skills_directory(conf: Optional[dict] = None) -> str:
     """ return default directory to scan for skills
     This is only meaningful if xdg is disabled in ovos.conf
     If xdg is enabled then data_dir is always XDG_DATA_DIR
@@ -84,7 +99,9 @@ def get_default_skills_directory(conf=None):
         }
     }
     Args:
-        conf (dict): mycroft.conf dict, will be loaded automatically if None
+        conf: Configuration, else loads from ovos_config.config.Configuration
+    Returns:
+        Absolute path to default skills directory
     """
     conf = conf or Configuration()
     path_override = conf["skills"].get("directory_override")
@@ -94,10 +111,10 @@ def get_default_skills_directory(conf=None):
         LOG.warning("'directory_override' is deprecated!\n"
                     "It will no longer be supported after version 0.0.3\n"
                     "add the new path to 'extra_directories' instead")
-        skills_folder = path_override
+        skills_folder = expanduser(path_override)
     elif conf["skills"].get("extra_directories") and \
             len(conf["skills"].get("extra_directories")) > 0:
-        skills_folder = conf["skills"]["extra_directories"][0]
+        skills_folder = expanduser(conf["skills"]["extra_directories"][0])
     else:
         skills_folder = join(get_xdg_data_save_path(), "skills")
     # create folder if needed
@@ -107,17 +124,23 @@ def get_default_skills_directory(conf=None):
         skills_folder = join(get_xdg_data_save_path(), "skills")
         makedirs(skills_folder, exist_ok=True)
 
-    return expanduser(skills_folder)
+    return skills_folder
 
 
-def get_plugin_skill_dirs() -> list:
+def get_plugin_skills() -> (list, list):
+    """
+    Get the package directories for any pip installed skill plugins
+    Returns:
+        lists of skill directories and plugin skill IDs
+    """
     import importlib.util
     from ovos_plugin_manager.skills import find_skill_plugins
     skill_dirs = list()
     plugins = find_skill_plugins()
+    skill_ids = list(plugins.keys())
     for skill_class in plugins.values():
         skill_dir = dirname(importlib.util.find_spec(
             skill_class.__module__).origin)
         skill_dirs.append(skill_dir)
-    LOG.info(f"Located plugin skill_dirs: {skill_dirs}")
-    return skill_dirs
+    LOG.info(f"Located plugin skills: {skill_ids}")
+    return skill_dirs, skill_ids
