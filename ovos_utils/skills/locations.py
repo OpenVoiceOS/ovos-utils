@@ -76,12 +76,10 @@ def get_skill_directories(conf: Optional[dict] = None) -> List[str]:
     # NOT a list of individual skill folders
     # preserve order while removing any duplicate entries
     extra_dirs = [expanduser(d) for d in
-                  list(dict.fromkeys(conf.get("extra_directories")))
-                  if isdir(expanduser(d)) and
-                  expanduser(d) not in skill_locations] if \
-        conf.get("extra_directories") and len(conf["extra_directories"]) > 0 \
-        else []
-    skill_locations += extra_dirs
+                  list(dict.fromkeys(conf.get("extra_directories") or []))]
+    valid_extra_dirs = [d for d in extra_dirs if isdir(d) and
+                        d not in skill_locations]
+    skill_locations += valid_extra_dirs
     return skill_locations
 
 
