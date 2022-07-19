@@ -135,7 +135,11 @@ def get_plugin_skills() -> (list, list):
         lists of skill directories and plugin skill IDs
     """
     import importlib.util
-    from ovos_plugin_manager.skills import find_skill_plugins
+    try:
+        from ovos_plugin_manager.skills import find_skill_plugins
+    except ImportError:
+        LOG.warning("ovos-plugin-manager not available to load plugin skills")
+        return [], []
     skill_dirs = list()
     plugins = find_skill_plugins()
     skill_ids = list(plugins.keys())
