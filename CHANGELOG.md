@@ -2,7 +2,19 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23a5...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23a6...HEAD)
+
+**Implemented enhancements:**
+
+- Skill location utilities [\#55](https://github.com/OpenVoiceOS/ovos_utils/pull/55) ([NeonDaniel](https://github.com/NeonDaniel))
+
+**Merged pull requests:**
+
+- Update release tag workflows to include version change commits [\#56](https://github.com/OpenVoiceOS/ovos_utils/pull/56) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.23a6](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.23a6) (2022-07-06)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23a5...V0.0.23a6)
 
 **Merged pull requests:**
 
