@@ -49,8 +49,8 @@ def can_use_gui(bus=None, local=False):
         return can_use_local_gui()
     return can_use_local_gui() or is_gui_connected(bus)
 
-def extend_about_data(about_data):
-    bus = get_mycroft_bus()
+def extend_about_data(bus=None, about_data):
+    bus = bus or get_mycroft_bus()
     if isinstance(about_data, list):
         bus.emit(Message("smartspeaker.extension.extend.about", {"display_list": about_data}))
     elif isinstance(about_data, dict):
