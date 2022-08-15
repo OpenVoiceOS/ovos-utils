@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23...HEAD)
+
+**Merged pull requests:**
+
+- Add extend about data method to gui utils [\#57](https://github.com/OpenVoiceOS/ovos_utils/pull/57) ([AIIX](https://github.com/AIIX))
+
+## [V0.0.23](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.23) (2022-07-20)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23a7...V0.0.23)
+
 ## [V0.0.23a7](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.23a7) (2022-07-20)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23a6...V0.0.23a7)
