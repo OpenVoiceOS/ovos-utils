@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.24a1...HEAD)
+
+**Merged pull requests:**
+
+- Handle exceptions getting cache directory when MemoryTempfile fails \(i.e. in a chroot\) [\#58](https://github.com/OpenVoiceOS/ovos_utils/pull/58) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.24a1](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.24a1) (2022-08-15)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.23...V0.0.24a1)
 
 **Merged pull requests:**
 
