@@ -42,14 +42,15 @@ def get_temp_path(*args):
 def get_cache_directory(folder):
     # optional import to use ram for cache
     # does not work in windows!
-    try:
-        from memory_tempfile import MemoryTempfile
-    except ImportError:
-        MemoryTempfile = None
-    if os.name == 'nt' or not MemoryTempfile:
-        path = get_temp_path(folder)
-    else:
-        path = join(MemoryTempfile(fallback=True).gettempdir(), folder)
+    path = get_temp_path(folder)
+    if os.name != 'nt':
+        try:
+            from memory_tempfile import MemoryTempfile
+            path = join(MemoryTempfile(fallback=True).gettempdir(), folder)
+        except ImportError:
+            pass
+        except Exception as e:
+            LOG.exception(e)
     os.makedirs(path, exist_ok=True)
     return path
 
