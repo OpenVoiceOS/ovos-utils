@@ -1,4 +1,3 @@
-import json
 import requests
 from json_database import JsonStorageXDG
 
@@ -36,3 +35,27 @@ class OVOSApiService:
 
     def get_session_token(self):
         return self.token_storage.get("challenge", "")
+
+
+class OvosWeather:
+    def __init__(self):
+        self.api = OVOSApiService()
+        self.api.register_device()
+
+    @property
+    def uuid(self):
+        return self.api.get_uuid()
+
+    @property
+    def headers(self):
+        self.api.get_session_challenge()
+        return {'session_challenge': self.api.get_session_token(),  'backend': 'OWM'}
+
+    def get_weather_onecall(self, query):
+        reqdata = {"lat": query.get("lat"),
+                   "lon": query.get("lon"),
+                   "units": query.get("units"),
+                   "lang": query.get("lang")}
+        url = f'https://api.openvoiceos.com/weather/onecall_weather_report/{self.uuid}'
+        r = requests.post(url, data=reqdata, headers=self.headers)
+        return r.json()
