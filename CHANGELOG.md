@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.24a2...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.24a3...HEAD)
+
+**Merged pull requests:**
+
+- add systemctl mycroft restart option [\#61](https://github.com/OpenVoiceOS/ovos_utils/pull/61) ([AIIX](https://github.com/AIIX))
+
+## [V0.0.24a3](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.24a3) (2022-09-06)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.24a2...V0.0.24a3)
 
 **Implemented enhancements:**
 
