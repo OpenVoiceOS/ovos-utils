@@ -50,6 +50,34 @@ class OvosWeather:
         self.api.get_session_challenge()
         return {'session_challenge': self.api.get_session_token(),  'backend': 'OWM'}
 
+    def get_current(self, query):
+        reqdata = {"lat": query.get("lat"),
+                   "lon": query.get("lon"),
+                   "units": query.get("units"),
+                   "lang": query.get("lang")}
+        url = f"https://api.openvoiceos.com/weather/generate_current_weather_report/{self.uuid}"
+        r = requests.post(url, data=reqdata, headers=self.headers)
+        return r.json()
+
+    def get_hourly(self, query):
+        reqdata = {"lat": query.get("lat"),
+                   "lon": query.get("lon"),
+                   "units": query.get("units"),
+                   "lang": query.get("lang")}
+        url = f"https://api.openvoiceos.com/weather/generate_hourly_weather_report/{self.uuid}"
+        r = requests.post(url, data=reqdata, headers=self.headers)
+        return r.json()
+
+    def get_forecast(self, query):
+        # Requires Paid API
+        reqdata = {"lat": query.get("lat"),
+                   "lon": query.get("lon"),
+                   "units": query.get("units"),
+                   "lang": query.get("lang")}
+        url = f"https://api.openvoiceos.com/weather/generate_forecast_weather_report/{self.uuid}"
+        r = requests.post(url, data=reqdata, headers=self.headers)
+        return r.json()
+
     def get_weather_onecall(self, query):
         reqdata = {"lat": query.get("lat"),
                    "lon": query.get("lon"),
@@ -88,10 +116,14 @@ class OvosWolframAlpha:
     
     def get_wolfram_full(self, query):
         reqdata = {"input": query.get("input"),
-                   "units": query.get("units")}
+                   "units": query.get("units")
+                   "output": query.get("output", "json")}
         url = f'https://api.openvoiceos.com/wolframalpha/full/{self.uuid}'
         r = requests.post(url, data=reqdata, headers=self.headers)
-        return r.json()
+        if reqdata["output"] == "json":
+            return r.json()
+        else:
+            return r
 
 class OvosEdamamRecipe:
     def __init__(self):
