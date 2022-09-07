@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.24...HEAD)
+
+**Implemented enhancements:**
+
+- add more api methods [\#62](https://github.com/OpenVoiceOS/ovos_utils/pull/62) ([AIIX](https://github.com/AIIX))
+
+## [V0.0.24](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.24) (2022-09-07)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.24a4...V0.0.24)
+
 ## [V0.0.24a4](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.24a4) (2022-09-06)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.24a3...V0.0.24a4)
