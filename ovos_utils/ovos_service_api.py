@@ -74,7 +74,7 @@ class OvosWeather:
                    "lon": query.get("lon"),
                    "units": query.get("units"),
                    "lang": query.get("lang")}
-        url = f"https://api.openvoiceos.com/weather/generate_hourly_weather_report/{self.uuid}"
+        url = f"https://api.openvoiceos.com/weather/generate_forecast_weather_report/{self.uuid}"
         r = requests.post(url, data=reqdata, headers=self.headers)
         return r.json()
 
@@ -117,10 +117,13 @@ class OvosWolframAlpha:
     def get_wolfram_full(self, query):
         reqdata = {"input": query.get("input"),
                    "units": query.get("units")
-                   "output": query.get("output")}
+                   "output": query.get("output", "json")}
         url = f'https://api.openvoiceos.com/wolframalpha/full/{self.uuid}'
         r = requests.post(url, data=reqdata, headers=self.headers)
-        return r
+        if reqdata["output"] == "json":
+            return r.json()
+        else:
+            return r
 
 class OvosEdamamRecipe:
     def __init__(self):
