@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.24...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a1...HEAD)
+
+**Merged pull requests:**
+
+- Add method to restart arbitrary systemd service [\#63](https://github.com/OpenVoiceOS/ovos_utils/pull/63) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.25a1](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.25a1) (2022-09-07)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.24...V0.0.25a1)
 
 **Implemented enhancements:**
 
