@@ -77,8 +77,10 @@ def ssh_disable():
     subprocess.call('sudo systemctl stop ssh.service', shell=True)
     subprocess.call('sudo systemctl disable ssh.service', shell=True)
 
-def restart_mycroft_service():
-    subprocess.call('sudo systemctl restart mycroft.service', shell=True)
+
+def restart_mycroft_service(service_name="mycroft.service"):
+    subprocess.call(f'sudo systemctl restart {service_name}', shell=True)
+
 
 # platform fingerprinting
 def set_root_path(path):
