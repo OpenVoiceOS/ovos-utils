@@ -10,14 +10,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from threading import Thread
-from time import sleep
-from os.path import isdir, join
-import re
 import datetime
+import re
+from functools import lru_cache, wraps
+from os.path import isdir, join
+from threading import Thread
+from time import monotonic_ns
+from time import sleep
+
 import kthread
-from ovos_utils.network_utils import get_ip, get_external_ip, is_connected_dns, is_connected_http, is_connected
+
 from ovos_utils.file_utils import resolve_ovos_resource_file, resolve_resource_file
+from ovos_utils.network_utils import get_ip, get_external_ip, is_connected_dns, is_connected_http, is_connected
 
 
 def ensure_mycroft_import():
@@ -33,7 +37,6 @@ def ensure_mycroft_import():
             raise
 
 
-
 def get_mycroft_root():
     paths = [
         "/opt/venvs/mycroft-core/lib/python3.7/site-packages/",  # mark1/2
@@ -45,6 +48,44 @@ def get_mycroft_root():
             return p
     return None
 
+
+def timed_lru_cache(
+        _func=None, *, seconds: int = 7000, maxsize: int = 128, typed: bool = False
+):
+    """ Extension over existing lru_cache with timeout
+
+    taken from: https://blog.soumendrak.com/cache-heavy-computation-functions-with-a-timeout-value
+
+    :param seconds: timeout value
+    :param maxsize: maximum size of the cache
+    :param typed: whether different keys for different types of cache keys
+    """
+
+    def wrapper_cache(f):
+        # create a function wrapped with traditional lru_cache
+        f = lru_cache(maxsize=maxsize, typed=typed)(f)
+        # convert seconds to nanoseconds to set the expiry time in nanoseconds
+        f.delta = seconds * 10 ** 9
+        f.expiration = monotonic_ns() + f.delta
+
+        @wraps(f)  # wraps is used to access the decorated function attributes
+        def wrapped_f(*args, **kwargs):
+            if monotonic_ns() >= f.expiration:
+                # if the current cache expired of the decorated function then
+                # clear cache for that function and set a new cache value with new expiration time
+                f.cache_clear()
+                f.expiration = monotonic_ns() + f.delta
+            return f(*args, **kwargs)
+
+        wrapped_f.cache_info = f.cache_info
+        wrapped_f.cache_clear = f.cache_clear
+        return wrapped_f
+
+    # To allow decorator to be used without arguments
+    if _func is None:
+        return wrapper_cache
+    else:
+        return wrapper_cache(_func)
 
 
 def create_killable_daemon(target, args=(), kwargs=None, autostart=True):
@@ -135,4 +176,3 @@ def datestr2ts(datestr):
     d = int(datestr[-2:])
     dt = datetime.datetime(y, m, d)
     return dt.timestamp()
-
