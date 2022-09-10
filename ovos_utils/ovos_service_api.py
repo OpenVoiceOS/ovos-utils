@@ -14,7 +14,9 @@ class OVOSApiService:
         else:
             created_challenge = requests.get('https://api.openvoiceos.com/create_challenge')
             challenge_response = created_challenge.json()
-            register_device = requests.get('https://api.openvoiceos.com/register_device/' + challenge_response['challenge'] + '/' + challenge_response['secret'])
+            register_device = requests.get(
+                'https://api.openvoiceos.com/register_device/' + challenge_response['challenge'] + '/' +
+                challenge_response['secret'])
             register_device_uuid = challenge_response['challenge']
             self.uuid_storage['uuid'] = register_device_uuid
             self.uuid_storage.store()
@@ -48,7 +50,7 @@ class OvosWeather:
     @property
     def headers(self):
         self.api.get_session_challenge()
-        return {'session_challenge': self.api.get_session_token(),  'backend': 'OWM'}
+        return {'session_challenge': self.api.get_session_token(), 'backend': 'OWM'}
 
     def get_current(self, query):
         reqdata = {"lat": query.get("lat"),
@@ -87,6 +89,7 @@ class OvosWeather:
         r = requests.post(url, data=reqdata, headers=self.headers)
         return r.json()
 
+
 class OvosWolframAlpha:
     def __init__(self):
         self.api = OVOSApiService()
@@ -106,17 +109,17 @@ class OvosWolframAlpha:
         url = f'https://api.openvoiceos.com/wolframalpha/spoken/{self.uuid}'
         r = requests.post(url, data=reqdata, headers=self.headers)
         return r
-    
+
     def get_wolfram_simple(self, query):
         reqdata = {"input": query.get("input"),
                    "units": query.get("units")}
         url = f'https://api.openvoiceos.com/wolframalpha/simple/{self.uuid}'
         r = requests.post(url, data=reqdata, headers=self.headers)
         return r
-    
+
     def get_wolfram_full(self, query):
         reqdata = {"input": query.get("input"),
-                   "units": query.get("units")
+                   "units": query.get("units"),
                    "output": query.get("output", "json")}
         url = f'https://api.openvoiceos.com/wolframalpha/full/{self.uuid}'
         r = requests.post(url, data=reqdata, headers=self.headers)
@@ -125,10 +128,11 @@ class OvosWolframAlpha:
         else:
             return r
 
+
 class OvosEdamamRecipe:
     def __init__(self):
         self.api = OVOSApiService()
-        
+
     @property
     def uuid(self):
         return self.api.get_uuid()
@@ -137,22 +141,23 @@ class OvosEdamamRecipe:
     def headers(self):
         self.api.get_session_challenge()
         return {'session_challenge': self.api.get_session_token()}
-    
+
     def get_recipe(self, query):
         reqdata = {"query": query.get("query"),
                    "count": query.get("count", 5)}
         url = f'https://api.openvoiceos.com/recipes/search_recipe/'
         r = requests.post(url, data=reqdata, headers=self.headers)
         return r.json()
-    
+
+
 class OvosOmdb:
     def __init__(self):
         self.api = OVOSApiService()
-        
+
     @property
     def uuid(self):
         return self.api.get_uuid()
-    
+
     @property
     def headers(self):
         self.api.get_session_challenge()
@@ -162,7 +167,7 @@ class OvosOmdb:
         reqdata = {"movie_name": query.get("movie_name"),
                    "movie_year": query.get("movie_year"),
                    "movie_id": query.get("movie_id")}
-        
+
         url = f'https://api.openvoiceos.com/omdb/search_movie/'
         r = requests.post(url, data=reqdata, headers=self.headers)
         return r.json()
