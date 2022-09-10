@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a2...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a3...HEAD)
+
+**Implemented enhancements:**
+
+- feat/timed\_lru\_cache [\#65](https://github.com/OpenVoiceOS/ovos_utils/pull/65) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.25a3](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.25a3) (2022-09-10)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a2...V0.0.25a3)
 
 **Fixed bugs:**
 
