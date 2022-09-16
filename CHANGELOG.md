@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a3...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a4...HEAD)
+
+**Implemented enhancements:**
+
+- Add methods for controlled notifications [\#66](https://github.com/OpenVoiceOS/ovos_utils/pull/66) ([AIIX](https://github.com/AIIX))
+
+## [V0.0.25a4](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.25a4) (2022-09-10)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a3...V0.0.25a4)
 
 **Implemented enhancements:**
 
