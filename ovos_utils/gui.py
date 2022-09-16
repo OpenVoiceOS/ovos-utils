@@ -736,6 +736,32 @@ class GUIInterface:
                                         "style": style
                                     }))
 
+    def show_controlled_notification(self, content, style="info"):
+        """Display a controlled Notification in the GUI.
+        Arguments:
+            content (str): Main text content of a notification, Limited
+            to two visual lines.
+            style (str):
+                info: 'Default' displays a notification with information styling
+                warning: displays a notification with warning styling
+                success: displays a notification with success styling
+                error: displays a notification with error styling
+        """
+        if not self.bus:
+            raise RuntimeError("bus not set, did you call self.bind() ?")
+        self.bus.emit(Message("ovos.notification.api.set.controlled",
+                              data={
+                                    "sender": self.skill_id,
+                                    "text": content,
+                                    "style": style
+                                }))
+
+    def remove_controlled_notification(self):
+        """Remove a controlled Notification in the GUI."""
+        if not self.bus:
+            raise RuntimeError("bus not set, did you call self.bind() ?")
+        self.bus.emit(Message("ovos.notification.api.remove.controlled"))
+
     def show_text(self, text, title=None, override_idle=None,
                   override_animations=False):
         """Display a GUI page for viewing simple text.
