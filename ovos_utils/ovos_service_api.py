@@ -171,3 +171,25 @@ class OvosOmdb:
         url = f'https://api.openvoiceos.com/omdb/search_movie/'
         r = requests.post(url, data=reqdata, headers=self.headers)
         return r.json()
+
+class OvosGeolocate:
+    def __init__(self):
+        pass
+
+    def geolocate_ip(self, ip):
+        reqdata = {"address": ip}
+        url = f'https://api.openvoiceos.com/geolocate/ip/'
+        r = requests.post(url, data=reqdata)
+        return r.json()
+
+    def geolocate_address(self, address):
+        reqdata = {"address": address}
+        url = f'https://api.openvoiceos.com/geolocate/address/'
+        r = requests.post(url, data=reqdata)
+        return r.json()
+
+    def geolocate_location_config(self, address):
+        reqdata = {"address": address}
+        url = f'https://api.openvoiceos.com/geolocate/location/config'
+        r = requests.post(url, data=reqdata)
+        return r.json()
