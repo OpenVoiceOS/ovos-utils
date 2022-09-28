@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a4...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a5...HEAD)
+
+**Merged pull requests:**
+
+- Add geolocate methods support in ovos\_api\_service [\#67](https://github.com/OpenVoiceOS/ovos_utils/pull/67) ([AIIX](https://github.com/AIIX))
+
+## [V0.0.25a5](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.25a5) (2022-09-16)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a4...V0.0.25a5)
 
 **Implemented enhancements:**
 
