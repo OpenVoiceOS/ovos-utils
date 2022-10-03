@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a5...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a6...HEAD)
+
+**Implemented enhancements:**
+
+- feat/email\_utils [\#68](https://github.com/OpenVoiceOS/ovos_utils/pull/68) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.25a6](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.25a6) (2022-09-28)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a5...V0.0.25a6)
 
 **Merged pull requests:**
 
