@@ -45,14 +45,14 @@ class LOG:
     @classmethod
     def init(cls, config=None):
         config = config or {}
-        cls.base_path = config.get("path", "stdout")
+        cls.base_path = config.get("path", "stdout")  # TODO default to XDG compliant location
         cls.max_bytes = config.get("max_bytes", 50000000)
         cls.backup_count = config.get("backup_count", 3)
         cls.level = config.get("level", "INFO")
         cls.diagnostic_mode = config.get("diagnostic", False)
 
     @classmethod
-    def create_logger(cls, name, tostdout=False):
+    def create_logger(cls, name, tostdout=True):
         if name in cls._loggers:
             return cls._loggers[name]
         logger = logging.getLogger(name)
@@ -103,7 +103,7 @@ class LOG:
         module_name = mod.__name__ if mod else ''
         name += module_name + ':' + record[3] + ':' + str(record[2])
 
-        logger = cls.create_logger(name)
+        logger = cls.create_logger(name, tostdout=True)
         if cls.diagnostic_mode:
             msg = dig_for_message()
             if msg:
