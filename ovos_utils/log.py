@@ -1,4 +1,3 @@
-
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,9 +12,11 @@
 #
 import inspect
 import logging
+import os
 import sys
-from os.path import join
 from logging.handlers import RotatingFileHandler
+from os.path import join
+
 from mycroft_bus_client.message import dig_for_message
 
 
@@ -44,15 +45,20 @@ class LOG:
 
     @classmethod
     def init(cls, config=None):
+
+        from ovos_config.meta import get_xdg_base
+        from ovos_utils.xdg_utils import xdg_state_home
+
         config = config or {}
-        cls.base_path = config.get("path", "stdout")
+        cls.base_path = config.get("path") or f"{xdg_state_home()}/{get_xdg_base()}/logs"
         cls.max_bytes = config.get("max_bytes", 50000000)
         cls.backup_count = config.get("backup_count", 3)
         cls.level = config.get("level", "INFO")
         cls.diagnostic_mode = config.get("diagnostic", False)
+        os.makedirs(cls.base_path, exist_ok=True)
 
     @classmethod
-    def create_logger(cls, name, tostdout=False):
+    def create_logger(cls, name, tostdout=True):
         if name in cls._loggers:
             return cls._loggers[name]
         logger = logging.getLogger(name)
@@ -103,7 +109,7 @@ class LOG:
         module_name = mod.__name__ if mod else ''
         name += module_name + ':' + record[3] + ':' + str(record[2])
 
-        logger = cls.create_logger(name)
+        logger = cls.create_logger(name, tostdout=True)
         if cls.diagnostic_mode:
             msg = dig_for_message()
             if msg:
@@ -129,5 +135,3 @@ class LOG:
     @classmethod
     def exception(cls, *args, **kwargs):
         cls._get_real_logger().exception(*args, **kwargs)
-
-
