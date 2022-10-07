@@ -13,10 +13,13 @@
 #
 import inspect
 import logging
+import os
 import sys
 from os.path import join
 from logging.handlers import RotatingFileHandler
 from mycroft_bus_client.message import dig_for_message
+from ovos_utils.xdg_utils import xdg_state_home
+from ovos_config.meta import get_xdg_base
 
 
 class LOG:
@@ -30,7 +33,7 @@ class LOG:
         >>> LOG('custom_name').debug('Another message')
         13:13:10.462 - custom_name - DEBUG - Another message
     """
-    base_path = "stdout"
+    base_path = f"{xdg_state_home()}/{get_xdg_base()}/logs"
     fmt = '%(asctime)s.%(msecs)03d - ' \
           '%(name)s - %(levelname)s - %(message)s'
     datefmt = '%Y-%m-%d %H:%M:%S'
@@ -45,11 +48,12 @@ class LOG:
     @classmethod
     def init(cls, config=None):
         config = config or {}
-        cls.base_path = config.get("path", "stdout")  # TODO default to XDG compliant location
+        cls.base_path = config.get("path") or cls.base_path
         cls.max_bytes = config.get("max_bytes", 50000000)
         cls.backup_count = config.get("backup_count", 3)
         cls.level = config.get("level", "INFO")
         cls.diagnostic_mode = config.get("diagnostic", False)
+        os.makedirs(cls.base_path, exist_ok=True)
 
     @classmethod
     def create_logger(cls, name, tostdout=True):
