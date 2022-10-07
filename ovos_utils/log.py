@@ -1,4 +1,3 @@
-
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,11 +14,10 @@ import inspect
 import logging
 import os
 import sys
-from os.path import join
 from logging.handlers import RotatingFileHandler
+from os.path import join
+
 from mycroft_bus_client.message import dig_for_message
-from ovos_utils.xdg_utils import xdg_state_home
-import ovos_config.meta
 
 
 class LOG:
@@ -47,8 +45,12 @@ class LOG:
 
     @classmethod
     def init(cls, config=None):
+
+        from ovos_config.meta import get_xdg_base
+        from ovos_utils.xdg_utils import xdg_state_home
+
         config = config or {}
-        cls.base_path = config.get("path") or f"{xdg_state_home()}/{ovos_config.meta.get_xdg_base()}/logs"
+        cls.base_path = config.get("path") or f"{xdg_state_home()}/{get_xdg_base()}/logs"
         cls.max_bytes = config.get("max_bytes", 50000000)
         cls.backup_count = config.get("backup_count", 3)
         cls.level = config.get("level", "INFO")
@@ -133,5 +135,3 @@ class LOG:
     @classmethod
     def exception(cls, *args, **kwargs):
         cls._get_real_logger().exception(*args, **kwargs)
-
-
