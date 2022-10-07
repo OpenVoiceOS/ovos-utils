@@ -19,7 +19,7 @@ from os.path import join
 from logging.handlers import RotatingFileHandler
 from mycroft_bus_client.message import dig_for_message
 from ovos_utils.xdg_utils import xdg_state_home
-from ovos_config.meta import get_xdg_base
+import ovos_config.meta
 
 
 class LOG:
@@ -33,7 +33,7 @@ class LOG:
         >>> LOG('custom_name').debug('Another message')
         13:13:10.462 - custom_name - DEBUG - Another message
     """
-    base_path = f"{xdg_state_home()}/{get_xdg_base()}/logs"
+    base_path = f"{xdg_state_home()}/{ovos_config.meta.get_xdg_base()}/logs"
     fmt = '%(asctime)s.%(msecs)03d - ' \
           '%(name)s - %(levelname)s - %(message)s'
     datefmt = '%Y-%m-%d %H:%M:%S'
