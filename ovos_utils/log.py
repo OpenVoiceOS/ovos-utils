@@ -33,7 +33,7 @@ class LOG:
         >>> LOG('custom_name').debug('Another message')
         13:13:10.462 - custom_name - DEBUG - Another message
     """
-    base_path = f"{xdg_state_home()}/{ovos_config.meta.get_xdg_base()}/logs"
+    base_path = "stdout"
     fmt = '%(asctime)s.%(msecs)03d - ' \
           '%(name)s - %(levelname)s - %(message)s'
     datefmt = '%Y-%m-%d %H:%M:%S'
@@ -48,7 +48,7 @@ class LOG:
     @classmethod
     def init(cls, config=None):
         config = config or {}
-        cls.base_path = config.get("path") or cls.base_path
+        cls.base_path = config.get("path") or f"{xdg_state_home()}/{ovos_config.meta.get_xdg_base()}/logs"
         cls.max_bytes = config.get("max_bytes", 50000000)
         cls.backup_count = config.get("backup_count", 3)
         cls.level = config.get("level", "INFO")
