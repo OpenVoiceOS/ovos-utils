@@ -103,7 +103,7 @@ def resolve_resource_file(res_name, root_path=None, config=None):
         str: path to resource or None if no resource found
     """
     if config is None:
-        from ovos_utils.configuration import read_mycroft_config
+        from ovos_config.config import read_mycroft_config
         config = read_mycroft_config()
 
     # First look for fully qualified file (e.g. a user setting)
