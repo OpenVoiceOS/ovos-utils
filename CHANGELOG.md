@@ -2,7 +2,19 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a8...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a9...HEAD)
+
+**Closed issues:**
+
+- `get_mycroft_bus` ignores Configuration [\#71](https://github.com/OpenVoiceOS/ovos_utils/issues/71)
+
+**Merged pull requests:**
+
+- Update `ovos_config` references, Read config in `get_mycroft_bus` [\#72](https://github.com/OpenVoiceOS/ovos_utils/pull/72) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.25a9](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.25a9) (2022-10-10)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a8...V0.0.25a9)
 
 **Fixed bugs:**
 
