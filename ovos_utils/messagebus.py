@@ -1,13 +1,21 @@
+
 from mycroft_bus_client import MessageBusClient
 from mycroft_bus_client.message import dig_for_message, Message
 from ovos_utils.log import LOG
-from ovos_utils.configuration import read_mycroft_config, get_default_lang
+from ovos_config.config import read_mycroft_config
+from ovos_config.locale import get_default_lang
 from ovos_utils import create_loop
 from ovos_utils.json_helper import merge_dict
 import time
 import json
 from pyee import BaseEventEmitter
 from threading import Event
+
+
+_DEFAULT_WS_CONFIG = {"host": "0.0.0.0",
+                      "port": 8181,
+                      "route": "/core",
+                      "ssl": False}
 
 
 class FakeBus:
@@ -135,10 +143,19 @@ def get_websocket(host, port, route='/', ssl=False, threaded=True):
     return client
 
 
-def get_mycroft_bus(host='0.0.0.0', port=8181, route='/core', ssl=False):
+def get_mycroft_bus(host: str = None, port: int = None, route: str = None,
+                    ssl: bool = None):
     """
     Returns a connection to the mycroft messagebus
     """
+    from ovos_config.config import read_mycroft_config
+    config = read_mycroft_config().get('websocket') or dict()
+    host = host or config.get('host') or _DEFAULT_WS_CONFIG['host']
+    port = port or config.get('port') or _DEFAULT_WS_CONFIG['port']
+    route = route or config.get('route') or _DEFAULT_WS_CONFIG['route']
+    if ssl is None:
+        ssl = config.get('ssl') if 'ssl' in config else \
+            _DEFAULT_WS_CONFIG['ssl']
     return get_websocket(host, port, route, ssl)
 
 
