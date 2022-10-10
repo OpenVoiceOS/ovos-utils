@@ -50,7 +50,7 @@ class LOG:
         from ovos_utils.xdg_utils import xdg_state_home
 
         config = config or {}
-        cls.base_path = config.get("path") or f"{xdg_state_home()}/{get_xdg_base()}/logs"
+        cls.base_path = config.get("path") or f"{xdg_state_home()}/{get_xdg_base()}"
         cls.max_bytes = config.get("max_bytes", 50000000)
         cls.backup_count = config.get("backup_count", 3)
         cls.level = config.get("level", "INFO")
