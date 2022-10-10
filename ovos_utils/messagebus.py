@@ -1,4 +1,3 @@
-from typing import Optional
 
 from mycroft_bus_client import MessageBusClient
 from mycroft_bus_client.message import dig_for_message, Message
@@ -144,8 +143,8 @@ def get_websocket(host, port, route='/', ssl=False, threaded=True):
     return client
 
 
-def get_mycroft_bus(host: str = None, port: int = 8181, route: str = '/core',
-                    ssl: Optional[bool] = None):
+def get_mycroft_bus(host: str = None, port: int = None, route: str = None,
+                    ssl: bool = None):
     """
     Returns a connection to the mycroft messagebus
     """
