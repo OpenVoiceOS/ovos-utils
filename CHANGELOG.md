@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a9...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a10...HEAD)
+
+**Merged pull requests:**
+
+- add mail api point to ovos api service [\#73](https://github.com/OpenVoiceOS/ovos_utils/pull/73) ([AIIX](https://github.com/AIIX))
+
+## [V0.0.25a10](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.25a10) (2022-10-10)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a9...V0.0.25a10)
 
 **Closed issues:**
 
