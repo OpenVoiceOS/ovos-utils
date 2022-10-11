@@ -193,3 +193,23 @@ class OvosGeolocate:
         url = f'https://api.openvoiceos.com/geolocate/location/config'
         r = requests.post(url, data=reqdata)
         return r.json()
+
+class OvosSendMail:
+    def __init__(self):
+        self.api = OVOSApiService()
+
+    @property
+    def uuid(self):
+        return self.api.get_uuid()
+
+    @property
+    def headers(self):
+        self.api.get_session_challenge()
+        return {'session_challenge': self.api.get_session_token()}
+
+    def send_mail(self, recipient, subject, body):
+        reqdata = {"recipient": recipient,
+                   "subject": subject,
+                   "body": body}
+        url = f"https://api.openvoiceos.com/send/mail/{self.uuid}"
+        r = requests.post(url, data=reqdata, headers=self.headers)
