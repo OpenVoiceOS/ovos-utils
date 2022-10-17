@@ -1,18 +1,21 @@
+import os
 import subprocess
 from distutils.spawn import find_executable
+
+from ovos_utils.log import LOG
 
 
 class InputDeviceHelper:
     def __init__(self) -> None:
         self.libinput_devices_list = []
         self.xinput_devices_list = []
+        self.dev_input_devices_list = []
         if not find_executable("libinput") and not find_executable("xinput"):
-            raise Exception("xinput/libinput executable not found")
+            LOG.warning("Could not find libinput or xinput, input device detection will be inaccurate")
 
     # ToDo: add support for discovring the input device based of a connected
     # monitors, currently linux only supports input listing directly from the
     # system
-
     def _build_linput_devices_list(self):
         # Always clear the list before building it
         self.libinput_devices_list.clear()
@@ -93,13 +96,28 @@ class InputDeviceHelper:
         self._build_xinput_devices_list()
         return self.xinput_devices_list
 
+    def _build_dev_input_devices_list(self):
+        # Always clear the list before building it
+        self.dev_input_devices_list.clear()
+
+        # Get the list of devices from naive scanning of /dev/input
+        for d in os.listdir("/dev/input"):
+            if d.startswith("mouse") or d.startswith("mice"):
+                dev = {"Device": d,
+                       "Capabilities": ["mouse"]}
+                self.dev_input_devices_list.append(dev)
+
     def get_input_device_list(self):
         # check if any of the devices support touch or mouse
         if find_executable("libinput"):
             self._build_linput_devices_list()
         if find_executable("xinput"):
             self._build_xinput_devices_list()
-        return self.libinput_devices_list + self.xinput_devices_list
+        self._build_dev_input_devices_list()
+
+        return self.libinput_devices_list + \
+               self.xinput_devices_list + \
+               self.dev_input_devices_list
 
     def can_use_touch_mouse(self):
         for device in self.get_input_device_list():
@@ -123,3 +141,7 @@ def can_use_touch_mouse():
 
 def can_use_keyboard():
     return InputDeviceHelper().can_use_keyboard()
+
+
+if __name__ == "__main__":
+    can_use_touch_mouse()
