@@ -80,7 +80,7 @@ class InputDeviceHelper:
         proc_output = subprocess.check_output(['xinput', 'list']).decode('utf-8')
         for line in proc_output.splitlines():
             # skip virtual devices always present
-            if "↳" not in line or "Virtual core XTEST" in line:
+            if "↳" not in line or "XTEST" in line:
                 continue
             line = line.replace("↳", "").replace("⎡", "").replace("⎣", "").replace("⎜", "").strip()
 
