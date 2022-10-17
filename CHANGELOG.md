@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a10...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a11...HEAD)
+
+**Fixed bugs:**
+
+- feat/xinput support [\#74](https://github.com/OpenVoiceOS/ovos_utils/pull/74) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.25a11](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.25a11) (2022-10-11)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a10...V0.0.25a11)
 
 **Merged pull requests:**
 
