@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a11...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a12...HEAD)
+
+**Implemented enhancements:**
+
+- scan /dev/input for device detection [\#75](https://github.com/OpenVoiceOS/ovos_utils/pull/75) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.25a12](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.25a12) (2022-10-17)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a11...V0.0.25a12)
 
 **Fixed bugs:**
 
