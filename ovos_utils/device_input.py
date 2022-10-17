@@ -1,8 +1,6 @@
 import subprocess
 from distutils.spawn import find_executable
 
-from ovos_utils.log import LOG
-
 
 class InputDeviceHelper:
     def __init__(self) -> None:
@@ -120,10 +118,7 @@ class InputDeviceHelper:
 
 
 def can_use_touch_mouse():
-    try:
-        return InputDeviceHelper().can_use_touch_mouse()
-    except:
-        LOG.exception("could not check for input devices, is libinput-dev installed?")
+    return InputDeviceHelper().can_use_touch_mouse()
 
 
 def can_use_keyboard():
