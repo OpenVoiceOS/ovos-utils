@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a12...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a13...HEAD)
+
+**Fixed bugs:**
+
+- fallback to True for mouse detection if libinput is missing [\#76](https://github.com/OpenVoiceOS/ovos_utils/pull/76) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.25a13](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.25a13) (2022-10-17)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a12...V0.0.25a13)
 
 **Implemented enhancements:**
 
