@@ -1,7 +1,6 @@
-import os
 import subprocess
 from distutils.spawn import find_executable
-
+from ovos_utils.gui import is_gui_installed
 from ovos_utils.log import LOG
 
 
@@ -9,9 +8,8 @@ class InputDeviceHelper:
     def __init__(self) -> None:
         self.libinput_devices_list = []
         self.xinput_devices_list = []
-        self.dev_input_devices_list = []
         if not find_executable("libinput") and not find_executable("xinput"):
-            LOG.warning("Could not find libinput or xinput, input device detection will be inaccurate")
+            LOG.warning("Could not find libinput, input device detection will be inaccurate")
 
     # ToDo: add support for discovring the input device based of a connected
     # monitors, currently linux only supports input listing directly from the
@@ -97,30 +95,21 @@ class InputDeviceHelper:
         self._build_xinput_devices_list()
         return self.xinput_devices_list
 
-    def _build_dev_input_devices_list(self):
-        # Always clear the list before building it
-        self.dev_input_devices_list.clear()
-
-        # Get the list of devices from naive scanning of /dev/input
-        for d in os.listdir("/dev/input"):
-            if d.startswith("mouse") or d.startswith("mice"):
-                dev = {"Device": d,
-                       "Capabilities": ["mouse"]}
-                self.dev_input_devices_list.append(dev)
-
     def get_input_device_list(self):
         # check if any of the devices support touch or mouse
         if find_executable("libinput"):
             self._build_linput_devices_list()
         if find_executable("xinput"):
             self._build_xinput_devices_list()
-        self._build_dev_input_devices_list()
 
         return self.libinput_devices_list + \
-               self.xinput_devices_list + \
-               self.dev_input_devices_list
+               self.xinput_devices_list
 
     def can_use_touch_mouse(self):
+        if not find_executable("libinput") and not find_executable("xinput"):
+            # if gui installed assume we have a mouse
+            # otherwise let's assume we are a server or something...
+            return is_gui_installed()
         for device in self.get_input_device_list():
             if "touch" in device["Capabilities"] or \
                     "mouse" in device["Capabilities"] or \
