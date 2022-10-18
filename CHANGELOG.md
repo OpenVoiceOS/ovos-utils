@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a13...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a14...HEAD)
+
+**Fixed bugs:**
+
+- fix input detect again [\#77](https://github.com/OpenVoiceOS/ovos_utils/pull/77) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.25a14](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.25a14) (2022-10-17)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a13...V0.0.25a14)
 
 **Fixed bugs:**
 
