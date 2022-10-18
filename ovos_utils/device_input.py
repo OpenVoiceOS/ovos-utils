@@ -67,7 +67,12 @@ class InputDeviceHelper:
                  })
 
     def _get_libinput_devices_list(self):
-        self._build_linput_devices_list()
+        if find_executable("libinput"):
+            try:
+                self._build_linput_devices_list()
+            except:
+                self.libinput_devices_list.clear()
+                LOG.exception("Failed to query libinput for devices")
         return self.libinput_devices_list
 
     def _build_xinput_devices_list(self):
@@ -92,18 +97,19 @@ class InputDeviceHelper:
                 self.xinput_devices_list.append(dev)
 
     def _get_xinput_devices_list(self):
-        self._build_xinput_devices_list()
+        if find_executable("xinput"):
+            try:
+                self._build_xinput_devices_list()
+            except:
+                self.xinput_devices_list.clear()
+                LOG.exception("Failed to query xinput for devices")
         return self.xinput_devices_list
 
     def get_input_device_list(self):
         # check if any of the devices support touch or mouse
-        if find_executable("libinput"):
-            self._build_linput_devices_list()
-        if find_executable("xinput"):
-            self._build_xinput_devices_list()
-
-        return self.libinput_devices_list + \
-               self.xinput_devices_list
+        self._get_libinput_devices_list()
+        self._get_xinput_devices_list()
+        return self.libinput_devices_list + self.xinput_devices_list
 
     def can_use_touch_mouse(self):
         if not find_executable("libinput") and not find_executable("xinput"):
