@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a15...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25...HEAD)
+
+**Implemented enhancements:**
+
+- feat/event\_wrappers\_in\_outils [\#79](https://github.com/OpenVoiceOS/ovos_utils/pull/79) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.25](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.25) (2022-10-18)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.25a15...V0.0.25)
 
 **Merged pull requests:**
 
