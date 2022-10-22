@@ -59,6 +59,7 @@ def extend_about_data(about_data, bus=None):
     else:
         LOG.error("about_data is not a list or dictionary")
 
+
 class GUIWidgets:
     def __init__(self, bus=None):
         self.bus = bus or get_mycroft_bus()
@@ -459,20 +460,47 @@ class GUIInterface:
     """
 
     def __init__(self, skill_id, bus=None, remote_server=None, config=None):
-        self.bus = bus
+        self.config = config or {}
+        if remote_server:
+            self.config["remote-server"] = remote_server
+        self._bus = bus
         self.__session_data = {}  # synced to GUI for use by this skill's pages
         self.pages = []
         self.current_page_idx = -1
-        self.skill_id = skill_id
+        self._skill_id = skill_id
         self.on_gui_changed_callback = None
-        self.remote_url = remote_server
         self._events = []
         if bus:
             self.set_bus(bus)
 
+    @property
+    def remote_url(self):
+        """Returns configuration value for url of remote-server."""
+        return self.config.get('remote-server')
+
+    @remote_url.setter
+    def remote_url(self, val):
+        self.config["remote-server"] = val
+
     def set_bus(self, bus=None):
-        self.bus = bus or get_mycroft_bus()
+        self._bus = bus or get_mycroft_bus()
         self.setup_default_handlers()
+
+    @property
+    def bus(self):
+        return self._bus
+
+    @bus.setter
+    def bus(self, val):
+        self._bus = val
+
+    @property
+    def skill_id(self):
+        return self._skill_id
+
+    @skill_id.setter
+    def skill_id(self, val):
+        self._skill_id = val
 
     @property
     def page(self):
