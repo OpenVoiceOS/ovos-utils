@@ -4,15 +4,15 @@ from unittest.mock import Mock
 
 
 class TestDeviceInput(unittest.TestCase):
-    @mock.patch('distutils.spawn.find_executable')
-    def test_get_input_device_list(self, find_exec):
-        from ovos_utils.device_input import InputDeviceHelper
-        find_exec.return_value = False
-        dev_input = InputDeviceHelper()
-        dev_input.libinput_devices_list = ['libinput']
-        dev_input.xinput_devices_list = ['xinput']
-        self. assertEqual(dev_input.get_input_device_list(),
-                          ['libinput', 'xinput'])
+    # @mock.patch('distutils.spawn.find_executable')
+    # def test_get_input_device_list(self, find_exec):
+    #     from ovos_utils.device_input import InputDeviceHelper
+    #     find_exec.return_value = False
+    #     dev_input = InputDeviceHelper()
+    #     dev_input.libinput_devices_list = ['libinput']
+    #     dev_input.xinput_devices_list = ['xinput']
+    #     self. assertEqual(dev_input.get_input_device_list(),
+    #                       ['libinput', 'xinput'])
 
     @mock.patch('distutils.spawn.find_executable')
     def test_can_use_touch_mouse(self, find_exec):
