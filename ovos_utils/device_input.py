@@ -1,7 +1,107 @@
 import subprocess
+import evdev
 from distutils.spawn import find_executable
 from ovos_utils.gui import is_gui_installed
 from ovos_utils.log import LOG
+
+
+class EvdevHelper:
+    def __init__(self):
+        pass
+    
+    def _device_has_capability(self, device, capability):
+        if capability in device.capabilities():
+            return True
+        return False
+
+    def _device_supports_key(self, provided_keys, required_key):
+        if required_key in provided_keys:
+            return True
+        return False
+
+    def _check_if_device_is_type_mouse(self, device):
+        if self._device_has_capability(device, evdev.ecodes.EV_REL):
+            if self._device_has_capability(device, evdev.ecodes.REL_X):
+                if self._device_has_capability(device, evdev.ecodes.REL_Y):
+                    return True
+        return False
+
+    def _check_if_device_is_type_touchscreen(self, device):
+        if self._device_has_capability(device, evdev.ecodes.EV_ABS):
+            if self._device_has_capability(device, evdev.ecodes.ABS_X):
+                if self._device_has_capability(device, evdev.ecodes.ABS_Y):
+                    return True
+        return False
+
+    def _check_if_device_is_type_tablet(self, device):
+        if self._device_has_capability(device, evdev.ecodes.EV_ABS):
+            if self._device_has_capability(device, evdev.ecodes.ABS_X):
+                if self._device_has_capability(device, evdev.ecodes.ABS_Y):
+                    if self._device_has_capability(device, evdev.ecodes.ABS_PRESSURE):
+                        return True
+        return False
+
+    def _check_if_device_is_type_gesture(self, device):
+        if self._device_has_capability(device, evdev.ecodes.EV_ABS):
+            if self._device_has_capability(device, evdev.ecodes.EV_KEY):
+                if self._device_has_capability(device, evdev.ecodes.BTN_TOOL_FINGER):
+                    return True
+        return False
+
+    def _check_if_device_is_type_keyboard(self, device):
+        keys = [evdev.ecodes.KEY_F1, evdev.ecodes.KEY_F2,
+                evdev.ecodes.KEY_F3, evdev.ecodes.KEY_F4,
+                evdev.ecodes.KEY_F5, evdev.ecodes.KEY_F6,
+                evdev.ecodes.KEY_F7, evdev.ecodes.KEY_F8,
+                evdev.ecodes.KEY_F9, evdev.ecodes.KEY_F10,
+                evdev.ecodes.KEY_F11, evdev.ecodes.KEY_F12,
+                evdev.ecodes.KEY_LEFTCTRL, evdev.ecodes.KEY_LEFTSHIFT,
+                evdev.ecodes.KEY_LEFTALT, evdev.ecodes.KEY_LEFTMETA,
+                evdev.ecodes.KEY_RIGHTCTRL, evdev.ecodes.KEY_RIGHTSHIFT,
+                evdev.ecodes.KEY_RIGHTALT, evdev.ecodes.KEY_RIGHTMETA,
+                evdev.ecodes.KEY_ESC, evdev.ecodes.KEY_ENTER,
+                evdev.ecodes.KEY_BACKSPACE, evdev.ecodes.KEY_TAB,
+                evdev.ecodes.KEY_SPACE, evdev.ecodes.KEY_MENU]
+
+        if self._device_has_capability(device, evdev.ecodes.EV_KEY):
+            for key in keys:
+                if self._device_supports_key(device.capabilities()[evdev.ecodes.EV_KEY], key):
+                    return True
+        
+        return False
+
+    def _build_device_capabilities(self, device):
+        capabilities = []
+        if self._check_if_device_is_type_mouse(device):
+            capabilities.append("mouse")
+        if self._check_if_device_is_type_keyboard(device):
+            capabilities.append("keyboard")
+        if self._check_if_device_is_type_touchscreen(device):
+            capabilities.append("touch")
+        if self._check_if_device_is_type_tablet(device):
+            capabilities.append("tablet")
+        if self._check_if_device_is_type_gesture(device):
+            capabilities.append("gesture")
+        return capabilities
+
+    def _build_list_of_evdev_input_devices(self):
+        input_devices = []
+        devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+        for device in devices:
+            capabilities = self._build_device_capabilities(device)
+            if capabilities:
+                input_devices.append({
+                    "Device": device.name,
+                    "Capabilities": capabilities
+                })
+        return input_devices
+
+    def supports_touch_or_pointer_input(self):
+        devices = self._build_list_of_evdev_input_devices()
+        for device in devices:
+            if "touch" in device["Capabilities"] or "mouse" in device["Capabilities"]:
+                return True
+        return False
 
 
 class InputDeviceHelper:
@@ -10,6 +110,7 @@ class InputDeviceHelper:
         self.xinput_devices_list = []
         if not find_executable("libinput") and not find_executable("xinput"):
             LOG.warning("Could not find libinput, input device detection will be inaccurate")
+        self.evdev_helper = EvdevHelper()      
 
     # ToDo: add support for discovring the input device based of a connected
     # monitors, currently linux only supports input listing directly from the
@@ -112,16 +213,23 @@ class InputDeviceHelper:
         return self.libinput_devices_list + self.xinput_devices_list
 
     def can_use_touch_mouse(self):
+        # check evdev first as it is more reliable
+        evdev_support_required_input = self.evdev_helper.supports_touch_or_pointer_input()
+        if evdev_support_required_input:
+            return True
+        
         if not find_executable("libinput") and not find_executable("xinput"):
             # if gui installed assume we have a mouse
             # otherwise let's assume we are a server or something...
             return is_gui_installed()
+
         for device in self.get_input_device_list():
             if "touch" in device["Capabilities"] or \
                     "mouse" in device["Capabilities"] or \
                     "tablet" in device["Capabilities"] or \
                     "gesture" in device["Capabilities"]:
                 return True
+
         return False
 
     def can_use_keyboard(self):
