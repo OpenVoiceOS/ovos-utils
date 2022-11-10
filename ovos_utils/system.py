@@ -92,9 +92,10 @@ def restart_service(service_name, sudo=True):
     @param service_name: name of service to restart
     @param sudo: use sudo when calling systemctl
     """
-    cmd = f'systemctl restart {service_name}'
     if sudo:
-        cmd = f"sudo {cmd}"
+        cmd = f"systemctl restart --user {service_name}"
+    else:
+        cmd = f'sudo systemctl restart {service_name}'
     subprocess.call(cmd, shell=True)
 
 
