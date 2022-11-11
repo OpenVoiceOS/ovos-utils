@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.26...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.27a1...HEAD)
+
+**Fixed bugs:**
+
+- fix sudo flag again [\#83](https://github.com/OpenVoiceOS/ovos_utils/pull/83) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.27a1](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.27a1) (2022-11-11)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.26...V0.0.27a1)
 
 **Fixed bugs:**
 
