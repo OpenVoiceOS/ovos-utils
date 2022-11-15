@@ -756,6 +756,10 @@ class GUIInterface:
         """
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
+        if not callback_data:
+            # GUI does not accept NONE type when building models, send a empty dict
+            # Sending NONE will corrupt entries in the model
+            callback_data = {}
         self.bus.emit(Message("ovos.notification.api.set",
                                     data={
                                         "sender": self.skill_id,
