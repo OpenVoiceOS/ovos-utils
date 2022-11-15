@@ -737,7 +737,7 @@ class GUIInterface:
 
     # backport - PR https://github.com/MycroftAI/mycroft-core/pull/2862
     def show_notification(self, content, action=None,
-                          noticetype="transient", style="info"):
+                          noticetype="transient", style="info", callback_data=None):
         """Display a Notification on homepage in the GUI.
         Arguments:
             content (str): Main text content of a notification, Limited
@@ -752,6 +752,7 @@ class GUIInterface:
                 warning: displays a notification with warning styling
                 success: displays a notification with success styling
                 error: displays a notification with error styling
+            callback_data (dict): data dictionary available to use with action
         """
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
@@ -761,7 +762,8 @@ class GUIInterface:
                                         "text": content,
                                         "action": action,
                                         "type": noticetype,
-                                        "style": style
+                                        "style": style,
+                                        "callback_data": callback_data
                                     }))
 
     def show_controlled_notification(self, content, style="info"):
