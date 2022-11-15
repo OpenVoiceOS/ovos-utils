@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.27a1...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.27a2...HEAD)
+
+**Merged pull requests:**
+
+- gui notification callback data [\#84](https://github.com/OpenVoiceOS/ovos_utils/pull/84) ([AIIX](https://github.com/AIIX))
+
+## [V0.0.27a2](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.27a2) (2022-11-11)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.27a1...V0.0.27a2)
 
 **Fixed bugs:**
 
