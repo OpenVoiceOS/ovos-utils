@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos_utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.27a2...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.27a3...HEAD)
+
+**Merged pull requests:**
+
+- Add background\_color to show image and show animated image [\#86](https://github.com/OpenVoiceOS/ovos_utils/pull/86) ([AIIX](https://github.com/AIIX))
+
+## [V0.0.27a3](https://github.com/OpenVoiceOS/ovos_utils/tree/V0.0.27a3) (2022-11-15)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos_utils/compare/V0.0.27a2...V0.0.27a3)
 
 **Merged pull requests:**
 
