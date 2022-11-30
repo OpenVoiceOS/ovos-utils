@@ -827,7 +827,8 @@ class GUIInterface:
             title (str): A title to display above the image content
             fill (str): Fill type supports 'PreserveAspectFit',
             'PreserveAspectCrop', 'Stretch'
-            background_color (str): A background color for the page
+            background_color (str): A background color for
+            the page in hex i.e. #000000
             override_idle (boolean, int):
                 True: Takes over the resting page indefinitely
                 (int): Delays resting page for the specified number of
@@ -855,6 +856,8 @@ class GUIInterface:
             title (str): A title to display above the image content
             fill (str): Fill type supports 'PreserveAspectFit',
             'PreserveAspectCrop', 'Stretch'
+            background_color (str): A background color for
+            the page in hex i.e. #000000
             override_idle (boolean, int):
                 True: Takes over the resting page indefinitely
                 (int): Delays resting page for the specified number of
