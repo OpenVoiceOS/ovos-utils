@@ -817,7 +817,7 @@ class GUIInterface:
                        override_animations)
 
     def show_image(self, url, caption=None,
-                   title=None, fill=None,
+                   title=None, fill=None, background_color=None,
                    override_idle=None, override_animations=False):
         """Display a GUI page for viewing an image.
 
@@ -827,6 +827,8 @@ class GUIInterface:
             title (str): A title to display above the image content
             fill (str): Fill type supports 'PreserveAspectFit',
             'PreserveAspectCrop', 'Stretch'
+            background_color (str): A background color for
+            the page in hex i.e. #000000
             override_idle (boolean, int):
                 True: Takes over the resting page indefinitely
                 (int): Delays resting page for the specified number of
@@ -839,11 +841,12 @@ class GUIInterface:
         self["title"] = title
         self["caption"] = caption
         self["fill"] = fill
+        self["background_color"] = background_color
         self.show_page("SYSTEM_ImageFrame.qml", override_idle,
                        override_animations)
 
     def show_animated_image(self, url, caption=None,
-                            title=None, fill=None,
+                            title=None, fill=None, background_color=None,
                             override_idle=None, override_animations=False):
         """Display a GUI page for viewing an image.
 
@@ -853,6 +856,8 @@ class GUIInterface:
             title (str): A title to display above the image content
             fill (str): Fill type supports 'PreserveAspectFit',
             'PreserveAspectCrop', 'Stretch'
+            background_color (str): A background color for
+            the page in hex i.e. #000000
             override_idle (boolean, int):
                 True: Takes over the resting page indefinitely
                 (int): Delays resting page for the specified number of
@@ -865,6 +870,7 @@ class GUIInterface:
         self["title"] = title
         self["caption"] = caption
         self["fill"] = fill
+        self["background_color"] = background_color
         self.show_page("SYSTEM_AnimatedImageFrame.qml", override_idle,
                        override_animations)
 
