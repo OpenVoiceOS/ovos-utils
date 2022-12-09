@@ -3,15 +3,19 @@ from colorsys import rgb_to_yiq, yiq_to_rgb, rgb_to_hls, hls_to_rgb, \
 from webcolors import name_to_rgb, rgb_to_hex, rgb_to_name, \
     hex_to_name, hex_to_rgb
 
+# TODO - lang support, we should translate names https://github.com/ubernostrum/webcolors/blob/trunk/src/webcolors/constants.py
+# does this belong in LF ?
+
+
+def name_to_hsv(name):
+    name = name.replace(" ", "")  # see link above, requires exact matches
+    r, g, b = name_to_rgb(name)
+    return rgb_to_hsv(r, g, b)
+
 
 def hsv_to_name(h, s, v):
     rgb = hsv_to_rgb(h, s, v)
     return rgb_to_name(rgb)
-
-
-def name_to_hsv(name):
-    r, g, b = name_to_rgb(name)
-    return rgb_to_hsv(r, g, b)
 
 
 def hex_to_hsv(hex_color):
@@ -28,6 +32,7 @@ class Color:
 
     @staticmethod
     def from_name(name):
+        name = name.replace(" ", "")  # see link on top of file, requires exact matches
         return Color(*name_to_rgb(name))
 
     @staticmethod
@@ -107,6 +112,10 @@ if __name__ == "__main__":
     print(color.name)
     print(color.as_dict)
     color = Color.from_name("red")
+    print(color.name, color.rgb)
+    color = Color.from_name("dark red")
+    print(color.name, color.rgb)
+    color = Color.from_name("darkred")
     print(color.name, color.rgb)
     print(color.as_dict)
     color = Color.from_name("violet")
