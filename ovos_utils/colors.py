@@ -1,6 +1,27 @@
-from colorsys import rgb_to_yiq, rgb_to_hls, yiq_to_rgb, hls_to_rgb, rgb_to_hsv, hsv_to_rgb
+from colorsys import rgb_to_yiq, yiq_to_rgb, rgb_to_hls, hls_to_rgb, \
+    rgb_to_hsv, hsv_to_rgb
+
 from colour import Color as _Color
+from webcolors import name_to_rgb, rgb_to_name, \
+    hex_to_rgb
+
 from ovos_utils import camel_case_split
+
+
+def hsv_to_name(h, s, v):
+    rgb = hsv_to_rgb(h, s, v)
+    return rgb_to_name(rgb)
+
+
+def name_to_hsv(name):
+    r, g, b = name_to_rgb(name)
+    return rgb_to_hsv(r, g, b)
+
+
+def hex_to_hsv(hex_color):
+    r, g, b = hex_to_rgb(hex_color)
+    h, s, v = rgb_to_hsv(r, g, b)
+    return h, s, v
 
 
 class UnrecognizedColorName(ValueError):
@@ -9,6 +30,7 @@ class UnrecognizedColorName(ValueError):
 
 class Color(_Color):
     """ A well defined Color, just the way computers love colors"""
+
     @property
     def name(self):
         if self.web != self.hex:
@@ -216,6 +238,7 @@ class Color(_Color):
 
 class ColorOutOfSpace(Color):
     """ Some Human described this color, but humans suck at this"""
+
     @property
     def name(self):
         # H.P. Lovecraft - https://www.youtube.com/watch?v=4liRxrDzS5I
