@@ -15,8 +15,10 @@ def get_network_tests_config():
             "ip_url": 'https://api.ipify.org',
             "dns_primary": "1.1.1.1",
             "dns_secondary": "8.8.8.8",
-            "web_url": "https://nmcheck.gnome.org/check_network_status.txt",
-            "web_url_secondary": "https://checkonline.home-assistant.io/online.txt"
+            "web_url": "http://nmcheck.gnome.org/check_network_status.txt",
+            "web_url_secondary": "https://checkonline.home-assistant.io/online.txt",
+            "captive_portal_url": "http://nmcheck.gnome.org/check_network_status.txt",
+            "captive_portal_text": "NetworkManager is online"
         }
     )
 
@@ -84,15 +86,18 @@ def is_connected():
     return any((is_connected_dns(), is_connected_http()))
 
 
-def check_captive_portal(url="http://start.mycroft.ai/portal-check.html",
-                         expected_text="<title>Portal Check</title>") -> bool:
+def check_captive_portal(host=None, expected_text=None) -> bool:
     """Returns True if a captive portal page is detected"""
     captive_portal = False
 
+    if not host or not expected_text:
+        cfg = get_network_tests_config()
+        host = host or cfg["captive_portal_url"]
+        expected_text = expected_text or cfg["captive_portal_url_text"]
+
     try:
         # We need to check a site that doesn't use HTTPS
-        html_doc = requests.get(url).text
-
+        html_doc = requests.get(host).text
         # If something different is in the html, we likely were redirected
         # to the portal page.
         if expected_text not in html_doc:
