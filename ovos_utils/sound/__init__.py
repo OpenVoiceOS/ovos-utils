@@ -161,11 +161,13 @@ def play_audio(uri, play_cmd=None, environment=None):
             play_cmd = config.get("play_mp3_cmdline")
 
     if not play_cmd:
-        player = _find_player(uri)
-        if not player:
-            LOG.error(f"Failed to play: No playback functionality available")
-            return None
-        play_cmd = player.split(" ")
+        play_cmd = _find_player(uri)
+
+    if not play_cmd:
+        LOG.error(f"Failed to play: No playback functionality available")
+        return None
+
+    play_cmd = play_cmd.split(" ")
 
     for index, cmd in enumerate(play_cmd):
         if cmd == "%1":
