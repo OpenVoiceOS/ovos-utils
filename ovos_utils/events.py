@@ -189,32 +189,47 @@ class EventContainer:
 class EventSchedulerInterface:
     """Interface for accessing the event scheduler over the message bus."""
 
-    def __init__(self, name, sched_id=None, bus=None):
-        self.name = name
-        self.sched_id = sched_id
-        self.bus = bus or FakeBus()
-        self.events = EventContainer(bus)
+    def __init__(self, name=None, sched_id=None, bus=None, skill_id=None):
+        # NOTE: can not rename or move sched_id/name arguments to keep api compatibility
+        if name:
+            LOG.warning("name argument has been deprecated! use skill_id instead")
+        if sched_id:
+            LOG.warning("sched_id argument has been deprecated! use skill_id instead")
 
+        self.skill_id = skill_id or sched_id or name or self.__class__.__name__
+        self.bus = bus
+        self.events = EventContainer(bus)
         self.scheduled_repeats = []
 
     def set_bus(self, bus):
+        """Attach the messagebus of the parent skill
+
+        Args:
+            bus (MessageBusClient): websocket connection to the messagebus
+        """
         self.bus = bus
         self.events.set_bus(bus)
 
     def set_id(self, sched_id):
-        self.sched_id = sched_id
+        """Attach the skill_id of the parent skill
+
+        Args:
+            sched_id (str): skill_id of the parent skill
+        """
+        # NOTE: can not rename sched_id kwarg to keep api compatibility
+        self.skill_id = sched_id
 
     def _create_unique_name(self, name):
         """Return a name unique to this skill using the format
         [skill_id]:[name].
 
-        Arguments:
+        Args:
             name:   Name to use internally
 
         Returns:
             str: name unique to this skill
         """
-        return str(self.sched_id) + ':' + (name or '')
+        return self.skill_id + ':' + (name or '')
 
     def _schedule_event(self, handler, when, data, name,
                         repeat_interval=None, context=None):
@@ -222,7 +237,7 @@ class EventSchedulerInterface:
 
         Takes scheduling information and sends it off on the message bus.
 
-        Arguments:
+        Args:
             handler:                method to be called
             when (datetime):        time (in system timezone) for first
                                     calling the handler, or None to
@@ -237,7 +252,7 @@ class EventSchedulerInterface:
         if isinstance(when, (int, float)) and when >= 0:
             when = datetime.now() + timedelta(seconds=when)
         if not name:
-            name = self.name + handler.__name__
+            name = self.skill_id + handler.__name__
         unique_name = self._create_unique_name(name)
         if repeat_interval:
             self.scheduled_repeats.append(name)  # store "friendly name"
@@ -245,8 +260,7 @@ class EventSchedulerInterface:
         data = data or {}
 
         def on_error(e):
-            LOG.exception('An error occured executing the scheduled event '
-                          '{}'.format(repr(e)))
+            LOG.exception(f'An error occurred executing the scheduled event {e}')
 
         wrapped = create_basic_wrapper(handler, on_error)
         self.events.add(unique_name, wrapped, once=not repeat_interval)
@@ -254,6 +268,8 @@ class EventSchedulerInterface:
                       'event': unique_name,
                       'repeat': repeat_interval,
                       'data': data}
+        context = context or {}
+        context["skill_id"] = self.skill_id
         self.bus.emit(Message('mycroft.scheduler.schedule_event',
                               data=event_data, context=context))
 
@@ -261,7 +277,7 @@ class EventSchedulerInterface:
                        context=None):
         """Schedule a single-shot event.
 
-        Arguments:
+        Args:
             handler:               method to be called
             when (datetime/int/float):   datetime (in system timezone) or
                                    number of seconds in the future when the
@@ -280,7 +296,7 @@ class EventSchedulerInterface:
                                  data=None, name=None, context=None):
         """Schedule a repeating event.
 
-        Arguments:
+        Args:
             handler:                method to be called
             when (datetime):        time (in system timezone) for first
                                     calling the handler, or None to
@@ -307,7 +323,7 @@ class EventSchedulerInterface:
     def update_scheduled_event(self, name, data=None):
         """Change data of event.
 
-        Arguments:
+        Args:
             name (str): reference name of event (from original scheduling)
         """
         data = data or {}
@@ -316,13 +332,13 @@ class EventSchedulerInterface:
             'data': data
         }
         self.bus.emit(Message('mycroft.schedule.update_event',
-                              data=data))
+                              data=data, context={"skill_id": self.skill_id}))
 
     def cancel_scheduled_event(self, name):
         """Cancel a pending event. The event will no longer be scheduled
         to be executed
 
-        Arguments:
+        Args:
             name (str): reference name of event (from original scheduling)
         """
         unique_name = self._create_unique_name(name)
@@ -331,12 +347,13 @@ class EventSchedulerInterface:
             self.scheduled_repeats.remove(name)
         if self.events.remove(unique_name):
             self.bus.emit(Message('mycroft.scheduler.remove_event',
-                                  data=data))
+                                  data=data,
+                                  context={"skill_id": self.skill_id}))
 
     def get_scheduled_event_status(self, name):
         """Get scheduled event data and return the amount of time left
 
-        Arguments:
+        Args:
             name (str): reference name of event (from original scheduling)
 
         Returns:
@@ -348,8 +365,9 @@ class EventSchedulerInterface:
         event_name = self._create_unique_name(name)
         data = {'name': event_name}
 
-        reply_name = 'mycroft.event_status.callback.{}'.format(event_name)
-        msg = Message('mycroft.scheduler.get_event', data=data)
+        reply_name = f'mycroft.event_status.callback.{event_name}'
+        msg = Message('mycroft.scheduler.get_event', data=data,
+                      context={"skill_id": self.skill_id})
         status = self.bus.wait_for_response(msg, reply_type=reply_name)
 
         if status:
@@ -372,3 +390,35 @@ class EventSchedulerInterface:
         """Shutdown the interface unregistering any event handlers."""
         self.cancel_all_repeating_events()
         self.events.clear()
+
+    @property
+    def sched_id(self):
+        """DEPRECATED: do not use, method only for api backwards compatibility
+        Logs a warning and returns self.skill_id
+        """
+        LOG.warning("self.sched_id has been deprecated! use self.skill_id instead")
+        return self.skill_id
+
+    @sched_id.setter
+    def sched_id(self, skill_id):
+        """DEPRECATED: do not use, method only for api backwards compatibility
+        Logs a warning and sets self.skill_id
+        """
+        LOG.warning("self.sched_id has been deprecated! use self.skill_id instead")
+        self.skill_id = skill_id
+
+    @property
+    def name(self):
+        """DEPRECATED: do not use, method only for api backwards compatibility
+        Logs a warning and returns self.skill_id
+        """
+        LOG.warning("self.name has been deprecated! use self.skill_id instead")
+        return self.skill_id
+
+    @name.setter
+    def name(self, skill_id):
+        """DEPRECATED: do not use, method only for api backwards compatibility
+        Logs a warning and sets self.skill_id
+        """
+        LOG.warning("self.name has been deprecated! use self.skill_id instead")
+        self.skill_id = skill_id
