@@ -97,6 +97,10 @@ class IntentServiceInterface:
         self.registered_intents = []
         self.detached_intents = []
 
+    @property
+    def intent_names(self):
+        return [a[0] for a in self.registered_intents + self.detached_intents]
+
     def set_bus(self, bus):
         self.bus = bus
 
@@ -109,22 +113,30 @@ class IntentServiceInterface:
 
             vocab_type(str): Keyword reference
             entity (str): Primary keyword
-            aliases (list): List of alternative kewords
+            aliases (list): List of alternative keywords
         """
-        aliases = aliases or []
         msg = dig_for_message() or Message("")
         if "skill_id" not in msg.context:
             msg.context["skill_id"] = self.skill_id
+
+        # TODO 22.02: Remove compatibility data
+        aliases = aliases or []
+        entity_data = {'entity_value': entity,
+                       'entity_type': vocab_type,
+                       'lang': lang}
+        compatibility_data = {'start': entity, 'end': vocab_type}
+
         self.bus.emit(msg.forward("register_vocab",
-                                  {'start': entity,
-                                   'end': vocab_type,
-                                   'lang': lang}))
+                                  {**entity_data, **compatibility_data}))
         for alias in aliases:
+            alias_data = {
+                'entity_value': alias,
+                'entity_type': vocab_type,
+                'alias_of': entity,
+                'lang': lang}
+            compatibility_data = {'start': alias, 'end': vocab_type}
             self.bus.emit(msg.forward("register_vocab",
-                                      {'start': alias,
-                                       'end': vocab_type,
-                                       'alias_of': entity,
-                                       'lang': lang}))
+                                      {**alias_data, **compatibility_data}))
 
     def register_adapt_regex(self, regex, lang=None):
         """Register a regex with the intent service.
@@ -156,27 +168,50 @@ class IntentServiceInterface:
     def detach_intent(self, intent_name):
         """Remove an intent from the intent service.
 
+        DEPRECATED: please use remove_intent instead, all other methods from this class expect intent_name,
+        this was the weird one expecting the internal munged intent_name with skill_id
+
+        The intent is saved in the list of detached intents for use when
+        re-enabling an intent.
+
+        Args:
+            intent_name(str): internal munged intent name (skill_id:name)
+        """
+        name = intent_name.split(':')[1]
+        self.remove_intent(name)
+
+    def remove_intent(self, intent_name):
+        """Remove an intent from the intent service.
+
         The intent is saved in the list of detached intents for use when
         re-enabling an intent.
 
         Args:
             intent_name(str): Intent reference
         """
-        # split skill_id if needed
-        if intent_name not in self and ":" in intent_name:
-            name = intent_name.split(':')[1]
-        else:
-            name = intent_name
-
-        if name in self:
-            msg = dig_for_message() or Message("")
-            if "skill_id" not in msg.context:
-                msg.context["skill_id"] = self.skill_id
-            self.bus.emit(msg.forward("detach_intent",
-                                      {"intent_name": intent_name}))
-            self.detached_intents.append((name, self.get_intent(name)))
+        msg = dig_for_message() or Message("")
+        if "skill_id" not in msg.context:
+            msg.context["skill_id"] = self.skill_id
+        if intent_name in self.intent_names:
+            self.detached_intents.append((intent_name, self.get_intent(intent_name)))
             self.registered_intents = [pair for pair in self.registered_intents
-                                       if pair[0] != name]
+                                       if pair[0] != intent_name]
+        self.bus.emit(msg.forward("detach_intent",
+                                  {"intent_name": f"{self.skill_id}.{intent_name}"}))
+
+    def intent_is_detached(self, intent_name):
+        """Determine if an intent is detached.
+
+        Args:
+            intent_name(str): Intent reference
+
+        Returns:
+            (bool) True if intent is found, else False.
+        """
+        for (name, _) in self.detached_intents:
+            if name == intent_name:
+                return True
+        return False
 
     def set_adapt_context(self, context, word, origin):
         """Set an Adapt context.
@@ -214,7 +249,7 @@ class IntentServiceInterface:
         if not isinstance(filename, str):
             raise ValueError('Filename path must be a string')
         if not exists(filename):
-            raise FileNotFoundError('Unable to find "{}"'.format(filename))
+            raise FileNotFoundError(f'Unable to find "{filename}"')
 
         data = {'file_name': filename,
                 'name': intent_name,
@@ -257,7 +292,7 @@ class IntentServiceInterface:
         return val in [i[0] for i in self.registered_intents]
 
     def get_intent_names(self):
-        return [i[0] for i in self.registered_intents]
+        return self.intent_names
 
     def detach_all(self):
         for name in self.get_intent_names():
@@ -276,7 +311,7 @@ class IntentServiceInterface:
         Returns:
             Found intent or None if none were found.
         """
-        for name, intent in self:
+        for name, intent in self.registered_intents:
             if name == intent_name:
                 return intent
         for name, intent in self.detached_intents:
