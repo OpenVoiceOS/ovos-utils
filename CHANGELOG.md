@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.27a4...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.27a5...HEAD)
+
+**Fixed bugs:**
+
+- fix/mouse\_detect\_again [\#90](https://github.com/OpenVoiceOS/ovos-utils/pull/90) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.27a5](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.27a5) (2022-12-16)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.27a4...V0.0.27a5)
 
 **Implemented enhancements:**
 
