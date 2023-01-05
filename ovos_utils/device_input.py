@@ -120,6 +120,7 @@ class InputDeviceHelper:
             if "touch" in device["Capabilities"] or \
                     "mouse" in device["Capabilities"] or \
                     "tablet" in device["Capabilities"] or \
+                    "pointer" in device["Capabilities"] or \
                     "gesture" in device["Capabilities"]:
                 return True
         return False
@@ -140,4 +141,5 @@ def can_use_keyboard():
 
 
 if __name__ == "__main__":
+
     can_use_touch_mouse()
