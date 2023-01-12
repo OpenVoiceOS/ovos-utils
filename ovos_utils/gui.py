@@ -736,7 +736,7 @@ class GUIInterface:
     # Utils / Templates
 
     # backport - PR https://github.com/MycroftAI/mycroft-core/pull/2862
-    def show_notification(self, content, action=None,
+    def show_notification(self, content, duration=10, action=None,
                           noticetype="transient", style="info", callback_data=None):
         """Display a Notification on homepage in the GUI.
         Arguments:
@@ -762,6 +762,7 @@ class GUIInterface:
             callback_data = {}
         self.bus.emit(Message("ovos.notification.api.set",
                                     data={
+                                        "duration": duration,
                                         "sender": self.skill_id,
                                         "text": content,
                                         "action": action,
