@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.27a5...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.27a6...HEAD)
+
+**Merged pull requests:**
+
+- add transient duration config [\#92](https://github.com/OpenVoiceOS/ovos-utils/pull/92) ([emphasize](https://github.com/emphasize))
+
+## [V0.0.27a6](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.27a6) (2023-01-05)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.27a5...V0.0.27a6)
 
 **Fixed bugs:**
 
