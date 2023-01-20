@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.27a6...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.27a7...HEAD)
+
+**Merged pull requests:**
+
+- Log deprecation warning in `layers` module [\#93](https://github.com/OpenVoiceOS/ovos-utils/pull/93) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.27a7](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.27a7) (2023-01-12)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.27a6...V0.0.27a7)
 
 **Merged pull requests:**
 
