@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.27...HEAD)
+
+**Fixed bugs:**
+
+- According to the usage, you should be able to pass the name to LOG\(\). [\#94](https://github.com/OpenVoiceOS/ovos-utils/pull/94) ([gmsoft-tuxicoman](https://github.com/gmsoft-tuxicoman))
+
+## [V0.0.27](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.27) (2023-01-20)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.27a8...V0.0.27)
+
 ## [V0.0.27a8](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.27a8) (2023-01-20)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.27a7...V0.0.27a8)
