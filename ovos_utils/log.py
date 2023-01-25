@@ -44,6 +44,10 @@ class LOG:
     _loggers = {}
 
     @classmethod
+    def __init__(cls, name='OVOS'):
+        cls.name = name
+
+    @classmethod
     def init(cls, config=None):
 
         from ovos_config.meta import get_xdg_base
