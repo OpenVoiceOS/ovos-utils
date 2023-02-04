@@ -24,6 +24,13 @@ from ovos_utils.file_utils import resolve_ovos_resource_file, resolve_resource_f
 from ovos_utils.network_utils import get_ip, get_external_ip, is_connected_dns, is_connected_http, is_connected
 
 
+class classproperty(property):
+    """Decorator for a Class-level property.
+    Credit to Denis Rhyzhkov on Stackoverflow: https://stackoverflow.com/a/13624858/1280629"""
+    def __get__(self, owner_self, owner_cls):
+        return self.fget(owner_cls)
+
+
 def ensure_mycroft_import():
     try:
         import mycroft
