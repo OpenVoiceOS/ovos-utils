@@ -86,10 +86,15 @@ def core_supports_xdg():
 
 
 def get_mycroft_version():
-    try:
+    try:  # ovos
+        from mycroft.version import OVOS_VERSION_STR
+        return OVOS_VERSION_STR
+    except ImportError:
+        pass
+    try:  # mycroft
         from mycroft.version import CORE_VERSION_STR
         return CORE_VERSION_STR
-    except:
+    except ImportError:
         pass
 
     root = search_mycroft_core_location()

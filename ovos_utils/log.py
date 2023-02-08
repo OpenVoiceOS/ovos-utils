@@ -139,3 +139,17 @@ class LOG:
     @classmethod
     def exception(cls, *args, **kwargs):
         cls._get_real_logger().exception(*args, **kwargs)
+
+
+def init_service_logger(service_name):
+    # this is makes all logs from this service be configured to write to service_name.log file
+    # if this is not called in every __main__.py entrypoint logs will be written
+    # to a generic OVOS.log file shared across all services
+    from ovos_config import Configuration
+
+    _cfg = Configuration()
+    _log_level = _cfg.get("log_level", "INFO")
+    _logs_conf = _cfg.get("logs") or {}
+    _logs_conf["level"] = _log_level
+    LOG.name = service_name
+    LOG.init(_logs_conf)  # read log level from config
