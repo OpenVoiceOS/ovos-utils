@@ -97,7 +97,7 @@ def restart_service(service_name, sudo=True):
     subprocess.call(cmd, shell=True)
 
 
-def enable_service(service_name, sudo=True):
+def enable_service(service_name, sudo=True, user=False):
     """
     Enables and Starts a systemd service using systemctl
     @param service_name: name of service to Enable and Start
@@ -105,14 +105,17 @@ def enable_service(service_name, sudo=True):
     """
     enable_command = f"systemctl enable {service_name}"
     start_command = f"systemctl start {service_name}"
-    if sudo:
+    if user:
+        enable_command = f"{enable_command} --user"
+        start_command = f"{start_command} --user"
+    elif sudo:
         enable_command = f"sudo {enable_command}"
         start_command = f"sudo {start_command}"
     subprocess.call(enable_command, shell=True)
     subprocess.call(start_command, shell=True)
 
 
-def disable_service(service_name, sudo=True):
+def disable_service(service_name, sudo=True, user=False):
     """
     Disables and Stops a systemd service using systemctl
     @param service_name: name of service to Disable and Stop
@@ -120,14 +123,17 @@ def disable_service(service_name, sudo=True):
     """
     disable_command = f"systemctl disable {service_name}"
     stop_command = f"systemctl stop {service_name}"
-    if sudo:
+    if user:
+        disable_command = f"{disable_command} --user"
+        stop_command = f"{stop_command} --user"
+    elif sudo:
         disable_command = f"sudo {disable_command}"
         stop_command = f"sudo {stop_command}"
     subprocess.call(stop_command, shell=True)
     subprocess.call(disable_command, shell=True)
 
 
-def check_service_active(service_name, sudo=False) -> bool:
+def check_service_active(service_name, sudo=False, user=False) -> bool:
     """
     Checks if a systemd service is active using systemctl
     @param service_name: name of service to check
@@ -135,7 +141,9 @@ def check_service_active(service_name, sudo=False) -> bool:
     @return: True if the service is active, else False
     """
     status_command = f"systemctl is-active --quiet {service_name}"
-    if sudo:
+    if user:
+        statust_command = f"{status_command} --user"
+    elif sudo:
         status_command = f"sudo {status_command}"
     state = subprocess.run(status_command, shell=True).returncode
     return state == 0
