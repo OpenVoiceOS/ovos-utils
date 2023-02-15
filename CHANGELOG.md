@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.28a4...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.28a5...HEAD)
+
+**Merged pull requests:**
+
+- Handle default network config values if core configuration is incomplete [\#99](https://github.com/OpenVoiceOS/ovos-utils/pull/99) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.28a5](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.28a5) (2023-02-15)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.28a4...V0.0.28a5)
 
 **Implemented enhancements:**
 
