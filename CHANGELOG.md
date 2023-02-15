@@ -2,7 +2,16 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.28a3...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.28a4...HEAD)
+
+**Implemented enhancements:**
+
+- port network utils from mk2 [\#85](https://github.com/OpenVoiceOS/ovos-utils/issues/85)
+- improve network checks [\#88](https://github.com/OpenVoiceOS/ovos-utils/pull/88) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.28a4](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.28a4) (2023-02-08)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.28a3...V0.0.28a4)
 
 **Implemented enhancements:**
 
