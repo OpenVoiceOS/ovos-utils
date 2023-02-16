@@ -56,23 +56,43 @@ def ntp_sync():
     subprocess.call('service ntp start', shell=True)
 
 
-def system_shutdown():
-    # Turn the system completely off (with no option to inhibit it)
-    subprocess.call('sudo systemctl poweroff -i', shell=True)
+def system_shutdown(sudo=True):
+    """
+    Turn the system completely off (with no option to inhibit it)
+    @param sudo: use sudo when calling systemctl
+    """
+    cmd = 'systemctl poweroff -i'
+    if sudo:
+        cmd = f'sudo {cmd}'
+    subprocess.call(cmd, shell=True)
 
 
-def system_reboot():
-    # Shut down and restart the system
-    subprocess.call('sudo systemctl reboot -i', shell=True)
+def system_reboot(sudo=True):
+    """
+    Shut down and restart the system
+    @param sudo: use sudo when calling systemctl
+    """
+    cmd = 'systemctl reboot -i'
+    if sudo:
+        cmd = f'sudo {cmd}'
+    subprocess.call(cmd, shell=True)
 
 
 def ssh_enable(sudo=True, user=False):
-    # Permanently allow SSH access
+    """
+    Permanently allow SSH access
+    @param sudo: use sudo when calling systemctl
+    @param user: pass --user flag when calling systemctl
+    """
     enable_service("ssh.service", sudo=sudo, user=user)
 
 
 def ssh_disable(sudo=True, user=False):
-    # Permanently block SSH access from the outside
+    """
+    Permanently block SSH access from the outside
+    @param sudo: use sudo when calling systemctl
+    @param user: pass --user flag when calling systemctl
+    """
     disable_service("ssh.service", sudo=sudo, user=user)
 
 
@@ -80,6 +100,7 @@ def restart_mycroft_service(sudo=True, user=False):
     """
     Restarts the `mycroft.service` systemd service
     @param sudo: use sudo when calling systemctl
+    @param user: pass --user flag when calling systemctl
     """
     restart_service("mycroft.service", sudo=sudo, user=user)
 
@@ -89,6 +110,7 @@ def restart_service(service_name, sudo=True, user=False):
     Restarts a systemd service using systemctl
     @param service_name: name of service to restart
     @param sudo: use sudo when calling systemctl
+    @param user: pass --user flag when calling systemctl
     """
     cmd = f'systemctl restart {service_name}'
     if user:
@@ -103,6 +125,7 @@ def enable_service(service_name, sudo=False, user=False):
     Enables and Starts a systemd service using systemctl
     @param service_name: name of service to Enable and Start
     @param sudo: use sudo when calling systemctl
+    @param user: pass --user flag when calling systemctl
     """
     enable_command = f"systemctl enable {service_name}"
     start_command = f"systemctl start {service_name}"
@@ -121,6 +144,7 @@ def disable_service(service_name, sudo=False, user=False):
     Disables and Stops a systemd service using systemctl
     @param service_name: name of service to Disable and Stop
     @param sudo: use sudo when calling systemctl
+    @param user: pass --user flag when calling systemctl
     """
     disable_command = f"systemctl disable {service_name}"
     stop_command = f"systemctl stop {service_name}"
@@ -138,6 +162,7 @@ def check_service_active(service_name, sudo=False, user=False) -> bool:
     """
     Checks if a systemd service is active using systemctl
     @param service_name: name of service to check
+    @param user: pass --user flag when calling systemctl
     @param sudo: use sudo when calling systemctl
     @return: True if the service is active, else False
     """
