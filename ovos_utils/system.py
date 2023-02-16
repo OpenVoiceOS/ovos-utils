@@ -168,7 +168,7 @@ def check_service_active(service_name, sudo=False, user=False) -> bool:
     """
     status_command = f"systemctl is-active --quiet {service_name}"
     if user:
-        statust_command = f"{status_command} --user"
+        status_command = f"{status_command} --user"
     elif sudo:
         status_command = f"sudo {status_command}"
     state = subprocess.run(status_command, shell=True).returncode
