@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.28...HEAD)
+
+**Implemented enhancements:**
+
+- Migrate/lock monotonic event [\#100](https://github.com/OpenVoiceOS/ovos-utils/pull/100) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.28](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.28) (2023-02-24)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.28a7...V0.0.28)
+
 ## [V0.0.28a7](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.28a7) (2023-02-16)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.28a6...V0.0.28a7)
