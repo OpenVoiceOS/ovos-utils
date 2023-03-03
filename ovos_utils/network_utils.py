@@ -6,7 +6,7 @@ import requests
 # TODO - remove next stable
 try:
     from ovos_utils.process_utils import RuntimeRequirements as NetworkRequirements
-except ImportError:
+except:
     pass  # circular import introduced here, ovos_config importts network_utils, process_utils imports ovos_config
 
 from ovos_utils.log import LOG
