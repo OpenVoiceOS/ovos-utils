@@ -384,3 +384,12 @@ class PIDLock:  # python 3+ 'class Lock'
                     os.unlink(self.path)
         except IOError:
             pass
+
+
+def reset_sigint_handler():
+    """Reset the sigint handler to the default.
+
+    This fixes KeyboardInterrupt not getting raised when started via
+    start-mycroft.sh
+    """
+    signal(SIGINT, default_int_handler)
