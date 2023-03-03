@@ -350,8 +350,7 @@ class PIDLock:  # python 3+ 'class Lock'
         lock file for writing and store the current process ID (PID)
         as text.
         """
-        if not os.path.exists(PIDLock.DIRECTORY):
-            os.makedirs(PIDLock.DIRECTORY)
+        os.makedirs(PIDLock.DIRECTORY, exist_ok=True)
         with open(self.path, 'w') as L:
             L.write('{}'.format(self.__pid))
 

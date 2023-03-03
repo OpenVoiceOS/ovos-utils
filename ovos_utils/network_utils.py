@@ -1,8 +1,13 @@
 import socket
 
 import requests
-# backwards compat
-from ovos_utils.process_utils import RuntimeRequirements as NetworkRequirements
+
+# backwards compat - was only out there for a couple alpha version
+# TODO - remove next stable
+try:
+    from ovos_utils.process_utils import RuntimeRequirements as NetworkRequirements
+except ImportError:
+    pass  # circular import introduced here, ovos_config importts network_utils, process_utils imports ovos_config
 
 from ovos_utils.log import LOG
 
