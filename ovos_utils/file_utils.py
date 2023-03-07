@@ -3,11 +3,10 @@ import csv
 import re
 import os
 from os import walk
-from os.path import splitext, join, dirname
+from os.path import splitext, join
 import tempfile
 from ovos_utils.bracket_expansion import expand_options
 from ovos_utils.log import LOG
-from ovos_utils.system import search_mycroft_core_location
 import time
 from os.path import dirname
 
@@ -59,6 +58,8 @@ def resolve_ovos_resource_file(res_name):
     """Convert a resource into an absolute filename.
     used internally for ovos resources
     """
+    from ovos_utils.system import search_mycroft_core_location
+
     # First look for fully qualified file (e.g. a user setting)
     if os.path.isfile(res_name):
         return res_name

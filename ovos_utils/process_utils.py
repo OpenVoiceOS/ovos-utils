@@ -22,7 +22,6 @@ from signal import signal, SIGKILL, SIGINT, SIGTERM, \
 from threading import Event
 from time import sleep, monotonic
 
-from ovos_utils.file_utils import get_temp_path
 from ovos_utils.log import LOG
 
 
@@ -290,6 +289,7 @@ class PIDLock:  # python 3+ 'class Lock'
     previously running process and then change the process ID in the lock file.
     """
     from ovos_config.meta import get_xdg_base
+    from ovos_utils.file_utils import get_temp_path
 
     #
     # Class constants
