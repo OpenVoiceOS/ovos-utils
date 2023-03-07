@@ -48,12 +48,15 @@ class TestSystem(unittest.TestCase):
         pass
 
     def test_set_root_path(self):
-        from ovos_utils.system import set_root_path, _USER_DEFINED_ROOT
+        from ovos_utils.system import set_root_path
         set_root_path("test")
+        from ovos_utils.system import _USER_DEFINED_ROOT
         self.assertEqual(_USER_DEFINED_ROOT, "test")
         set_root_path("mycroft")
+        from ovos_utils.system import _USER_DEFINED_ROOT
         self.assertEqual(_USER_DEFINED_ROOT, "mycroft")
         set_root_path(None)
+        from ovos_utils.system import _USER_DEFINED_ROOT
         self.assertIsNone(_USER_DEFINED_ROOT)
 
     def test_find_root_from_sys_path(self):
