@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.30a1...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.30a2...HEAD)
+
+**Merged pull requests:**
+
+- Bump ovos-config dependency cleanup module init [\#104](https://github.com/OpenVoiceOS/ovos-utils/pull/104) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.30a2](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.30a2) (2023-03-08)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.30a1...V0.0.30a2)
 
 **Implemented enhancements:**
 
