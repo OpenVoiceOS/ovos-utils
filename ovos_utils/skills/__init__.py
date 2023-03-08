@@ -1,4 +1,4 @@
-from ovos_config.config import read_mycroft_config, update_mycroft_config
+from ovos_config.config import Configuration, update_mycroft_config
 from ovos_utils.messagebus import wait_for_reply
 from ovos_utils.skills.locations import get_default_skills_directory, get_installed_skill_ids
 from ovos_utils.log import LOG
@@ -39,7 +39,7 @@ def skills_loaded(bus=None):
 
 
 def blacklist_skill(skill, config=None):
-    config = config or read_mycroft_config()
+    config = config or Configuration()
     skills_config = config.get("skills", {})
     blacklisted_skills = skills_config.get("blacklisted_skills", [])
     if skill not in blacklisted_skills:
@@ -55,7 +55,7 @@ def blacklist_skill(skill, config=None):
 
 
 def whitelist_skill(skill, config=None):
-    config = config or read_mycroft_config()
+    config = config or Configuration()
     skills_config = config.get("skills", {})
     blacklisted_skills = skills_config.get("blacklisted_skills", [])
     if skill in blacklisted_skills:
@@ -71,7 +71,7 @@ def whitelist_skill(skill, config=None):
 
 
 def make_priority_skill(skill, config=None):
-    config = config or read_mycroft_config()
+    config = config or Configuration()
     skills_config = config.get("skills", {})
     priority_skills = skills_config.get("priority_skills", [])
     if skill not in priority_skills:

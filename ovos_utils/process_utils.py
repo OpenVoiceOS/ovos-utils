@@ -22,9 +22,7 @@ from signal import signal, SIGKILL, SIGINT, SIGTERM, \
 from threading import Event
 from time import sleep, monotonic
 
-from ovos_config.meta import get_xdg_base
 
-from ovos_utils.file_utils import get_temp_path
 from ovos_utils.log import LOG
 
 
@@ -291,11 +289,16 @@ class PIDLock:  # python 3+ 'class Lock'
     of the same type is started, this class will 'attempt' to stop the
     previously running process and then change the process ID in the lock file.
     """
-
+    @classmethod
+    def init(cls):
+        from ovos_config.meta import get_xdg_base
+        from ovos_utils.file_utils import get_temp_path
+        cls.DIRECTORY = cls.DIRECTORY or get_temp_path(get_xdg_base())
     #
     # Class constants
-    DIRECTORY = get_temp_path(get_xdg_base())
+    DIRECTORY = None
     FILE = '/{}.pid'
+    LOG.info(f"Create PIDLock in: {DIRECTORY}")
 
     #
     # Constructor
@@ -307,6 +310,7 @@ class PIDLock:  # python 3+ 'class Lock'
         service: Text string.  The name of the service application
         to be locked (ie: skills, voice)
         """
+        PIDLock.init()
         super(PIDLock, self).__init__()  # python 3+ 'super().__init__()'
         self.__pid = os.getpid()  # PID of this application
         self.path = PIDLock.DIRECTORY + PIDLock.FILE.format(service)

@@ -5,7 +5,7 @@ from threading import Event
 
 from mycroft_bus_client import MessageBusClient
 from mycroft_bus_client.message import dig_for_message, Message
-from ovos_config.config import read_mycroft_config
+from ovos_config.config import Configuration
 from ovos_config.locale import get_default_lang
 from pyee import BaseEventEmitter
 
@@ -150,8 +150,7 @@ def get_mycroft_bus(host: str = None, port: int = None, route: str = None,
     """
     Returns a connection to the mycroft messagebus
     """
-    from ovos_config.config import read_mycroft_config
-    config = read_mycroft_config().get('websocket') or dict()
+    config = Configuration().get('websocket') or dict()
     host = host or config.get('host') or _DEFAULT_WS_CONFIG['host']
     port = port or config.get('port') or _DEFAULT_WS_CONFIG['port']
     route = route or config.get('route') or _DEFAULT_WS_CONFIG['route']
@@ -553,7 +552,7 @@ class BusFeedProvider:
                 name(str): name identifier for .conf settings
                 bus (WebsocketClient): mycroft messagebus websocket
         """
-        config = config or read_mycroft_config()
+        config = config or Configuration()
         self.trigger_message = trigger_message
         self.name = name or self.__class__.__name__
         self.bus = bus or get_mycroft_bus()
@@ -695,7 +694,7 @@ class BusFeedConsumer:
         self.query_message.context["source"] = self.name
         self.name = name or self.__class__.__name__
         self.bus = bus or get_mycroft_bus()
-        config = config or read_mycroft_config()
+        config = config or Configuration()
         self.config = config.get(self.name, {})
         self.timeout = timeout
         self.query = None
