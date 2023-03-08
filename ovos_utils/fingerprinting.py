@@ -4,7 +4,6 @@ from enum import Enum
 from os.path import join, isfile
 from ovos_utils.system import is_installed, is_running_from_module, has_screen, \
     get_desktop_environment, search_mycroft_core_location, is_process_running
-from ovos_config.meta import is_using_xdg
 
 
 class MycroftPlatform(str, Enum):
@@ -28,8 +27,8 @@ def detect_platform():
 
 def get_config_fingerprint(config=None):
     if not config:
-        from ovos_config.config import read_mycroft_config
-        config = read_mycroft_config()
+        from ovos_config.config import Configuration
+        config = Configuration()
     conf = config
     listener_conf = conf.get("listener", {})
     skills_conf = conf.get("skills", {})
@@ -80,9 +79,7 @@ def get_fingerprint():
 
 
 def core_supports_xdg():
-    if any((is_holmes(), is_chatterbox_core())):
-        return True
-    return is_using_xdg()
+    return True  # no longer optional
 
 
 def get_mycroft_version():
