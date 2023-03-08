@@ -20,6 +20,7 @@ from time import sleep
 
 import kthread
 
+# TODO: Deprecate below imports
 from ovos_utils.file_utils import resolve_ovos_resource_file, resolve_resource_file
 from ovos_utils.network_utils import get_ip, get_external_ip, is_connected_dns, is_connected_http, is_connected
 
