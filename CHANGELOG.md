@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.29...HEAD)
+
+**Merged pull requests:**
+
+- Implement module\_property decorator with unit test [\#103](https://github.com/OpenVoiceOS/ovos-utils/pull/103) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.29](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.29) (2023-03-03)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.29a2...V0.0.29)
+
 ## [V0.0.29a2](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.29a2) (2023-03-03)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.29a1...V0.0.29a2)
