@@ -75,7 +75,7 @@ setup(
         'console_scripts': [
             'ovos-listen=ovos_utils.scripts:ovos_listen',
             'ovos-speak=ovos_utils.scripts:ovos_speak',
-            'ovos-say_to=ovos_utils.scripts:ovos_say_to',
+            'ovos-say-to=ovos_utils.scripts:ovos_say_to',
         ]
     }
 )
