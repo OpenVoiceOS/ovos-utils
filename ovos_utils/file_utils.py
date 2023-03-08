@@ -1,18 +1,20 @@
 import collections
 import csv
-import re
 import os
-from os import walk
-from os.path import splitext, join, dirname
+import re
 import tempfile
+import time
+from os import walk
+from os.path import dirname
+from os.path import splitext, join
+
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
+
 from ovos_utils.bracket_expansion import expand_options
+from ovos_utils.configuration import read_mycroft_config
 from ovos_utils.log import LOG
 from ovos_utils.system import search_mycroft_core_location
-import time
-from os.path import dirname
-
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
 
 
 def get_temp_path(*args):
@@ -103,8 +105,7 @@ def resolve_resource_file(res_name, root_path=None, config=None):
         str: path to resource or None if no resource found
     """
     if config is None:
-        from ovos_config.config import Configuration
-        config = Configuration()
+        config = read_mycroft_config()
 
     # First look for fully qualified file (e.g. a user setting)
     if os.path.isfile(res_name):

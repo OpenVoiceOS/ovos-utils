@@ -18,7 +18,6 @@ from logging.handlers import RotatingFileHandler
 from os.path import join
 
 
-
 class LOG:
     """
     Custom logger class that acts like logging.Logger
@@ -49,7 +48,7 @@ class LOG:
     @classmethod
     def init(cls, config=None):
 
-        from ovos_config.meta import get_xdg_base
+        from ovos_utils.configuration import get_xdg_base
         from ovos_utils.xdg_utils import xdg_state_home
 
         config = config or {}
@@ -148,9 +147,9 @@ def init_service_logger(service_name):
     # this is makes all logs from this service be configured to write to service_name.log file
     # if this is not called in every __main__.py entrypoint logs will be written
     # to a generic OVOS.log file shared across all services
-    from ovos_config import Configuration
+    from ovos_utils.configuration import read_mycroft_config
 
-    _cfg = Configuration()
+    _cfg = read_mycroft_config()
     _log_level = _cfg.get("log_level", "INFO")
     _logs_conf = _cfg.get("logs") or {}
     _logs_conf["level"] = _log_level

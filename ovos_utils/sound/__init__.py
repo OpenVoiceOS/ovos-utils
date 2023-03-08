@@ -4,7 +4,8 @@ import time
 from copy import deepcopy
 from distutils.spawn import find_executable
 
-from ovos_config import Configuration
+
+from ovos_utils.configuration import read_mycroft_config
 
 from ovos_utils.file_utils import resolve_resource_file
 from ovos_utils.log import LOG
@@ -35,7 +36,7 @@ def play_acknowledge_sound():
     to the user that their request was handled successfully.
     """
     audio_file = resolve_resource_file(
-        Configuration().get('sounds', {}).get('acknowledge'))
+        read_mycroft_config().get('sounds', {}).get('acknowledge'))
 
     if not audio_file:
         LOG.warning("Could not find 'acknowledge' audio file!")
@@ -50,7 +51,7 @@ def play_acknowledge_sound():
 def play_listening_sound():
     """Audibly indicate speech recording started."""
     audio_file = resolve_resource_file(
-        Configuration().get('sounds', {}).get('start_listening'))
+        read_mycroft_config().get('sounds', {}).get('start_listening'))
 
     if not audio_file:
         LOG.warning("Could not find 'start_listening' audio file!")
@@ -65,7 +66,7 @@ def play_listening_sound():
 def play_end_listening_sound():
     """Audibly indicate speech recording is no longer happening."""
     audio_file = resolve_resource_file(
-        Configuration().get('sounds', {}).get('end_listening'))
+        read_mycroft_config().get('sounds', {}).get('end_listening'))
 
     if not audio_file:
         LOG.debug("Could not find 'end_listening' audio file!")
@@ -85,7 +86,7 @@ def play_error_sound():
     to the user that their request was NOT handled successfully.
     """
     audio_file = resolve_resource_file(
-        Configuration().get('sounds', {}).get('error'))
+        read_mycroft_config().get('sounds', {}).get('error'))
 
     if not audio_file:
         LOG.warning("Could not find 'error' audio file!")
@@ -141,7 +142,7 @@ def play_audio(uri, play_cmd=None, environment=None):
     Returns: subprocess.Popen object. None if the format is not supported or
              an error occurs playing the file.
     """
-    config = Configuration()
+    config = read_mycroft_config()
     environment = environment or _get_pulse_environment(config)
 
     # NOTE: some urls like youtube streams will cause extension detection to fail
@@ -186,7 +187,7 @@ def play_wav(uri, play_cmd=None, environment=None):
 
         Returns: subprocess.Popen object
     """
-    config = Configuration()
+    config = read_mycroft_config()
     environment = environment or _get_pulse_environment(config)
     play_cmd = play_cmd or config.get("play_wav_cmdline") or "paplay %1"
     play_wav_cmd = str(play_cmd).split(" ")
@@ -206,7 +207,7 @@ def play_mp3(uri, play_cmd=None, environment=None):
 
         Returns: subprocess.Popen object
     """
-    config = Configuration()
+    config = read_mycroft_config()
     environment = environment or _get_pulse_environment(config)
     play_cmd = play_cmd or config.get("play_mp3_cmdline") or "mpg123 %1"
     play_mp3_cmd = str(play_cmd).split(" ")
@@ -226,7 +227,7 @@ def play_ogg(uri, play_cmd=None, environment=None):
 
         Returns: subprocess.Popen object
     """
-    config = Configuration()
+    config = read_mycroft_config()
     environment = environment or _get_pulse_environment(config)
     play_cmd = play_cmd or config.get("play_ogg_cmdline") or "ogg123 -q %1"
     play_ogg_cmd = str(play_cmd).split(" ")
