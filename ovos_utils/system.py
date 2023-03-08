@@ -318,3 +318,28 @@ def has_screen():
         except ImportError:
             pass
     return have_display
+
+
+def module_property(func):
+    """
+    Decorator to turn module functions into properties.
+    Function names must be prefixed with an underscore.
+    :param func: function to decorate
+    """
+    import sys
+    module = sys.modules[func.__module__]
+
+    def fallback_getattr(name):
+        raise AttributeError(
+            f"module '{module.__name__}' has no attribute '{name}'")
+
+    default_getattr = getattr(module, '__getattr__', fallback_getattr)
+
+    def patched_getattr(name):
+        if f'_{name}' == func.__name__:
+            return func()
+        return default_getattr(name)
+
+    module.__getattr__ = patched_getattr
+    return func
+
