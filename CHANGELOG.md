@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
+## [V0.0.30a4](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.30a4) (2023-03-09)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.30a3...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.30a3...V0.0.30a4)
 
 **Merged pull requests:**
 
