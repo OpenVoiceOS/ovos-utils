@@ -914,6 +914,32 @@ class GUIInterface:
         self.show_page("SYSTEM_UrlFrame.qml", override_idle,
                        override_animations)
 
+    def show_input_box(self, title=None, placeholder=None,
+                       confirm_text=None, exit_text=None,
+                       override_idle=None, override_animations=None):
+        self["title"] = title
+        self["placeholder"] = placeholder
+        self["skill_id_handler"] = self.skill_id
+        if not confirm_text:
+            self["confirm_text"] = "Confirm"
+        else:
+            self["confirm_text"] = confirm_text
+
+        if not exit_text:
+            self["exit_text"] = "Exit"
+        else:
+            self["exit_text"] = exit_text
+
+        self.show_page("SYSTEM_InputBox.qml", override_idle,
+                       override_animations)
+
+    def remove_input_box(self):
+        LOG.info(f"GUI pages length {len(self.pages)}")
+        if len(self.pages) > 1:
+            self.remove_page("SYSTEM_InputBox.qml")
+        else:
+            self.release()
+
     def release(self):
         """Signal that this skill is no longer using the GUI,
         allow different platforms to properly handle this event.
