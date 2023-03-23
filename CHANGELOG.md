@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.30...HEAD)
+
+**Merged pull requests:**
+
+- Add show input box method for skills [\#109](https://github.com/OpenVoiceOS/ovos-utils/pull/109) ([AIIX](https://github.com/AIIX))
+
+## [V0.0.30](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.30) (2023-03-09)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.30a4...V0.0.30)
+
 ## [V0.0.30a4](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.30a4) (2023-03-09)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.30a3...V0.0.30a4)
