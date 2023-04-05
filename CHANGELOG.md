@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a1...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a2...HEAD)
+
+**Merged pull requests:**
+
+- feat/FakeMessage [\#111](https://github.com/OpenVoiceOS/ovos-utils/pull/111) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.31a2](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.31a2) (2023-04-05)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a1...V0.0.31a2)
 
 **Merged pull requests:**
 
