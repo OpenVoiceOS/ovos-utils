@@ -17,7 +17,6 @@ import sys
 from logging.handlers import RotatingFileHandler
 from os.path import join
 
-from mycroft_bus_client.message import dig_for_message
 
 
 class LOG:
@@ -115,9 +114,13 @@ class LOG:
 
         logger = cls.create_logger(name, tostdout=True)
         if cls.diagnostic_mode:
-            msg = dig_for_message()
-            if msg:
-                logger.debug(f"DIAGNOSTIC - source bus message {msg.serialize()}")
+            try:
+                from ovos_bus_client.message import dig_for_message
+                msg = dig_for_message()
+                if msg:
+                    logger.debug(f"DIAGNOSTIC - source bus message {msg.serialize()}")
+            except ImportError:
+                pass
         return logger
 
     @classmethod

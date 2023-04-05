@@ -3,8 +3,7 @@ import time
 from inspect import signature
 from threading import Event
 
-from mycroft_bus_client import MessageBusClient
-from mycroft_bus_client.message import dig_for_message, Message
+
 from ovos_config.config import Configuration
 from ovos_config.locale import get_default_lang
 from pyee import BaseEventEmitter
@@ -127,6 +126,8 @@ def get_message_lang(message=None):
     Returns:
         The language code from the message or the default language.
     """
+    from ovos_bus_client.message import dig_for_message
+
     message = message or dig_for_message()
     default_lang = get_default_lang()
     if not message:
@@ -139,6 +140,8 @@ def get_websocket(host, port, route='/', ssl=False, threaded=True):
     """
     Returns a connection to a websocket
     """
+    from ovos_bus_client import MessageBusClient
+
     client = MessageBusClient(host, port, route, ssl)
     if threaded:
         client.run_in_thread()
@@ -198,6 +201,8 @@ def wait_for_reply(message, reply_type=None, timeout=3.0, bus=None):
     Returns:
         The received message or None if the response timed out
     """
+    from ovos_bus_client.message import Message
+
     auto_close = bus is None
     bus = bus or get_mycroft_bus()
     if isinstance(message, str):
@@ -220,6 +225,8 @@ def wait_for_reply(message, reply_type=None, timeout=3.0, bus=None):
 
 
 def send_message(message, data=None, context=None, bus=None):
+    from ovos_bus_client.message import Message
+
     auto_close = bus is None
     bus = bus or get_mycroft_bus()
     if isinstance(message, str):
@@ -572,6 +579,8 @@ class BusFeedProvider:
         """
           prepare responder for sending, register answers
         """
+        from ovos_bus_client.message import Message
+
         self.bus.remove_all_listeners(self.trigger_message)
         if ".request" in self.trigger_message:
             response_type = self.trigger_message.replace(".request", ".reply")
@@ -623,6 +632,7 @@ class BusQuery:
     """
 
     def __init__(self, message, bus=None):
+        from ovos_bus_client.message import Message
         self.bus = bus or get_mycroft_bus()
         self._waiting = False
         self.response = Message(None, None, None)
@@ -649,6 +659,8 @@ class BusQuery:
         self._waiting = False
 
     def send(self, response_type=None, timeout=10):
+        from ovos_bus_client.message import Message
+
         self.response = Message(None, None, None)
         if response_type is None:
             response_type = self.query.type + ".reply"
