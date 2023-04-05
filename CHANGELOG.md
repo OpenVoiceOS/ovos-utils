@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.30...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a1...HEAD)
+
+**Merged pull requests:**
+
+- refactor/ovos-bus-client [\#110](https://github.com/OpenVoiceOS/ovos-utils/pull/110) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.31a1](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.31a1) (2023-03-23)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.30...V0.0.31a1)
 
 **Merged pull requests:**
 
