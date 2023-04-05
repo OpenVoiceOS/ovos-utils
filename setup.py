@@ -70,12 +70,5 @@ setup(
     license='Apache',
     author='jarbasAI',
     author_email='jarbasai@mailfence.com',
-    description='collection of simple utilities for use across the mycroft ecosystem',
-    entry_points={
-        'console_scripts': [
-            'ovos-listen=ovos_utils.scripts:ovos_listen',
-            'ovos-speak=ovos_utils.scripts:ovos_speak',
-            'ovos-say-to=ovos_utils.scripts:ovos_say_to',
-        ]
-    }
+    description='collection of simple utilities for use across the mycroft ecosystem'
 )
