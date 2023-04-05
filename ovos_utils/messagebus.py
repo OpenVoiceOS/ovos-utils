@@ -3,8 +3,8 @@ import time
 from inspect import signature
 from threading import Event
 
-from mycroft_bus_client import MessageBusClient
-from mycroft_bus_client.message import dig_for_message, Message
+from ovos_bus_client import MessageBusClient
+from ovos_bus_client.message import dig_for_message, Message
 from ovos_config.config import Configuration
 from ovos_config.locale import get_default_lang
 from pyee import BaseEventEmitter

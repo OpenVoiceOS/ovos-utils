@@ -17,7 +17,7 @@ import sys
 from logging.handlers import RotatingFileHandler
 from os.path import join
 
-from mycroft_bus_client.message import dig_for_message
+from ovos_bus_client.message import dig_for_message
 
 
 class LOG:

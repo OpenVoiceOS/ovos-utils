@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # each method here is a console_script defined in setup.py
 # each corresponds to a cli util
-from mycroft_bus_client import MessageBusClient, Message
+from ovos_bus_client import MessageBusClient, Message
 from ovos_config import Configuration
 import sys
 

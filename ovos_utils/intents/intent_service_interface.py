@@ -1,8 +1,8 @@
 from os.path import exists, isfile
 
 
-from mycroft_bus_client import MessageBusClient
-from mycroft_bus_client.message import Message, dig_for_message
+from ovos_bus_client import MessageBusClient
+from ovos_bus_client.message import Message, dig_for_message
 from ovos_utils import create_daemon
 from ovos_utils.log import LOG
 
