@@ -1,8 +1,8 @@
 import json
 import time
+from copy import deepcopy
 from inspect import signature
 from threading import Event
-
 
 from ovos_config.config import Configuration
 from ovos_config.locale import get_default_lang
@@ -17,6 +17,15 @@ _DEFAULT_WS_CONFIG = {"host": "0.0.0.0",
                       "port": 8181,
                       "route": "/core",
                       "ssl": False}
+
+
+def dig_for_message():
+    try:
+        from ovos_bus_client.message import dig_for_message as _dig
+        return _dig()
+    except ImportError:
+        pass
+    return None
 
 
 class FakeBus:
@@ -119,6 +128,160 @@ class FakeBus:
         self.on_close()
 
 
+# fake Message object to allow usage with FakeBus
+class FakeMessage:
+    """ fake Message object to allow usage with FakeBus without ovos-bus-client installed"""
+
+    def __init__(self, msg_type, data=None, context=None):
+        """Used to construct a message object
+
+        Message objects will be used to send information back and forth
+        between processes of mycroft service, voice, skill and cli
+        """
+        self.msg_type = msg_type
+        self.data = data or {}
+        self.context = context or {}
+
+    def __eq__(self, other):
+        try:
+            return other.msg_type == self.msg_type and \
+                other.data == self.data and \
+                other.context == self.context
+        except:
+            return False
+
+    def serialize(self):
+        """This returns a string of the message info.
+
+        This makes it easy to send over a websocket. This uses
+        json dumps to generate the string with type, data and context
+
+        Returns:
+            str: a json string representation of the message.
+        """
+        return json.dumps({'type': self.msg_type,
+                           'data': self.data,
+                           'context': self.context})
+
+    @staticmethod
+    def deserialize(value):
+        """This takes a string and constructs a message object.
+
+        This makes it easy to take strings from the websocket and create
+        a message object.  This uses json loads to get the info and generate
+        the message object.
+
+        Args:
+            value(str): This is the json string received from the websocket
+
+        Returns:
+            Message: message object constructed from the json string passed
+            int the function.
+            value(str): This is the string received from the websocket
+        """
+        obj = json.loads(value)
+        return FakeMessage(obj.get('type') or '',
+                           obj.get('data') or {},
+                           obj.get('context') or {})
+
+    def forward(self, msg_type, data=None):
+        """ Keep context and forward message
+
+        This will take the same parameters as a message object but use
+        the current message object as a reference.  It will copy the context
+        from the existing message object.
+
+        Args:
+            msg_type (str): type of message
+            data (dict): data for message
+
+        Returns:
+            Message: Message object to be used on the reply to the message
+        """
+        data = data or {}
+        return FakeMessage(msg_type, data, context=self.context)
+
+    def reply(self, msg_type, data=None, context=None):
+        """Construct a reply message for a given message
+
+        This will take the same parameters as a message object but use
+        the current message object as a reference.  It will copy the context
+        from the existing message object and add any context passed in to
+        the function.  Check for a destination passed in to the function from
+        the data object and add that to the context as a destination.  If the
+        context has a source then that will be swapped with the destination
+        in the context.  The new message will then have data passed in plus the
+        new context generated.
+
+        Args:
+            msg_type (str): type of message
+            data (dict): data for message
+            context: intended context for new message
+
+        Returns:
+            Message: Message object to be used on the reply to the message
+        """
+        data = deepcopy(data) or {}
+        context = context or {}
+
+        new_context = deepcopy(self.context)
+        for key in context:
+            new_context[key] = context[key]
+        if 'destination' in data:
+            new_context['destination'] = data['destination']
+        if 'source' in new_context and 'destination' in new_context:
+            s = new_context['destination']
+            new_context['destination'] = new_context['source']
+            new_context['source'] = s
+        return FakeMessage(msg_type, data, context=new_context)
+
+    def response(self, data=None, context=None):
+        """Construct a response message for the message
+
+        Constructs a reply with the data and appends the expected
+        ".response" to the message
+
+        Args:
+            data (dict): message data
+            context (dict): message context
+        Returns
+            (Message) message with the type modified to match default response
+        """
+        return self.reply(self.msg_type + '.response', data, context)
+
+    def publish(self, msg_type, data, context=None):
+        """
+        Copy the original context and add passed in context.  Delete
+        any target in the new context. Return a new message object with
+        passed in data and new context.  Type remains unchanged.
+
+        Args:
+            msg_type (str): type of message
+            data (dict): date to send with message
+            context: context added to existing context
+
+        Returns:
+            Message: Message object to publish
+        """
+        context = context or {}
+        new_context = self.context.copy()
+        for key in context:
+            new_context[key] = context[key]
+
+        if 'target' in new_context:
+            del new_context['target']
+
+        return FakeMessage(msg_type, data, context=new_context)
+
+
+# patch for utils below
+try:
+    from ovos_bus_client.message import Message
+except ImportError:
+    LOG.warning("ovos-bus-client not installed")
+    Message = FakeMessage
+
+
 def get_message_lang(message=None):
     """Get the language from the message or the default language.
     Args:
@@ -126,8 +289,6 @@ def get_message_lang(message=None):
     Returns:
         The language code from the message or the default language.
     """
-    from ovos_bus_client.message import dig_for_message
-
     message = message or dig_for_message()
     default_lang = get_default_lang()
     if not message:
@@ -201,8 +362,6 @@ def wait_for_reply(message, reply_type=None, timeout=3.0, bus=None):
     Returns:
         The received message or None if the response timed out
     """
-    from ovos_bus_client.message import Message
-
     auto_close = bus is None
     bus = bus or get_mycroft_bus()
     if isinstance(message, str):
@@ -225,8 +384,6 @@ def wait_for_reply(message, reply_type=None, timeout=3.0, bus=None):
 
 
 def send_message(message, data=None, context=None, bus=None):
-    from ovos_bus_client.message import Message
-
     auto_close = bus is None
     bus = bus or get_mycroft_bus()
     if isinstance(message, str):
@@ -579,7 +736,6 @@ class BusFeedProvider:
         """
           prepare responder for sending, register answers
         """
-        from ovos_bus_client.message import Message
 
         self.bus.remove_all_listeners(self.trigger_message)
         if ".request" in self.trigger_message:
@@ -632,7 +788,6 @@ class BusQuery:
     """
 
     def __init__(self, message, bus=None):
-        from ovos_bus_client.message import Message
         self.bus = bus or get_mycroft_bus()
         self._waiting = False
         self.response = Message(None, None, None)
@@ -659,8 +814,6 @@ class BusQuery:
         self._waiting = False
 
     def send(self, response_type=None, timeout=10):
-        from ovos_bus_client.message import Message
-
         self.response = Message(None, None, None)
         if response_type is None:
             response_type = self.query.type + ".reply"

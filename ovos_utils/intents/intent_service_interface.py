@@ -1,9 +1,7 @@
 from os.path import exists, isfile
 
 
-from ovos_bus_client import MessageBusClient
-from ovos_bus_client.message import Message, dig_for_message
-from ovos_utils import create_daemon
+from ovos_utils.messagebus import get_mycroft_bus, Message, dig_for_message
 from ovos_utils.log import LOG
 
 
@@ -327,8 +325,7 @@ class IntentQueryApi:
 
     def __init__(self, bus=None, timeout=5):
         if bus is None:
-            bus = MessageBusClient()
-            create_daemon(bus.run_forever)
+            bus = get_mycroft_bus()
         self.bus = bus
         self.timeout = timeout
 
