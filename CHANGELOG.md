@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a2...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a3...HEAD)
+
+**Merged pull requests:**
+
+- Update rapidfuzz dependency [\#112](https://github.com/OpenVoiceOS/ovos-utils/pull/112) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.31a3](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.31a3) (2023-04-05)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a2...V0.0.31a3)
 
 **Merged pull requests:**
 
