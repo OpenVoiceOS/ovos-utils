@@ -2,7 +2,16 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a5...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a6...HEAD)
+
+**Merged pull requests:**
+
+- feat/PKGBUILD [\#116](https://github.com/OpenVoiceOS/ovos-utils/pull/116) ([JarbasAl](https://github.com/JarbasAl))
+- Feat/optional ovos config [\#106](https://github.com/OpenVoiceOS/ovos-utils/pull/106) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.31a6](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.31a6) (2023-04-07)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a5...V0.0.31a6)
 
 **Fixed bugs:**
 
