@@ -29,7 +29,7 @@ jobs:
           commit_message: generate PKGBUILD
           branch: dev
       - name: Publish AUR package
-        uses: KSXGitHub/github-actions-deploy-aur@<TAG>
+        uses: KSXGitHub/github-actions-deploy-aur@master
         with:
           pkgname: ovos-utils
           pkgbuild: ./PKGBUILD
