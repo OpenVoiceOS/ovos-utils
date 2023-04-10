@@ -4,7 +4,6 @@ from copy import deepcopy
 from inspect import signature
 from threading import Event
 
-from ovos_config.config import Configuration
 from ovos_config.locale import get_default_lang
 from ovos_utils.configuration import read_mycroft_config, get_default_lang
 from pyee import BaseEventEmitter
