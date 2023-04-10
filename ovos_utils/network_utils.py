@@ -2,11 +2,9 @@ import socket
 
 import requests
 
-# backwards compat - was only out there for a couple alpha version
-# TODO - remove next stable
-from ovos_utils.process_utils import RuntimeRequirements as NetworkRequirements
 
 from ovos_utils.log import LOG
+from ovos_utils.configuration import read_mycroft_config
 
 
 _DEFAULT_TEST_CONFIG = {
@@ -22,8 +20,7 @@ _DEFAULT_TEST_CONFIG = {
 
 def get_network_tests_config():
     """Get network_tests object from mycroft.configuration."""
-    from ovos_config import Configuration
-    config = Configuration()
+    config = read_mycroft_config()
     return config.get("network_tests", _DEFAULT_TEST_CONFIG)
 
 

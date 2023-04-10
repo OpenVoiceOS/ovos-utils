@@ -1,8 +1,7 @@
 from os.path import join, isdir, dirname, expanduser, isfile
 from os import makedirs, listdir
 from typing import List, Optional
-from ovos_config.locations import get_xdg_data_save_path, get_xdg_data_dirs
-from ovos_config.config import Configuration
+from ovos_utils.configuration import read_mycroft_config, get_xdg_data_save_path, get_xdg_data_dirs
 from ovos_utils.log import LOG
 
 
@@ -54,7 +53,7 @@ def get_skill_directories(conf: Optional[dict] = None) -> List[str]:
     # the contents of each skills directory must be individual skill folders
     # we are still dependent on the mycroft-core structure of skill_id/__init__.py
 
-    conf = conf or Configuration()
+    conf = conf or read_mycroft_config()
 
     # load all valid XDG paths
     # NOTE: skills are actually code, but treated as user data!
@@ -101,7 +100,7 @@ def get_default_skills_directory(conf: Optional[dict] = None) -> str:
     Returns:
         Absolute path to default skills directory
     """
-    conf = conf or Configuration()
+    conf = conf or read_mycroft_config()
     path_override = conf["skills"].get("directory_override")
 
     # if .conf wants to use a specific path, use it!

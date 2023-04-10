@@ -2,7 +2,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP_SSL
 
-from ovos_config import Configuration
+from ovos_utils.configuration import read_mycroft_config
 
 
 def send_smtp(user, pswd, sender,
@@ -19,7 +19,7 @@ def send_smtp(user, pswd, sender,
 
 
 def send_email(subject, body, recipient=None):
-    mail_config = Configuration.get("email") or {}
+    mail_config = read_mycroft_config().get("email") or {}
     if not mail_config:
         raise KeyError("email configuration not set")
 

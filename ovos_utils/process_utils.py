@@ -24,6 +24,8 @@ from time import sleep, monotonic
 
 
 from ovos_utils.log import LOG
+from ovos_utils.configuration import get_xdg_base
+from ovos_utils.file_utils import get_temp_path
 
 
 @dataclass
@@ -291,8 +293,6 @@ class PIDLock:  # python 3+ 'class Lock'
     """
     @classmethod
     def init(cls):
-        from ovos_config.meta import get_xdg_base
-        from ovos_utils.file_utils import get_temp_path
         cls.DIRECTORY = cls.DIRECTORY or get_temp_path(get_xdg_base())
     #
     # Class constants

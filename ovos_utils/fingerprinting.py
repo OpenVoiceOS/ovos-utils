@@ -4,6 +4,7 @@ from enum import Enum
 from os.path import join, isfile
 from ovos_utils.system import is_installed, is_running_from_module, has_screen, \
     get_desktop_environment, search_mycroft_core_location, is_process_running
+from ovos_utils.configuration import read_mycroft_config
 
 
 class MycroftPlatform(str, Enum):
@@ -27,8 +28,7 @@ def detect_platform():
 
 def get_config_fingerprint(config=None):
     if not config:
-        from ovos_config.config import Configuration
-        config = Configuration()
+        config = read_mycroft_config()
     conf = config
     listener_conf = conf.get("listener", {})
     skills_conf = conf.get("skills", {})
