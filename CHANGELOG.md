@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a6...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a7...HEAD)
+
+**Merged pull requests:**
+
+- Update input device checks [\#81](https://github.com/OpenVoiceOS/ovos-utils/pull/81) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.31a7](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.31a7) (2023-04-10)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a6...V0.0.31a7)
 
 **Merged pull requests:**
 
