@@ -1,7 +1,10 @@
+from typing import Optional, Union
+
 import time
 from collections import namedtuple
 from enum import IntEnum
 from os.path import join
+# from ovos_bus_client import MessageBusClient
 
 from ovos_utils import resolve_ovos_resource_file, resolve_resource_file
 from ovos_utils.log import LOG
@@ -9,28 +12,40 @@ from ovos_utils.messagebus import wait_for_reply, get_mycroft_bus, Message
 from ovos_utils.system import is_installed, has_screen, is_process_running
 
 
-def can_display():
-    return has_screen()
+def can_display() -> bool:
+    """
+    Return true if a display is available
+    """
+    return bool(has_screen())
 
 
-def is_gui_installed():
+def is_gui_installed() -> bool:
+    """
+    Return true if a GUI application is installed
+    """
     return is_installed("mycroft-gui-app") or \
            is_installed("ovos-shell") or \
            is_installed("mycroft-embedded-shell") or \
            is_installed("plasmashell")
 
 
-def is_gui_running():
+def is_gui_running() -> bool:
+    """
+    Return true if a GUI application is running
+    """
     return is_process_running("mycroft-gui-app") or \
-           is_process_running("ovos-shell") or \
-           is_process_running("mycroft-embedded-shell") or \
-           is_process_running("plasmashell")
+        is_process_running("ovos-shell") or \
+        is_process_running("mycroft-embedded-shell") or \
+        is_process_running("plasmashell")
 
 
-def is_gui_connected(bus=None):
-    # bus api for https://github.com/MycroftAI/mycroft-core/pull/2682
-    # send "gui.status.request"
-    # receive "gui.status.request.response"
+def is_gui_connected(bus=None) -> bool:
+    """
+    Check if a GUI is connected to the MessageBus.
+    sends "gui.status.request" and waits for "gui.status.request.response"
+    @param bus: MessageBusClient to use for query
+    @return: True if GUI is connected
+    """
     response = wait_for_reply("gui.status.request",
                               "gui.status.request.response", bus=bus)
     if response:
@@ -38,24 +53,43 @@ def is_gui_connected(bus=None):
     return False
 
 
-def can_use_local_gui():
+def can_use_local_gui() -> bool:
+    """
+    Returns True if a local GUI is available to connect to
+    """
     if can_display() and is_gui_installed() and is_gui_running():
         return True
     return False
 
 
-def can_use_gui(bus=None, local=False):
+def can_use_gui(bus=None,
+                local: bool = False) -> bool:
+    """
+    Check if a GUI is available to connect to
+    @param bus: MessageBusClient to use for query
+    @param local: If True, only check for a GUI on the local host
+    @return: True if a GUI is available
+    """
     if local:
         return can_use_local_gui()
     return can_use_local_gui() or is_gui_connected(bus)
 
-def extend_about_data(about_data, bus=None):
+
+def extend_about_data(about_data: Union[list, dict],
+                      bus=None):
+    """
+    Add more information to the "About" section in the GUI.
+    @param about_data: list of dict key, val information to add to the GUI
+    @param bus: MessageBusClient object to emit update on
+    """
     bus = bus or get_mycroft_bus()
     if isinstance(about_data, list):
-        bus.emit(Message("smartspeaker.extension.extend.about", {"display_list": about_data}))
+        bus.emit(Message("smartspeaker.extension.extend.about",
+                         {"display_list": about_data}))
     elif isinstance(about_data, dict):
         display_list = [about_data]
-        bus.emit(Message("smartspeaker.extension.extend.about", {"display_list": display_list}))
+        bus.emit(Message("smartspeaker.extension.extend.about",
+                         {"display_list": display_list}))
     else:
         LOG.error("about_data is not a list or dictionary")
 
@@ -435,8 +469,10 @@ class GUITracker:
 
 
 class _GUIDict(dict):
-    """ this is an helper dictionay subclass, it ensures that value changed
-    in it are propagated to the GUI service real time"""
+    """
+    This is a helper dictionary subclass. It ensures that values changed
+    in it are propagated to the GUI service in real time.
+    """
     def __init__(self, gui, **kwargs):
         self.gui = gui
         super().__init__(**kwargs)
@@ -966,11 +1002,3 @@ class GUIInterface:
             self.release()
             for event, handler in self._events:
                 self.bus.remove(event, handler)
-
-
-if __name__ == "__main__":
-    from ovos_utils import wait_for_exit_signal
-
-    LOG.set_level("DEBUG")
-    g = GUITracker()
-    wait_for_exit_signal()

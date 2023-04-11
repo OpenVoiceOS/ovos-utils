@@ -150,6 +150,7 @@ def is_mycroft_core():
     except ImportError:
         return False
 
+
 def is_vanilla_mycroft_core():
     return is_mycroft_core() and not is_ovos()
 

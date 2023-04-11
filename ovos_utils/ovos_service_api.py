@@ -172,6 +172,7 @@ class OvosOmdb:
         r = requests.post(url, data=reqdata, headers=self.headers)
         return r.json()
 
+
 class OvosGeolocate:
     def __init__(self):
         pass
@@ -193,6 +194,7 @@ class OvosGeolocate:
         url = f'https://api.openvoiceos.com/geolocate/location/config'
         r = requests.post(url, data=reqdata)
         return r.json()
+
 
 class OvosSendMail:
     def __init__(self):

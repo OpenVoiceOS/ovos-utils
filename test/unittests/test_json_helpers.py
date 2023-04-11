@@ -6,12 +6,18 @@ from ovos_utils.json_helper import merge_dict, is_compatible_dict,\
 
 
 class TestJsonHelpers(unittest.TestCase):
-    @classmethod
-    def setUpClass(self):
-        self.base_dict = {"one": 1, "two": 2, "three": 3,
-                          "four": ["foo", "bar", "baz"], "five": 50}
-        self.delta_dict = {"two": 2, "three": 30,
-                           "four": [4, 5, 6, "foo"], "five": None}
+    base_dict = {"one": 1, "two": 2, "three": 3,
+                 "four": ["foo", "bar", "baz"], "five": 50}
+    delta_dict = {"two": 2, "three": 30,
+                  "four": [4, 5, 6, "foo"], "five": None}
+
+    def test_load_commented_json(self):
+        from ovos_utils.json_helper import load_commented_json
+        # TODO
+
+    def test_uncomment_json(self):
+        from ovos_utils.json_helper import uncomment_json
+        # TODO
 
     def test_invert_dict(self):
         dct = {'a': 1, 'b': "d"}

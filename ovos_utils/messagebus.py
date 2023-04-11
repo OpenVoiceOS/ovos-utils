@@ -12,6 +12,8 @@ from ovos_utils.json_helper import merge_dict
 from ovos_utils.log import LOG
 from ovos_utils.metrics import Stopwatch
 
+# TODO: Consider moving all of this to `ovos_bus_client`
+
 _DEFAULT_WS_CONFIG = {"host": "0.0.0.0",
                       "port": 8181,
                       "route": "/core",
@@ -19,6 +21,9 @@ _DEFAULT_WS_CONFIG = {"host": "0.0.0.0",
 
 
 def dig_for_message():
+    # TODO: Deprecate this wrapped reference in 0.1.0
+    LOG.warning("This reference is deprecated. "
+                "Import from `ovos_bus_client.message` directly")
     try:
         from ovos_bus_client.message import dig_for_message as _dig
         return _dig()

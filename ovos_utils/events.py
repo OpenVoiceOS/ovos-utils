@@ -7,8 +7,9 @@ from ovos_utils.log import LOG
 from ovos_utils.messagebus import Message, FakeBus
 
 
-def unmunge_message(message, skill_id):
-    """Restore message keywords by removing the Letterified skill ID.
+def unmunge_message(message: Message, skill_id: str) -> Message:
+    """
+    Restore message keywords by removing the Letterified skill ID.
     Args:
         message (Message): Intent result message
         skill_id (str): skill identifier
@@ -26,8 +27,9 @@ def unmunge_message(message, skill_id):
     return message
 
 
-def get_handler_name(handler):
-    """Name (including class if available) of handler function.
+def get_handler_name(handler) -> str:
+    """
+    Name (including class if available) of handler function.
 
     Args:
         handler (function): Function to be named
@@ -41,8 +43,9 @@ def get_handler_name(handler):
         return handler.__name__
 
 
-def create_wrapper(handler, skill_id, on_start, on_end, on_error):
-    """Create the default skill handler wrapper.
+def create_wrapper(handler, skill_id, on_start, on_end, on_error) -> callable:
+    """
+    Create the default skill handler wrapper.
 
     This wrapper handles things like metrics, reporting handler start/stop
     and errors.
@@ -77,7 +80,7 @@ def create_wrapper(handler, skill_id, on_start, on_end, on_error):
     return wrapper
 
 
-def create_basic_wrapper(handler, on_error=None):
+def create_basic_wrapper(handler, on_error=None) -> callable:
     """Create the default skill handler wrapper.
 
     This wrapper handles things like metrics, reporting handler start/stop
