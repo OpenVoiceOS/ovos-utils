@@ -5,7 +5,6 @@ from os.path import join
 from pathlib import Path
 
 from ovos_utils.bracket_expansion import expand_options
-from ovos_utils.configuration import read_mycroft_config
 from ovos_utils.file_utils import resolve_resource_file
 from ovos_utils.lang import translate_word
 from ovos_utils.log import LOG
@@ -146,9 +145,14 @@ def get_dialog(phrase, lang=None, context=None):
 
     if not lang:
         try:
+            from ovos_config.config import read_mycroft_config
             conf = read_mycroft_config()
             lang = conf.get('lang')
+        except ImportError:
+            LOG.warning("Config not provided and ovos_config not available")
+            lang = "en-us"
         except FileNotFoundError:
+            LOG.warning("Configuration file not found, default lang to 'en-us'")
             lang = "en-us"
 
     filename = join('text', lang.lower(), phrase + '.dialog')

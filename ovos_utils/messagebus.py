@@ -4,7 +4,7 @@ from copy import deepcopy
 from inspect import signature
 from threading import Event
 
-from ovos_utils.configuration import read_mycroft_config, get_default_lang
+# from ovos_utils.configuration import read_mycroft_config, get_default_lang
 from pyee import BaseEventEmitter
 
 from ovos_utils import create_loop
@@ -315,6 +315,7 @@ def get_message_lang(message=None):
     Returns:
         The language code from the message or the default language.
     """
+    from ovos_config.locale import get_default_lang
     message = message or dig_for_message()
     default_lang = get_default_lang()
     if not message:
@@ -340,6 +341,7 @@ def get_mycroft_bus(host: str = None, port: int = None, route: str = None,
     """
     Returns a connection to the mycroft messagebus
     """
+    from ovos_config.config import read_mycroft_config
     config = read_mycroft_config().get('websocket') or dict()
     host = host or config.get('host') or _DEFAULT_WS_CONFIG['host']
     port = port or config.get('port') or _DEFAULT_WS_CONFIG['port']
@@ -742,6 +744,7 @@ class BusFeedProvider:
                 name(str): name identifier for .conf settings
                 bus (WebsocketClient): mycroft messagebus websocket
         """
+        from ovos_config.config import read_mycroft_config
         config = config or read_mycroft_config()
         self.trigger_message = trigger_message
         self.name = name or self.__class__.__name__
@@ -885,7 +888,13 @@ class BusFeedConsumer:
         self.query_message.context["source"] = self.name
         self.name = name or self.__class__.__name__
         self.bus = bus or get_mycroft_bus()
-        config = config or read_mycroft_config()
+        if not config:
+            try:
+                from ovos_config.config import read_mycroft_config
+                config = read_mycroft_config()
+            except ImportError:
+                LOG.warning("Config not provided and ovos_config not available")
+                config = dict()
         self.config = config.get(self.name, {})
         self.timeout = timeout
         self.query = None

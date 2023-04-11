@@ -12,7 +12,6 @@ from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 from ovos_utils.bracket_expansion import expand_options
-from ovos_utils.configuration import read_mycroft_config
 from ovos_utils.log import LOG
 from ovos_utils.system import search_mycroft_core_location
 
@@ -105,7 +104,12 @@ def resolve_resource_file(res_name, root_path=None, config=None):
         str: path to resource or None if no resource found
     """
     if config is None:
-        config = read_mycroft_config()
+        try:
+            from ovos_config.config import read_mycroft_config
+            config = read_mycroft_config()
+        except ImportError:
+            LOG.warning("Config not provided and ovos_config not available")
+            config = dict()
 
     # First look for fully qualified file (e.g. a user setting)
     if os.path.isfile(res_name):

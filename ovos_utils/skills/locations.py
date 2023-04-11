@@ -1,7 +1,8 @@
 from os.path import join, isdir, dirname, expanduser, isfile
 from os import makedirs, listdir
 from typing import List, Optional
-from ovos_utils.configuration import read_mycroft_config, get_xdg_data_save_path, get_xdg_data_dirs
+from ovos_config.config import read_mycroft_config
+from ovos_config.locations import get_xdg_data_save_path, get_xdg_data_dirs
 from ovos_utils.log import LOG
 
 

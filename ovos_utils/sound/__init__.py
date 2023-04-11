@@ -1,15 +1,20 @@
 import os
 import subprocess
 import time
+
 from copy import deepcopy
 from distutils.spawn import find_executable
-
-
-from ovos_utils.configuration import read_mycroft_config
-
 from ovos_utils.file_utils import resolve_resource_file
 from ovos_utils.log import LOG
 from ovos_utils.signal import check_for_signal
+
+try:
+    from ovos_config.config import read_mycroft_config
+except ImportError:
+    LOG.warning("Config not provided and ovos_config not available")
+
+    def read_mycroft_config():
+        return dict()
 
 # Create a custom environment to use that can be ducked by a phone role.
 # This is kept separate from the normal os.environ to ensure that the TTS

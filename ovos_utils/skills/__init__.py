@@ -1,4 +1,4 @@
-from ovos_utils.configuration import read_mycroft_config, update_mycroft_config
+from ovos_config.config import read_mycroft_config, update_mycroft_config
 from ovos_utils.messagebus import wait_for_reply
 from ovos_utils.skills.locations import get_default_skills_directory, get_installed_skill_ids
 from ovos_utils.log import LOG
