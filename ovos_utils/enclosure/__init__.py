@@ -8,7 +8,6 @@ from ovos_utils.log import LOG
 
 class MycroftEnclosures(str, Enum):
     # TODO: Deprecate in 0.1.0
-    LOG.warning("This class is deprecated")
     PICROFT = "picroft"
     BIGSCREEN = "kde"
     OVOS = "OpenVoiceOS"
