@@ -5,10 +5,10 @@ from ovos_utils.messagebus import get_mycroft_bus, Message, dig_for_message
 from ovos_utils.log import LOG
 
 
-def to_alnum(skill_id):
-    """Convert a skill id to only alphanumeric characters
-
-     Non alpha-numeric characters are converted to "_"
+def to_alnum(skill_id: str) -> str:
+    """
+    Convert a skill id to only alphanumeric characters
+     Non-alphanumeric characters are converted to "_"
 
     Args:
         skill_id (str): identifier to be converted
@@ -18,8 +18,9 @@ def to_alnum(skill_id):
     return ''.join(c if c.isalnum() else '_' for c in str(skill_id))
 
 
-def munge_regex(regex, skill_id):
-    """Insert skill id as letters into match groups.
+def munge_regex(regex: str, skill_id: str) -> str:
+    """
+    Insert skill id as letters into match groups.
 
     Args:
         regex (str): regex string
@@ -32,7 +33,8 @@ def munge_regex(regex, skill_id):
 
 
 def munge_intent_parser(intent_parser, name, skill_id):
-    """Rename intent keywords to make them skill exclusive
+    """
+    Rename intent keywords to make them skill exclusive
     This gives the intent parser an exclusive name in the
     format <skill_id>:<name>.  The keywords are given unique
     names in the format <Skill id as letters><Intent name>.
@@ -533,7 +535,9 @@ class IntentQueryApi:
 
 
 def open_intent_envelope(message):
-    """Convert dictionary received over messagebus to Intent."""
+    """
+    Convert dictionary received over messagebus to Intent.
+    """
     # TODO can this method be fully removed from ovos_utils ?
     from adapt.intent import Intent
 

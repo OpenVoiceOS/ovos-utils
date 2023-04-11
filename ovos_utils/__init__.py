@@ -46,6 +46,7 @@ def ensure_mycroft_import():
 
 
 def get_mycroft_root():
+    # TODO: Is this useful anymore?
     paths = [
         "/opt/venvs/mycroft-core/lib/python3.7/site-packages/",  # mark1/2
         "/opt/venvs/mycroft-core/lib/python3.4/site-packages/ ",  # old mark1 installs

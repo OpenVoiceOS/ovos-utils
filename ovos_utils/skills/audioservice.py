@@ -22,10 +22,13 @@ from ovos_utils.log import LOG
 from ovos_utils.messagebus import Message, get_mycroft_bus, dig_for_message
 
 
-def ensure_uri(s):
-    """Interprete paths as file:// uri's.
+def ensure_uri(s: str):
+    """
+    Interpret paths as file:// uri's.
+
     Args:
-        s: string to be checked
+        s: string path to be checked
+
     Returns:
         if s is uri, s is returned otherwise file:// is prepended
     """
@@ -34,7 +37,7 @@ def ensure_uri(s):
             return 'file://' + abspath(s)
         else:
             return s
-    elif isinstance(s, (tuple, list)):
+    elif isinstance(s, (tuple, list)):  # TODO: What case is this handling?
         if '://' not in s[0]:
             return 'file://' + abspath(s[0]), s[1]
         else:

@@ -71,6 +71,7 @@ def whitelist_skill(skill, config=None):
 
 
 def make_priority_skill(skill, config=None):
+    # TODO: Priority skills are deprecated
     config = config or read_mycroft_config()
     skills_config = config.get("skills", {})
     priority_skills = skills_config.get("priority_skills", [])

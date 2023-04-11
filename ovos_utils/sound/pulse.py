@@ -155,8 +155,3 @@ class PulseAudio:
         elif volume > 100:
             volume = 100
         self.set_all_volumes_percent(volume)
-
-
-if __name__ == "__main__":
-    p = PulseAudio()
-    print(p.list_sources())

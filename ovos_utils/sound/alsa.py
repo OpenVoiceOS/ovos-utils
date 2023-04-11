@@ -98,29 +98,3 @@ class AlsaControl:
 
     def get_volume_percent(self):
         return self.get_volume()
-
-
-if __name__ == "__main__":
-    from time import sleep
-    a = AlsaControl()
-    a.set_volume(100)
-    sleep(2)
-    print(a.is_muted())
-    a.mute()
-    print(a.is_muted())
-    sleep(2)
-    a.unmute()
-    print(a.is_muted())
-    print(a.get_volume())
-    sleep(2)
-    a.set_volume(50)
-    print(a.get_volume())
-    sleep(2)
-    a.set_volume(70)
-    print(a.get_volume())
-    sleep(2)
-    a.set_volume(10)
-    print(a.get_volume())
-    sleep(2)
-    a.set_volume(80)
-    print(a.get_volume())
