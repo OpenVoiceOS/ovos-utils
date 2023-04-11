@@ -11,17 +11,6 @@ class TestEnclosureAPI(unittest.TestCase):
     # TODO: Test api methods
 
 
-class TestEnclosure(unittest.TestCase):
-    def test_enclosure2rootdir(self):
-        # TODO
-        pass
-
-    @patch("ovos_utils.enclosure.detect_platform")
-    def test_detect_enclosure(self, detect_platform):
-        # TODO
-        pass
-
-
 class TestMark1(unittest.TestCase):
     # TODO should this be removed from ovos-utils?
     pass

@@ -7,14 +7,6 @@ class TestHelpers(unittest.TestCase):
         # TODO
         pass
 
-    def test_ensure_mycroft_import(self):
-        # TODO
-        pass
-
-    def get_mycroft_root(self):
-        # TODO
-        pass
-
     def test_timed_lru_cache(self):
         # TODO
         pass

@@ -37,7 +37,7 @@ def ensure_uri(s: str):
             return 'file://' + abspath(s)
         else:
             return s
-    elif isinstance(s, (tuple, list)):  # TODO: What case is this handling?
+    elif isinstance(s, (tuple, list)):  # Handle (mime, uri) arg
         if '://' not in s[0]:
             return 'file://' + abspath(s[0]), s[1]
         else:
