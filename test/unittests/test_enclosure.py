@@ -12,5 +12,5 @@ class TestEnclosureAPI(unittest.TestCase):
 
 
 class TestMark1(unittest.TestCase):
-    # TODO should this be removed from ovos-utils?
+    # TODO Implement tests or move to separate PHAL plugin
     pass
