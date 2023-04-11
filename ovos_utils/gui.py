@@ -55,7 +55,8 @@ def is_gui_connected(bus=None) -> bool:
 
 def can_use_local_gui() -> bool:
     """
-    Returns True if a local GUI is available to connect to
+    Returns True if a local GUI is installed and running (does not check if the
+    GUI is connected to an accessible GUI service).
     """
     if can_display() and is_gui_installed() and is_gui_running():
         return True
