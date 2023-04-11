@@ -9,6 +9,9 @@ class AlsaControl:
     _mixer = None
 
     def __init__(self, control=None):
+        # TODO: Deprecate class in 0.1
+        LOG.warning(f"This class is deprecated! Controls moved to"
+                    f"ovos_phal_plugin_alsa.AlsaVolumeControlPlugin")
         if alsaaudio is None:
             LOG.error("pyalsaaudio not installed")
             LOG.info("Run pip install pyalsaaudio==0.8.2")
