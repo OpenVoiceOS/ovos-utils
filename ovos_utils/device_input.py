@@ -11,7 +11,7 @@ class InputDeviceHelper:
         if not find_executable("libinput") and not find_executable("xinput"):
             LOG.warning("Could not find libinput, input device detection will be inaccurate")
 
-    # ToDo: add support for discovring the input device based of a connected
+    # ToDo: add support for discovering the input device based of a connected
     # monitors, currently linux only supports input listing directly from the
     # system
     def _build_linput_devices_list(self):
@@ -138,8 +138,3 @@ def can_use_touch_mouse():
 
 def can_use_keyboard():
     return InputDeviceHelper().can_use_keyboard()
-
-
-if __name__ == "__main__":
-
-    can_use_touch_mouse()
