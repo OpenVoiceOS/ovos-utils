@@ -85,8 +85,11 @@ class TestAlsaControl(unittest.TestCase):
 
 @unittest.skip("Skip Pulse Audio tests")
 class TestPulseAudio(unittest.TestCase):
-    from ovos_utils.sound.pulse import PulseAudio
-    controller = PulseAudio()
+    try:
+        from ovos_utils.sound.pulse import PulseAudio
+        controller = PulseAudio()
+    except:
+        pass
 
     def test_list_sources(self):
         self.assertIsInstance(self.controller.list_sources(), list)
