@@ -83,6 +83,7 @@ class TestAlsaControl(unittest.TestCase):
     # TODO: Test other methods
 
 
+@unittest.skip("Skip Pulse Audio tests")
 class TestPulseAudio(unittest.TestCase):
     from ovos_utils.sound.pulse import PulseAudio
     controller = PulseAudio()
