@@ -48,11 +48,16 @@ class LOG:
     @classmethod
     def init(cls, config=None):
 
-        from ovos_utils.configuration import get_xdg_base
+        try:
+            from ovos_config.meta import get_xdg_base
+            default_base = get_xdg_base()
+        except ImportError:
+            default_base = "mycroft"
         from ovos_utils.xdg_utils import xdg_state_home
 
         config = config or {}
-        cls.base_path = config.get("path") or f"{xdg_state_home()}/{get_xdg_base()}"
+        cls.base_path = config.get("path") or \
+            f"{xdg_state_home()}/{default_base}"
         cls.max_bytes = config.get("max_bytes", 50000000)
         cls.backup_count = config.get("backup_count", 3)
         cls.level = config.get("level", "INFO")
@@ -147,7 +152,7 @@ def init_service_logger(service_name):
     # this is makes all logs from this service be configured to write to service_name.log file
     # if this is not called in every __main__.py entrypoint logs will be written
     # to a generic OVOS.log file shared across all services
-    from ovos_utils.configuration import read_mycroft_config
+    from ovos_config.config import read_mycroft_config
 
     _cfg = read_mycroft_config()
     _log_level = _cfg.get("log_level", "INFO")

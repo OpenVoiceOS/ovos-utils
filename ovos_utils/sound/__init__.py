@@ -5,7 +5,7 @@ from copy import deepcopy
 from distutils.spawn import find_executable
 
 
-from ovos_utils.configuration import read_mycroft_config
+from ovos_config.config import read_mycroft_config
 
 from ovos_utils.file_utils import resolve_resource_file
 from ovos_utils.log import LOG

@@ -4,7 +4,6 @@ import requests
 
 
 from ovos_utils.log import LOG
-from ovos_utils.configuration import read_mycroft_config
 
 
 _DEFAULT_TEST_CONFIG = {
@@ -20,7 +19,12 @@ _DEFAULT_TEST_CONFIG = {
 
 def get_network_tests_config():
     """Get network_tests object from mycroft.configuration."""
-    config = read_mycroft_config()
+    try:
+        from ovos_config.config import read_mycroft_config
+        config = read_mycroft_config()
+    except ImportError:
+        LOG.warning("ovos_config not available. Falling back to default config")
+        config = dict()
     return config.get("network_tests", _DEFAULT_TEST_CONFIG)
 
 

@@ -24,7 +24,6 @@ from time import sleep, monotonic
 
 
 from ovos_utils.log import LOG
-from ovos_utils.configuration import get_xdg_base
 from ovos_utils.file_utils import get_temp_path
 
 
@@ -293,7 +292,14 @@ class PIDLock:  # python 3+ 'class Lock'
     """
     @classmethod
     def init(cls):
-        cls.DIRECTORY = cls.DIRECTORY or get_temp_path(get_xdg_base())
+        try:
+            from ovos_config.meta import get_xdg_base
+            base_dir = get_xdg_base()
+        except ImportError:
+            LOG.warning("ovos-config not available, using default "
+                        "'mycroft' basedir")
+            base_dir = "mycroft"
+        cls.DIRECTORY = cls.DIRECTORY or get_temp_path(base_dir)
     #
     # Class constants
     DIRECTORY = None

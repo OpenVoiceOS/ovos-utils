@@ -6,7 +6,6 @@ import os.path
 
 
 from ovos_utils.log import LOG
-from ovos_utils.configuration import read_mycroft_config
 
 
 def get_ipc_directory(domain=None, config=None):
@@ -24,7 +23,12 @@ def get_ipc_directory(domain=None, config=None):
         str: a path to the IPC directory
     """
     if config is None:
-        config = read_mycroft_config()
+        try:
+            from ovos_config.config import read_mycroft_config
+            config = read_mycroft_config()
+        except ImportError:
+            LOG.warning("Config not provided and ovos_config not available")
+            config = dict()
     path = config.get("ipc_path")
     if not path:
         # If not defined, use /tmp/mycroft/ipc

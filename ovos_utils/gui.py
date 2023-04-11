@@ -7,7 +7,6 @@ from ovos_utils import resolve_ovos_resource_file, resolve_resource_file
 from ovos_utils.log import LOG
 from ovos_utils.messagebus import wait_for_reply, get_mycroft_bus, Message
 from ovos_utils.system import is_installed, has_screen, is_process_running
-from ovos_utils.configuration import read_mycroft_config
 
 
 def can_display():
@@ -461,7 +460,14 @@ class GUIInterface:
     """
 
     def __init__(self, skill_id, bus=None, remote_server=None, config=None):
-        self.config = config or read_mycroft_config().get("gui", {})
+        if not config:
+            try:
+                from ovos_config.config import read_mycroft_config
+                config = read_mycroft_config().get("gui", {})
+            except ImportError:
+                LOG.warning("Config not provided and ovos_config not available")
+                config = dict()
+        self.config = config
         if remote_server:
             self.config["remote-server"] = remote_server
         self._bus = bus
