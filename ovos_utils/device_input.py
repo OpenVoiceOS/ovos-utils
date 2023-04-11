@@ -138,8 +138,3 @@ def can_use_touch_mouse():
 
 def can_use_keyboard():
     return InputDeviceHelper().can_use_keyboard()
-
-
-if __name__ == "__main__":
-
-    can_use_touch_mouse()
