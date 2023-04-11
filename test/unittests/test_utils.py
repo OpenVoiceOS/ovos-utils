@@ -1,7 +1,5 @@
 import unittest
 
-, , flatten_list
-
 
 class TestHelpers(unittest.TestCase):
 
@@ -43,10 +41,6 @@ class TestHelpers(unittest.TestCase):
             return
 
         self.assertEqual(get_handler_name(some_function), "some_function")
-        self.assertEqual(get_handler_name(self.test_utils), "test_utils")
-
-        self.assertEqual(camel_case_split("MyAwesomeSkill"),
-                         "My Awesome Skill")
 
     def test_camel_case_split(self):
         from ovos_utils import camel_case_split

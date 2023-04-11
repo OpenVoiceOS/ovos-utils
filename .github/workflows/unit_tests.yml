@@ -55,7 +55,7 @@ jobs:
           pip install .[extras]
       - name: Install test dependencies
         run: |
-          pip install pytest pytest-timeout pytest-cov
+          pip install pytest pytest-timeout pytest-cov mock
       - name: Run unittests
         run: |
           pytest --cov=ovos_utils --cov-report xml test/unittests
