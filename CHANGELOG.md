@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a9...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a10...HEAD)
+
+**Merged pull requests:**
+
+- Deprecate internal `ovos_config.config` references [\#122](https://github.com/OpenVoiceOS/ovos-utils/pull/122) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.31a10](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.31a10) (2023-04-11)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a9...V0.0.31a10)
 
 **Fixed bugs:**
 
