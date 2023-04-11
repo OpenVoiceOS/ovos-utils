@@ -127,9 +127,40 @@ class FakeBus:
         self.on_close()
 
 
-# fake Message object to allow usage with FakeBus
-class FakeMessage:
+class _MutableMessage(type):
+    """ To override isinstance checks we need to use a metaclass """
+
+    def __instancecheck__(self, instance):
+        try:
+            from ovos_bus_client.message import Message as _MycroftMessage
+            if isinstance(instance, _MycroftMessage):
+                return True
+        except:
+            pass
+        try:
+            from mycroft_bus_client.message import Message as _MycroftMessage
+            if isinstance(instance, _MycroftMessage):
+                return True
+        except:
+            pass
+        return super().__instancecheck__(instance)
+
+
+# fake Message object to allow usage without ovos-bus-client installed
+class Message(metaclass=_MutableMessage):
     """ fake Message object to allow usage with FakeBus without ovos-bus-client installed"""
+
+    def __new__(cls, *args, **kwargs):
+        try:  # most common case
+            from ovos_bus_client import Message as _M
+            return _M(*args, **kwargs)
+        except:
+            pass
+        try:  # some old install that upgraded during migration period
+            from mycroft_bus_client import Message as _M
+            return _M(*args, **kwargs)
+        except:  # FakeMessage
+            return super().__new__(cls, *args, **kwargs)
 
     def __init__(self, msg_type, data=None, context=None):
         """Used to construct a message object
@@ -179,7 +210,7 @@ class FakeMessage:
             value(str): This is the string received from the websocket
         """
         obj = json.loads(value)
-        return FakeMessage(obj.get('type') or '',
+        return Message(obj.get('type') or '',
                            obj.get('data') or {},
                            obj.get('context') or {})
 
@@ -198,7 +229,7 @@ class FakeMessage:
             Message: Message object to be used on the reply to the message
         """
         data = data or {}
-        return FakeMessage(msg_type, data, context=self.context)
+        return Message(msg_type, data, context=self.context)
 
     def reply(self, msg_type, data=None, context=None):
         """Construct a reply message for a given message
@@ -232,7 +263,7 @@ class FakeMessage:
             s = new_context['destination']
             new_context['destination'] = new_context['source']
             new_context['source'] = s
-        return FakeMessage(msg_type, data, context=new_context)
+        return Message(msg_type, data, context=new_context)
 
     def response(self, data=None, context=None):
         """Construct a response message for the message
@@ -270,15 +301,11 @@ class FakeMessage:
         if 'target' in new_context:
             del new_context['target']
 
-        return FakeMessage(msg_type, data, context=new_context)
+        return Message(msg_type, data, context=new_context)
 
 
-# patch for utils below
-try:
-    from ovos_bus_client.message import Message
-except ImportError:
-    LOG.warning("ovos-bus-client not installed")
-    Message = FakeMessage
+# compat
+FakeMessage = Message
 
 
 def get_message_lang(message=None):
