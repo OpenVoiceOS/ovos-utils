@@ -44,8 +44,16 @@ class TestAudioservice(unittest.TestCase):
         # self.assertEqual(ensure_uri(rel_uri),
         #                  f"file://{join(dirname(__file__), 'test')}")
 
+    def test_classic_audio_service_interface(self):
+        from ovos_utils.skills.audioservice import ClassicAudioServiceInterface
+        # TODO
+
     def test_audio_service_interface(self):
         from ovos_utils.skills.audioservice import AudioServiceInterface
+        # TODO
+
+    def test_ocp_interface(self):
+        from ovos_utils.skills.audioservice import OCPInterface
         # TODO
 
 
