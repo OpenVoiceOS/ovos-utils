@@ -1,4 +1,5 @@
 import socket
+from typing import Optional
 
 import requests
 
@@ -28,8 +29,11 @@ def get_network_tests_config():
     return config.get("network_tests", _DEFAULT_TEST_CONFIG)
 
 
-def get_ip():
-    # taken from https://stackoverflow.com/a/28950776/13703283
+def get_ip() -> str:
+    """
+    Get the local IPv4 address of this device
+    taken from https://stackoverflow.com/a/28950776/13703283
+    """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         # doesn't even have to be reachable
@@ -43,12 +47,18 @@ def get_ip():
 
 
 def get_external_ip():
+    """
+    Get the public IPv4 address of this device
+    """
     cfg = get_network_tests_config()
-    return requests.get(cfg.get("ip_url") or _DEFAULT_TEST_CONFIG['ip_url']).text
+    return requests.get(cfg.get("ip_url") or
+                        _DEFAULT_TEST_CONFIG['ip_url']).text
 
 
-def is_connected_dns(host=None, port=53, timeout=3):
-    """Check internet connection by connecting to DNS servers
+def is_connected_dns(host: Optional[str] = None, port: int = 53,
+                     timeout: int = 3) -> bool:
+    """
+    Check internet connection by connecting to DNS servers
     Returns:
         True if internet connection can be detected
     """
@@ -69,15 +79,18 @@ def is_connected_dns(host=None, port=53, timeout=3):
     return False
 
 
-def is_connected_http(host=None):
-    """Check internet connection by connecting to some website
+def is_connected_http(host: Optional[str] = None) -> bool:
+    """
+    Check internet connection by connecting to some website
     Returns:
         True if connection attempt succeeded
     """
     if host is None:
         cfg = get_network_tests_config()
-        return is_connected_http(cfg.get("web_url") or _DEFAULT_TEST_CONFIG['web_url']) or \
-            is_connected_http(cfg.get("web_url_secondary") or _DEFAULT_TEST_CONFIG['web_url_secondary'])
+        return is_connected_http(cfg.get("web_url") or
+                                 _DEFAULT_TEST_CONFIG['web_url']) or \
+            is_connected_http(cfg.get("web_url_secondary") or
+                              _DEFAULT_TEST_CONFIG['web_url_secondary'])
 
     try:
         status = requests.head(host).status_code
@@ -87,12 +100,18 @@ def is_connected_http(host=None):
     return False
 
 
-def is_connected():
+def is_connected() -> bool:
+    """
+    Return True if any connection check (DNS or HTTP) is True
+    """
     return any((is_connected_dns(), is_connected_http()))
 
 
-def check_captive_portal(host=None, expected_text=None) -> bool:
-    """Returns True if a captive portal page is detected"""
+def check_captive_portal(host: Optional[str] = None,
+                         expected_text: Optional[str] = None) -> bool:
+    """
+    Returns True if a captive portal page is detected
+    """
     captive_portal = False
 
     if not host or not expected_text:

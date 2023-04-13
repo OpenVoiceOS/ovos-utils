@@ -304,7 +304,6 @@ class PIDLock:  # python 3+ 'class Lock'
     # Class constants
     DIRECTORY = None
     FILE = '/{}.pid'
-    LOG.info(f"Create PIDLock in: {DIRECTORY}")
 
     #
     # Constructor

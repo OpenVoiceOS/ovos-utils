@@ -2,11 +2,11 @@ from ovos_utils.messagebus import Message, get_mycroft_bus
 from ovos_utils.log import LOG
 from time import sleep
 
-LOG.error(f"This module is deprecated, import from `ovos_workshop.skills.layers")
-
 
 class IntentLayers:
     def __init__(self, bus=None, layers=None):
+        # TODO: Deprecate in 0.1.0
+        LOG.error(f"This module is deprecated, import from `ovos_workshop.skills.layers")
         layers = layers or []
         self.bus = bus or get_mycroft_bus()
         # make intent levels for N layers

@@ -9,6 +9,9 @@ class AlsaControl:
     _mixer = None
 
     def __init__(self, control=None):
+        # TODO: Deprecate class in 0.1
+        LOG.warning(f"This class is deprecated! Controls moved to"
+                    f"ovos_phal_plugin_alsa.AlsaVolumeControlPlugin")
         if alsaaudio is None:
             LOG.error("pyalsaaudio not installed")
             LOG.info("Run pip install pyalsaaudio==0.8.2")
@@ -98,29 +101,3 @@ class AlsaControl:
 
     def get_volume_percent(self):
         return self.get_volume()
-
-
-if __name__ == "__main__":
-    from time import sleep
-    a = AlsaControl()
-    a.set_volume(100)
-    sleep(2)
-    print(a.is_muted())
-    a.mute()
-    print(a.is_muted())
-    sleep(2)
-    a.unmute()
-    print(a.is_muted())
-    print(a.get_volume())
-    sleep(2)
-    a.set_volume(50)
-    print(a.get_volume())
-    sleep(2)
-    a.set_volume(70)
-    print(a.get_volume())
-    sleep(2)
-    a.set_volume(10)
-    print(a.get_volume())
-    sleep(2)
-    a.set_volume(80)
-    print(a.get_volume())

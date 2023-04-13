@@ -11,6 +11,7 @@ from os.path import expanduser, exists, join
 from ovos_utils.log import LOG
 
 
+# TODO: Deprecate MycroftRootLocations in 0.1.0
 class MycroftRootLocations(str, Enum):
     PICROFT = "/home/pi/mycroft-core"
     BIGSCREEN = "/home/mycroft/mycroft-core"

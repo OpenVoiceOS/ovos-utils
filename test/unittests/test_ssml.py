@@ -3,10 +3,8 @@ from ovos_utils.ssml import SSMLBuilder
 
 
 class TestSSMLhelpers(unittest.TestCase):
-    @classmethod
-    def setUpClass(self):
-        self.base_utterance = "this is a test of Open Voice OS SSML utils"
-        self.base_utterance2 = "creating ssml for usage with text to speech"
+    base_utterance = "this is a test of Open Voice OS SSML utils"
+    base_utterance2 = "creating ssml for usage with text to speech"
 
     def test_init_flags(self):
         self.assertEqual(

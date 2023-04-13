@@ -12,6 +12,51 @@ except ImportError:
     ovos_config = None
 
 
+class TestSkills(unittest.TestCase):
+    def test_get_non_properties(self):
+        from ovos_utils.skills import get_non_properties
+        # TODO
+
+    def test_skills_loaded(self):
+        from ovos_utils.skills import skills_loaded
+        # TODO
+
+    @patch("ovos_utils.skills.update_mycroft_config")
+    def test_blacklist_skill(self, update_config):
+        from ovos_utils.skills import blacklist_skill
+        # TODO
+
+    @patch("ovos_utils.skills.update_mycroft_config")
+    def test_whitelist_skill(self, update_config):
+        from ovos_utils.skills import whitelist_skill
+        # TODO
+
+
+class TestAudioservice(unittest.TestCase):
+    def test_ensure_uri(self):
+        from ovos_utils.skills.audioservice import ensure_uri
+        valid_uri = "file:///test"
+        non_uri = "/test"
+        # rel_uri = "test"
+        self.assertEqual(ensure_uri(valid_uri), valid_uri)
+        self.assertEqual(ensure_uri(non_uri), valid_uri)
+        # TODO: Relative path is relative to method and not caller?
+        # self.assertEqual(ensure_uri(rel_uri),
+        #                  f"file://{join(dirname(__file__), 'test')}")
+
+    def test_classic_audio_service_interface(self):
+        from ovos_utils.skills.audioservice import ClassicAudioServiceInterface
+        # TODO
+
+    def test_audio_service_interface(self):
+        from ovos_utils.skills.audioservice import AudioServiceInterface
+        # TODO
+
+    def test_ocp_interface(self):
+        from ovos_utils.skills.audioservice import OCPInterface
+        # TODO
+
+
 class TestLocations(unittest.TestCase):
     @patch("ovos_utils.skills.locations.get_plugin_skills")
     def test_get_installed_skill_ids(self, plugins):

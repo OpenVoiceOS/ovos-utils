@@ -3,6 +3,7 @@ import random
 import re
 from os.path import join
 from pathlib import Path
+from typing import Optional
 
 from ovos_utils.bracket_expansion import expand_options
 from ovos_utils.file_utils import resolve_resource_file
@@ -103,12 +104,15 @@ class MustacheDialogRenderer:
         return line
 
 
-def load_dialogs(dialog_dir, renderer=None):
-    """Load all dialog files within the specified directory.
+def load_dialogs(dialog_dir: str,
+                 renderer: Optional[MustacheDialogRenderer] = None) -> \
+        MustacheDialogRenderer:
+    """
+    Load all dialog files within the specified directory.
 
     Args:
         dialog_dir (str): directory that contains dialog files
-
+        renderer (MustacheDialogRenderer): instance to load files with
     Returns:
         a loaded instance of a dialog renderer
     """
@@ -128,8 +132,10 @@ def load_dialogs(dialog_dir, renderer=None):
     return renderer
 
 
-def get_dialog(phrase, lang=None, context=None):
-    """Looks up a resource file for the given phrase.
+def get_dialog(phrase: str, lang: str = None,
+               context: Optional[dict] = None) -> str:
+    """
+    Looks up a resource file for the given phrase.
 
     If no file is found, the requested phrase is returned as the string. This
     will use the default language for translations.
@@ -168,8 +174,10 @@ def get_dialog(phrase, lang=None, context=None):
     return stache.render('template', context)
 
 
-def join_list(items, connector, sep=None, lang=''):
-    """ Join a list into a phrase using the given connector word
+def join_list(items: list, connector: str, sep: Optional[str] = None,
+              lang: Optional[str] = '') -> str:
+    """
+    Join a list into a phrase using the given connector word
     Examples:
         join_list([1,2,3], "and") ->  "1, 2 and 3"
         join_list([1,2,3], "and", ";") ->  "1; 2 and 3"

@@ -1,7 +1,8 @@
 import re
+from typing import List
 
 
-def expand_parentheses(sent):
+def expand_parentheses(sent: List[str]) -> List[str]:
     """
     ['1', '(', '2', '|', '3, ')'] -> [['1', '2'], ['1', '3']]
     For example:

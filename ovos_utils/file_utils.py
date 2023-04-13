@@ -3,6 +3,8 @@ import csv
 import os
 import re
 import tempfile
+from typing import Optional, List
+
 import time
 from os import walk
 from os.path import dirname
@@ -16,8 +18,9 @@ from ovos_utils.log import LOG
 from ovos_utils.system import search_mycroft_core_location
 
 
-def get_temp_path(*args):
-    """Generate a valid path in the system temp directory.
+def get_temp_path(*args) -> str:
+    """
+    Generate a valid path in the system temp directory.
 
     This method accepts one or more strings as arguments. The arguments are
     joined and returned as a complete path inside the systems temp directory.
@@ -40,9 +43,13 @@ def get_temp_path(*args):
     return path
 
 
-def get_cache_directory(folder):
-    # optional import to use ram for cache
-    # does not work in windows!
+def get_cache_directory(folder: str) -> str:
+    """
+    Get a temporary cache directory, preferably in RAM.
+    Note that Windows will not use RAM.
+    @param folder: base path to use for cache
+    @return: valid cache path
+    """
     path = get_temp_path(folder)
     if os.name != 'nt':
         try:
@@ -56,8 +63,9 @@ def get_cache_directory(folder):
     return path
 
 
-def resolve_ovos_resource_file(res_name):
-    """Convert a resource into an absolute filename.
+def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
+    """
+    Convert a resource into an absolute filename.
     used internally for ovos resources
     """
     # First look for fully qualified file (e.g. a user setting)
@@ -78,8 +86,10 @@ def resolve_ovos_resource_file(res_name):
     return None  # Resource cannot be resolved
 
 
-def resolve_resource_file(res_name, root_path=None, config=None):
-    """Convert a resource into an absolute filename.
+def resolve_resource_file(res_name: str, root_path: Optional[str] = None,
+                          config: Optional[dict] = None) -> Optional[str]:
+    """
+    Convert a resource into an absolute filename.
 
     Resource names are in the form: 'filename.ext'
     or 'path/filename.ext'
@@ -99,6 +109,7 @@ def resolve_resource_file(res_name, root_path=None, config=None):
 
     Args:
         res_name (str): a resource path/name
+        root_path: Optional root path to check
         config (dict): mycroft.conf, to read data directory from
     Returns:
         str: path to resource or None if no resource found
@@ -134,18 +145,19 @@ def resolve_resource_file(res_name, root_path=None, config=None):
     return None  # Resource cannot be resolved
 
 
-def read_vocab_file(path):
-    """ Read voc file.
+def read_vocab_file(path: str) -> List[List[str]]:
+    """
+    Read voc file.
 
-        This reads a .voc file, stripping out empty lines comments and expand
-        parentheses. It returns each line as a list of all expanded
-        alternatives.
+    This reads a .voc file, stripping out empty lines comments and expand
+    parentheses. It returns each line as a list of all expanded
+    alternatives.
 
-        Args:
-            path (str): path to vocab file.
+    Args:
+        path (str): path to vocab file.
 
-        Returns:
-            List of Lists of strings.
+    Returns:
+        List of Lists of strings.
     """
     vocab = []
     with open(path, 'r', encoding='utf8') as voc_file:
@@ -156,8 +168,9 @@ def read_vocab_file(path):
     return vocab
 
 
-def load_regex_from_file(path, skill_id):
-    """Load regex from file
+def load_regex_from_file(path: str, skill_id: str) -> List[str]:
+    """
+    Load regex from file
     The regex is sent to the intent handler using the message bus
 
     Args:
@@ -185,8 +198,9 @@ def load_regex_from_file(path, skill_id):
     return regexes
 
 
-def load_vocabulary(basedir, skill_id):
-    """Load vocabulary from all files in the specified directory.
+def load_vocabulary(basedir: str, skill_id: str) -> dict:
+    """
+    Load vocabulary from all files in the specified directory.
 
     Args:
         basedir (str): path of directory to load from (will recurse)
@@ -207,13 +221,12 @@ def load_vocabulary(basedir, skill_id):
     return vocabs
 
 
-def load_regex(basedir, skill_id):
-    """Load regex from all files in the specified directory.
+def load_regex(basedir: str, skill_id: str) -> List[List[str]]:
+    """
+    Load regex from all files in the specified directory.
 
     Args:
         basedir (str): path of directory to load from
-        bus (messagebus emitter): messagebus instance used to send the vocab to
-                                  the intent service
         skill_id (str): skill identifier
     """
     regexes = []
@@ -224,8 +237,9 @@ def load_regex(basedir, skill_id):
     return regexes
 
 
-def read_value_file(filename, delim):
-    """Read value file.
+def read_value_file(filename: str, delim: str) -> collections.OrderedDict:
+    """
+    Read value file.
 
     The value file is a simple csv structure with a key and value.
 
@@ -252,8 +266,9 @@ def read_value_file(filename, delim):
     return result
 
 
-def read_translated_file(filename, data):
-    """Read a file inserting data.
+def read_translated_file(filename: str, data: dict) -> Optional[List[str]]:
+    """
+    Read a file inserting data.
 
     Args:
         filename (str): file to read

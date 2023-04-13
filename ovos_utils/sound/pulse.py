@@ -1,6 +1,7 @@
 import subprocess
 import re
 import collections
+from ovos_utils.log import LOG
 
 
 class PulseAudio:
@@ -8,6 +9,9 @@ class PulseAudio:
     mute_re = re.compile('^set-sink-mute ([^ ]+) ((?:yes)|(?:no))')
 
     def __init__(self):
+        # TODO: Deprecate class in 0.1
+        LOG.warning(f"This class is deprecated! Controls moved to"
+                    f"ovos_phal_plugin_pulseaudio.PulseAudioVolumeControlPlugin")
         self._mute = collections.OrderedDict()
         self._volume = collections.OrderedDict()
         self.update()
@@ -155,8 +159,3 @@ class PulseAudio:
         elif volume > 100:
             volume = 100
         self.set_all_volumes_percent(volume)
-
-
-if __name__ == "__main__":
-    p = PulseAudio()
-    print(p.list_sources())

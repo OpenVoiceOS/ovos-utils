@@ -41,20 +41,3 @@ def send_email(subject, body, recipient=None):
               user, recipient,
               subject, body,
               host, port)
-
-
-if __name__ == "__main__":
-    USER = "JarbasAI"
-    YOUR_EMAIL_ADDRESS = "jarbasai@mailfence.com"
-    DESTINATARY_ADDRESS = "casimiro@jarbasai.online"
-    YOUR_PASSWORD = "a very very strong Password1!"
-    HOST = "smtp.mailfence.com"
-    PORT = 465
-
-    subject = 'test again'
-    body = 'this is a test bruh'
-
-    send_email(USER, YOUR_PASSWORD,
-               YOUR_EMAIL_ADDRESS, DESTINATARY_ADDRESS,
-               subject, body,
-               HOST, PORT)

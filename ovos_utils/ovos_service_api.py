@@ -1,10 +1,14 @@
 import requests
 from json_database import JsonStorageXDG
+from ovos_utils.log import LOG
+# TODO: This will be deprecated in v0.1
 
 
 class OVOSApiService:
 
     def __init__(self) -> None:
+        LOG.warning(f"ovos_utils.ovos_service_api is deprecated. "
+                    f"Import from ovos-backend-client")
         self.uuid_storage = JsonStorageXDG("ovos_api_uuid")
         self.token_storage = JsonStorageXDG("ovos_api_token")
 
@@ -172,8 +176,11 @@ class OvosOmdb:
         r = requests.post(url, data=reqdata, headers=self.headers)
         return r.json()
 
+
 class OvosGeolocate:
     def __init__(self):
+        LOG.warning(f"This reference is deprecated. "
+                    f"Import from ovos-backend-client")
         pass
 
     def geolocate_ip(self, ip):
@@ -193,6 +200,7 @@ class OvosGeolocate:
         url = f'https://api.openvoiceos.com/geolocate/location/config'
         r = requests.post(url, data=reqdata)
         return r.json()
+
 
 class OvosSendMail:
     def __init__(self):

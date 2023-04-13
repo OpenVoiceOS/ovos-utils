@@ -71,18 +71,21 @@ def whitelist_skill(skill, config=None):
 
 
 def make_priority_skill(skill, config=None):
-    config = config or read_mycroft_config()
-    skills_config = config.get("skills", {})
-    priority_skills = skills_config.get("priority_skills", [])
-    if skill not in priority_skills:
-        priority_skills.append(skill)
-        conf = {
-            "skills": {
-                "priority_skills": priority_skills
-            }
-        }
-        update_mycroft_config(conf)
-        return True
+    # TODO: Deprecate in 0.1.0
+    LOG.warning("This method is deprecated. Skills are now loaded based on "
+                "`runtime_requirements`")
+    # config = config or read_mycroft_config()
+    # skills_config = config.get("skills", {})
+    # priority_skills = skills_config.get("priority_skills", [])
+    # if skill not in priority_skills:
+    #     priority_skills.append(skill)
+    #     conf = {
+    #         "skills": {
+    #             "priority_skills": priority_skills
+    #         }
+    #     }
+    #     update_mycroft_config(conf)
+    #     return True
     return False
 
 
