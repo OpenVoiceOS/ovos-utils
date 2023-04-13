@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import List, Union
 
 import time
 from collections import namedtuple
@@ -12,6 +12,14 @@ from ovos_utils.messagebus import wait_for_reply, get_mycroft_bus, Message
 from ovos_utils.system import is_installed, has_screen, is_process_running
 
 
+_default_gui_apps = (
+    "mycroft-gui-app",
+    "ovos-shell",
+    "mycroft-embedded-shell",
+    "plasmashell"
+)
+
+
 def can_display() -> bool:
     """
     Return true if a display is available
@@ -19,24 +27,20 @@ def can_display() -> bool:
     return bool(has_screen())
 
 
-def is_gui_installed() -> bool:
+def is_gui_installed(applications: List[str] = _default_gui_apps) -> bool:
     """
     Return true if a GUI application is installed
+    @param applications: list of applications to check for
     """
-    return is_installed("mycroft-gui-app") or \
-           is_installed("ovos-shell") or \
-           is_installed("mycroft-embedded-shell") or \
-           is_installed("plasmashell")
+    return any((is_installed(app) for app in applications))
 
 
-def is_gui_running() -> bool:
+def is_gui_running(applications: List[str] = _default_gui_apps) -> bool:
     """
     Return true if a GUI application is running
+    @param applications: list of applications to check for
     """
-    return is_process_running("mycroft-gui-app") or \
-        is_process_running("ovos-shell") or \
-        is_process_running("mycroft-embedded-shell") or \
-        is_process_running("plasmashell")
+    return any((is_process_running(app) for app in applications))
 
 
 def is_gui_connected(bus=None) -> bool:

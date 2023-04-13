@@ -26,6 +26,10 @@ class TestGui(unittest.TestCase):
         self.assertTrue(is_gui_installed())
         is_installed.assert_called_with("mycroft-gui-app")
 
+        # Test passed applications
+        self.assertTrue(is_gui_installed(["test"]))
+        is_installed.assert_called_with("test")
+
     @patch("ovos_utils.gui.is_process_running")
     def test_is_gui_running(self, is_running):
         from ovos_utils.gui import is_gui_running
@@ -38,6 +42,10 @@ class TestGui(unittest.TestCase):
         is_running.return_value = True
         self.assertTrue(is_gui_running())
         is_running.assert_called_with("mycroft-gui-app")
+
+        # Test passed applications
+        self.assertTrue(is_gui_running(["test"]))
+        is_running.assert_called_with("test")
 
     def test_is_gui_connected(self):
         from ovos_utils.gui import is_gui_connected

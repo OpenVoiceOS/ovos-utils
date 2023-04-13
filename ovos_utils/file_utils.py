@@ -46,7 +46,7 @@ def get_temp_path(*args) -> str:
 def get_cache_directory(folder: str) -> str:
     """
     Get a temporary cache directory, preferably in RAM.
-    This method is not compatible with Windows!
+    Note that Windows will not use RAM.
     @param folder: base path to use for cache
     @return: valid cache path
     """
