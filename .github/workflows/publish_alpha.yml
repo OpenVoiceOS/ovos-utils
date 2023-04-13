@@ -31,6 +31,8 @@ jobs:
       update_changelog: True
       branch: dev
   build_and_publish:
+    if: False
+    # TODO: Remove test patch above
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

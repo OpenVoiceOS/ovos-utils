@@ -6,6 +6,8 @@ on:
 
 jobs:
   github_release:
+    if: false
+    # TODO: Remove test patch above
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
