@@ -28,6 +28,8 @@ jobs:
       build_var: VERSION_BUILD
       minor_var: VERSION_MINOR
       major_var: VERSION_MAJOR
+      update_changelog: True
+      branch: dev
   build_and_publish:
     runs-on: ubuntu-latest
     steps:
@@ -47,11 +49,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
         id: changelog
-      - name: Commit to dev
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Increment Version
-          branch: dev
       - name: version
         run: echo "::set-output name=version::$(python setup.py --version)"
         id: version
