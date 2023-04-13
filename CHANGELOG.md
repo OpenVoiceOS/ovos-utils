@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a11...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a12...HEAD)
+
+**Fixed bugs:**
+
+- \[log\] Only creates directory if not stdout [\#125](https://github.com/OpenVoiceOS/ovos-utils/pull/125) ([goldyfruit](https://github.com/goldyfruit))
+
+## [V0.0.31a12](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.31a12) (2023-04-12)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a11...V0.0.31a12)
 
 **Merged pull requests:**
 
