@@ -62,7 +62,6 @@ class LOG:
         cls.backup_count = config.get("backup_count", 3)
         cls.level = config.get("level", "INFO")
         cls.diagnostic_mode = config.get("diagnostic", False)
-        os.makedirs(cls.base_path, exist_ok=True)
 
     @classmethod
     def create_logger(cls, name, tostdout=True):
@@ -77,6 +76,7 @@ class LOG:
             logger.addHandler(stdout_handler)
         # log to file
         if cls.base_path != "stdout":
+            os.makedirs(cls.base_path, exist_ok=True)
             path = join(cls.base_path,
                         cls.name.lower().strip() + ".log")
             handler = RotatingFileHandler(path, maxBytes=cls.max_bytes,
