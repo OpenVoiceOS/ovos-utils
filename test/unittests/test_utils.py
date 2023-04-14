@@ -1,4 +1,8 @@
+import signal
 import unittest
+from os.path import join, dirname
+from sys import executable
+from subprocess import Popen, TimeoutExpired
 
 
 class TestHelpers(unittest.TestCase):
@@ -24,11 +28,22 @@ class TestHelpers(unittest.TestCase):
         pass
 
     def test_wait_for_exit_signal(self):
-        # TODO
-        pass
+        test_file = join(dirname(__file__), "scripts", "wait_for_exit.py")
+        wait_thread = Popen([executable, test_file])
+
+        # No return
+        with self.assertRaises(TimeoutExpired):
+            wait_thread.communicate(timeout=1)
+        with self.assertRaises(TimeoutExpired):
+            wait_thread.communicate(timeout=1)
+
+        # Send interrupt and get returncode 0
+        wait_thread.send_signal(signal.SIGINT)
+        self.assertEqual(wait_thread.wait(1), 0)
 
     def test_get_handler_name(self):
         from ovos_utils import get_handler_name
+
         def some_function():
             return
 

@@ -14,7 +14,7 @@ import datetime
 import re
 from functools import lru_cache, wraps
 from os.path import isdir, join
-from threading import Thread
+from threading import Thread, Event
 from time import monotonic_ns
 from time import sleep
 
@@ -141,8 +141,7 @@ def create_loop(target, interval, args=(), kwargs=None):
 def wait_for_exit_signal():
     """Blocks until KeyboardInterrupt is received"""
     try:
-        while True:
-            sleep(100)
+        Event().wait()
     except KeyboardInterrupt:
         pass
 
