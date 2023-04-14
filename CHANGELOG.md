@@ -2,7 +2,19 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a13...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a14...HEAD)
+
+**Closed issues:**
+
+- Is there an option to disable the log file creation [\#124](https://github.com/OpenVoiceOS/ovos-utils/issues/124)
+
+**Merged pull requests:**
+
+- Stable extra dependencies [\#127](https://github.com/OpenVoiceOS/ovos-utils/pull/127) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.31a14](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.31a14) (2023-04-13)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a13...V0.0.31a14)
 
 **Merged pull requests:**
 
