@@ -23,6 +23,7 @@ jobs:
       branch: dev
 
   pull_changes:
+    needs: update_version
     uses: neongeckocom/.github/.github/workflows/pull_master.yml@master
     with:
       pr_assignee: ${{ github.actor }}
