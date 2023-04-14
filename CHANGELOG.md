@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a14...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a15...HEAD)
+
+**Implemented enhancements:**
+
+- Update `wait_for_exit_signal` to use Event.wait instead of looped sleep [\#128](https://github.com/OpenVoiceOS/ovos-utils/pull/128) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.31a15](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.31a15) (2023-04-14)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a14...V0.0.31a15)
 
 **Closed issues:**
 
