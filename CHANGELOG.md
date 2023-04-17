@@ -1,8 +1,16 @@
 # Changelog
 
-## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
+## [0.0.31a17](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.31a17) (2023-04-17)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a15...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a16...0.0.31a17)
+
+**Merged pull requests:**
+
+- Update release automation [\#126](https://github.com/OpenVoiceOS/ovos-utils/pull/126) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.31a16](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.31a16) (2023-04-14)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a15...V0.0.31a16)
 
 **Implemented enhancements:**
 
@@ -706,10 +714,6 @@
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.17a6...V0.0.19a2)
 
-**Breaking changes:**
-
-- Refactor/remove deprecated [\#11](https://github.com/OpenVoiceOS/ovos-utils/pull/11) ([JarbasAl](https://github.com/JarbasAl))
-
 **Merged pull requests:**
 
 - Fix/package workflow [\#32](https://github.com/OpenVoiceOS/ovos-utils/pull/32) ([JarbasAl](https://github.com/JarbasAl))
@@ -738,49 +742,22 @@
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.0.12...V0.0.17a4)
 
-**Implemented enhancements:**
-
-- Feat/diagnostic mode [\#18](https://github.com/OpenVoiceOS/ovos-utils/pull/18) ([NeonJarbas](https://github.com/NeonJarbas))
-- fix/play\_audio [\#14](https://github.com/OpenVoiceOS/ovos-utils/pull/14) ([NeonJarbas](https://github.com/NeonJarbas))
-- Feat/better stop watch [\#10](https://github.com/OpenVoiceOS/ovos-utils/pull/10) ([JarbasAl](https://github.com/JarbasAl))
-- Feat/more file utils [\#9](https://github.com/OpenVoiceOS/ovos-utils/pull/9) ([JarbasAl](https://github.com/JarbasAl))
-- add notification api change and style parameter [\#6](https://github.com/OpenVoiceOS/ovos-utils/pull/6) ([AIIX](https://github.com/AIIX))
-
 **Fixed bugs:**
 
 - Fix/core module detection + refactor xdg config path utils [\#28](https://github.com/OpenVoiceOS/ovos-utils/pull/28) ([NeonJarbas](https://github.com/NeonJarbas))
 - Fix typo in configuration paths [\#27](https://github.com/OpenVoiceOS/ovos-utils/pull/27) ([NeonDaniel](https://github.com/NeonDaniel))
 - Add back colour dependency [\#24](https://github.com/OpenVoiceOS/ovos-utils/pull/24) ([NeonDaniel](https://github.com/NeonDaniel))
 - Add user config home to `get_xdg_config_dirs` [\#23](https://github.com/OpenVoiceOS/ovos-utils/pull/23) ([NeonDaniel](https://github.com/NeonDaniel))
-- Loosen dependency versions for OVOS image compat [\#16](https://github.com/OpenVoiceOS/ovos-utils/pull/16) ([NeonDaniel](https://github.com/NeonDaniel))
-- Ovos conf [\#12](https://github.com/OpenVoiceOS/ovos-utils/pull/12) ([NeonJarbas](https://github.com/NeonJarbas))
-- fix/update\_enclosure\_api [\#8](https://github.com/OpenVoiceOS/ovos-utils/pull/8) ([JarbasAl](https://github.com/JarbasAl))
-- Fix/nested delete [\#7](https://github.com/OpenVoiceOS/ovos-utils/pull/7) ([JarbasAl](https://github.com/JarbasAl))
-
-**Closed issues:**
-
-- Dependency Version specs [\#13](https://github.com/OpenVoiceOS/ovos-utils/issues/13)
-- dependencies are duplicated  + add version specs  [\#5](https://github.com/OpenVoiceOS/ovos-utils/issues/5)
 
 **Merged pull requests:**
 
 - feat/packaging workflows [\#29](https://github.com/OpenVoiceOS/ovos-utils/pull/29) ([JarbasAl](https://github.com/JarbasAl))
 - Update license\_tests.yml [\#26](https://github.com/OpenVoiceOS/ovos-utils/pull/26) ([NeonJarbas](https://github.com/NeonJarbas))
 - Feat/pypi workflow [\#25](https://github.com/OpenVoiceOS/ovos-utils/pull/25) ([NeonJarbas](https://github.com/NeonJarbas))
-- feat/license tests workflow [\#22](https://github.com/OpenVoiceOS/ovos-utils/pull/22) ([JarbasAl](https://github.com/JarbasAl))
-- refactor/replace\_pyxdg [\#21](https://github.com/OpenVoiceOS/ovos-utils/pull/21) ([NeonJarbas](https://github.com/NeonJarbas))
-- refactor/bump\_requests [\#20](https://github.com/OpenVoiceOS/ovos-utils/pull/20) ([NeonJarbas](https://github.com/NeonJarbas))
-- refactor/deprecate\_inflection [\#19](https://github.com/OpenVoiceOS/ovos-utils/pull/19) ([NeonJarbas](https://github.com/NeonJarbas))
-- Refactor requirements to read from files [\#15](https://github.com/OpenVoiceOS/ovos-utils/pull/15) ([NeonDaniel](https://github.com/NeonDaniel))
 
 ## [0.0.12](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.12) (2021-11-04)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/25fe462e3c19a58f32dc1fd940bf7c96fc18e6de...0.0.12)
-
-**Implemented enhancements:**
-
-- release0.0.12/extract get\_local\_settings and save\_settings from core [\#4](https://github.com/OpenVoiceOS/ovos-utils/pull/4) ([JarbasAl](https://github.com/JarbasAl))
-- Adds checked path to log that root config path was not found [\#3](https://github.com/OpenVoiceOS/ovos-utils/pull/3) ([NeonDaniel](https://github.com/NeonDaniel))
 
 
 
