@@ -147,7 +147,7 @@ class _MutableMessage(type):
 
 
 # fake Message object to allow usage without ovos-bus-client installed
-class Message(metaclass=_MutableMessage):
+class FakeMessage(metaclass=_MutableMessage):
     """ fake Message object to allow usage with FakeBus without ovos-bus-client installed"""
 
     def __new__(cls, *args, **kwargs):
@@ -205,12 +205,12 @@ class Message(metaclass=_MutableMessage):
             value(str): This is the json string received from the websocket
 
         Returns:
-            Message: message object constructed from the json string passed
+            FakeMessage: message object constructed from the json string passed
             int the function.
             value(str): This is the string received from the websocket
         """
         obj = json.loads(value)
-        return Message(obj.get('type') or '',
+        return FakeMessage(obj.get('type') or '',
                            obj.get('data') or {},
                            obj.get('context') or {})
 
@@ -226,10 +226,10 @@ class Message(metaclass=_MutableMessage):
             data (dict): data for message
 
         Returns:
-            Message: Message object to be used on the reply to the message
+            FakeMessage: Message object to be used on the reply to the message
         """
         data = data or {}
-        return Message(msg_type, data, context=self.context)
+        return FakeMessage(msg_type, data, context=self.context)
 
     def reply(self, msg_type, data=None, context=None):
         """Construct a reply message for a given message
@@ -249,7 +249,7 @@ class Message(metaclass=_MutableMessage):
             context: intended context for new message
 
         Returns:
-            Message: Message object to be used on the reply to the message
+            FakeMessage: Message object to be used on the reply to the message
         """
         data = deepcopy(data) or {}
         context = context or {}
@@ -263,7 +263,7 @@ class Message(metaclass=_MutableMessage):
             s = new_context['destination']
             new_context['destination'] = new_context['source']
             new_context['source'] = s
-        return Message(msg_type, data, context=new_context)
+        return FakeMessage(msg_type, data, context=new_context)
 
     def response(self, data=None, context=None):
         """Construct a response message for the message
@@ -291,7 +291,7 @@ class Message(metaclass=_MutableMessage):
             context: context added to existing context
 
         Returns:
-            Message: Message object to publish
+            FakeMessage: Message object to publish
         """
         context = context or {}
         new_context = self.context.copy()
@@ -301,11 +301,14 @@ class Message(metaclass=_MutableMessage):
         if 'target' in new_context:
             del new_context['target']
 
-        return Message(msg_type, data, context=new_context)
+        return FakeMessage(msg_type, data, context=new_context)
 
 
-# compat
-FakeMessage = Message
+class Message(FakeMessage):
+    def __int__(self, *args, **kwargs):
+        LOG.warning(f"This reference is deprecated, import from "
+                    f"`ovos_bus_client.message` directly")
+        FakeMessage.__init__(self, *args, **kwargs)
 
 
 def get_message_lang(message=None):
@@ -391,7 +394,7 @@ def wait_for_reply(message, reply_type=None, timeout=3.0, bus=None):
     """Send a message and wait for a response.
 
     Args:
-        message (Message or str or dict): message object or type to send
+        message (FakeMessage or str or dict): message object or type to send
         reply_type (str): the message type of the expected reply.
                           Defaults to "<message.type>.response".
         timeout: seconds to wait before timeout, defaults to 3
@@ -406,12 +409,12 @@ def wait_for_reply(message, reply_type=None, timeout=3.0, bus=None):
         except:
             pass
     if isinstance(message, str):
-        message = Message(message)
+        message = FakeMessage(message)
     elif isinstance(message, dict):
-        message = Message(message["type"],
-                          message.get("data"),
-                          message.get("context"))
-    elif not isinstance(message, Message):
+        message = FakeMessage(message["type"],
+                              message.get("data"),
+                              message.get("context"))
+    elif not isinstance(message, FakeMessage):
         raise ValueError
     response = bus.wait_for_response(message, reply_type, timeout)
     if auto_close:
@@ -424,17 +427,17 @@ def send_message(message, data=None, context=None, bus=None):
     bus = bus or get_mycroft_bus()
     if isinstance(message, str):
         if isinstance(data, dict) or isinstance(context, dict):
-            message = Message(message, data, context)
+            message = FakeMessage(message, data, context)
         else:
             try:
                 message = json.loads(message)
             except:
-                message = Message(message)
+                message = FakeMessage(message)
     if isinstance(message, dict):
-        message = Message(message["type"],
-                          message.get("data"),
-                          message.get("context"))
-    if not isinstance(message, Message):
+        message = FakeMessage(message["type"],
+                              message.get("data"),
+                              message.get("context"))
+    if not isinstance(message, FakeMessage):
         raise ValueError
     bus.emit(message)
     if auto_close:
@@ -494,7 +497,7 @@ def to_alnum(skill_id):
 def unmunge_message(message, skill_id):
     """Restore message keywords by removing the Letterified skill ID.
     Args:
-        message (Message): Intent result message
+        message (FakeMessage): Intent result message
         skill_id (str): skill identifier
     Returns:
         Message without clear keywords
@@ -789,7 +792,7 @@ class BusFeedProvider:
         else:
             response_type = self.trigger_message + ".reply"
 
-        response = Message(response_type, default_data)
+        response = FakeMessage(response_type, default_data)
         self.service = BusService(response, bus=self.bus)
         self.callback = callback
         self.bus.on(self.trigger_message, self._respond)
@@ -836,7 +839,7 @@ class BusQuery:
     def __init__(self, message, bus=None):
         self.bus = bus or get_mycroft_bus()
         self._waiting = False
-        self.response = Message(None, None, None)
+        self.response = FakeMessage(None, None, None)
         self.query = message
         self.valid_response_types = []
 
@@ -860,7 +863,7 @@ class BusQuery:
         self._waiting = False
 
     def send(self, response_type=None, timeout=10):
-        self.response = Message(None, None, None)
+        self.response = FakeMessage(None, None, None)
         if response_type is None:
             response_type = self.query.type + ".reply"
         self.add_response_type(response_type)
