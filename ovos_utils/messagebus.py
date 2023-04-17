@@ -315,9 +315,13 @@ def get_message_lang(message=None):
     Returns:
         The language code from the message or the default language.
     """
-    from ovos_config.locale import get_default_lang
+    try:
+        from ovos_config.locale import get_default_lang
+        default_lang = get_default_lang()
+    except ImportError:
+        LOG.warning("ovos_config not available. Using default lang en-us")
+        default_lang = "en-us"
     message = message or dig_for_message()
-    default_lang = get_default_lang()
     if not message:
         return default_lang
     lang = message.data.get("lang") or message.context.get("lang") or default_lang
@@ -341,8 +345,12 @@ def get_mycroft_bus(host: str = None, port: int = None, route: str = None,
     """
     Returns a connection to the mycroft messagebus
     """
-    from ovos_config.config import read_mycroft_config
-    config = read_mycroft_config().get('websocket') or dict()
+    try:
+        from ovos_config.config import read_mycroft_config
+        config = read_mycroft_config().get('websocket') or dict()
+    except ImportError:
+        LOG.warning("ovos_config not available. Falling back to default WS")
+        config = dict()
     host = host or config.get('host') or _DEFAULT_WS_CONFIG['host']
     port = port or config.get('port') or _DEFAULT_WS_CONFIG['port']
     route = route or config.get('route') or _DEFAULT_WS_CONFIG['route']

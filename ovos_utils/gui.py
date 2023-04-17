@@ -502,6 +502,9 @@ class GUIInterface:
 
     def __init__(self, skill_id, bus=None, remote_server=None, config=None):
         if not config:
+            LOG.warning(f"Expected a dict config and got None. This config"
+                        f"fallback behavior will be deprecated in a future "
+                        f"release")
             try:
                 from ovos_config.config import read_mycroft_config
                 config = read_mycroft_config().get("gui", {})

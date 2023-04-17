@@ -87,7 +87,7 @@ def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
 
 
 def resolve_resource_file(res_name: str, root_path: Optional[str] = None,
-                          config: Optional[dict] = None) -> Optional[str]:
+                          config: dict = None) -> Optional[str]:
     """
     Convert a resource into an absolute filename.
 
@@ -115,6 +115,8 @@ def resolve_resource_file(res_name: str, root_path: Optional[str] = None,
         str: path to resource or None if no resource found
     """
     if config is None:
+        LOG.warning(f"Expected a dict config and got None. This config"
+                    f"fallback behavior will be deprecated in a future release")
         try:
             from ovos_config.config import read_mycroft_config
             config = read_mycroft_config()

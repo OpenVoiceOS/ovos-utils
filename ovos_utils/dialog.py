@@ -135,7 +135,7 @@ def load_dialogs(dialog_dir: str,
 def get_dialog(phrase: str, lang: str = None,
                context: Optional[dict] = None) -> str:
     """
-    Looks up a resource file for the given phrase.
+    Looks up a resource file for the given phrase in the specified language.
 
     If no file is found, the requested phrase is returned as the string. This
     will use the default language for translations.
@@ -150,6 +150,8 @@ def get_dialog(phrase: str, lang: str = None,
     """
 
     if not lang:
+        LOG.warning(f"Expected a string lang and got None. This config"
+                    f"fallback behavior will be deprecated in a future release")
         try:
             from ovos_config.config import read_mycroft_config
             conf = read_mycroft_config()
