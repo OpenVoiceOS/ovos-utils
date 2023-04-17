@@ -752,8 +752,17 @@ class BusFeedProvider:
                 name(str): name identifier for .conf settings
                 bus (WebsocketClient): mycroft messagebus websocket
         """
-        from ovos_config.config import read_mycroft_config
-        config = config or read_mycroft_config()
+        if not config:
+            LOG.warning(f"Expected a dict config and got None. This config"
+                        f"fallback behavior will be deprecated in a future "
+                        f"release")
+            try:
+                from ovos_config.config import read_mycroft_config
+                config = read_mycroft_config()
+            except ImportError:
+                LOG.warning("ovos_config not available. Falling back to "
+                            "default configuration")
+                config = dict()
         self.trigger_message = trigger_message
         self.name = name or self.__class__.__name__
         self.bus = bus or get_mycroft_bus()
