@@ -2,7 +2,7 @@ import time
 
 from ovos_utils.intents.intent_service_interface import IntentQueryApi
 from ovos_utils.log import LOG
-from ovos_utils.messagebus import Message
+from ovos_utils.messagebus import FakeMessage as Message
 
 
 class ConverseTracker:

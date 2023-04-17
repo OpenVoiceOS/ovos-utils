@@ -19,7 +19,8 @@ from datetime import timedelta
 from os.path import abspath
 
 from ovos_utils.log import LOG
-from ovos_utils.messagebus import Message, get_mycroft_bus, dig_for_message
+from ovos_utils.messagebus import get_mycroft_bus, dig_for_message, \
+    FakeMessage as Message
 
 
 def ensure_uri(s: str):

@@ -1,4 +1,4 @@
-from ovos_utils.messagebus import Message, get_mycroft_bus
+from ovos_utils.messagebus import get_mycroft_bus, FakeMessage as Message
 from ovos_utils.log import LOG
 from time import sleep
 
