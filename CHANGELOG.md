@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.32](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.32) (2023-04-18)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a18...0.0.32)
+
+**Merged pull requests:**
+
+- Enable release action [\#131](https://github.com/OpenVoiceOS/ovos-utils/pull/131) ([NeonDaniel](https://github.com/NeonDaniel))
+
 ## [V0.0.31a18](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.31a18) (2023-04-18)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a17...V0.0.31a18)
