@@ -1,5 +1,9 @@
 # Changelog
 
+## [V0.0.31a18](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.31a18) (2023-04-18)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a17...V0.0.31a18)
+
 ## [V0.0.31a17](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.31a17) (2023-04-17)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.31a16...V0.0.31a17)
