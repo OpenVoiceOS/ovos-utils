@@ -152,9 +152,12 @@ def init_service_logger(service_name):
     # this is makes all logs from this service be configured to write to service_name.log file
     # if this is not called in every __main__.py entrypoint logs will be written
     # to a generic OVOS.log file shared across all services
-    from ovos_config.config import read_mycroft_config
-
-    _cfg = read_mycroft_config()
+    try:
+        from ovos_config.config import read_mycroft_config
+        _cfg = read_mycroft_config()
+    except ImportError:
+        LOG.warning("ovos_config not available. Falling back to defaults")
+        _cfg = dict()
     _log_level = _cfg.get("log_level", "INFO")
     _logs_conf = _cfg.get("logs") or {}
     _logs_conf["level"] = _log_level

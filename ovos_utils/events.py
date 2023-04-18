@@ -4,7 +4,7 @@ from inspect import signature
 
 from ovos_utils.intents.intent_service_interface import to_alnum
 from ovos_utils.log import LOG
-from ovos_utils.messagebus import Message, FakeBus
+from ovos_utils.messagebus import FakeBus, FakeMessage as Message
 
 
 def unmunge_message(message: Message, skill_id: str) -> Message:
