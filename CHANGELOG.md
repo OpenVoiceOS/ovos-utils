@@ -1,8 +1,8 @@
 # Changelog
 
-## [0.0.33a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a1) (2023-04-24)
+## [V0.0.33a1](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.33a1) (2023-04-24)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.32...0.0.33a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.32...V0.0.33a1)
 
 **Implemented enhancements:**
 
