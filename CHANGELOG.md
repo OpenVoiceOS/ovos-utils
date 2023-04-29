@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.33a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a3) (2023-04-29)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a2...0.0.33a3)
+
+**Fixed bugs:**
+
+- fix/core\_root\_location [\#134](https://github.com/OpenVoiceOS/ovos-utils/pull/134) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.33a2](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.33a2) (2023-04-24)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a1...V0.0.33a2)
+
 ## [V0.0.33a1](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.33a1) (2023-04-24)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.32...V0.0.33a1)
