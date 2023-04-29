@@ -72,17 +72,44 @@ def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
     if os.path.isfile(res_name):
         return res_name
 
-    # now look in bundled ovos resources
+    # now look in bundled ovos-utils resources
     filename = join(dirname(__file__), "res", res_name)
     if os.path.isfile(filename):
         return filename
 
-    # let's look in mycroft/ovos-core if it's installed
-    path = search_mycroft_core_location()
-    if path:
-        filename = join(path, "mycroft", "res", res_name)
+    # let's look in ovos_workshop if it's installed
+    # (default skill resources live here)
+    try:
+        import ovos_workshop
+        core_root = dirname(ovos_workshop.__file__)
+        filename = join(core_root, "res", res_name)
         if os.path.isfile(filename):
             return filename
+    except:
+        pass
+
+    # let's look in ovos_gui if it's installed
+    # (default GUI resources live here)
+    try:
+        import ovos_gui
+        core_root = dirname(ovos_gui.__file__)
+        filename = join(core_root, "res", res_name)
+        if os.path.isfile(filename):
+            return filename
+    except:
+        pass
+
+    # let's look in mycroft/ovos-core if it's installed
+    # (default core resources live here / backwards compat)
+    try:
+        import mycroft
+        core_root = dirname(mycroft.__file__)
+        filename = join(core_root, "res", res_name)
+        if os.path.isfile(filename):
+            return filename
+    except:
+        pass
+
     return None  # Resource cannot be resolved
 
 
