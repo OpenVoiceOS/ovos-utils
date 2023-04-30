@@ -23,7 +23,7 @@ jobs:
         python -m pip install build wheel
     - name: Install repo
       run: |
-        pip install .
+        pip install .[extras]
     - name: Generate coverage report
       run: |
         pip install pytest
