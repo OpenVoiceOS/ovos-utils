@@ -1,5 +1,5 @@
 import unittest
-from mock import patch, call
+from unittest.mock import patch, call
 
 
 class TestGui(unittest.TestCase):

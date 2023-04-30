@@ -1,8 +1,5 @@
 import unittest
 
-from mock import mock, patch
-from ovos_utils.messagebus import FakeBus
-
 
 class TestIntent(unittest.TestCase):
     from ovos_utils.intents import Intent
