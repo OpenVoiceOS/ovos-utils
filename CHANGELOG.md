@@ -1,8 +1,25 @@
 # Changelog
 
-## [0.0.33a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a3) (2023-04-29)
+## [0.0.33a4](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a4) (2023-05-01)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a2...0.0.33a3)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a3...0.0.33a4)
+
+**Fixed bugs:**
+
+- fix/new\_bug [\#138](https://github.com/OpenVoiceOS/ovos-utils/pull/138) ([JarbasAl](https://github.com/JarbasAl))
+
+**Closed issues:**
+
+- Moving ovos-bus-client to requirements.txt? [\#137](https://github.com/OpenVoiceOS/ovos-utils/issues/137)
+
+**Merged pull requests:**
+
+- codecov [\#136](https://github.com/OpenVoiceOS/ovos-utils/pull/136) ([JarbasAl](https://github.com/JarbasAl))
+- codecov automation [\#135](https://github.com/OpenVoiceOS/ovos-utils/pull/135) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.33a3](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.33a3) (2023-04-29)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a2...V0.0.33a3)
 
 **Fixed bugs:**
 
