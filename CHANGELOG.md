@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.33a4](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a4) (2023-05-01)
+## [0.0.33a5](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a5) (2023-05-01)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a3...0.0.33a4)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a4...0.0.33a5)
+
+**Implemented enhancements:**
+
+- feat/skill\_api [\#139](https://github.com/OpenVoiceOS/ovos-utils/pull/139) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.33a4](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.33a4) (2023-05-01)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a3...V0.0.33a4)
 
 **Fixed bugs:**
 
