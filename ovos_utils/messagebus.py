@@ -160,7 +160,7 @@ class FakeMessage(metaclass=_MutableMessage):
             from mycroft_bus_client import Message as _M
             return _M(*args, **kwargs)
         except:  # FakeMessage
-            return super().__new__(cls, *args, **kwargs)
+            return super().__new__(cls)
 
     def __init__(self, msg_type, data=None, context=None):
         """Used to construct a message object
