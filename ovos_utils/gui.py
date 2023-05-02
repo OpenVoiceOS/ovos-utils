@@ -784,7 +784,7 @@ class GUIInterface:
         contents = []
         for p in page_urls:
             if os.path.isfile(p):
-                with open(p, "w") as f:
+                with open(p, "r") as f:
                     contents.append((p, f.read()))
         self.bus.emit(Message("gui.page.upload",
                               {"qml_contents": contents,
