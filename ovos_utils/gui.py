@@ -778,7 +778,19 @@ class GUIInterface:
         data.update({'__from': self.skill_id})
         LOG.debug(f"Updating gui data: {data}")
         self.bus.emit(Message("gui.value.set", data))
+
+        # upload qml contents directly to support gui running in different devices
         page_urls = self._pages2uri(page_names)
+        contents = []
+        for p in page_urls:
+            if os.path.isfile(p):
+                with open(p, "w") as f:
+                    contents.append((p, f.read()))
+        self.bus.emit(Message("gui.page.upload",
+                              {"qml_contents": contents,
+                               "__from": self.skill_id}))
+
+        # finally tell gui what to show
         self.bus.emit(Message("gui.page.show",
                               {"page": page_urls,
                                "index": index,
