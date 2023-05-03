@@ -1,16 +1,23 @@
 from datetime import datetime
 from dateutil.tz import gettz, tzlocal
-
-try:
-    from ovos_config.locale import get_default_tz
-    _default_tz = get_default_tz()
-except ImportError:
-    _default_tz = tzlocal()
-
+from typing import Any
 
 # used to calculate timespans
 DAYS_IN_1_YEAR = 365.2425
 DAYS_IN_1_MONTH = 30.42
+
+
+def get_tz() -> Any:
+    """Get the configured timezone or, if missing, defaults to local timezone
+
+    Returns:
+        Any: timezone
+    """
+    try:
+        from ovos_config.locale import get_config_tz
+        return get_config_tz()
+    except ImportError:
+        return tzlocal()
 
 
 def now_utc() -> datetime:
@@ -31,7 +38,7 @@ def now_local(tz: datetime.tzinfo = None) -> datetime:
     Returns:
         (datetime): The current time
     """
-    tz = tz or _default_tz
+    tz = tz or get_tz()
     return datetime.now(tz)
 
 
@@ -45,7 +52,7 @@ def to_utc(dt: datetime) -> datetime:
     """
     tz = gettz("UTC")
     if not dt.tzinfo:
-        dt = dt.replace(tzinfo=_default_tz)
+        dt = dt.replace(tzinfo=get_tz())
     return dt.astimezone(tz)
 
 
@@ -57,9 +64,9 @@ def to_local(dt: datetime) -> datetime:
     Returns:
         (datetime): time converted to the local timezone
     """
-    tz = get_default_tz()
+    tz = get_tz()
     if not dt.tzinfo:
-        dt = dt.replace(tzinfo=_default_tz)
+        dt = dt.replace(tzinfo=get_tz())
     return dt.astimezone(tz)
 
 
@@ -73,7 +80,7 @@ def to_system(dt: datetime) -> datetime:
     """
     tz = tzlocal()
     if not dt.tzinfo:
-        dt = dt.replace(tzinfo=_default_tz)
+        dt = dt.replace(tzinfo=get_tz())
     return dt.astimezone(tz)
 
 
