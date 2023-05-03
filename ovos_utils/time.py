@@ -1,6 +1,11 @@
 from datetime import datetime
 from dateutil.tz import gettz, tzlocal
-from ovos_config.locale import get_default_tz
+
+try:
+    from ovos_config.locale import get_default_tz
+    _default_tz = get_default_tz()
+except ImportError:
+    _default_tz = tzlocal()
 
 
 # used to calculate timespans
@@ -26,7 +31,7 @@ def now_local(tz: datetime.tzinfo = None) -> datetime:
     Returns:
         (datetime): The current time
     """
-    tz = tz or get_default_tz()
+    tz = tz or _default_tz
     return datetime.now(tz)
 
 
@@ -40,7 +45,7 @@ def to_utc(dt: datetime) -> datetime:
     """
     tz = gettz("UTC")
     if not dt.tzinfo:
-        dt = dt.replace(tzinfo=get_default_tz())
+        dt = dt.replace(tzinfo=_default_tz)
     return dt.astimezone(tz)
 
 
@@ -54,7 +59,7 @@ def to_local(dt: datetime) -> datetime:
     """
     tz = get_default_tz()
     if not dt.tzinfo:
-        dt = dt.replace(tzinfo=get_default_tz())
+        dt = dt.replace(tzinfo=_default_tz)
     return dt.astimezone(tz)
 
 
@@ -68,7 +73,7 @@ def to_system(dt: datetime) -> datetime:
     """
     tz = tzlocal()
     if not dt.tzinfo:
-        dt = dt.replace(tzinfo=get_default_tz())
+        dt = dt.replace(tzinfo=_default_tz)
     return dt.astimezone(tz)
 
 
