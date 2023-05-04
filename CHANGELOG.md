@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.33a5](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a5) (2023-05-01)
+## [0.0.33a6](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a6) (2023-05-04)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a4...0.0.33a5)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a5...0.0.33a6)
+
+**Implemented enhancements:**
+
+- port LF time utils [\#141](https://github.com/OpenVoiceOS/ovos-utils/pull/141) ([emphasize](https://github.com/emphasize))
+
+## [V0.0.33a5](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.33a5) (2023-05-01)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a4...V0.0.33a5)
 
 **Implemented enhancements:**
 
