@@ -7,15 +7,15 @@ DAYS_IN_1_YEAR = 365.2425
 DAYS_IN_1_MONTH = 30.42
 
 
-def get_tz() -> Any:
+def get_config_tz() -> Any:
     """Get the configured timezone or, if missing, defaults to local timezone
 
     Returns:
         Any: timezone
     """
     try:
-        from ovos_config.locale import get_config_tz
-        return get_config_tz()
+        from ovos_config.locale import get_config_tz as _get_config_tz
+        return _get_config_tz()
     except ImportError:
         return tzlocal()
 
@@ -38,7 +38,7 @@ def now_local(tz: datetime.tzinfo = None) -> datetime:
     Returns:
         (datetime): The current time
     """
-    tz = tz or get_tz()
+    tz = tz or get_config_tz()
     return datetime.now(tz)
 
 
@@ -52,7 +52,7 @@ def to_utc(dt: datetime) -> datetime:
     """
     tz = gettz("UTC")
     if not dt.tzinfo:
-        dt = dt.replace(tzinfo=get_tz())
+        dt = dt.replace(tzinfo=get_config_tz())
     return dt.astimezone(tz)
 
 
@@ -64,9 +64,9 @@ def to_local(dt: datetime) -> datetime:
     Returns:
         (datetime): time converted to the local timezone
     """
-    tz = get_tz()
+    tz = get_config_tz()
     if not dt.tzinfo:
-        dt = dt.replace(tzinfo=get_tz())
+        dt = dt.replace(tzinfo=get_config_tz())
     return dt.astimezone(tz)
 
 
@@ -80,7 +80,7 @@ def to_system(dt: datetime) -> datetime:
     """
     tz = tzlocal()
     if not dt.tzinfo:
-        dt = dt.replace(tzinfo=get_tz())
+        dt = dt.replace(tzinfo=get_config_tz())
     return dt.astimezone(tz)
 
 
