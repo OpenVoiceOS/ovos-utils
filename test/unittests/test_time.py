@@ -26,7 +26,6 @@ class TestTimeUtils(unittest.TestCase):
     @patch("ovos_config.locale.get_config_tz")
     def test_get_tz_user_config(self, mock_tz):
         mock_tz.return_value = gettz("Africa/Johannesburg")
-        #conf = user_location_config("Africa/Johannesburg")
         self.assertIn("Johannesburg", get_tz()._filename)
     
     def test_now_utc(self):
