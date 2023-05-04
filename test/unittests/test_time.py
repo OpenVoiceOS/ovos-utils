@@ -4,8 +4,8 @@ from dateutil.tz import tzlocal, tzfile, gettz
 from datetime import datetime, timedelta, timezone
 from mock import patch
 
+from ovos_utils.time import get_config_tz as _get_config_tz
 from ovos_utils.time import (
-    get_tz,
     now_utc,
     now_local,
     to_local,
@@ -19,14 +19,13 @@ from ovos_utils.time import (
 # South Africa has no DST, easier to work with
 class TestTimeUtils(unittest.TestCase):
     def test_get_tz_default_config(self):
-        from ovos_utils.time import get_tz
-        timezone = get_tz()
+        timezone = _get_config_tz()
         self.assertIsInstance(timezone, tzfile)
     
     @patch("ovos_config.locale.get_config_tz")
     def test_get_tz_user_config(self, mock_tz):
         mock_tz.return_value = gettz("Africa/Johannesburg")
-        self.assertIn("Johannesburg", get_tz()._filename)
+        self.assertIn("Johannesburg", _get_config_tz()._filename)
     
     def test_now_utc(self):
         utc_now = now_utc()
