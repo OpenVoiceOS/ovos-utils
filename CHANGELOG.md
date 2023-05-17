@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.33a6](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a6) (2023-05-04)
+## [0.0.33a7](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a7) (2023-05-17)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a5...0.0.33a6)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a6...0.0.33a7)
+
+**Fixed bugs:**
+
+- Configurable skills base directory [\#143](https://github.com/OpenVoiceOS/ovos-utils/pull/143) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.33a6](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.33a6) (2023-05-04)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a5...V0.0.33a6)
 
 **Implemented enhancements:**
 
