@@ -1,8 +1,21 @@
 # Changelog
 
-## [0.0.33a8](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a8) (2023-05-17)
+## [0.0.33a9](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a9) (2023-05-24)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a7...0.0.33a8)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a8...0.0.33a9)
+
+**Implemented enhancements:**
+
+- Enable Log name and level overrides from envvars [\#147](https://github.com/OpenVoiceOS/ovos-utils/pull/147) ([NeonDaniel](https://github.com/NeonDaniel))
+
+**Closed issues:**
+
+- os.env [\#146](https://github.com/OpenVoiceOS/ovos-utils/issues/146)
+- These lines are always showing even if log\_level is set to INFO [\#142](https://github.com/OpenVoiceOS/ovos-utils/issues/142)
+
+## [V0.0.33a8](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.33a8) (2023-05-17)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a7...V0.0.33a8)
 
 **Merged pull requests:**
 
