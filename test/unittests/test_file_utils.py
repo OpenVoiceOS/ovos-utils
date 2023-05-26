@@ -1,5 +1,6 @@
 import unittest
-from os.path import isdir, isfile
+from os.path import isdir, join, dirname
+from unittest.mock import Mock
 
 
 class TestFileUtils(unittest.TestCase):
@@ -50,8 +51,48 @@ class TestFileUtils(unittest.TestCase):
 
     def test_filewatcher(self):
         from ovos_utils.file_utils import FileWatcher
+        test_file = join(dirname(__file__), "test.watch")
         # TODO
 
     def test_file_event_handler(self):
         from ovos_utils.file_utils import FileEventHandler
-        # TODO
+        from watchdog.events import FileCreatedEvent, FileModifiedEvent, FileClosedEvent
+        test_file = join(dirname(__file__), "test.watch")
+        callback = Mock()
+
+        # Test ignore creation callbacks
+        handler = FileEventHandler(test_file, callback, True)
+        handler.on_any_event(FileCreatedEvent(test_file))
+        callback.assert_not_called()
+
+        # Closed before modification (i.e. listener started while file open)
+        handler.on_any_event(FileClosedEvent(test_file))
+        callback.assert_not_called()
+
+        # Modified
+        handler.on_any_event(FileModifiedEvent(test_file))
+        handler.on_any_event(FileModifiedEvent(test_file))
+        callback.assert_not_called()
+        # Closed triggers callback
+        handler.on_any_event(FileClosedEvent(test_file))
+        callback.assert_called_once()
+        # Second close won't trigger callback
+        handler.on_any_event(FileClosedEvent(test_file))
+        callback.assert_called_once()
+
+        # Test include creation callbacks
+        callback.reset_mock()
+        handler = FileEventHandler(test_file, callback, False)
+        handler.on_any_event(FileCreatedEvent(test_file))
+        callback.assert_not_called()
+
+        # Modified
+        handler.on_any_event(FileModifiedEvent(test_file))
+        handler.on_any_event(FileModifiedEvent(test_file))
+        callback.assert_not_called()
+        # Closed triggers callback
+        handler.on_any_event(FileClosedEvent(test_file))
+        callback.assert_called_once()
+        # Second close won't trigger callback
+        handler.on_any_event(FileClosedEvent(test_file))
+        callback.assert_called_once()

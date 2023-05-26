@@ -3,6 +3,7 @@ import csv
 import os
 import re
 import tempfile
+from threading import RLock
 from typing import Optional, List
 
 import time
@@ -333,7 +334,14 @@ class FileWatcher:
 
 
 class FileEventHandler(FileSystemEventHandler):
-    def __init__(self, file_path, callback, ignore_creation=False):
+    def __init__(self, file_path: str, callback: callable,
+                 ignore_creation: bool = False):
+        """
+        Create a handler for file change events
+        @param file_path: file_path being watched Unused(?)
+        @param callback: function or method to call on file change
+        @param ignore_creation: if True, only track file modification events
+        """
         super().__init__()
         self._callback = callback
         self._file_path = file_path
@@ -342,18 +350,22 @@ class FileEventHandler(FileSystemEventHandler):
         else:
             self._events = ('created', 'modified')
         self._changed_files = []
+        self._lock = RLock()
 
     def on_any_event(self, event):
         if event.is_directory:
             return
-        elif event.event_type == "closed":
-            if event.src_path in self._changed_files:
-                self._changed_files.remove(event.src_path)
-                # fire event, it is now safe
-                try:
-                    self._callback(event.src_path)
-                except:
-                    LOG.exception("An error occurred handling file change event callback")
+        with self._lock:
+            if event.event_type == "closed":
+                if event.src_path in self._changed_files:
+                    self._changed_files.remove(event.src_path)
+                    # fire event, it is now safe
+                    try:
+                        self._callback(event.src_path)
+                    except:
+                        LOG.exception("An error occurred handling file "
+                                      "change event callback")
 
-        elif event.event_type in self._events:
-            self._changed_files.append(event.src_path)
+            elif event.event_type in self._events:
+                if event.src_path not in self._changed_files:
+                    self._changed_files.append(event.src_path)
