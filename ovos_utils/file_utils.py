@@ -319,7 +319,10 @@ class FileWatcher:
         self.observer = Observer()
         self.handlers = []
         for file_path in files:
-            watch_dir = dirname(file_path)
+            if os.path.isfile(file_path):
+                watch_dir = dirname(file_path)
+            else:
+                watch_dir = file_path
             self.observer.schedule(FileEventHandler(file_path, callback, ignore_creation),
                                    watch_dir, recursive=recursive)
         self.observer.start()
@@ -334,18 +337,23 @@ class FileEventHandler(FileSystemEventHandler):
         super().__init__()
         self._callback = callback
         self._file_path = file_path
-        self._debounce = 1
-        self._last_update = 0
         if ignore_creation:
             self._events = ('modified')
         else:
             self._events = ('created', 'modified')
+        self._changed_files = []
 
     def on_any_event(self, event):
         if event.is_directory:
             return
-        elif event.event_type in self._events:
-            if event.src_path == self._file_path:
-                if time.time() - self._last_update >= self._debounce:
+        elif event.event_type == "closed":
+            if event.src_path in self._changed_files:
+                self._changed_files.remove(event.src_path)
+                # fire event, it is now safe
+                try:
                     self._callback(event.src_path)
-                    self._last_update = time.time()
+                except:
+                    LOG.exception("An error occurred handling file change event callback")
+
+        elif event.event_type in self._events:
+            self._changed_files.append(event.src_path)
