@@ -1,8 +1,20 @@
 # Changelog
 
-## [0.0.33a9](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a9) (2023-05-24)
+## [0.0.33a10](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a10) (2023-05-29)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a8...0.0.33a9)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a9...0.0.33a10)
+
+**Fixed bugs:**
+
+- fix/filewatcher [\#148](https://github.com/OpenVoiceOS/ovos-utils/pull/148) ([JarbasAl](https://github.com/JarbasAl))
+
+**Closed issues:**
+
+- OVOS-Cookbook link goes nowhere useful [\#150](https://github.com/OpenVoiceOS/ovos-utils/issues/150)
+
+## [V0.0.33a9](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.33a9) (2023-05-24)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a8...V0.0.33a9)
 
 **Implemented enhancements:**
 
