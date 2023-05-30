@@ -316,7 +316,15 @@ def read_translated_file(filename: str, data: dict) -> Optional[List[str]]:
 
 
 class FileWatcher:
-    def __init__(self, files, callback, recursive=False, ignore_creation=False):
+    def __init__(self, files: List[str], callback: callable,
+                 recursive: bool = False, ignore_creation: bool = False):
+        """
+        Initialize a FileWatcher to monitor the specified files for changes
+        @param files: list of paths to monitor for file changes
+        @param callback: Function or method to call when a change is detected
+        @param recursive: If true, recursively include directory contents
+        @param ignore_creation: If true, ignore file creation events
+        """
         self.observer = Observer()
         self.handlers = []
         for file_path in files:
@@ -324,11 +332,15 @@ class FileWatcher:
                 watch_dir = dirname(file_path)
             else:
                 watch_dir = file_path
-            self.observer.schedule(FileEventHandler(file_path, callback, ignore_creation),
+            self.observer.schedule(FileEventHandler(file_path, callback,
+                                                    ignore_creation),
                                    watch_dir, recursive=recursive)
         self.observer.start()
 
     def shutdown(self):
+        """
+        Remove observer scheduled events and stop the observer.
+        """
         self.observer.unschedule_all()
         self.observer.stop()
 
