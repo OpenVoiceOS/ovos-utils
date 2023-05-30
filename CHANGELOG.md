@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.33a10](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a10) (2023-05-29)
+## [0.0.33a11](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a11) (2023-05-30)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a9...0.0.33a10)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a10...0.0.33a11)
+
+**Merged pull requests:**
+
+- loosen pexpect requirement [\#153](https://github.com/OpenVoiceOS/ovos-utils/pull/153) ([mikejgray](https://github.com/mikejgray))
+
+## [V0.0.33a10](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.33a10) (2023-05-29)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a9...V0.0.33a10)
 
 **Fixed bugs:**
 
