@@ -3,6 +3,7 @@ import unittest
 from os import makedirs
 from os.path import isdir, join, dirname
 from threading import Event
+from time import time
 from unittest.mock import Mock
 
 
@@ -61,64 +62,83 @@ class TestFileUtils(unittest.TestCase):
 
         # Test watch directory
         called = Event()
-        callback = Mock(side_effect=called.set)
+        callback = Mock(side_effect=lambda x: called.set())
         watcher = FileWatcher([test_dir], callback)
         with open(test_file, 'w+') as f:
             callback.assert_not_called()
 
         # Called on file close after creation
-        called.wait(3)
+        self.assertTrue(called.wait(3))
         callback.assert_called_once()
         called.clear()
         with open(test_file, 'w+') as f:
             callback.assert_called_once()
         # Called again on file close
-        called.wait(3)
+        self.assertTrue(called.wait(3))
         self.assertEqual(callback.call_count, 2)
 
         # Not called on directory creation
         callback.reset_mock()
         called.clear()
         makedirs(join(test_dir, "new_dir"))
-        called.wait(3)
+        self.assertFalse(called.wait(3))
         callback.assert_not_called()
 
         # Not called on recursive file creation
         with open(join(test_dir, "new_dir", "file.txt"), 'w+') as f:
             callback.assert_not_called()
-        called.wait(3)
+        self.assertFalse(called.wait(3))
         callback.assert_not_called()
 
         watcher.shutdown()
 
         # Test recursive watch
         called = Event()
-        callback = Mock(side_effect=called.set)
+        callback = Mock(side_effect=lambda x: called.set())
         watcher = FileWatcher([test_dir], callback, recursive=True,
                               ignore_creation=True)
         # Called on file change
         with open(join(test_dir, "new_dir", "file.txt"), 'w+') as f:
             callback.assert_not_called()
-        called.wait(3)
+        self.assertTrue(called.wait(3))
         callback.assert_called_once()
 
         # Not called on file creation
         with open(join(test_dir, "new_dir", "new_file.txt"), 'w+') as f:
             callback.assert_called_once()
-        called.wait(3)
+        self.assertTrue(called.wait(3))
         callback.assert_called_once()
 
         watcher.shutdown()
 
         # Test watch single file
         called.clear()
-        callback = Mock(side_effect=called.set)
+        callback = Mock(side_effect=lambda x: called.set())
         watcher = FileWatcher([test_file], callback)
         with open(test_file, 'w+') as f:
             callback.assert_not_called()
         # Called on file close after change
-        called.wait(3)
+        self.assertTrue(called.wait(3))
         callback.assert_called_once()
+        watcher.shutdown()
+
+        # Test changes on callback
+        contents = None
+        changed = Event()
+
+        def _on_change(fp):
+            nonlocal contents
+            self.assertEqual(fp, test_file)
+            with open(fp, 'r') as f:
+                contents = f.read()
+            changed.set()
+
+        watcher = FileWatcher([test_file], _on_change)
+        now_time = time()
+        with open(test_file, 'w') as f:
+            f.write(f"test {now_time}")
+        self.assertTrue(changed.wait(3))
+        self.assertEqual(contents, f"test {now_time}")
         watcher.shutdown()
 
         shutil.rmtree(test_dir)

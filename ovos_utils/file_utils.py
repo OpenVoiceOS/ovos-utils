@@ -321,7 +321,7 @@ class FileWatcher:
         """
         Initialize a FileWatcher to monitor the specified files for changes
         @param files: list of paths to monitor for file changes
-        @param callback: Function or method to call when a change is detected
+        @param callback: function to call on file change with modified file path
         @param recursive: If true, recursively include directory contents
         @param ignore_creation: If true, ignore file creation events
         """
@@ -351,7 +351,7 @@ class FileEventHandler(FileSystemEventHandler):
         """
         Create a handler for file change events
         @param file_path: file_path being watched Unused(?)
-        @param callback: function or method to call on file change
+        @param callback: function to call on file change with modified file path
         @param ignore_creation: if True, only track file modification events
         """
         super().__init__()
