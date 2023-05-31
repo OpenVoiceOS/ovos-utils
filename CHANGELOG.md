@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.33a11](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a11) (2023-05-30)
+## [0.0.33a12](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.33a12) (2023-05-31)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a10...0.0.33a11)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a11...0.0.33a12)
+
+**Merged pull requests:**
+
+- Update docstrings for FileWatcher class and add unit test coverage [\#152](https://github.com/OpenVoiceOS/ovos-utils/pull/152) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.33a11](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.33a11) (2023-05-30)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33a10...V0.0.33a11)
 
 **Merged pull requests:**
 
