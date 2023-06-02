@@ -55,13 +55,13 @@ def get_skill_directories(conf: Optional[dict] = None) -> List[str]:
     # we are still dependent on the mycroft-core structure of skill_id/__init__.py
 
     conf = conf or read_mycroft_config()
-
+    folder = conf["skills"].get("directory") or "skills"
     # load all valid XDG paths
     # NOTE: skills are actually code, but treated as user data!
     # they should be considered applets rather than full applications
     skill_locations = list(reversed(
-        [join(p, "skills") for p in get_xdg_data_dirs() if
-         isdir(join(p, "skills"))]
+        [join(p, folder) for p in get_xdg_data_dirs() if
+         isdir(join(p, folder))]
     ))
 
     # load the default skills folder
@@ -103,6 +103,7 @@ def get_default_skills_directory(conf: Optional[dict] = None) -> str:
     """
     conf = conf or read_mycroft_config()
     path_override = conf["skills"].get("directory_override")
+    folder = conf["skills"].get("directory") or "skills"
 
     # if .conf wants to use a specific path, use it!
     if path_override:
@@ -114,12 +115,12 @@ def get_default_skills_directory(conf: Optional[dict] = None) -> str:
             len(conf["skills"].get("extra_directories")) > 0:
         skills_folder = expanduser(conf["skills"]["extra_directories"][0])
     else:
-        skills_folder = join(get_xdg_data_save_path(), "skills")
+        skills_folder = join(get_xdg_data_save_path(), folder)
     # create folder if needed
     try:
         makedirs(skills_folder, exist_ok=True)
     except PermissionError:  # old style /opt/mycroft/skills not available
-        skills_folder = join(get_xdg_data_save_path(), "skills")
+        skills_folder = join(get_xdg_data_save_path(), folder)
         makedirs(skills_folder, exist_ok=True)
 
     return skills_folder

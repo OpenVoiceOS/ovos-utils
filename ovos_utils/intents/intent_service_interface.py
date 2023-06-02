@@ -250,8 +250,10 @@ class IntentServiceInterface:
             raise ValueError('Filename path must be a string')
         if not exists(filename):
             raise FileNotFoundError(f'Unable to find "{filename}"')
-
+        with open(filename) as f:
+            samples = [_ for _ in f.read().split("\n") if _ and not _.startswith("#")]
         data = {'file_name': filename,
+                "samples": samples,
                 'name': intent_name,
                 'lang': lang}
         msg = dig_for_message() or Message("")
@@ -271,11 +273,14 @@ class IntentServiceInterface:
             raise ValueError('Filename path must be a string')
         if not exists(filename):
             raise FileNotFoundError('Unable to find "{}"'.format(filename))
+        with open(filename) as f:
+            samples = [_ for _ in f.read().split("\n") if _ and not _.startswith("#")]
         msg = dig_for_message() or Message("")
         if "skill_id" not in msg.context:
             msg.context["skill_id"] = self.skill_id
         self.bus.emit(msg.forward('padatious:register_entity',
                                   {'file_name': filename,
+                                   "samples": samples,
                                    'name': entity_name,
                                    'lang': lang}))
 

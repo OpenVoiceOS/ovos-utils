@@ -1,6 +1,5 @@
 import unittest
 
-from mock import patch
 from ovos_utils.messagebus import FakeBus
 
 

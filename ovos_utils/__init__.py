@@ -143,7 +143,7 @@ def wait_for_exit_signal():
     try:
         Event().wait()
     except KeyboardInterrupt:
-        pass
+        LOG.debug(f"Exiting on KeyboardInterrupt")
 
 
 def get_handler_name(handler):

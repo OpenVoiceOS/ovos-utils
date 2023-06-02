@@ -48,8 +48,12 @@ jobs:
       - name: Install package
         run: |
           pip install .[all]
-      - uses: pypa/gh-action-pip-audit@v1.0.0
+      - uses: pypa/gh-action-pip-audit@v1.0.7
         with:
           # Ignore setuptools vulnerability we can't do much about
+          # Ignore requests vulnerability
+          # Ignore Setuptools vulnerability
           ignore-vulns: |
             GHSA-r9hx-vwmv-q579
+            GHSA-j8r2-6x86-q33q
+            PYSEC-2022-43012

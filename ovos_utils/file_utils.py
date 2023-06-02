@@ -3,6 +3,7 @@ import csv
 import os
 import re
 import tempfile
+from threading import RLock
 from typing import Optional, List
 
 import time
@@ -72,17 +73,44 @@ def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
     if os.path.isfile(res_name):
         return res_name
 
-    # now look in bundled ovos resources
+    # now look in bundled ovos-utils resources
     filename = join(dirname(__file__), "res", res_name)
     if os.path.isfile(filename):
         return filename
 
-    # let's look in mycroft/ovos-core if it's installed
-    path = search_mycroft_core_location()
-    if path:
-        filename = join(path, "mycroft", "res", res_name)
+    # let's look in ovos_workshop if it's installed
+    # (default skill resources live here)
+    try:
+        import ovos_workshop
+        core_root = dirname(ovos_workshop.__file__)
+        filename = join(core_root, "res", res_name)
         if os.path.isfile(filename):
             return filename
+    except:
+        pass
+
+    # let's look in ovos_gui if it's installed
+    # (default GUI resources live here)
+    try:
+        import ovos_gui
+        core_root = dirname(ovos_gui.__file__)
+        filename = join(core_root, "res", res_name)
+        if os.path.isfile(filename):
+            return filename
+    except:
+        pass
+
+    # let's look in mycroft/ovos-core if it's installed
+    # (default core resources live here / backwards compat)
+    try:
+        import mycroft
+        core_root = dirname(mycroft.__file__)
+        filename = join(core_root, "res", res_name)
+        if os.path.isfile(filename):
+            return filename
+    except:
+        pass
+
     return None  # Resource cannot be resolved
 
 
@@ -288,37 +316,68 @@ def read_translated_file(filename: str, data: dict) -> Optional[List[str]]:
 
 
 class FileWatcher:
-    def __init__(self, files, callback, recursive=False, ignore_creation=False):
+    def __init__(self, files: List[str], callback: callable,
+                 recursive: bool = False, ignore_creation: bool = False):
+        """
+        Initialize a FileWatcher to monitor the specified files for changes
+        @param files: list of paths to monitor for file changes
+        @param callback: function to call on file change with modified file path
+        @param recursive: If true, recursively include directory contents
+        @param ignore_creation: If true, ignore file creation events
+        """
         self.observer = Observer()
         self.handlers = []
         for file_path in files:
-            watch_dir = dirname(file_path)
-            self.observer.schedule(FileEventHandler(file_path, callback, ignore_creation),
+            if os.path.isfile(file_path):
+                watch_dir = dirname(file_path)
+            else:
+                watch_dir = file_path
+            self.observer.schedule(FileEventHandler(file_path, callback,
+                                                    ignore_creation),
                                    watch_dir, recursive=recursive)
         self.observer.start()
 
     def shutdown(self):
+        """
+        Remove observer scheduled events and stop the observer.
+        """
         self.observer.unschedule_all()
         self.observer.stop()
 
 
 class FileEventHandler(FileSystemEventHandler):
-    def __init__(self, file_path, callback, ignore_creation=False):
+    def __init__(self, file_path: str, callback: callable,
+                 ignore_creation: bool = False):
+        """
+        Create a handler for file change events
+        @param file_path: file_path being watched Unused(?)
+        @param callback: function to call on file change with modified file path
+        @param ignore_creation: if True, only track file modification events
+        """
         super().__init__()
         self._callback = callback
         self._file_path = file_path
-        self._debounce = 1
-        self._last_update = 0
         if ignore_creation:
             self._events = ('modified')
         else:
             self._events = ('created', 'modified')
+        self._changed_files = []
+        self._lock = RLock()
 
     def on_any_event(self, event):
         if event.is_directory:
             return
-        elif event.event_type in self._events:
-            if event.src_path == self._file_path:
-                if time.time() - self._last_update >= self._debounce:
-                    self._callback(event.src_path)
-                    self._last_update = time.time()
+        with self._lock:
+            if event.event_type == "closed":
+                if event.src_path in self._changed_files:
+                    self._changed_files.remove(event.src_path)
+                    # fire event, it is now safe
+                    try:
+                        self._callback(event.src_path)
+                    except:
+                        LOG.exception("An error occurred handling file "
+                                      "change event callback")
+
+            elif event.event_type in self._events:
+                if event.src_path not in self._changed_files:
+                    self._changed_files.append(event.src_path)

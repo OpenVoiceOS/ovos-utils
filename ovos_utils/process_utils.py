@@ -348,8 +348,8 @@ class PIDLock:  # python 3+ 'class Lock'
         with open(self.path, 'r') as L:
             try:
                 os.kill(int(L.read()), SIGKILL)
-            except Exception as E:
-                pass
+            except Exception as e:
+                LOG.error(f"Failed to kill PID {L}: {e}")
 
     #
     # Create a lock file for this server process

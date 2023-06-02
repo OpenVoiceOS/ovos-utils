@@ -1,15 +1,26 @@
 import unittest
 from os import environ
-from os.path import isdir, join, dirname
+from os.path import isdir, join, dirname, basename
 from unittest.mock import patch
+
+from ovos_utils.messagebus import FakeBus, Message
 from ovos_utils.skills.locations import get_skill_directories
 from ovos_utils.skills.locations import get_default_skills_directory
 from ovos_utils.skills.locations import get_installed_skill_ids
 from ovos_utils.skills.locations import get_plugin_skills
+
 try:
     import ovos_config
 except ImportError:
     ovos_config = None
+
+
+def _api_method_1(message: Message) -> str:
+    return message.serialize()
+
+
+def _api_method_2(**kwargs) -> int:
+    return len(kwargs)
 
 
 class TestSkills(unittest.TestCase):
@@ -94,11 +105,29 @@ class TestLocations(unittest.TestCase):
         self.assertEqual(get_skill_directories(config),
                          [default_dir, extra_dir])
 
-
         # Define invalid directories in extra_directories
         config['skills']['extra_directories'] += ["/not/a/directory"]
         self.assertEqual(get_skill_directories(config),
                          [default_dir, extra_dir])
+
+        # Default directory
+        mock_config = {'skills': {}}
+        default_directories = get_skill_directories(mock_config)
+        for directory in default_directories:
+            self.assertEqual(basename(directory), 'skills')
+        # Configured directory
+        mock_config['skills']['directory'] = 'test'
+        test_directories = get_skill_directories(mock_config)
+        for directory in test_directories:
+            self.assertEqual(basename(directory), 'test')
+        self.assertEqual(len(default_directories), len(test_directories))
+        # Extra directory
+        extra_dir = join(dirname(__file__), 'skills')
+        mock_config['skills']['extra_directories'] = [extra_dir]
+        extra_directories = get_skill_directories(mock_config)
+        self.assertEqual(extra_directories[-1], extra_dir)
+        for directory in test_directories:
+            self.assertIn(directory, extra_directories)
 
     def test_get_default_skills_directory(self):
         if not ovos_config:
@@ -124,6 +153,21 @@ class TestLocations(unittest.TestCase):
         config = {"skills": {"extra_directories": []}}
         self.assertEqual(get_default_skills_directory(config), xdg_skills_dir)
 
+        # Default directory
+        mock_config = {'skills': {}}
+        default_dir = get_default_skills_directory(mock_config)
+        self.assertTrue(isdir(default_dir))
+        self.assertEqual(basename(default_dir), 'skills')
+        self.assertEqual(dirname(dirname(default_dir)),
+                         join(dirname(__file__), "test_skills_xdg"))
+        # Override directory
+        mock_config['skills']['directory'] = 'test'
+        test_dir = get_default_skills_directory(mock_config)
+        self.assertTrue(isdir(test_dir))
+        self.assertEqual(basename(test_dir), 'test')
+        self.assertEqual(dirname(dirname(test_dir)),
+                         join(dirname(__file__), "test_skills_xdg"))
+
     def test_get_plugin_skills(self):
         dirs, ids = get_plugin_skills()
         for d in dirs:
@@ -131,3 +175,20 @@ class TestLocations(unittest.TestCase):
         for s in ids:
             self.assertIsInstance(s, str)
         self.assertEqual(len(dirs), len(ids))
+
+
+class TestSkillApi(unittest.TestCase):
+    bus = FakeBus()
+
+    def test_skill_api_init(self):
+        from ovos_utils.skills.api import SkillApi
+
+        test_api = SkillApi({"serialize": _api_method_1,
+                             "get_length": _api_method_2})
+        test_api.connect_bus(self.bus)
+        self.assertEqual(test_api.bus, self.bus)
+        self.assertEqual(SkillApi.bus, self.bus)
+        self.assertIsNotNone(test_api.serialize)
+        self.assertIsNotNone(test_api.get_length)
+
+    # TODO: Test SkillApi.get
