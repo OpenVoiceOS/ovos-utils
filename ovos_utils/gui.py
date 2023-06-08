@@ -500,7 +500,8 @@ class GUIInterface:
         text: sessionData.time
     """
 
-    def __init__(self, skill_id, bus=None, remote_server=None, config=None):
+    def __init__(self, skill_id, bus=None, remote_server=None, config=None,
+                 resource_dir=None):
         if not config:
             LOG.warning(f"Expected a dict config and got None. This config"
                         f"fallback behavior will be deprecated in a future "
@@ -521,6 +522,7 @@ class GUIInterface:
         self._skill_id = skill_id
         self.on_gui_changed_callback = None
         self._events = []
+        self.resource_dir = resource_dir
         if bus:
             self.set_bus(bus)
 
@@ -664,8 +666,10 @@ class GUIInterface:
         self.bus.emit(Message("gui.clear.namespace",
                               {"__from": self.skill_id}))
 
-    def send_event(self, event_name, params=None):
-        """Trigger a gui event.
+    def send_event(self, event_name: str,
+                   params: Union[dict, list, str, int, float, bool] = None):
+        """
+        Trigger a gui event.
 
         Arguments:
             event_name (str): name of event to be triggered
@@ -680,14 +684,15 @@ class GUIInterface:
                                "event_name": event_name,
                                "params": params}))
 
-    def _pages2uri(self, page_names):
+    def _pages2uri(self, page_names: List[str]) -> List[str]:
         # Convert pages to full reference
         page_urls = []
+        extra_dirs = [self.resource_dir] or list()
         for name in page_names:
-            page = resolve_resource_file(name) or \
-                   resolve_resource_file(join('ui', name)) or \
-                   resolve_ovos_resource_file(name) or \
-                   resolve_ovos_resource_file(join('ui', name))
+            page = resolve_resource_file(name, self.config) or \
+                   resolve_resource_file(join('ui', name), self.config) or \
+                   resolve_ovos_resource_file(name, extra_dirs) or \
+                   resolve_ovos_resource_file(join('ui', name), extra_dirs)
 
             if page:
                 if self.remote_url:
@@ -697,7 +702,8 @@ class GUIInterface:
                 else:
                     page_urls.append("file://" + page)
             else:
-                LOG.error("Unable to find page: {}".format(name))
+                LOG.error(f"Unable to find page: {name}")
+        LOG.debug(f"Resolved pages: {page_urls}")
         return page_urls
 
     # base gui interactions
@@ -751,6 +757,7 @@ class GUIInterface:
         # First sync any data...
         data = self.__session_data.copy()
         data.update({'__from': self.skill_id})
+        LOG.debug(f"Updating gui data: {data}")
         self.bus.emit(Message("gui.value.set", data))
         page_urls = self._pages2uri(page_names)
         self.bus.emit(Message("gui.page.show",
