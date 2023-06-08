@@ -86,7 +86,18 @@ def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
         filename = join(core_root, "res", res_name)
         if os.path.isfile(filename):
             return filename
-    except:
+    except ImportError:
+        pass
+
+    # ovos-shell doesn't know about core resource locations
+    # check the shell plugin
+    try:
+        import ovos_gui_plugin_shell_companion
+        shell_root = dirname(ovos_gui_plugin_shell_companion.__file__)
+        filename = join(shell_root, "res", res_name)
+        if os.path.isfile(filename):
+            return filename
+    except ImportError:
         pass
 
     # let's look in ovos_gui if it's installed
@@ -97,7 +108,7 @@ def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
         filename = join(core_root, "res", res_name)
         if os.path.isfile(filename):
             return filename
-    except:
+    except ImportError:
         pass
 
     # let's look in mycroft/ovos-core if it's installed
@@ -108,7 +119,7 @@ def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
         filename = join(core_root, "res", res_name)
         if os.path.isfile(filename):
             return filename
-    except:
+    except ImportError:
         pass
 
     return None  # Resource cannot be resolved
