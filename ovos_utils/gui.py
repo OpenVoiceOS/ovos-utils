@@ -1,16 +1,14 @@
-from typing import List, Union
+from typing import List, Union, Optional, Callable, Any
 
 import time
 from collections import namedtuple
 from enum import IntEnum
 from os.path import join
-# from ovos_bus_client import MessageBusClient
 
 from ovos_utils import resolve_ovos_resource_file, resolve_resource_file
 from ovos_utils.log import LOG
 from ovos_utils.messagebus import wait_for_reply, get_mycroft_bus, Message
 from ovos_utils.system import is_installed, has_screen, is_process_running
-
 
 _default_gui_apps = (
     "mycroft-gui-app",
@@ -279,7 +277,7 @@ class GUITracker:
                 return i
         return None
 
-    def __insert_pages(self, namespace, pages):
+    def __insert_pages(self, namespace: str, pages: List[str]):
         """ Insert pages into the namespace
 
         Args:
@@ -304,7 +302,7 @@ class GUITracker:
         # Remove the page from the local reprensentation as well.
         self._loaded[0].pages.pop(pos)
 
-    def __insert_new_namespace(self, namespace, pages):
+    def __insert_new_namespace(self, namespace: str, pages: List[str]):
         """ Insert new namespace and pages.
 
         This first sends a message adding a new namespace at the
@@ -478,6 +476,7 @@ class _GUIDict(dict):
     This is a helper dictionary subclass. It ensures that values changed
     in it are propagated to the GUI service in real time.
     """
+
     def __init__(self, gui, **kwargs):
         self.gui = gui
         super().__init__(**kwargs)
@@ -527,12 +526,12 @@ class GUIInterface:
             self.set_bus(bus)
 
     @property
-    def remote_url(self):
+    def remote_url(self) -> Optional[str]:
         """Returns configuration value for url of remote-server."""
         return self.config.get('remote-server')
 
     @remote_url.setter
-    def remote_url(self, val):
+    def remote_url(self, val: str):
         self.config["remote-server"] = val
 
     def set_bus(self, bus=None):
@@ -545,44 +544,53 @@ class GUIInterface:
 
     @bus.setter
     def bus(self, val):
-        self._bus = val
+        self.set_bus(val)
 
     @property
-    def skill_id(self):
+    def skill_id(self) -> str:
         return self._skill_id
 
     @skill_id.setter
-    def skill_id(self, val):
+    def skill_id(self, val: str):
         self._skill_id = val
 
     @property
-    def page(self):
+    def page(self) -> Optional[str]:
+        """
+        Return the current page
+        """
         # the active GUI page (e.g. QML template) to show
         return self.pages[self.current_page_idx] if len(self.pages) else None
 
     @property
-    def connected(self):
-        """Returns True if at least 1 remote gui is connected or if gui is
+    def connected(self) -> bool:
+        """
+        Returns True if at least 1 remote gui is connected or if gui is
         installed and running locally, else False"""
         if not self.bus:
             return False
         return can_use_gui(self.bus)
 
-    def build_message_type(self, event):
-        """Builds a message matching the output from the enclosure."""
+    def build_message_type(self, event: str) -> str:
+        """
+        Builds a message matching the output from the enclosure.
+        """
         if not event.startswith(f'{self.skill_id}.'):
             event = f'{self.skill_id}.' + event
         return event
 
     # events
     def setup_default_handlers(self):
-        """Sets the handlers for the default messages."""
+        """
+        Sets the handlers for the default messages.
+        """
         msg_type = self.build_message_type('set')
         self.bus.on(msg_type, self.gui_set)
         self._events.append((msg_type, self.gui_set))
 
-    def register_handler(self, event, handler):
-        """Register a handler for GUI events.
+    def register_handler(self, event: str, handler: Callable):
+        """
+        Register a handler for GUI events.
 
         will be prepended with self.skill_id.XXX if missing in event
 
@@ -599,8 +607,9 @@ class GUIInterface:
         self._events.append((event, handler))
         self.bus.on(event, handler)
 
-    def set_on_gui_changed(self, callback):
-        """Registers a callback function to run when a value is
+    def set_on_gui_changed(self, callback: Callable):
+        """
+        Registers a callback function to run when a value is
         changed from the GUI.
 
         Arguments:
@@ -609,8 +618,9 @@ class GUIInterface:
         self.on_gui_changed_callback = callback
 
     # internals
-    def gui_set(self, message):
-        """Handler catching variable changes from the GUI.
+    def gui_set(self, message: Message):
+        """
+        Handler catching variable changes from the GUI.
 
         Arguments:
             message: Messagebus message
@@ -644,16 +654,21 @@ class GUIInterface:
         """Implements get part of dict-like behaviour with named keys."""
         return self.__session_data[key]
 
-    def get(self, *args, **kwargs):
-        """Implements the get method for accessing dict keys."""
+    def get(self, *args, **kwargs) -> Any:
+        """
+        Implements the get method for accessing dict keys.
+        """
         return self.__session_data.get(*args, **kwargs)
 
     def __contains__(self, key):
-        """Implements the "in" operation."""
+        """
+        Implements the "in" operation.
+        """
         return self.__session_data.__contains__(key)
 
     def clear(self):
-        """Reset the value dictionary, and remove namespace from GUI.
+        """
+        Reset the value dictionary, and remove namespace from GUI.
 
         This method does not close the GUI for a Skill. For this purpose see
         the `release` method.
@@ -707,9 +722,10 @@ class GUIInterface:
         return page_urls
 
     # base gui interactions
-    def show_page(self, name, override_idle=None,
-                  override_animations=False):
-        """Begin showing the page in the GUI
+    def show_page(self, name: str, override_idle: Union[bool, int] = None,
+                  override_animations: bool = False):
+        """
+        Begin showing the page in the GUI
 
         Arguments:
             name (str): Name of page (e.g "mypage.qml") to display
@@ -723,9 +739,11 @@ class GUIInterface:
         """
         self.show_pages([name], 0, override_idle, override_animations)
 
-    def show_pages(self, page_names, index=0, override_idle=None,
-                   override_animations=False):
-        """Begin showing the list of pages in the GUI.
+    def show_pages(self, page_names: List[str], index: int = 0,
+                   override_idle: Union[bool, int] = None,
+                   override_animations: bool = False):
+        """
+        Begin showing the list of pages in the GUI.
 
         Arguments:
             page_names (list): List of page names (str) to display, such as
@@ -767,16 +785,17 @@ class GUIInterface:
                                "__idle": override_idle,
                                "__animations": override_animations}))
 
-    def remove_page(self, page):
+    def remove_page(self, page: str):
         """Remove a single page from the GUI.
 
         Arguments:
             page (str): Page to remove from the GUI
         """
-        return self.remove_pages([page])
+        self.remove_pages([page])
 
-    def remove_pages(self, page_names):
-        """Remove a list of pages in the GUI.
+    def remove_pages(self, page_names: List[str]):
+        """
+        Remove a list of pages in the GUI.
 
         Arguments:
             page_names (list): List of page names (str) to display, such as
@@ -794,8 +813,10 @@ class GUIInterface:
     # Utils / Templates
 
     # backport - PR https://github.com/MycroftAI/mycroft-core/pull/2862
-    def show_notification(self, content, duration=10, action=None,
-                          noticetype="transient", style="info", callback_data=None):
+    def show_notification(self, content: str, duration: int = 10,
+                          action: str = None, noticetype: str = "transient",
+                          style: str = "info",
+                          callback_data: Optional[dict] = None):
         """Display a Notification on homepage in the GUI.
         Arguments:
             content (str): Main text content of a notification, Limited
@@ -812,25 +833,26 @@ class GUIInterface:
                 error: displays a notification with error styling
             callback_data (dict): data dictionary available to use with action
         """
+        # TODO: Define enums for style and noticetype
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
-        if not callback_data:
-            # GUI does not accept NONE type when building models, send a empty dict
-            # Sending NONE will corrupt entries in the model
-            callback_data = {}
+        # GUI does not accept NONE type, send an empty dict
+        # Sending NONE will corrupt entries in the model
+        callback_data = callback_data or dict()
         self.bus.emit(Message("ovos.notification.api.set",
-                                    data={
-                                        "duration": duration,
-                                        "sender": self.skill_id,
-                                        "text": content,
-                                        "action": action,
-                                        "type": noticetype,
-                                        "style": style,
-                                        "callback_data": callback_data
-                                    }))
+                              data={
+                                  "duration": duration,
+                                  "sender": self.skill_id,
+                                  "text": content,
+                                  "action": action,
+                                  "type": noticetype,
+                                  "style": style,
+                                  "callback_data": callback_data
+                              }))
 
-    def show_controlled_notification(self, content, style="info"):
-        """Display a controlled Notification in the GUI.
+    def show_controlled_notification(self, content: str, style: str = "info"):
+        """
+        Display a controlled Notification in the GUI.
         Arguments:
             content (str): Main text content of a notification, Limited
             to two visual lines.
@@ -840,24 +862,29 @@ class GUIInterface:
                 success: displays a notification with success styling
                 error: displays a notification with error styling
         """
+        # TODO: Define enum for style
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
         self.bus.emit(Message("ovos.notification.api.set.controlled",
                               data={
-                                    "sender": self.skill_id,
-                                    "text": content,
-                                    "style": style
-                                }))
+                                  "sender": self.skill_id,
+                                  "text": content,
+                                  "style": style
+                              }))
 
     def remove_controlled_notification(self):
-        """Remove a controlled Notification in the GUI."""
+        """
+        Remove a controlled Notification in the GUI.
+        """
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
         self.bus.emit(Message("ovos.notification.api.remove.controlled"))
 
-    def show_text(self, text, title=None, override_idle=None,
-                  override_animations=False):
-        """Display a GUI page for viewing simple text.
+    def show_text(self, text: str, title: Optional[str] = None,
+                  override_idle: Union[int, bool] = None,
+                  override_animations: bool = False):
+        """
+        Display a GUI page for viewing simple text.
 
         Arguments:
             text (str): Main text content.  It will auto-paginate
@@ -875,10 +902,13 @@ class GUIInterface:
         self.show_page("SYSTEM_TextFrame.qml", override_idle,
                        override_animations)
 
-    def show_image(self, url, caption=None,
-                   title=None, fill=None, background_color=None,
-                   override_idle=None, override_animations=False):
-        """Display a GUI page for viewing an image.
+    def show_image(self, url: str, caption: Optional[str] = None,
+                   title: Optional[str] = None,
+                   fill: str = None, background_color: str = None,
+                   override_idle: Union[int, bool] = None,
+                   override_animations: bool = False):
+        """
+        Display a GUI page for viewing an image.
 
         Arguments:
             url (str): Pointer to the image
@@ -904,10 +934,13 @@ class GUIInterface:
         self.show_page("SYSTEM_ImageFrame.qml", override_idle,
                        override_animations)
 
-    def show_animated_image(self, url, caption=None,
-                            title=None, fill=None, background_color=None,
-                            override_idle=None, override_animations=False):
-        """Display a GUI page for viewing an image.
+    def show_animated_image(self, url: str, caption: Optional[str] = None,
+                            title: Optional[str] = None,
+                            fill: str = None, background_color: str = None,
+                            override_idle: Union[int, bool] = None,
+                            override_animations: bool = False):
+        """
+        Display a GUI page for viewing an image.
 
         Args:
             url (str): Pointer to the .gif image
@@ -933,9 +966,11 @@ class GUIInterface:
         self.show_page("SYSTEM_AnimatedImageFrame.qml", override_idle,
                        override_animations)
 
-    def show_html(self, html, resource_url=None, override_idle=None,
-                  override_animations=False):
-        """Display an HTML page in the GUI.
+    def show_html(self, html: str, resource_url: Optional[str] = None,
+                  override_idle: Union[int, bool] = None,
+                  override_animations: bool = False):
+        """
+        Display an HTML page in the GUI.
 
         Args:
             html (str): HTML text to display
@@ -953,9 +988,10 @@ class GUIInterface:
         self.show_page("SYSTEM_HtmlFrame.qml", override_idle,
                        override_animations)
 
-    def show_url(self, url, override_idle=None,
-                 override_animations=False):
-        """Display an HTML page in the GUI.
+    def show_url(self, url: str, override_idle: Union[int, bool] = None,
+                 override_animations: bool = False):
+        """
+        Display an HTML page in the GUI.
 
         Args:
             url (str): URL to render
@@ -971,9 +1007,22 @@ class GUIInterface:
         self.show_page("SYSTEM_UrlFrame.qml", override_idle,
                        override_animations)
 
-    def show_input_box(self, title=None, placeholder=None,
-                       confirm_text=None, exit_text=None,
-                       override_idle=None, override_animations=None):
+    def show_input_box(self, title: Optional[str] = None,
+                       placeholder: Optional[str] = None,
+                       confirm_text: Optional[str] = None,
+                       exit_text: Optional[str] = None,
+                       override_idle: Union[int, bool] = None,
+                       override_animations: bool = False):
+        """
+        Display a fullscreen UI for a user to enter text and confirm or cancel
+        @param title: title of input UI should describe what the input is
+        @param placeholder: default text hint to show in an empty entry box
+        @param confirm_text: text to display on the submit/confirm button
+        @param exit_text: text to display on the cancel/exit button
+        @param override_idle: if True, takes over the resting page indefinitely
+            else Delays resting page for the specified number of seconds.
+        @param override_animations: disable showing all platform animations
+        """
         self["title"] = title
         self["placeholder"] = placeholder
         self["skill_id_handler"] = self.skill_id
@@ -991,6 +1040,9 @@ class GUIInterface:
                        override_animations)
 
     def remove_input_box(self):
+        """
+        Remove an input box shown by `show_input_box`
+        """
         LOG.info(f"GUI pages length {len(self.pages)}")
         if len(self.pages) > 1:
             self.remove_page("SYSTEM_InputBox.qml")
@@ -998,10 +1050,12 @@ class GUIInterface:
             self.release()
 
     def release(self):
-        """Signal that this skill is no longer using the GUI,
+        """
+        Signal that this skill is no longer using the GUI,
         allow different platforms to properly handle this event.
         Also calls self.clear() to reset the state variables
-        Platforms can close the window or go back to previous page"""
+        Platforms can close the window or go back to previous page
+        """
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
         self.clear()
@@ -1009,7 +1063,8 @@ class GUIInterface:
                               {"skill_id": self.skill_id}))
 
     def shutdown(self):
-        """Shutdown gui interface.
+        """
+        Shutdown gui interface.
 
         Clear pages loaded through this interface and remove the bus events
         """
