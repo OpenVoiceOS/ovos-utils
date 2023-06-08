@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.34a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.34a1) (2023-06-08)
+## [0.0.34a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.34a2) (2023-06-08)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33...0.0.34a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a1...0.0.34a2)
+
+**Merged pull requests:**
+
+- Troubleshooting GUI shell plugin resource file resolution [\#157](https://github.com/OpenVoiceOS/ovos-utils/pull/157) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.34a1](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a1) (2023-06-08)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33...V0.0.34a1)
 
 **Fixed bugs:**
 
