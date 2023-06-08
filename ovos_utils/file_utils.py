@@ -64,7 +64,8 @@ def get_cache_directory(folder: str) -> str:
     return path
 
 
-def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
+def resolve_ovos_resource_file(res_name: str,
+                               extra_res_dirs: list = None) -> Optional[str]:
     """
     Convert a resource into an absolute filename.
     used internally for ovos resources
@@ -72,6 +73,12 @@ def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
     # First look for fully qualified file (e.g. a user setting)
     if os.path.isfile(res_name):
         return res_name
+
+    if extra_res_dirs:
+        for res_dir in extra_res_dirs:
+            filename = join(res_dir, res_name)
+            if os.path.isfile(filename):
+                return filename
 
     # now look in bundled ovos-utils resources
     filename = join(dirname(__file__), "res", res_name)
@@ -86,7 +93,7 @@ def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
         filename = join(core_root, "res", res_name)
         if os.path.isfile(filename):
             return filename
-    except:
+    except ImportError:
         pass
 
     # let's look in ovos_gui if it's installed
@@ -97,7 +104,7 @@ def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
         filename = join(core_root, "res", res_name)
         if os.path.isfile(filename):
             return filename
-    except:
+    except ImportError:
         pass
 
     # let's look in mycroft/ovos-core if it's installed
@@ -108,7 +115,7 @@ def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
         filename = join(core_root, "res", res_name)
         if os.path.isfile(filename):
             return filename
-    except:
+    except ImportError:
         pass
 
     return None  # Resource cannot be resolved
