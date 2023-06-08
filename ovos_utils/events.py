@@ -1,7 +1,8 @@
+
 import time
 from datetime import datetime, timedelta
 from inspect import signature
-
+from typing import Callable, Optional
 from ovos_utils.intents.intent_service_interface import to_alnum
 from ovos_utils.log import LOG
 from ovos_utils.messagebus import FakeBus, FakeMessage as Message
@@ -27,7 +28,7 @@ def unmunge_message(message: Message, skill_id: str) -> Message:
     return message
 
 
-def get_handler_name(handler) -> str:
+def get_handler_name(handler: Callable) -> str:
     """
     Name (including class if available) of handler function.
 
@@ -43,17 +44,20 @@ def get_handler_name(handler) -> str:
         return handler.__name__
 
 
-def create_wrapper(handler, skill_id, on_start, on_end, on_error) -> callable:
+def create_wrapper(handler: Callable, skill_id: str,
+                   on_start: Callable, on_end: Callable,
+                   on_error: Callable) -> Callable:
     """
     Create the default skill handler wrapper.
-
     This wrapper handles things like metrics, reporting handler start/stop
     and errors.
-        handler (callable): method/function to call
-        skill_id: skill_id for associated skill
-        on_start (function): function to call before executing the handler
-        on_end (function): function to call after executing the handler
-        on_error (function): function to call for error reporting
+
+    @param handler: method/function to call
+    @param skill_id: skill_id for associated skill
+    @param on_start: function to call before executing the handler
+    @param on_end: function to call after executing the handler
+    @param on_error: function to call for error reporting
+    @return: callable implementing the passed methods
     """
 
     def wrapper(message):
@@ -80,8 +84,10 @@ def create_wrapper(handler, skill_id, on_start, on_end, on_error) -> callable:
     return wrapper
 
 
-def create_basic_wrapper(handler, on_error=None) -> callable:
-    """Create the default skill handler wrapper.
+def create_basic_wrapper(handler: Callable,
+                         on_error: Optional[Callable] = None) -> Callable:
+    """
+    Create the default skill handler wrapper.
 
     This wrapper handles things like metrics, reporting handler start/stop
     and errors.
@@ -108,7 +114,8 @@ def create_basic_wrapper(handler, on_error=None) -> callable:
 
 
 class EventContainer:
-    """Container tracking messagbus handlers.
+    """
+    Container tracking messagebus handlers.
 
     This container tracks events added by a skill, allowing unregistering
     all events on shutdown.
@@ -121,14 +128,14 @@ class EventContainer:
     def set_bus(self, bus):
         self.bus = bus
 
-    def add(self, name, handler, once=False):
-        """Create event handler for executing intent or other event.
+    def add(self, name: str, handler: Callable, once: bool = False):
+        """
+        Create event handler for executing intent or other event.
 
         Arguments:
-            name (string): IntentParser name
-            handler (func): Method to call
-            once (bool, optional): Event handler will be removed after it has
-                                   been run once.
+            name: IntentParser name
+            handler: Method to call
+            once: Event handler will be removed after it has been run once.
         """
 
         def once_wrapper(message):
@@ -147,8 +154,9 @@ class EventContainer:
 
             LOG.debug('Added event: {}'.format(name))
 
-    def remove(self, name):
-        """Removes an event from bus emitter and events list.
+    def remove(self, name: str) -> bool:
+        """
+        Removes an event from bus emitter and events list.
 
         Args:
             name (string): Name of Intent or Scheduler Event
@@ -181,7 +189,8 @@ class EventContainer:
         return iter(self.events)
 
     def clear(self):
-        """Unregister all registered handlers and clear the list of registered
+        """
+        Unregister all registered handlers and clear the list of registered
         events.
         """
         for e, f in self.events:
@@ -193,7 +202,8 @@ class EventSchedulerInterface:
     """Interface for accessing the event scheduler over the message bus."""
 
     def __init__(self, name=None, sched_id=None, bus=None, skill_id=None):
-        # NOTE: can not rename or move sched_id/name arguments to keep api compatibility
+        # NOTE: can not rename or move sched_id/name arguments to keep api
+        # compatibility
         if name:
             LOG.warning("name argument has been deprecated! use skill_id instead")
         if sched_id:
@@ -252,7 +262,10 @@ class EventSchedulerInterface:
             context (dict, optional): message context to send
                                       when the handler is called
         """
-        if isinstance(when, (int, float)) and when >= 0:
+        if isinstance(when, (int, float)):
+            if when < 0:
+                raise ValueError(f"Expected datetime or positive int/float. "
+                                 f"got: {when}")
             when = datetime.now() + timedelta(seconds=when)
         if not name:
             name = self.skill_id + handler.__name__
@@ -267,7 +280,7 @@ class EventSchedulerInterface:
 
         wrapped = create_basic_wrapper(handler, on_error)
         self.events.add(unique_name, wrapped, once=not repeat_interval)
-        event_data = {'time': time.mktime(when.timetuple()),
+        event_data = {'time': when.timestamp(),
                       'event': unique_name,
                       'repeat': repeat_interval,
                       'data': data}
