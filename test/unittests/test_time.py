@@ -2,7 +2,7 @@ import unittest
 from os.path import expanduser
 from dateutil.tz import tzlocal, tzfile, gettz
 from datetime import datetime, timedelta, timezone
-from mock import patch
+from unittest.mock import patch
 
 from ovos_utils.time import get_config_tz as _get_config_tz
 from ovos_utils.time import (
