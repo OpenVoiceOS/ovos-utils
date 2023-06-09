@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.34a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.34a2) (2023-06-08)
+## [0.0.34a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.34a3) (2023-06-09)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a1...0.0.34a2)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a2...0.0.34a3)
+
+**Fixed bugs:**
+
+- Annotate GUI Module and refactor resource resolution [\#158](https://github.com/OpenVoiceOS/ovos-utils/pull/158) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.34a2](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a2) (2023-06-08)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a1...V0.0.34a2)
 
 **Merged pull requests:**
 
