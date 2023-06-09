@@ -704,10 +704,11 @@ class GUIInterface:
         page_urls = []
         extra_dirs = [self.resource_dir] or list()
         for name in page_names:
-            page = resolve_resource_file(name, self.config) or \
-                   resolve_resource_file(join('ui', name), self.config) or \
-                   resolve_ovos_resource_file(name, extra_dirs) or \
-                   resolve_ovos_resource_file(join('ui', name), extra_dirs)
+            # Prefer plugin-specific resources first, then fallback to core
+            page = resolve_ovos_resource_file(name, extra_dirs) or \
+                   resolve_ovos_resource_file(join('ui', name), extra_dirs) or \
+                   resolve_resource_file(name, self.config) or \
+                   resolve_resource_file(join('ui', name), self.config)
 
             if page:
                 if self.remote_url:
