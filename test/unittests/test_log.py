@@ -4,7 +4,7 @@ import unittest
 import importlib
 
 from os.path import join, dirname, isdir, isfile
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 
 class TestLog(unittest.TestCase):
@@ -64,12 +64,15 @@ class TestLog(unittest.TestCase):
         from ovos_utils.log import init_service_logger
         # TODO
 
-    @patch("ovos_utils.log.LOG.warning")
-    def test_log_deprecation(self, log_warning):
+    @patch("ovos_utils.log.LOG.create_logger")
+    def test_log_deprecation(self, create_logger):
+        fake_log = Mock()
+        log_warning = fake_log.warning
+        create_logger.return_value = fake_log
         from ovos_utils.log import log_deprecation
 
         log_deprecation("test")
-        log_warning.assert_called_once()
+        create_logger.assert_called_once()
         log_msg = log_warning.call_args[0][0]
         self.assertTrue(log_msg.startswith('test - unittest.mock'))
 
@@ -77,8 +80,11 @@ class TestLog(unittest.TestCase):
         log_msg = log_warning.call_args[0][0]
         self.assertTrue(log_msg.startswith('DEPRECATED - unittest.mock'))
 
-    @patch("ovos_utils.log.LOG.warning")
-    def test_deprecated_decorator(self, log_warning):
+    @patch("ovos_utils.log.LOG.create_logger")
+    def test_deprecated_decorator(self, create_logger):
+        fake_log = Mock()
+        log_warning = fake_log.warning
+        create_logger.return_value = fake_log
         from ovos_utils.log import deprecated
         import sys
         sys.path.insert(0, dirname(__file__))

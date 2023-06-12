@@ -182,6 +182,7 @@ def log_deprecation(log_message: str = "DEPRECATED"):
     stack = inspect.stack()[1:]  # [0] is this method
     call_info = "Unknown Origin"
     origin_module = None
+    log_name = LOG.name
     for call in stack:
         module = inspect.getmodule(call.frame)
         name = module.__name__ if module else call.filename
@@ -191,11 +192,12 @@ def log_deprecation(log_message: str = "DEPRECATED"):
             continue
         if not origin_module:
             origin_module = name
+            log_name = name + ':' + call[3] + ':' + str(call[2])
             continue
         if not name.startswith(origin_module):
             call_info = f"{name}:{call.lineno}"
             break
-    LOG.warning(f"{log_message} - {call_info}")
+    LOG.create_logger(log_name).warning(f"{log_message} - {call_info}")
 
 
 def deprecated(log_message: str, *args, **kwargs):
