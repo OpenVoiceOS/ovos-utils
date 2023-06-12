@@ -172,11 +172,12 @@ def init_service_logger(service_name):
     LOG.init(_logs_conf)  # read log level from config
 
 
-def log_deprecation(log_message: str = "DEPRECATED"):
+def log_deprecation(log_message: str = "DEPRECATED", func_name: str = None):
     """
     Log a deprecation warning with information for the call outside the module
     that is generating the warning
     @param log_message: Log contents describing the deprecation
+    @param func_name: decorated function name (else read from stack)
     """
     import inspect
     stack = inspect.stack()[1:]  # [0] is this method
@@ -192,13 +193,12 @@ def log_deprecation(log_message: str = "DEPRECATED"):
             continue
         if not origin_module:
             origin_module = name
-            log_name = f"{LOG.name} - {name}:{call[3]}:{call[2]}"
+            log_name = f"{LOG.name} - {name}:{func_name or call[3]}:{call[2]}"
             continue
         if not name.startswith(origin_module):
             call_info = f"{name}:{call.lineno}"
             break
     # Explicitly format log to print origin log reference
-    LOG.debug(f"Logging deprecation to log: {log_name}")
     LOG.create_logger(log_name).warning(f"{log_message} - {call_info}")
 
 
@@ -208,7 +208,7 @@ def deprecated(log_message: str, *args, **kwargs):
     @param log_message: Deprecation log message
     """
     def wrapped(func):
-        log_deprecation(log_message)
+        log_deprecation(log_message, func.__name__)
         return func
 
     return wrapped
