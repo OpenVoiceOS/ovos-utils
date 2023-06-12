@@ -173,8 +173,8 @@ def init_service_logger(service_name):
 
 
 def log_deprecation(log_message: str = "DEPRECATED",
-                    func_name: str = None,
-                    deprecation_version: str = "Unknown"):
+                    deprecation_version: str = "Unknown",
+                    func_name: str = None):
     """
     Log a deprecation warning with information for the call outside the module
     that is generating the warning
@@ -213,7 +213,9 @@ def deprecated(log_message: str, deprecation_version: str):
     @param deprecation_version: package version in which deprecation will occur
     """
     def wrapped(func):
-        log_deprecation(log_message, func.__name__, deprecation_version)
+        log_deprecation(log_message=log_message,
+                        func_name=func.__name__,
+                        deprecation_version=deprecation_version)
         return func
 
     return wrapped

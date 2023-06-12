@@ -150,9 +150,7 @@ def get_dialog(phrase: str, lang: str = None,
     """
 
     if not lang:
-        log_deprecation("Expected a string lang and got None. This config"
-                        "fallback behavior will be deprecated in a future "
-                        "release")
+        log_deprecation("Expected a string lang and got None.", "0.1.0")
         try:
             from ovos_config.config import read_mycroft_config
             conf = read_mycroft_config()
