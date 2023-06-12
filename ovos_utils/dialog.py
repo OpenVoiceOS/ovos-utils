@@ -8,7 +8,7 @@ from typing import Optional
 from ovos_utils.bracket_expansion import expand_options
 from ovos_utils.file_utils import resolve_resource_file
 from ovos_utils.lang import translate_word
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, log_deprecation
 
 
 class MustacheDialogRenderer:
@@ -150,8 +150,9 @@ def get_dialog(phrase: str, lang: str = None,
     """
 
     if not lang:
-        LOG.warning(f"Expected a string lang and got None. This config"
-                    f"fallback behavior will be deprecated in a future release")
+        log_deprecation("Expected a string lang and got None. This config"
+                        "fallback behavior will be deprecated in a future "
+                        "release")
         try:
             from ovos_config.config import read_mycroft_config
             conf = read_mycroft_config()

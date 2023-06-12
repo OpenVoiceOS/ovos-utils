@@ -4,6 +4,7 @@ import unittest
 import importlib
 
 from os.path import join, dirname, isdir, isfile
+from unittest.mock import patch
 
 
 class TestLog(unittest.TestCase):
@@ -62,3 +63,39 @@ class TestLog(unittest.TestCase):
     def test_init_service_logger(self):
         from ovos_utils.log import init_service_logger
         # TODO
+
+    @patch("ovos_utils.log.LOG.warning")
+    def test_log_deprecation(self, log_warning):
+        from ovos_utils.log import log_deprecation
+
+        log_deprecation("test")
+        log_warning.assert_called_once()
+        log_msg = log_warning.call_args[0][0]
+        self.assertTrue(log_msg.startswith('test - unittest.mock'))
+
+        log_deprecation()
+        log_msg = log_warning.call_args[0][0]
+        self.assertTrue(log_msg.startswith('DEPRECATED - unittest.mock'))
+
+    @patch("ovos_utils.log.LOG.warning")
+    def test_deprecated_decorator(self, log_warning):
+        from ovos_utils.log import deprecated
+        import sys
+        sys.path.insert(0, dirname(__file__))
+        from deprecation_helper import deprecated_function
+        deprecated_function()
+        log_warning.assert_called_once()
+        log_msg = log_warning.call_args[0][0]
+        self.assertTrue(log_msg.startswith('imported deprecation - test_log'))
+
+        call_arg = None
+
+        @deprecated("test deprecation")
+        def _deprecated_function(test_arg):
+            nonlocal call_arg
+            call_arg = test_arg
+
+        _deprecated_function("test")
+        self.assertEqual(call_arg, "test")
+        log_msg = log_warning.call_args[0][0]
+        self.assertTrue(log_msg.startswith('test deprecation - '))

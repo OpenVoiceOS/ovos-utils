@@ -170,3 +170,41 @@ def init_service_logger(service_name):
     _logs_conf["level"] = _log_level
     LOG.name = service_name
     LOG.init(_logs_conf)  # read log level from config
+
+
+def log_deprecation(log_message: str = "DEPRECATED"):
+    """
+    Log a deprecation warning with information for the call outside the module
+    that is generating the warning
+    @param log_message: Log contents describing the deprecation
+    """
+    import inspect
+    stack = inspect.stack()[1:]  # [0] is this method
+    call_info = "Unknown Origin"
+    origin_module = None
+    for call in stack:
+        module = inspect.getmodule(call.frame)
+        name = module.__name__ if module else call.filename
+        if any((name if name.startswith(x) else None
+                for x in ("ovos_utils.log", "<"))):
+            # Skip calls from this module and unittests to get at real origin
+            continue
+        if not origin_module:
+            origin_module = name
+            continue
+        if not name.startswith(origin_module):
+            call_info = f"{name}:{call.lineno}"
+            break
+    LOG.warning(f"{log_message} - {call_info}")
+
+
+def deprecated(log_message: str, *args, **kwargs):
+    """
+    Decorator to log deprecation on call to deprecated function
+    @param log_message: Deprecation log message
+    """
+    def wrapped(func):
+        log_deprecation(log_message)
+        return func
+
+    return wrapped

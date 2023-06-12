@@ -23,7 +23,7 @@ import kthread
 # TODO: Deprecate below imports
 from ovos_utils.file_utils import resolve_ovos_resource_file, resolve_resource_file
 from ovos_utils.network_utils import get_ip, get_external_ip, is_connected_dns, is_connected_http, is_connected
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, deprecated
 
 
 class classproperty(property):
@@ -32,11 +32,10 @@ class classproperty(property):
     def __get__(self, owner_self, owner_cls):
         return self.fget(owner_cls)
 
-
+@deprecated("This method is deprecated. Anything depending on `mycroft`"
+            "should install `ovos-core` as a dependency")
 def ensure_mycroft_import():
     # TODO: Deprecate in 0.1.0
-    LOG.warning("This method is deprecated. Anything depending on `mycroft`"
-                "should install `ovos-core` as a dependency")
     try:
         import mycroft
     except ImportError:
@@ -48,11 +47,10 @@ def ensure_mycroft_import():
         else:
             raise
 
-
+@deprecated("This method is deprecated. Code should import from the current"
+                "namespace; other system paths are irrelevant.")
 def get_mycroft_root():
     # TODO: Deprecate in 0.1.0
-    LOG.warning("This method is deprecated. Code should import from the current"
-                "namespace; other system paths are irrelevant.")
     paths = [
         "/opt/venvs/mycroft-core/lib/python3.7/site-packages/",  # mark1/2
         "/opt/venvs/mycroft-core/lib/python3.4/site-packages/ ",  # old mark1 installs
