@@ -32,8 +32,9 @@ class classproperty(property):
     def __get__(self, owner_self, owner_cls):
         return self.fget(owner_cls)
 
-@deprecated("This method is deprecated. Anything depending on `mycroft`"
-            "should install `ovos-core` as a dependency")
+
+@deprecated("Anything depending on `mycroft`"
+            "should install `ovos-core` as a dependency", "0.1.0")
 def ensure_mycroft_import():
     # TODO: Deprecate in 0.1.0
     try:
@@ -47,8 +48,9 @@ def ensure_mycroft_import():
         else:
             raise
 
-@deprecated("This method is deprecated. Code should import from the current"
-                "namespace; other system paths are irrelevant.")
+
+@deprecated("Code should import from the current"
+            "namespace; other system paths are irrelevant.", "0.1.0")
 def get_mycroft_root():
     # TODO: Deprecate in 0.1.0
     paths = [

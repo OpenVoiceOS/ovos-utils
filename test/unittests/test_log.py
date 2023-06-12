@@ -74,11 +74,13 @@ class TestLog(unittest.TestCase):
         log_deprecation("test")
         create_logger.assert_called_once()
         log_msg = log_warning.call_args[0][0]
-        self.assertTrue(log_msg.startswith('test - unittest.mock'))
+        self.assertIn('version=Unknown', log_msg, log_msg)
+        self.assertIn('test', log_msg, log_msg)
 
         log_deprecation()
         log_msg = log_warning.call_args[0][0]
-        self.assertTrue(log_msg.startswith('DEPRECATED - unittest.mock'))
+        self.assertIn('version=Unknown', log_msg, log_msg)
+        self.assertIn('DEPRECATED', log_msg, log_msg)
 
     @patch("ovos_utils.log.LOG.create_logger")
     def test_deprecated_decorator(self, create_logger):
@@ -92,11 +94,13 @@ class TestLog(unittest.TestCase):
         deprecated_function()
         log_warning.assert_called_once()
         log_msg = log_warning.call_args[0][0]
-        self.assertTrue(log_msg.startswith('imported deprecation - test_log'))
+        self.assertIn('version=0.1.0', log_msg, log_msg)
+        self.assertIn('test_log:', log_msg, log_msg)
+        self.assertIn('imported deprecation', log_msg, log_msg)
 
         call_arg = None
 
-        @deprecated("test deprecation")
+        @deprecated("test deprecation", "1.0.0")
         def _deprecated_function(test_arg):
             nonlocal call_arg
             call_arg = test_arg
@@ -104,4 +108,5 @@ class TestLog(unittest.TestCase):
         _deprecated_function("test")
         self.assertEqual(call_arg, "test")
         log_msg = log_warning.call_args[0][0]
-        self.assertTrue(log_msg.startswith('test deprecation - '))
+        self.assertIn('version=1.0.0', log_msg, log_msg)
+        self.assertIn('test deprecation', log_msg, log_msg)

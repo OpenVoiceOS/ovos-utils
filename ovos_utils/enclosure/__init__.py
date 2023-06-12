@@ -21,7 +21,7 @@ class MycroftEnclosures(str, Enum):
 
 
 @deprecated("This method is deprecated. Code should import from the current"
-            "namespace; other system paths are irrelevant.")
+            "namespace; other system paths are irrelevant.", "0.1.0")
 def enclosure2rootdir(enclosure: MycroftEnclosures = None) -> Optional[str]:
     """
     Find the default installed core location for a specific platform.
@@ -46,7 +46,7 @@ def enclosure2rootdir(enclosure: MycroftEnclosures = None) -> Optional[str]:
 
 
 @deprecated("This method is deprecated. Platform-specific code should"
-            "use ovos_utils.fingerprinting.detect_platform directly")
+            "use ovos_utils.fingerprinting.detect_platform directly", "0.1.0")
 def detect_enclosure() -> MycroftEnclosures:
     """
     Determine which enclosure is present on this file system.

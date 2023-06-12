@@ -7,7 +7,7 @@ from ovos_utils.log import deprecated
 
 
 class OVOSApiService:
-    @deprecated("This reference is deprecated. Import from ovos-backend-client")
+    @deprecated("Import from ovos-backend-client", "0.1.0")
     def __init__(self) -> None:
         self.uuid_storage = JsonStorageXDG("ovos_api_uuid")
         self.token_storage = JsonStorageXDG("ovos_api_token")
@@ -44,6 +44,7 @@ class OVOSApiService:
 
 
 class OvosWeather:
+    @deprecated("Import from ovos-backend-client", "0.1.0")
     def __init__(self):
         self.api = OVOSApiService()
 
@@ -95,6 +96,7 @@ class OvosWeather:
 
 
 class OvosWolframAlpha:
+    @deprecated("Import from ovos-backend-client", "0.1.0")
     def __init__(self):
         self.api = OVOSApiService()
 
@@ -134,6 +136,7 @@ class OvosWolframAlpha:
 
 
 class OvosEdamamRecipe:
+    @deprecated("Import from ovos-backend-client", "0.1.0")
     def __init__(self):
         self.api = OVOSApiService()
 
@@ -155,6 +158,7 @@ class OvosEdamamRecipe:
 
 
 class OvosOmdb:
+    @deprecated("Import from ovos-backend-client", "0.1.0")
     def __init__(self):
         self.api = OVOSApiService()
 
@@ -178,7 +182,7 @@ class OvosOmdb:
 
 
 class OvosGeolocate:
-    @deprecated("This reference is deprecated. Import from ovos-backend-client")
+    @deprecated("Import from ovos-backend-client", "0.1.0")
     def __init__(self):
         pass
 
@@ -202,6 +206,7 @@ class OvosGeolocate:
 
 
 class OvosSendMail:
+    @deprecated("Import from ovos-backend-client", "0.1.0")
     def __init__(self):
         self.api = OVOSApiService()
 
