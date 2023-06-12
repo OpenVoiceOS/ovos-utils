@@ -192,7 +192,7 @@ def log_deprecation(log_message: str = "DEPRECATED"):
             continue
         if not origin_module:
             origin_module = name
-            log_name = name + ':' + call[3] + ':' + str(call[2])
+            log_name = f"{LOG.name} - {name}:{call[3]}:{call[2]}"
             continue
         if not name.startswith(origin_module):
             call_info = f"{name}:{call.lineno}"
