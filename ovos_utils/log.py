@@ -197,6 +197,8 @@ def log_deprecation(log_message: str = "DEPRECATED"):
         if not name.startswith(origin_module):
             call_info = f"{name}:{call.lineno}"
             break
+    # Explicitly format log to print origin log reference
+    LOG.debug(f"Logging deprecation to log: {log_name}")
     LOG.create_logger(log_name).warning(f"{log_message} - {call_info}")
 
 
