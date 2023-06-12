@@ -3,7 +3,7 @@ from os import makedirs
 from os.path import join, expanduser, exists, isfile
 
 import ovos_utils.xdg_utils as xdg
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, deprecated
 
 
 # TODO - deprecate this submodule in 0.1.0
@@ -137,9 +137,9 @@ def get_xdg_data_save_path():
         return expanduser("~/.local/share/mycroft")
 
 
+@deprecated("configuration moved to the `ovos_config` package. This submodule "
+            "will be removed in ovos_utils 0.1.0")
 def get_xdg_config_save_path():
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.locations import get_xdg_config_save_path as _get
         return _get()
