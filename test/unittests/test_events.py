@@ -65,6 +65,10 @@ class TestEvents(unittest.TestCase):
         self.assertEqual(interface.events.bus, self.bus)
         self.assertEqual(interface.scheduled_repeats, list())
 
+        # Deprecated properties
+        self.assertEqual(interface.sched_id, interface.skill_id)
+        self.assertEqual(interface.name, interface.skill_id)
+
         now_time = datetime.datetime.now(datetime.timezone.utc)
         self.assertAlmostEqual(now_time.timestamp(), time(), 0)
         event_time_tzaware = now_time + datetime.timedelta(hours=1)
