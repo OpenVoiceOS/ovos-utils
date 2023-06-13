@@ -2,7 +2,7 @@ import requests
 import json
 from os.path import join, expanduser, exists
 from json_database import JsonStorageXDG, JsonStorage
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, log_deprecation
 
 
 def settings2meta(settings, section_name="Skill Settings"):
@@ -93,7 +93,7 @@ def get_all_remote_settings(identity_file=None, backend_url=None):
 def get_local_settings(skill_dir, skill_name=None) -> dict:
     """Build a JsonStorage using the JSON string stored in settings.json."""
     if skill_name:
-        LOG.warning("skill_name is an unused legacy argument, will be removed in 0.0.3 or later")
+        log_deprecation("skill_name is an unused legacy argument", "0.1.0")
     if skill_dir.endswith("/settings.json"):
         settings_path = skill_dir
     else:

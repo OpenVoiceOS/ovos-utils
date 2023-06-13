@@ -6,7 +6,6 @@ import tempfile
 from threading import RLock
 from typing import Optional, List
 
-import time
 from os import walk
 from os.path import dirname
 from os.path import splitext, join
@@ -15,7 +14,7 @@ from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 from ovos_utils.bracket_expansion import expand_options
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, log_deprecation
 from ovos_utils.system import search_mycroft_core_location
 
 
@@ -150,8 +149,7 @@ def resolve_resource_file(res_name: str, root_path: Optional[str] = None,
         str: path to resource or None if no resource found
     """
     if config is None:
-        LOG.warning(f"Expected a dict config and got None. This config"
-                    f"fallback behavior will be deprecated in a future release")
+        log_deprecation(f"Expected a dict config and got None.", "0.1.0")
         try:
             from ovos_config.config import read_mycroft_config
             config = read_mycroft_config()

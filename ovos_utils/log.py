@@ -170,3 +170,52 @@ def init_service_logger(service_name):
     _logs_conf["level"] = _log_level
     LOG.name = service_name
     LOG.init(_logs_conf)  # read log level from config
+
+
+def log_deprecation(log_message: str = "DEPRECATED",
+                    deprecation_version: str = "Unknown",
+                    func_name: str = None):
+    """
+    Log a deprecation warning with information for the call outside the module
+    that is generating the warning
+    @param log_message: Log contents describing the deprecation
+    @param func_name: decorated function name (else read from stack)
+    @param deprecation_version: package version in which method will be deprecated
+    """
+    import inspect
+    stack = inspect.stack()[1:]  # [0] is this method
+    call_info = "Unknown Origin"
+    origin_module = None
+    log_name = LOG.name
+    for call in stack:
+        module = inspect.getmodule(call.frame)
+        name = module.__name__ if module else call.filename
+        if any((name if name.startswith(x) else None
+                for x in ("ovos_utils.log", "<"))):
+            # Skip calls from this module and unittests to get at real origin
+            continue
+        if not origin_module:
+            origin_module = name
+            log_name = f"{LOG.name} - {name}:{func_name or call[3]}:{call[2]}"
+            continue
+        if not name.startswith(origin_module):
+            call_info = f"{name}:{call.lineno}"
+            break
+    # Explicitly format log to print origin log reference
+    LOG.create_logger(log_name).warning(
+        f"Deprecation version={deprecation_version}. Caller={call_info}. {log_message}")
+
+
+def deprecated(log_message: str, deprecation_version: str):
+    """
+    Decorator to log deprecation on call to deprecated function
+    @param log_message: Deprecation log message
+    @param deprecation_version: package version in which deprecation will occur
+    """
+    def wrapped(func):
+        log_deprecation(log_message=log_message,
+                        func_name=func.__name__,
+                        deprecation_version=deprecation_version)
+        return func
+
+    return wrapped

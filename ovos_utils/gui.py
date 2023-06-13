@@ -7,7 +7,7 @@ from enum import IntEnum
 from os.path import join
 
 from ovos_utils import resolve_ovos_resource_file, resolve_resource_file
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, log_deprecation
 from ovos_utils.messagebus import wait_for_reply, get_mycroft_bus, Message
 from ovos_utils.system import is_installed, has_screen, is_process_running
 
@@ -513,9 +513,7 @@ class GUIInterface:
         @param ui_directories: dict framework to directory containing resources
         """
         if not config:
-            LOG.warning(f"Expected a dict config and got None. This config"
-                        f"fallback behavior will be deprecated in a future "
-                        f"release")
+            log_deprecation(f"Expected a dict config and got None.", "0.1.0")
             try:
                 from ovos_config.config import read_mycroft_config
                 config = read_mycroft_config().get("gui", {})

@@ -3,16 +3,15 @@ from os import makedirs
 from os.path import join, expanduser, exists, isfile
 
 import ovos_utils.xdg_utils as xdg
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, deprecated
 
 
 # TODO - deprecate this submodule in 0.1.0
 # note that a couple of these are also used inside ovos-utils
 # perhaps those usages should also move into workshop ?
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def get_default_lang():
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.locale import get_default_lang as _get
         return _get()
@@ -20,9 +19,8 @@ def get_default_lang():
         return read_mycroft_config().get("lang", "en-us")
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def find_user_config():
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.locations import find_user_config as _get
         return _get()
@@ -31,16 +29,14 @@ def find_user_config():
         return join(get_xdg_config_save_path(), get_config_filename())
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def get_webcache_location():
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     return join(get_xdg_config_save_path(), 'web_cache.json')
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def get_config_locations(default=True, web_cache=True, system=True,
                          old_user=True, user=True):
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.locations import get_config_locations as _get
         return _get(default, web_cache, system, old_user, user)
@@ -60,9 +56,8 @@ def get_config_locations(default=True, web_cache=True, system=True,
         return locs
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def get_ovos_config():
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.meta import get_ovos_config as _get
         return _get()
@@ -72,9 +67,8 @@ def get_ovos_config():
                 "config_filename": "mycroft.conf"}
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def get_xdg_base():
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.meta import get_xdg_base as _get
         return _get()
@@ -82,9 +76,8 @@ def get_xdg_base():
         return "mycroft"
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def get_xdg_config_locations():
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     # This includes both the user config and
     # /etc/xdg/mycroft/mycroft.conf
     xdg_paths = list(reversed(
@@ -94,9 +87,8 @@ def get_xdg_config_locations():
     return xdg_paths
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def get_xdg_data_dirs():
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.locations import get_xdg_data_dirs as _get
         return _get()
@@ -104,9 +96,8 @@ def get_xdg_data_dirs():
         return [expanduser("~/.local/share/mycroft")]
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def get_xdg_config_dirs(folder=None):
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.locations import get_xdg_config_dirs as _get
         return _get()
@@ -116,9 +107,8 @@ def get_xdg_config_dirs(folder=None):
         return [join(path, folder) for path in xdg_dirs]
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def get_xdg_cache_save_path(folder=None):
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.locations import get_xdg_cache_save_path as _get
         return _get()
@@ -127,9 +117,8 @@ def get_xdg_cache_save_path(folder=None):
         return join(xdg.xdg_cache_home(), folder)
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def get_xdg_data_save_path():
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.locations import get_xdg_data_save_path as _get
         return _get()
@@ -137,9 +126,8 @@ def get_xdg_data_save_path():
         return expanduser("~/.local/share/mycroft")
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def get_xdg_config_save_path():
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.locations import get_xdg_config_save_path as _get
         return _get()
@@ -147,16 +135,14 @@ def get_xdg_config_save_path():
         return expanduser("~/.config/mycroft")
 
 
+@deprecated("XDG is always used.", "0.1.0")
 def is_using_xdg():
     """ DEPRECATED """
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     return True
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def set_xdg_base(*args, **kwargs):
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.meta import set_xdg_base as _set
         _set(*args, **kwargs)
@@ -164,9 +150,8 @@ def set_xdg_base(*args, **kwargs):
         pass
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def set_config_filename(*args, **kwargs):
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.meta import config_filename as _set
         _set(*args, **kwargs)
@@ -174,9 +159,8 @@ def set_config_filename(*args, **kwargs):
         pass
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def get_config_filename():
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.locale import get_config_filename as _get
         return _get()
@@ -184,9 +168,8 @@ def get_config_filename():
         return "mycroft.conf"
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def get_ovos_default_config_paths():
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.meta import get_ovos_default_config_paths as _get
         return _get()
@@ -194,9 +177,8 @@ def get_ovos_default_config_paths():
         return ["/etc/OpenVoiceOS/ovos.conf"]
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def read_mycroft_config():
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config import Configuration
         return Configuration()
@@ -212,9 +194,8 @@ def read_mycroft_config():
     }
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def update_mycroft_config(config, path=None, bus=None):
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.config import update_mycroft_config as _update
         _update(config, path, bus)
@@ -227,9 +208,8 @@ def update_mycroft_config(config, path=None, bus=None):
         json.dump(config, f, indent=2)
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def set_default_config(*args, **kwargs):
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.meta import set_default_config as _set
         _set(*args, **kwargs)
@@ -237,9 +217,8 @@ def set_default_config(*args, **kwargs):
         pass
 
 
+@deprecated("configuration moved to the `ovos_config` package.", "0.1.0")
 def save_ovos_core_config(*args, **kwargs):
-    LOG.warning("configuration moved to the `ovos_config` package. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         from ovos_config.meta import save_ovos_config as _set
         _set(*args, **kwargs)

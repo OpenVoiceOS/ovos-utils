@@ -2,16 +2,15 @@ try:
     import alsaaudio
 except ImportError:
     alsaaudio = None
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, deprecated
 
 
 class AlsaControl:
     _mixer = None
 
+    @deprecated("This class is deprecated! Controls moved to "
+                "ovos_phal_plugin_alsa.AlsaVolumeControlPlugin", "0.1.0")
     def __init__(self, control=None):
-        # TODO: Deprecate class in 0.1
-        LOG.warning(f"This class is deprecated! Controls moved to"
-                    f"ovos_phal_plugin_alsa.AlsaVolumeControlPlugin")
         if alsaaudio is None:
             LOG.error("pyalsaaudio not installed")
             LOG.info("Run pip install pyalsaaudio==0.8.2")
