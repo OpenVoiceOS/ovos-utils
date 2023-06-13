@@ -1,8 +1,25 @@
 # Changelog
 
-## [0.0.34a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.34a3) (2023-06-09)
+## [0.0.34a5](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.34a5) (2023-06-13)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a2...0.0.34a3)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a3...0.0.34a5)
+
+**Implemented enhancements:**
+
+- Add deprecation log helpers [\#161](https://github.com/OpenVoiceOS/ovos-utils/pull/161) ([NeonDaniel](https://github.com/NeonDaniel))
+- bus upload qml [\#140](https://github.com/OpenVoiceOS/ovos-utils/pull/140) ([JarbasAl](https://github.com/JarbasAl))
+
+**Fixed bugs:**
+
+- Codecov automation [\#159](https://github.com/OpenVoiceOS/ovos-utils/pull/159) ([NeonDaniel](https://github.com/NeonDaniel))
+
+**Merged pull requests:**
+
+- Fix codecov automation [\#160](https://github.com/OpenVoiceOS/ovos-utils/pull/160) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.34a3](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a3) (2023-06-09)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a2...V0.0.34a3)
 
 **Fixed bugs:**
 
