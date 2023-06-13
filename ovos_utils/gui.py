@@ -1,3 +1,4 @@
+from os import walk
 from typing import List, Union, Optional, Callable, Any
 
 import time
@@ -499,8 +500,18 @@ class GUIInterface:
         text: sessionData.time
     """
 
-    def __init__(self, skill_id, bus=None, remote_server=None, config=None,
-                 resource_dir=None):
+    def __init__(self, skill_id: str, bus = None,
+                 remote_server: str = None, config: dict = None,
+                 ui_directories: dict = None):
+        """
+        Create an interface to the GUI module. Values set here are exposed to
+        the GUI client as sessionData
+        @param skill_id: ID of this interface
+        @param bus: MessagebusClient object to connect to
+        @param remote_server: Optional URL of a remote GUI server
+        @param config: dict gui Configuration
+        @param ui_directories: dict framework to directory containing resources
+        """
         if not config:
             LOG.warning(f"Expected a dict config and got None. This config"
                         f"fallback behavior will be deprecated in a future "
@@ -521,7 +532,7 @@ class GUIInterface:
         self._skill_id = skill_id
         self.on_gui_changed_callback = None
         self._events = []
-        self.resource_dir = resource_dir
+        self.ui_directories = ui_directories
         if bus:
             self.set_bus(bus)
 
@@ -540,6 +551,9 @@ class GUIInterface:
 
     @property
     def bus(self):
+        """
+        Return the attached MessageBusClient
+        """
         return self._bus
 
     @bus.setter
@@ -548,6 +562,9 @@ class GUIInterface:
 
     @property
     def skill_id(self) -> str:
+        """
+        Return the ID of the module implementing this interface
+        """
         return self._skill_id
 
     @skill_id.setter
@@ -557,23 +574,23 @@ class GUIInterface:
     @property
     def page(self) -> Optional[str]:
         """
-        Return the current page
+        Return the active GUI page (file path) to show
         """
-        # the active GUI page (e.g. QML template) to show
         return self.pages[self.current_page_idx] if len(self.pages) else None
 
     @property
     def connected(self) -> bool:
         """
         Returns True if at least 1 remote gui is connected or if gui is
-        installed and running locally, else False"""
+        installed and running locally, else False
+        """
         if not self.bus:
             return False
         return can_use_gui(self.bus)
 
     def build_message_type(self, event: str) -> str:
         """
-        Builds a message matching the output from the enclosure.
+        Ensure the specified event prepends this interface's `skill_id`
         """
         if not event.startswith(f'{self.skill_id}.'):
             event = f'{self.skill_id}.' + event
@@ -587,6 +604,35 @@ class GUIInterface:
         msg_type = self.build_message_type('set')
         self.bus.on(msg_type, self.gui_set)
         self._events.append((msg_type, self.gui_set))
+        self.bus.on("gui.request_page_upload", self.upload_gui_pages)
+
+    def upload_gui_pages(self, message: Message):
+        """
+        Emit a response Message with all known GUI resources managed by
+        this interface.
+        @param message: `gui.request_page_upload` Message requesting pages
+        """
+        if not self.ui_directories:
+            LOG.debug("No UI resources to upload")
+            return
+        request_res_type = message.data.get("framework", "qt5")
+        if request_res_type not in self.ui_directories:
+            LOG.warning(f"Requested UI files not available: {request_res_type}")
+            return
+
+        pages = dict()
+        res_dir = self.ui_directories[request_res_type]
+        for path, _, files in walk(res_dir):
+            for file in files:
+                full_path: str = join(path, file)
+                rel_path = full_path.replace(f"{res_dir}/", "", 1)
+                fname = join(self.skill_id, rel_path)
+                with open(full_path, 'r') as f:
+                    pages[fname] = f.read()
+
+        self.bus.emit(message.forward("gui.page.upload",
+                                      {"__from": self.skill_id,
+                                       "pages": pages}))
 
     def register_handler(self, event: str, handler: Callable):
         """
@@ -654,10 +700,8 @@ class GUIInterface:
         """Implements get part of dict-like behaviour with named keys."""
         return self.__session_data[key]
 
-    def get(self, *args, **kwargs) -> Any:
-        """
-        Implements the get method for accessing dict keys.
-        """
+    def get(self, *args, **kwargs):
+        """Implements the get method for accessing dict keys."""
         return self.__session_data.get(*args, **kwargs)
 
     def __contains__(self, key):
@@ -778,7 +822,10 @@ class GUIInterface:
         data.update({'__from': self.skill_id})
         LOG.debug(f"Updating gui data: {data}")
         self.bus.emit(Message("gui.value.set", data))
+
         page_urls = self._pages2uri(page_names)
+
+        # finally tell gui what to show
         self.bus.emit(Message("gui.page.show",
                               {"page": page_urls,
                                "index": index,
@@ -822,6 +869,7 @@ class GUIInterface:
         Arguments:
             content (str): Main text content of a notification, Limited
             to two visual lines.
+            duration (int): seconds to display notification for
             action (str): Callback to any event registered by the skill
             to perform a certain action when notification is clicked.
             noticetype (str):
