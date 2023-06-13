@@ -9,7 +9,7 @@ from pyee import BaseEventEmitter
 
 from ovos_utils import create_loop
 from ovos_utils.json_helper import merge_dict
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, log_deprecation
 from ovos_utils.metrics import Stopwatch
 
 _DEFAULT_WS_CONFIG = {"host": "0.0.0.0",
@@ -306,8 +306,8 @@ class FakeMessage(metaclass=_MutableMessage):
 
 class Message(FakeMessage):
     def __int__(self, *args, **kwargs):
-        LOG.warning(f"This reference is deprecated, import from "
-                    f"`ovos_bus_client.message` directly")
+        log_deprecation(f"Import from ovos_bus_client.message directly",
+                        "0.1.0")
         FakeMessage.__init__(self, *args, **kwargs)
 
 
@@ -756,9 +756,7 @@ class BusFeedProvider:
                 bus (WebsocketClient): mycroft messagebus websocket
         """
         if not config:
-            LOG.warning(f"Expected a dict config and got None. This config"
-                        f"fallback behavior will be deprecated in a future "
-                        f"release")
+            log_deprecation(f"Expected a dict config and got None.", "0.1.0")
             try:
                 from ovos_config.config import read_mycroft_config
                 config = read_mycroft_config()
@@ -909,6 +907,7 @@ class BusFeedConsumer:
         self.name = name or self.__class__.__name__
         self.bus = bus or get_mycroft_bus()
         if not config:
+            log_deprecation(f"Expected a dict config and got None.", "0.1.0")
             try:
                 from ovos_config.config import read_mycroft_config
                 config = read_mycroft_config()

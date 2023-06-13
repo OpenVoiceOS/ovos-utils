@@ -1,17 +1,17 @@
 import subprocess
 import re
 import collections
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, deprecated
 
 
 class PulseAudio:
     volume_re = re.compile('^set-sink-volume ([^ ]+) (.*)')
     mute_re = re.compile('^set-sink-mute ([^ ]+) ((?:yes)|(?:no))')
 
+    @deprecated("This class is deprecated! Controls moved to "
+                "ovos_phal_plugin_pulseaudio.PulseAudioVolumeControlPlugin",
+                "0.1.0")
     def __init__(self):
-        # TODO: Deprecate class in 0.1
-        LOG.warning(f"This class is deprecated! Controls moved to"
-                    f"ovos_phal_plugin_pulseaudio.PulseAudioVolumeControlPlugin")
         self._mute = collections.OrderedDict()
         self._volume = collections.OrderedDict()
         self.update()
