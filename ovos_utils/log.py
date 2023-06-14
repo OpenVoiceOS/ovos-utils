@@ -206,7 +206,7 @@ def log_deprecation(log_message: str = "DEPRECATED",
             origin_module = name
             log_name = f"{LOG.name} - {name}:{func_name or call[3]}:{call[2]}"
             continue
-        elif log_name == LOG.name and name == origin_module:
+        elif log_name == LOG.name:
             # Decorator provided origin module name, update the log name
             log_name = f"{LOG.name} - {name}:{func_name or call[3]}:{call[2]}"
         if excluded_package_refs and any((name.startswith(x) for x in
