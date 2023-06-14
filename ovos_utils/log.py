@@ -193,7 +193,8 @@ def log_deprecation(log_message: str = "DEPRECATED",
     stack = inspect.stack()[1:]  # [0] is this method
     call_info = "Unknown Origin"
     origin_module = func_module
-    log_name = LOG.name
+    log_name = f"{LOG.name} - {func_module}:{func_name}" if \
+        func_module and func_name else LOG.name
     for call in stack:
         module = inspect.getmodule(call.frame)
         name = module.__name__ if module else call.filename
@@ -206,9 +207,6 @@ def log_deprecation(log_message: str = "DEPRECATED",
             origin_module = name
             log_name = f"{LOG.name} - {name}:{func_name or call[3]}:{call[2]}"
             continue
-        elif log_name == LOG.name:
-            # Decorator provided origin module name, update the log name
-            log_name = f"{LOG.name} - {name}:{func_name or call[3]}:{call[2]}"
         if excluded_package_refs and any((name.startswith(x) for x in
                                           excluded_package_refs)):
             continue
