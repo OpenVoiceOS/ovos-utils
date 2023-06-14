@@ -202,9 +202,13 @@ def log_deprecation(log_message: str = "DEPRECATED",
             # Skip calls from this module and unittests to get at real origin
             continue
         if not origin_module:
+            # Assume first outside call is the origin if not specified
             origin_module = name
             log_name = f"{LOG.name} - {name}:{func_name or call[3]}:{call[2]}"
             continue
+        elif log_name == LOG.name and name == origin_module:
+            # Decorator provided origin module name, update the log name
+            log_name = f"{LOG.name} - {name}:{func_name or call[3]}:{call[2]}"
         if excluded_package_refs and any((name.startswith(x) for x in
                                           excluded_package_refs)):
             continue
