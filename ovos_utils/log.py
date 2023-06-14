@@ -16,7 +16,7 @@ import os
 import sys
 from logging.handlers import RotatingFileHandler
 from os.path import join
-
+from typing import List
 
 class LOG:
     """
@@ -174,13 +174,17 @@ def init_service_logger(service_name):
 
 def log_deprecation(log_message: str = "DEPRECATED",
                     deprecation_version: str = "Unknown",
-                    func_name: str = None):
+                    func_name: str = None,
+                    excluded_package_refs: List[str] = None):
     """
     Log a deprecation warning with information for the call outside the module
     that is generating the warning
     @param log_message: Log contents describing the deprecation
-    @param func_name: decorated function name (else read from stack)
     @param deprecation_version: package version in which method will be deprecated
+    @param func_name: decorated function name (else read from stack)
+    @param excluded_package_refs: list of packages to exclude from call origin
+        determination. i.e. an internal exception handling method should log the
+        first call external to that package
     """
     import inspect
     stack = inspect.stack()[1:]  # [0] is this method
@@ -198,12 +202,16 @@ def log_deprecation(log_message: str = "DEPRECATED",
             origin_module = name
             log_name = f"{LOG.name} - {name}:{func_name or call[3]}:{call[2]}"
             continue
+        if excluded_package_refs and any((name.startswith(x) for x in
+                                          excluded_package_refs)):
+            continue
         if not name.startswith(origin_module):
             call_info = f"{name}:{call.lineno}"
             break
     # Explicitly format log to print origin log reference
     LOG.create_logger(log_name).warning(
-        f"Deprecation version={deprecation_version}. Caller={call_info}. {log_message}")
+        f"Deprecation version={deprecation_version}. Caller={call_info}. "
+        f"{log_message}")
 
 
 def deprecated(log_message: str, deprecation_version: str):
