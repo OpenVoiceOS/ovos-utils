@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.34a6](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.34a6) (2023-06-14)
+## [0.0.34a7](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.34a7) (2023-06-14)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a5...0.0.34a6)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a6...0.0.34a7)
+
+**Merged pull requests:**
+
+- Add options to deprecation logging to configure logged caller [\#163](https://github.com/OpenVoiceOS/ovos-utils/pull/163) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.34a6](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a6) (2023-06-14)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a5...V0.0.34a6)
 
 **Fixed bugs:**
 
