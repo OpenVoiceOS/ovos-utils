@@ -530,7 +530,7 @@ class GUIInterface:
         self._skill_id = skill_id
         self.on_gui_changed_callback = None
         self._events = []
-        self.ui_directories = ui_directories
+        self.ui_directories = ui_directories or dict()
         if bus:
             self.set_bus(bus)
 
@@ -744,7 +744,7 @@ class GUIInterface:
     def _pages2uri(self, page_names: List[str]) -> List[str]:
         # Convert pages to full reference
         page_urls = []
-        extra_dirs = [self.resource_dir] or list()
+        extra_dirs = list(self.ui_directories.values()) or list()
         for name in page_names:
             # Prefer plugin-specific resources first, then fallback to core
             page = resolve_ovos_resource_file(name, extra_dirs) or \
