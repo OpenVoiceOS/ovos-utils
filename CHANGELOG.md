@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.34a5](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.34a5) (2023-06-13)
+## [0.0.34a6](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.34a6) (2023-06-14)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a3...0.0.34a5)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a5...0.0.34a6)
+
+**Fixed bugs:**
+
+- Fix compat. with `pages2uri` extra\_directories [\#162](https://github.com/OpenVoiceOS/ovos-utils/pull/162) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.34a5](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a5) (2023-06-13)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a3...V0.0.34a5)
 
 **Implemented enhancements:**
 
