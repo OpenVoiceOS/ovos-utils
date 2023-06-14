@@ -744,7 +744,7 @@ class GUIInterface:
     def _pages2uri(self, page_names: List[str]) -> List[str]:
         # Convert pages to full reference
         page_urls = []
-        extra_dirs = [self.ui_directories.values()] or list()
+        extra_dirs = list(self.ui_directories.values()) or list()
         for name in page_names:
             # Prefer plugin-specific resources first, then fallback to core
             page = resolve_ovos_resource_file(name, extra_dirs) or \
