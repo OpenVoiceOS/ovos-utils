@@ -57,8 +57,8 @@ def get_external_ip() -> str:
     try:
         return requests.get(cfg.get("ip_url") or
                             _DEFAULT_TEST_CONFIG['ip_url']).text
-    except ConnectionError:
-        LOG.error(f"Unable to get external IP Address")
+    except Exception as e:
+        LOG.error(f"Unable to get external IP Address: {e}")
     return "0.0.0.0"
 
 
