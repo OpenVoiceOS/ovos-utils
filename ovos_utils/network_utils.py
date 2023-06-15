@@ -55,8 +55,11 @@ def get_external_ip() -> str:
     """
     cfg = get_network_tests_config()
     try:
-        return requests.get(cfg.get("ip_url") or
-                            _DEFAULT_TEST_CONFIG['ip_url']).text
+        resp = requests.get(cfg.get("ip_url") or
+                            _DEFAULT_TEST_CONFIG['ip_url'])
+        if resp.ok:
+            return resp.text
+        LOG.error(f"Got resp={resp.status_code}: {resp.text}")
     except Exception as e:
         LOG.error(f"Unable to get external IP Address: {e}")
     return "0.0.0.0"
