@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.34a9](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.34a9) (2023-06-15)
+## [0.0.34](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.34) (2023-06-15)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a8...0.0.34a9)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a9...0.0.34)
+
+**Merged pull requests:**
+
+- Fix dev branch coverage action [\#166](https://github.com/OpenVoiceOS/ovos-utils/pull/166) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.34a9](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a9) (2023-06-15)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a8...V0.0.34a9)
 
 **Merged pull requests:**
 
