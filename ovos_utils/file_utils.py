@@ -6,7 +6,6 @@ import tempfile
 from threading import RLock
 from typing import Optional, List
 
-import time
 from os import walk
 from os.path import dirname
 from os.path import splitext, join
@@ -15,7 +14,7 @@ from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 from ovos_utils.bracket_expansion import expand_options
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, log_deprecation
 from ovos_utils.system import search_mycroft_core_location
 
 
@@ -64,7 +63,8 @@ def get_cache_directory(folder: str) -> str:
     return path
 
 
-def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
+def resolve_ovos_resource_file(res_name: str,
+                               extra_res_dirs: list = None) -> Optional[str]:
     """
     Convert a resource into an absolute filename.
     used internally for ovos resources
@@ -72,6 +72,12 @@ def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
     # First look for fully qualified file (e.g. a user setting)
     if os.path.isfile(res_name):
         return res_name
+
+    if extra_res_dirs:
+        for res_dir in extra_res_dirs:
+            filename = join(res_dir, res_name)
+            if os.path.isfile(filename):
+                return filename
 
     # now look in bundled ovos-utils resources
     filename = join(dirname(__file__), "res", res_name)
@@ -86,7 +92,7 @@ def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
         filename = join(core_root, "res", res_name)
         if os.path.isfile(filename):
             return filename
-    except:
+    except ImportError:
         pass
 
     # let's look in ovos_gui if it's installed
@@ -97,7 +103,7 @@ def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
         filename = join(core_root, "res", res_name)
         if os.path.isfile(filename):
             return filename
-    except:
+    except ImportError:
         pass
 
     # let's look in mycroft/ovos-core if it's installed
@@ -108,7 +114,7 @@ def resolve_ovos_resource_file(res_name: str) -> Optional[str]:
         filename = join(core_root, "res", res_name)
         if os.path.isfile(filename):
             return filename
-    except:
+    except ImportError:
         pass
 
     return None  # Resource cannot be resolved
@@ -143,8 +149,7 @@ def resolve_resource_file(res_name: str, root_path: Optional[str] = None,
         str: path to resource or None if no resource found
     """
     if config is None:
-        LOG.warning(f"Expected a dict config and got None. This config"
-                    f"fallback behavior will be deprecated in a future release")
+        log_deprecation(f"Expected a dict config and got None.", "0.1.0")
         try:
             from ovos_config.config import read_mycroft_config
             config = read_mycroft_config()

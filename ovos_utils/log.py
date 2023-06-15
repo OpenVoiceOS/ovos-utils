@@ -10,13 +10,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import functools
 import inspect
 import logging
 import os
 import sys
 from logging.handlers import RotatingFileHandler
 from os.path import join
-
+from typing import List
 
 class LOG:
     """
@@ -170,3 +171,68 @@ def init_service_logger(service_name):
     _logs_conf["level"] = _log_level
     LOG.name = service_name
     LOG.init(_logs_conf)  # read log level from config
+
+
+def log_deprecation(log_message: str = "DEPRECATED",
+                    deprecation_version: str = "Unknown",
+                    func_name: str = None,
+                    func_module: str = None,
+                    excluded_package_refs: List[str] = None):
+    """
+    Log a deprecation warning with information for the call outside the module
+    that is generating the warning
+    @param log_message: Log contents describing the deprecation
+    @param deprecation_version: package version in which method will be deprecated
+    @param func_name: decorated function name (else read from stack)
+    @param func_module: decorated function module (else read from stack)
+    @param excluded_package_refs: list of packages to exclude from call origin
+        determination. i.e. an internal exception handling method should log the
+        first call external to that package
+    """
+    import inspect
+    stack = inspect.stack()[1:]  # [0] is this method
+    call_info = "Unknown Origin"
+    origin_module = func_module
+    log_name = f"{LOG.name} - {func_module}:{func_name}" if \
+        func_module and func_name else LOG.name
+    for call in stack:
+        module = inspect.getmodule(call.frame)
+        name = module.__name__ if module else call.filename
+        if any((name if name.startswith(x) else None
+                for x in ("ovos_utils.log", "<"))):
+            # Skip calls from this module and unittests to get at real origin
+            continue
+        if not origin_module:
+            # Assume first outside call is the origin if not specified
+            origin_module = name
+            log_name = f"{LOG.name} - {name}:{func_name or call[3]}:{call[2]}"
+            continue
+        if excluded_package_refs and any((name.startswith(x) for x in
+                                          excluded_package_refs)):
+            continue
+        if not name.startswith(origin_module):
+            call_info = f"{name}:{call.lineno}"
+            break
+    # Explicitly format log to print origin log reference
+    LOG.create_logger(log_name).warning(
+        f"Deprecation version={deprecation_version}. Caller={call_info}. "
+        f"{log_message}")
+
+
+def deprecated(log_message: str, deprecation_version: str):
+    """
+    Decorator to log deprecation on call to deprecated function
+    @param log_message: Deprecation log message
+    @param deprecation_version: package version in which deprecation will occur
+    """
+    def wrapped(func):
+        @functools.wraps(func)
+        def log_wrapper(*args, **kwargs):
+            log_deprecation(log_message=log_message,
+                            func_name=func.__qualname__,
+                            func_module=func.__module__,
+                            deprecation_version=deprecation_version)
+            return func(*args, **kwargs)
+        return log_wrapper
+
+    return wrapped

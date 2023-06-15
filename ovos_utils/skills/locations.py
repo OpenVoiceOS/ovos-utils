@@ -3,7 +3,7 @@ from os import makedirs, listdir
 from typing import List, Optional
 from ovos_config.config import read_mycroft_config
 from ovos_config.locations import get_xdg_data_save_path, get_xdg_data_dirs
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, log_deprecation
 
 
 def get_installed_skill_ids(conf: Optional[dict] = None) -> List[str]:
@@ -107,9 +107,9 @@ def get_default_skills_directory(conf: Optional[dict] = None) -> str:
 
     # if .conf wants to use a specific path, use it!
     if path_override:
-        LOG.warning("'directory_override' is deprecated!\n"
-                    "It will no longer be supported after version 0.0.3\n"
-                    "add the new path to 'extra_directories' instead")
+        log_deprecation("'directory_override' is deprecated!"
+                        "add the new path to 'extra_directories' instead",
+                        "0.1.0")
         skills_folder = expanduser(path_override)
     elif conf["skills"].get("extra_directories") and \
             len(conf["skills"].get("extra_directories")) > 0:

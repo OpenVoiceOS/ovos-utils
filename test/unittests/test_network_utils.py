@@ -22,7 +22,7 @@ class TestNetworkUtils(unittest.TestCase):
         from ovos_utils.network_utils import get_external_ip
         ip_addr = get_external_ip()
         self.assertIsInstance(ip_addr, str)
-        self.assertEqual(len(ip_addr.split('.')), 4)
+        self.assertEqual(len(ip_addr.split('.')), 4, ip_addr)
 
     def test_is_connected_dns(self):
         from ovos_utils.network_utils import is_connected_dns

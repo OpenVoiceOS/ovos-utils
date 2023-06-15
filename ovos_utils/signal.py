@@ -5,7 +5,7 @@ import os
 import os.path
 
 
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, log_deprecation
 
 
 def get_ipc_directory(domain=None, config=None):
@@ -23,6 +23,7 @@ def get_ipc_directory(domain=None, config=None):
         str: a path to the IPC directory
     """
     if config is None:
+        log_deprecation(f"Expected a dict config and got None.", "0.1.0")
         try:
             from ovos_config.config import read_mycroft_config
             config = read_mycroft_config()

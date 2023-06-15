@@ -1,7 +1,7 @@
 from ovos_config.config import read_mycroft_config, update_mycroft_config
 from ovos_utils.messagebus import wait_for_reply
 from ovos_utils.skills.locations import get_default_skills_directory, get_installed_skill_ids
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, deprecated
 
 
 def get_non_properties(obj):
@@ -70,10 +70,9 @@ def whitelist_skill(skill, config=None):
     return False
 
 
+@deprecated("This method is deprecated. Skills are now loaded based on "
+            "`runtime_requirements`", "0.1.0")
 def make_priority_skill(skill, config=None):
-    # TODO: Deprecate in 0.1.0
-    LOG.warning("This method is deprecated. Skills are now loaded based on "
-                "`runtime_requirements`")
     # config = config or read_mycroft_config()
     # skills_config = config.get("skills", {})
     # priority_skills = skills_config.get("priority_skills", [])
@@ -89,13 +88,13 @@ def make_priority_skill(skill, config=None):
     return False
 
 
+@deprecated("This reference is deprecated, use "
+            "`ovos_utils.skills.locations.get_default_skill_dir", "0.1.0")
 def get_skills_folder(config=None):
-    LOG.warning("This reference is deprecated, use "
-                "`ovos_utils.skills.locations.get_default_skill_dir")
     return get_default_skills_directory(config)
 
 
+@deprecated("This reference is deprecated, use "
+            "`ovos_utils.skills.locations.get_installed_skill_ids", "0.1.0")
 def get_installed_skills(config=None):
-    LOG.warning("This reference is deprecated, use "
-                "`ovos_utils.skills.locations.get_installed_skill_ids")
     return get_installed_skill_ids(config)
