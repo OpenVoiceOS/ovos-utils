@@ -35,24 +35,34 @@ def get_ip() -> str:
     taken from https://stackoverflow.com/a/28950776/13703283
     """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(10)
     try:
         # doesn't even have to be reachable
         s.connect(('10.255.255.255', 1))
-        IP = s.getsockname()[0]
-    except Exception:
-        IP = '127.0.0.1'
+        ip = s.getsockname()[0]
+    except Exception as e:
+        LOG.error(e)
+        ip = '127.0.0.1'
     finally:
         s.close()
-    return IP
+    return ip
 
 
-def get_external_ip():
+def get_external_ip() -> str:
     """
-    Get the public IPv4 address of this device
+    Get the public IPv4 address of this device. If a public IP address cannot be
+    determined, returns the public localhost address: `0.0.0.0`
     """
     cfg = get_network_tests_config()
-    return requests.get(cfg.get("ip_url") or
-                        _DEFAULT_TEST_CONFIG['ip_url']).text
+    try:
+        resp = requests.get(cfg.get("ip_url") or
+                            _DEFAULT_TEST_CONFIG['ip_url'])
+        if resp.ok:
+            return resp.text
+        LOG.error(f"Got resp={resp.status_code}: {resp.text}")
+    except Exception as e:
+        LOG.error(f"Unable to get external IP Address: {e}")
+    return "0.0.0.0"
 
 
 def is_connected_dns(host: Optional[str] = None, port: int = 53,
