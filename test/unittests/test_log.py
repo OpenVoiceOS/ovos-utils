@@ -90,13 +90,18 @@ class TestLog(unittest.TestCase):
         from ovos_utils.log import deprecated
         import sys
         sys.path.insert(0, dirname(__file__))
-        from deprecation_helper import deprecated_function
+        from deprecation_helper import deprecated_function, Deprecated
         deprecated_function()
         log_warning.assert_called_once()
         log_msg = log_warning.call_args[0][0]
         self.assertIn('version=0.1.0', log_msg, log_msg)
-        self.assertIn('test_log:', log_msg, log_msg)
+        self.assertIn('test_log', log_msg, log_msg)
         self.assertIn('imported deprecation', log_msg, log_msg)
+
+        test_class = Deprecated()
+        log_msg = log_warning.call_args[0][0]
+        self.assertIn('version=0.2.0', log_msg, log_msg)
+        self.assertIn('Class Deprecated', log_msg, log_msg)
 
         call_arg = None
 

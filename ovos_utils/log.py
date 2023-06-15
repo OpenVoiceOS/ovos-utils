@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import functools
 import inspect
 import logging
 import os
@@ -175,6 +176,7 @@ def init_service_logger(service_name):
 def log_deprecation(log_message: str = "DEPRECATED",
                     deprecation_version: str = "Unknown",
                     func_name: str = None,
+                    func_module: str = None,
                     excluded_package_refs: List[str] = None):
     """
     Log a deprecation warning with information for the call outside the module
@@ -182,6 +184,7 @@ def log_deprecation(log_message: str = "DEPRECATED",
     @param log_message: Log contents describing the deprecation
     @param deprecation_version: package version in which method will be deprecated
     @param func_name: decorated function name (else read from stack)
+    @param func_module: decorated function module (else read from stack)
     @param excluded_package_refs: list of packages to exclude from call origin
         determination. i.e. an internal exception handling method should log the
         first call external to that package
@@ -189,8 +192,9 @@ def log_deprecation(log_message: str = "DEPRECATED",
     import inspect
     stack = inspect.stack()[1:]  # [0] is this method
     call_info = "Unknown Origin"
-    origin_module = None
-    log_name = LOG.name
+    origin_module = func_module
+    log_name = f"{LOG.name} - {func_module}:{func_name}" if \
+        func_module and func_name else LOG.name
     for call in stack:
         module = inspect.getmodule(call.frame)
         name = module.__name__ if module else call.filename
@@ -199,6 +203,7 @@ def log_deprecation(log_message: str = "DEPRECATED",
             # Skip calls from this module and unittests to get at real origin
             continue
         if not origin_module:
+            # Assume first outside call is the origin if not specified
             origin_module = name
             log_name = f"{LOG.name} - {name}:{func_name or call[3]}:{call[2]}"
             continue
@@ -221,9 +226,13 @@ def deprecated(log_message: str, deprecation_version: str):
     @param deprecation_version: package version in which deprecation will occur
     """
     def wrapped(func):
-        log_deprecation(log_message=log_message,
-                        func_name=func.__name__,
-                        deprecation_version=deprecation_version)
-        return func
+        @functools.wraps(func)
+        def log_wrapper(*args, **kwargs):
+            log_deprecation(log_message=log_message,
+                            func_name=func.__qualname__,
+                            func_module=func.__module__,
+                            deprecation_version=deprecation_version)
+            return func(*args, **kwargs)
+        return log_wrapper
 
     return wrapped

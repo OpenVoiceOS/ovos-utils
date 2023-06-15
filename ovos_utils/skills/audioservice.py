@@ -224,7 +224,7 @@ class AudioServiceInterface(ClassicAudioServiceInterface):
     """
 
     @deprecated("AudioServiceInterface has been deprecated, compatibility "
-                "layer in use\nplease move to OCPInterface", "0.1.0")
+                "layer in use. please move to OCPInterface", "0.1.0")
     def __init__(self, bus=None):
         super().__init__(bus)
 
