@@ -228,12 +228,8 @@ def deprecated(log_message: str, deprecation_version: str):
     def wrapped(func):
         @functools.wraps(func)
         def log_wrapper(*args, **kwargs):
-            if hasattr(func, "__self__"):
-                name = f"{func.__self__.__name__}.{func.__name__}"
-            else:
-                name = func.__name__
             log_deprecation(log_message=log_message,
-                            func_name=name,
+                            func_name=func.__qualname__,
                             func_module=func.__module__,
                             deprecation_version=deprecation_version)
             return func(*args, **kwargs)
