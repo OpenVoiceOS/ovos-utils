@@ -48,13 +48,18 @@ def get_ip() -> str:
     return ip
 
 
-def get_external_ip():
+def get_external_ip() -> str:
     """
-    Get the public IPv4 address of this device
+    Get the public IPv4 address of this device. If a public IP address cannot be
+    determined, returns the public localhost address: `0.0.0.0`
     """
     cfg = get_network_tests_config()
-    return requests.get(cfg.get("ip_url") or
-                        _DEFAULT_TEST_CONFIG['ip_url']).text
+    try:
+        return requests.get(cfg.get("ip_url") or
+                            _DEFAULT_TEST_CONFIG['ip_url']).text
+    except ConnectionError:
+        LOG.error(f"Unable to get external IP Address")
+    return "0.0.0.0"
 
 
 def is_connected_dns(host: Optional[str] = None, port: int = 53,
