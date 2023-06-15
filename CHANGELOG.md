@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.34a8](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.34a8) (2023-06-15)
+## [0.0.34a9](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.34a9) (2023-06-15)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a7...0.0.34a8)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a8...0.0.34a9)
+
+**Merged pull requests:**
+
+- Add timeout to `get_ip` to prevent tests failing on timeout [\#165](https://github.com/OpenVoiceOS/ovos-utils/pull/165) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.34a8](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a8) (2023-06-15)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a7...V0.0.34a8)
 
 **Merged pull requests:**
 
