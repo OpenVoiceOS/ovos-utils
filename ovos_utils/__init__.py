@@ -26,6 +26,39 @@ from ovos_utils.network_utils import get_ip, get_external_ip, is_connected_dns, 
 from ovos_utils.log import LOG, deprecated
 
 
+def threaded_timeout(timeout=5):
+    """decorator to run a function in a thread with timeout 
+    adapted from https://github.com/OpenJarbas/InGeo"""
+    
+    def deco(func):
+        
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            res = [Exception(f'function [{func.__name__}] timeout [{timeout}] exceeded!')]
+
+            def func_wrapped():
+                try:
+                    res[0] = func(*args, **kwargs)
+                except Exception as e:
+                    res[0] = e
+
+            t = Thread(target=func_wrapped)
+            t.daemon = True
+            try:
+                t.start()
+                t.join(timeout)
+            except Exception as je:
+                raise je
+            ret = res[0]
+            if isinstance(ret, BaseException):
+                raise ret
+            return ret
+
+        return wrapper
+
+    return deco
+
+
 class classproperty(property):
     """Decorator for a Class-level property.
     Credit to Denis Rhyzhkov on Stackoverflow: https://stackoverflow.com/a/13624858/1280629"""
