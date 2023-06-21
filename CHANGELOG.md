@@ -1,89 +1,13 @@
 # Changelog
 
-## [0.0.34](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.34) (2023-06-15)
+## [0.0.35a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.35a1) (2023-06-21)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a9...0.0.34)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34...0.0.35a1)
 
 **Merged pull requests:**
 
+- Add unit tests for shutdown/restart [\#170](https://github.com/OpenVoiceOS/ovos-utils/pull/170) ([NeonDaniel](https://github.com/NeonDaniel))
 - Fix dev branch coverage action [\#166](https://github.com/OpenVoiceOS/ovos-utils/pull/166) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.34a9](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a9) (2023-06-15)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a8...V0.0.34a9)
-
-**Merged pull requests:**
-
-- Add timeout to `get_ip` to prevent tests failing on timeout [\#165](https://github.com/OpenVoiceOS/ovos-utils/pull/165) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.34a8](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a8) (2023-06-15)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a7...V0.0.34a8)
-
-**Merged pull requests:**
-
-- Cleanup deprecation logs [\#164](https://github.com/OpenVoiceOS/ovos-utils/pull/164) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.34a7](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a7) (2023-06-14)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a6...V0.0.34a7)
-
-**Merged pull requests:**
-
-- Add options to deprecation logging to configure logged caller [\#163](https://github.com/OpenVoiceOS/ovos-utils/pull/163) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.34a6](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a6) (2023-06-14)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a5...V0.0.34a6)
-
-**Fixed bugs:**
-
-- Fix compat. with `pages2uri` extra\_directories [\#162](https://github.com/OpenVoiceOS/ovos-utils/pull/162) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.34a5](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a5) (2023-06-13)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a3...V0.0.34a5)
-
-**Implemented enhancements:**
-
-- Add deprecation log helpers [\#161](https://github.com/OpenVoiceOS/ovos-utils/pull/161) ([NeonDaniel](https://github.com/NeonDaniel))
-- bus upload qml [\#140](https://github.com/OpenVoiceOS/ovos-utils/pull/140) ([JarbasAl](https://github.com/JarbasAl))
-
-**Fixed bugs:**
-
-- Codecov automation [\#159](https://github.com/OpenVoiceOS/ovos-utils/pull/159) ([NeonDaniel](https://github.com/NeonDaniel))
-
-**Merged pull requests:**
-
-- Fix codecov automation [\#160](https://github.com/OpenVoiceOS/ovos-utils/pull/160) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.34a3](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a3) (2023-06-09)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a2...V0.0.34a3)
-
-**Fixed bugs:**
-
-- Annotate GUI Module and refactor resource resolution [\#158](https://github.com/OpenVoiceOS/ovos-utils/pull/158) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.34a2](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a2) (2023-06-08)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a1...V0.0.34a2)
-
-**Merged pull requests:**
-
-- Troubleshooting GUI shell plugin resource file resolution [\#157](https://github.com/OpenVoiceOS/ovos-utils/pull/157) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.34a1](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a1) (2023-06-08)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33...V0.0.34a1)
-
-**Fixed bugs:**
-
-- Event Scheduler Interface tests [\#156](https://github.com/OpenVoiceOS/ovos-utils/pull/156) ([NeonDaniel](https://github.com/NeonDaniel))
-
-**Merged pull requests:**
-
-- Add unit test coverage for SkillApi [\#145](https://github.com/OpenVoiceOS/ovos-utils/pull/145) ([NeonDaniel](https://github.com/NeonDaniel))
 
 
 
