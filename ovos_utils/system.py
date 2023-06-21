@@ -65,6 +65,7 @@ def system_shutdown(sudo=True):
     cmd = ['systemctl', 'poweroff', '-i']
     if sudo:
         cmd.insert(0, 'sudo')
+    LOG.debug(cmd)
     subprocess.call(cmd, shell=True)
 
 
@@ -76,6 +77,7 @@ def system_reboot(sudo=True):
     cmd = ['systemctl', 'reboot', '-i']
     if sudo:
         cmd.insert(0, 'sudo')
+    LOG.debug(cmd)
     subprocess.call(cmd, shell=True)
 
 
