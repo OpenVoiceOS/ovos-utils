@@ -62,9 +62,9 @@ def system_shutdown(sudo=True):
     Turn the system completely off (with no option to inhibit it)
     @param sudo: use sudo when calling systemctl
     """
-    cmd = 'systemctl poweroff -i'
+    cmd = ['systemctl', 'poweroff', '-i']
     if sudo:
-        cmd = f'sudo {cmd}'
+        cmd.insert(0, 'sudo')
     subprocess.call(cmd, shell=True)
 
 
@@ -73,9 +73,9 @@ def system_reboot(sudo=True):
     Shut down and restart the system
     @param sudo: use sudo when calling systemctl
     """
-    cmd = 'systemctl reboot -i'
+    cmd = ['systemctl', 'reboot', '-i']
     if sudo:
-        cmd = f'sudo {cmd}'
+        cmd.insert(0, 'sudo')
     subprocess.call(cmd, shell=True)
 
 
