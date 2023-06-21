@@ -16,19 +16,17 @@ class TestSystem(unittest.TestCase):
     def test_system_shutdown(self, popen):
         from ovos_utils.system import system_shutdown
         system_shutdown()
-        popen.assert_called_with(["sudo", "systemctl", "poweroff", "-i"],
-                                 shell=True)
+        popen.assert_called_with("sudo systemctl poweroff -i", shell=True)
         system_shutdown(False)
-        popen.assert_called_with(["systemctl", "poweroff", "-i"], shell=True)
+        popen.assert_called_with("systemctl poweroff -i", shell=True)
 
     @patch("subprocess.Popen")
     def test_system_reboot(self, popen):
         from ovos_utils.system import system_reboot
         system_reboot()
-        popen.assert_called_with(["sudo", "systemctl", "reboot", "-i"],
-                                 shell=True)
+        popen.assert_called_with("sudo systemctl reboot -i", shell=True)
         system_reboot(False)
-        popen.assert_called_with(["systemctl", "reboot", "-i"], shell=True)
+        popen.assert_called_with("systemctl reboot -i", shell=True)
 
     def test_ssh_enable(self):
         # TODO
