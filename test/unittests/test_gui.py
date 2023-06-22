@@ -129,6 +129,7 @@ class TestGuiInterface(unittest.TestCase):
         self.assertEqual(msg.context['context'], message.context['context'])
         self.assertEqual(msg.msg_type, "gui.page.upload")
         self.assertEqual(msg.data['__from'], self.iface_name)
+        self.assertEqual(msg.data['res_dir'], 'ui')
 
         pages = msg.data['pages']
         self.assertIsInstance(pages, dict)

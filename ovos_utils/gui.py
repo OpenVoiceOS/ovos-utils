@@ -630,7 +630,8 @@ class GUIInterface:
 
         self.bus.emit(message.forward("gui.page.upload",
                                       {"__from": self.skill_id,
-                                       "pages": pages}))
+                                       "pages": pages,
+                                       "res_dir": res_dir}))
 
     def register_handler(self, event: str, handler: Callable):
         """
