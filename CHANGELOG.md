@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.35a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.35a1) (2023-06-21)
+## [0.0.35a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.35a2) (2023-06-28)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34...0.0.35a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a1...0.0.35a2)
+
+**Merged pull requests:**
+
+- hotfix/missing\_value\_qml\_upload [\#173](https://github.com/OpenVoiceOS/ovos-utils/pull/173) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.35a1](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a1) (2023-06-21)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34...V0.0.35a1)
 
 **Merged pull requests:**
 
