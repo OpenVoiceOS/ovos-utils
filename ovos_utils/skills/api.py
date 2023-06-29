@@ -14,6 +14,7 @@
 
 from typing import Dict, Optional
 from ovos_bus_client.message import Message
+from ovos_utils.log import LOG
 
 
 class SkillApi:
@@ -49,11 +50,13 @@ class SkillApi:
                     response = \
                         SkillApi.bus.wait_for_response(method_msg,
                                                        timeout=self.timeout)
-                    if (response and response.data and
-                            'result' in response.data):
-                        return response.data['result']
-                    else:
+                    if not response:
+                        LOG.error(f"Timed out waiting for {method_msg}")
                         return None
+                    elif 'result' not in response.data:
+                        LOG.error(f"missing `result` in: {response.data}")
+                    else:
+                        return response.data['result']
 
                 return method
 
