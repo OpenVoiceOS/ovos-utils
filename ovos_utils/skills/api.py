@@ -30,21 +30,25 @@ class SkillApi:
         """Registers the bus object to use."""
         cls.bus = mycroft_bus
 
-    def __init__(self, method_dict: Dict[str, dict]):
+    def __init__(self, method_dict: Dict[str, dict], timeout: int = 3):
         """
         Initialize a SkillApi for the given methods
         @param method_dict: dict of method name to dict containing:
             `help` - method docstring
             `type` - string Message type associated with this method
+        @param timeout: Seconds to wait for a Skill API response
         """
         self.method_dict = method_dict
+        self.timeout = timeout
         for key in method_dict:
             def get_method(k):
                 def method(*args, **kwargs):
                     m = self.method_dict[k]
                     data = {'args': args, 'kwargs': kwargs}
                     method_msg = Message(m['type'], data)
-                    response = SkillApi.bus.wait_for_response(method_msg)
+                    response = \
+                        SkillApi.bus.wait_for_response(method_msg,
+                                                       timeout=self.timeout)
                     if (response and response.data and
                             'result' in response.data):
                         return response.data['result']
@@ -56,11 +60,12 @@ class SkillApi:
             self.__setattr__(key, get_method(key))
 
     @staticmethod
-    def get(skill: str) -> Optional[object]:
+    def get(skill: str, api_timeout: int = 3) -> Optional[object]:
         """
         Generate a SkillApi object for the requested skill if that skill exposes
         and API methods.
         @param skill: ID of skill to get an API object for
+        @param api_timeout: seconds to wait for a skill API response
         @return: SkillApi object if available, else None
         """
         if not SkillApi.bus:
@@ -69,6 +74,6 @@ class SkillApi:
         public_api_msg = f'{skill}.public_api'
         api = SkillApi.bus.wait_for_response(Message(public_api_msg))
         if api:
-            return SkillApi(api.data)
+            return SkillApi(api.data, api_timeout)
         else:
             return None
