@@ -11,18 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Skill Api
 
-The skill api allows skills interact with eachother over the message bus
-just like interacting with any other object.
-"""
+from typing import Dict, Optional
 from ovos_bus_client.message import Message
 
 
 class SkillApi:
-    """SkillApi providing a simple interface to exported methods from skills
-
-    Methods are built from a method_dict provided when initializing the skill.
+    """
+    SkillApi provides a MessageBus interface to specific registered methods.
+    Methods decorated with `@skill_api_method` are exposed via the messagebus.
+    To use a skill's API methods, call `SkillApi.get` with the requested skill's
+    ID and an object is returned with an interface to all exposed methods.
     """
     bus = None
 
@@ -31,7 +30,13 @@ class SkillApi:
         """Registers the bus object to use."""
         cls.bus = mycroft_bus
 
-    def __init__(self, method_dict):
+    def __init__(self, method_dict: Dict[str, dict]):
+        """
+        Initialize a SkillApi for the given methods
+        @param method_dict: dict of method name to dict containing:
+            `help` - method docstring
+            `type` - string Message type associated with this method
+        """
         self.method_dict = method_dict
         for key in method_dict:
             def get_method(k):
@@ -51,15 +56,17 @@ class SkillApi:
             self.__setattr__(key, get_method(key))
 
     @staticmethod
-    def get(skill):
-        """Generate api object from skill id.
-        Args:
-            skill (str): skill id for target skill
-
-        Returns:
-            SkillApi
+    def get(skill: str) -> Optional[object]:
         """
-        public_api_msg = '{}.public_api'.format(skill)
+        Generate a SkillApi object for the requested skill if that skill exposes
+        and API methods.
+        @param skill: ID of skill to get an API object for
+        @return: SkillApi object if available, else None
+        """
+        if not SkillApi.bus:
+            raise RuntimeError("Requested update before `SkillAPI.bus` is set. "
+                               "Call `SkillAPI.connect_bus` first.")
+        public_api_msg = f'{skill}.public_api'
         api = SkillApi.bus.wait_for_response(Message(public_api_msg))
         if api:
             return SkillApi(api.data)
