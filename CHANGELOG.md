@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.35a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.35a2) (2023-06-28)
+## [0.0.35a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.35a3) (2023-07-04)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a1...0.0.35a2)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a2...0.0.35a3)
+
+**Closed issues:**
+
+- Non-blocking error when running on MacOS natively [\#175](https://github.com/OpenVoiceOS/ovos-utils/issues/175)
+
+## [V0.0.35a2](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a2) (2023-06-28)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a1...V0.0.35a2)
 
 **Merged pull requests:**
 
