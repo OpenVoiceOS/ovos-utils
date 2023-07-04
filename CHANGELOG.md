@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.35a4](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.35a4) (2023-07-04)
+## [0.0.35a5](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.35a5) (2023-07-04)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a3...0.0.35a4)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a4...0.0.35a5)
+
+**Fixed bugs:**
+
+- Fix bug in `dev` branch with refactoring and added unit test [\#176](https://github.com/OpenVoiceOS/ovos-utils/pull/176) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.35a4](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a4) (2023-07-04)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a3...V0.0.35a4)
 
 **Merged pull requests:**
 
