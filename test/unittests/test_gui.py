@@ -1,7 +1,7 @@
 import unittest
-from os.path import join, dirname
+from os.path import join, dirname, isfile
 from threading import Event
-from unittest.mock import patch, call
+from unittest.mock import patch, call, Mock
 
 from ovos_bus_client.message import Message
 
@@ -171,25 +171,177 @@ class TestGuiInterface(unittest.TestCase):
         # TODO
         pass
 
-    def test_pages2uri(self):
-        # TODO
-        pass
+    @patch('ovos_utils.gui.resolve_resource_file')
+    @patch('ovos_utils.gui.resolve_ovos_resource_file')
+    def test_pages2uri(self, ovos_res, res):
+        def _resolve(name, config):
+            self.assertEqual(config, self.interface.config)
+            if name.startswith("ui/core"):
+                return f"res/{name}"
+
+        def _ovos_resolve(name, extra_dirs):
+            self.assertEqual(extra_dirs,
+                             list(self.interface.ui_directories.values()))
+            if name.startswith("ui/ovos"):
+                return f"ovos/{name}"
+
+        # Mock actual resource resolution methods
+        ovos_res.side_effect = _ovos_resolve
+        res.side_effect = _resolve
+
+        # remote_url is None
+        # OVOS Res
+        self.assertEqual(self.interface._pages2uri(["ui/ovos/test"]),
+                         ["file://ovos/ui/ovos/test"])
+        ovos_res.assert_called_once()
+        self.assertEqual(self.interface._pages2uri(["ovos/test"]),
+                         ["file://ovos/ui/ovos/test"])
+        res.assert_not_called()
+        # Core Res
+        self.assertEqual(self.interface._pages2uri(["ui/core/test"]),
+                         ["file://res/ui/core/test"])
+        res.assert_called_once()
+        self.assertEqual(self.interface._pages2uri(["core/test"]),
+                         ["file://res/ui/core/test"])
+
+    def test_normalize_page_name(self):
+        legacy_name = "test.qml"
+        name_with_path = "subdir/test"
+        name_with_dot = "subdir/test.file"
+        self.assertEqual(self.interface._normalize_page_name(legacy_name),
+                         "test")
+        self.assertEqual(self.interface._normalize_page_name(name_with_path),
+                         "subdir/test")
+        self.assertEqual(self.interface._normalize_page_name(name_with_dot),
+                         "subdir/test.file")
 
     def test_show_page(self):
-        # TODO
-        pass
+        real_show_pages = self.interface.show_pages
+        self.interface.show_pages = Mock()
+
+        # Default args
+        self.interface.show_page("test")
+        self.interface.show_pages.assert_called_once_with(["test"], 0,
+                                                          None, False)
+
+        self.interface.show_page("test2", True, True)
+        self.interface.show_pages.assert_called_with(["test2"], 0,
+                                                     True, True)
+
+        self.interface.show_page("test3", 30, True)
+        self.interface.show_pages.assert_called_with(["test3"], 0,
+                                                     30, True)
+        self.interface.show_pages = real_show_pages
 
     def test_show_pages(self):
-        # TODO
-        pass
+        msg: Message = Message("")
+        handled = Event()
+
+        def _gui_value_set(message):
+            self.assertEqual(message.data['__from'], self.interface.skill_id)
+
+        def _gui_page_show(message):
+            nonlocal msg
+            msg = message
+            handled.set()
+
+        self.bus.on('gui.value.set', _gui_value_set)
+        self.bus.on('gui.page.show', _gui_page_show)
+
+        # Test resource absolute paths
+        file_base_dir = join(dirname(__file__), "test_ui", "ui")
+        files = [join(file_base_dir, "test.qml"),
+                 join(file_base_dir, "subdir", "test.qml")]
+        self.interface.show_pages(files)
+        self.assertTrue(handled.wait(2))
+        self.assertEqual(msg.msg_type, "gui.page.show")
+        for page in msg.data['page']:
+            self.assertTrue(page.startswith("file://"))
+            path = page.replace("file://", "")
+            self.assertTrue(isfile(path), page)
+        self.assertEqual(len(msg.data['page']), len(msg.data['page_names']))
+        self.assertIsInstance(msg.data["index"], int)
+        self.assertEqual(msg.data['__from'], self.interface.skill_id)
+        self.assertIsNone(msg.data["__idle"])
+        self.assertIsInstance(msg.data["__animations"], bool)
+
+        # Test resources resolved locally
+        handled.clear()
+        files = ["file.qml", "subdir/file.qml"]
+        index = 1
+        override_idle = 30
+        override_animations = True
+        self.interface.show_pages(files, index, override_idle,
+                                  override_animations)
+        self.assertTrue(handled.wait(2))
+        self.assertEqual(msg.msg_type, "gui.page.show")
+        for page in msg.data['page']:
+            self.assertTrue(page.startswith("file://"))
+            path = page.replace("file://", "")
+            self.assertTrue(isfile(path), page)
+        self.assertEqual(msg.data["page_names"], ["file", "subdir/file"])
+        self.assertEqual(msg.data["index"], index)
+        self.assertEqual(msg.data["__from"], self.interface.skill_id)
+        self.assertEqual(msg.data["__idle"], override_idle)
+        self.assertEqual(msg.data["__animations"], override_animations)
+
+        # Test resources not resolved locally
+        handled.clear()
+        files = ["file.qml", "other.page"]
+        index = 1
+        override_idle = 30
+        override_animations = True
+        self.interface.show_pages(files, index, override_idle,
+                                  override_animations)
+        self.assertTrue(handled.wait(2))
+        self.assertEqual(msg.msg_type, "gui.page.show")
+        self.assertEqual(msg.data["page"], list())
+        self.assertEqual(msg.data["page_names"], ["file", "other.page"])
+        self.assertEqual(msg.data["index"], index)
+        self.assertEqual(msg.data["__from"], self.interface.skill_id)
+        self.assertEqual(msg.data["__idle"], override_idle)
+        self.assertEqual(msg.data["__animations"], override_animations)
 
     def test_remove_page(self):
-        # TODO
-        pass
+        real_remove_pages = self.interface.remove_pages
+        self.interface.remove_pages = Mock()
+        self.interface.remove_page("test_page")
+        self.interface.remove_pages.assert_called_once_with(["test_page"])
+        self.interface.remove_pages = real_remove_pages
 
     def test_remove_pages(self):
-        # TODO
-        pass
+        msg = Message("")
+        handled = Event()
+
+        def _gui_page_delete(message):
+            nonlocal msg
+            msg = message
+            handled.set()
+
+        self.bus.on("gui.page.delete", _gui_page_delete)
+
+        # Test resolved page
+        pages = ["test.qml"]
+        self.interface.remove_pages(pages)
+        self.assertTrue(handled.wait(2))
+        self.assertEqual(msg.msg_type, "gui.page.delete")
+        self.assertEqual(len(msg.data['page']), len(pages))
+        for page in msg.data['page']:
+            self.assertTrue(page.startswith("file://"))
+            path = page.replace("file://", "")
+            self.assertTrue(isfile(path), page)
+        self.assertEqual(msg.data['page_names'], ["test"])
+        self.assertEqual(msg.data['__from'], self.interface.skill_id)
+
+        # Test unresolved pages
+        handled.clear()
+        pages = ['file.qml', 'dir/other.file']
+        self.interface.remove_pages(pages)
+        self.assertTrue(handled.wait(2))
+        self.assertEqual(msg.msg_type, "gui.page.delete")
+        self.assertEqual(msg.data['page'], [])
+        self.assertEqual(msg.data['page_names'], ["file", "dir/other.file"])
+        self.assertEqual(msg.data['__from'], self.interface.skill_id)
 
     def test_show_notification(self):
         # TODO
