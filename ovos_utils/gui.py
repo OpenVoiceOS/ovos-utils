@@ -795,8 +795,8 @@ class GUIInterface:
         file, ext = splitext(page_name)
         if ext == ".qml":
             log_deprecation("GUI resources should exclude gui-specific file "
-                            "extensions. In the future, this may cause "
-                            "unexpected behavior.", "0.1.0")
+                            f"extensions. This call should probably pass "
+                            f"`{file}`, instead of `{page_name}`", "0.1.0")
             return file
 
         return page_name
