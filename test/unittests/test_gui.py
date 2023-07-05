@@ -113,7 +113,7 @@ class TestGuiInterface(unittest.TestCase):
         pass
 
     def test_upload_gui_pages(self):
-        msg = None
+        msg = Message("")
         handled = Event()
 
         def on_pages(message):
@@ -137,10 +137,12 @@ class TestGuiInterface(unittest.TestCase):
             self.assertIsInstance(val, str)
 
         test_file_key = join(self.iface_name, "test.qml")
-        self.assertEqual(pages.get(test_file_key), "Mock File Contents", pages)
+        self.assertEqual(bytes.fromhex(pages.get(test_file_key)),
+                         b"Mock File Contents", pages)
 
         test_file_key = join(self.iface_name, "subdir", "test.qml")
-        self.assertEqual(pages.get(test_file_key), "Nested Mock", pages)
+        self.assertEqual(bytes.fromhex(pages.get(test_file_key)),
+                         b"Nested Mock", pages)
         # TODO: Test other frameworks
 
     def test_register_handler(self):
