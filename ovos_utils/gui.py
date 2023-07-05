@@ -632,12 +632,15 @@ class GUIInterface:
         res_dir = self.ui_directories[request_res_type]
         for path, _, files in walk(res_dir):
             for file in files:
-                full_path: str = join(path, file)
-                rel_path = full_path.replace(f"{res_dir}/", "", 1)
-                fname = join(self.skill_id, rel_path)
-                with open(full_path, 'r') as f:
-                    pages[fname] = f.read()
-
+                try:
+                    full_path: str = join(path, file)
+                    rel_path = full_path.replace(f"{res_dir}/", "", 1)
+                    fname = join(self.skill_id, rel_path)
+                    with open(full_path, 'rb') as f:
+                        file_bytes = f.read()
+                    pages[fname] = file_bytes.hex()
+                except Exception as e:
+                    LOG.exception(f"{file} not uploaded: {e}")
         self.bus.emit(message.forward("gui.page.upload",
                                       {"__from": self.skill_id,
                                        "framework": request_res_type,
