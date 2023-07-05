@@ -624,10 +624,12 @@ class GUIInterface:
             LOG.debug("No UI resources to upload")
             return
         request_res_type = message.data.get("framework", "qt5")
+        # Note that ui_directory "all" is a special case that will upload all
+        # gui files, including all framework subdirectories
         if request_res_type not in self.ui_directories:
             LOG.warning(f"Requested UI files not available: {request_res_type}")
             return
-
+        LOG.debug(f"Requested upload resources for: {request_res_type}")
         pages = dict()
         res_dir = self.ui_directories[request_res_type]
         for path, _, files in walk(res_dir):
