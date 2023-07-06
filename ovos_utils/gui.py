@@ -857,6 +857,7 @@ class GUIInterface:
         self.bus.emit(Message("gui.page.show",
                               {"page": page_urls,
                                "page_names": page_names,
+                               "skill_paths": self.ui_directories,
                                "index": index,
                                "__from": self.skill_id,
                                "__idle": override_idle,
