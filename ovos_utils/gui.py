@@ -631,6 +631,8 @@ class GUIInterface:
             return
         LOG.debug(f"Requested upload resources for: {request_res_type}")
         pages = dict()
+        # `pages` keys are unique identifiers in the scope of this interface;
+        # if ui_directory is "all", then pages are prefixed with `<framework>/`
         res_dir = self.ui_directories[request_res_type]
         for path, _, files in walk(res_dir):
             for file in files:
