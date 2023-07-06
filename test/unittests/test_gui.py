@@ -121,7 +121,9 @@ class TestGuiInterface(unittest.TestCase):
             msg = message
             handled.set()
 
-        self.bus.once('gui.page.upload', on_pages)
+        self.bus.on('gui.page.upload', on_pages)
+
+        # Upload default/legacy behavior (qt5 `ui` dir)
         message = Message('test', {}, {'context': "Test"})
         self.interface.upload_gui_pages(message)
         self.assertTrue(handled.wait(10))
@@ -136,14 +138,36 @@ class TestGuiInterface(unittest.TestCase):
             self.assertIsInstance(key, str)
             self.assertIsInstance(val, str)
 
-        test_file_key = join(self.iface_name, "test.qml")
+        test_file_key = "test.qml"
         self.assertEqual(bytes.fromhex(pages.get(test_file_key)),
                          b"Mock File Contents", pages)
 
-        test_file_key = join(self.iface_name, "subdir", "test.qml")
+        test_file_key = join("subdir", "test.qml")
         self.assertEqual(bytes.fromhex(pages.get(test_file_key)),
                          b"Nested Mock", pages)
-        # TODO: Test other frameworks
+
+        # Upload all resources
+        handled.clear()
+        self.interface.ui_directories['all'] = join(dirname(__file__),
+                                                    'test_ui', 'gui')
+        message = Message('test', {"framework": "all"}, {'context': "All"})
+        self.interface.upload_gui_pages(message)
+        self.assertTrue(handled.wait(10))
+
+        self.assertEqual(msg.context['context'], message.context['context'])
+        self.assertEqual(msg.msg_type, "gui.page.upload")
+        self.assertEqual(msg.data['__from'], self.iface_name)
+
+        pages = msg.data['pages']
+        self.assertIsInstance(pages, dict)
+        for key, val in pages.items():
+            self.assertIsInstance(key, str)
+            self.assertIsInstance(val, str)
+
+        self.assertEqual(bytes.fromhex(pages.get("qt5/test.qml")),
+                         b"qt5", pages)
+        self.assertEqual(bytes.fromhex(pages.get("qt6/test.qml")),
+                         b"qt6", pages)
 
     def test_register_handler(self):
         # TODO

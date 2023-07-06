@@ -616,8 +616,8 @@ class GUIInterface:
 
     def upload_gui_pages(self, message: Message):
         """
-        Emit a response Message with all known GUI resources managed by
-        this interface.
+        Emit a response Message with all known GUI files managed by
+        this interface for the requested infrastructure
         @param message: `gui.request_page_upload` Message requesting pages
         """
         if not self.ui_directories:
@@ -644,6 +644,7 @@ class GUIInterface:
                     pages[page_name] = file_bytes.hex()
                 except Exception as e:
                     LOG.exception(f"{file} not uploaded: {e}")
+        # Note that `pages` in this context include file extensions
         self.bus.emit(message.forward("gui.page.upload",
                                       {"__from": self.skill_id,
                                        "framework": request_res_type,
@@ -791,12 +792,12 @@ class GUIInterface:
     def _normalize_page_name(page_name: str) -> str:
         """
         Normalize a requested GUI resource
-        @param page_name:
-        @return:
+        @param page_name: string name of a GUI resource
+        @return: normalized string name (`.qml` removed for other GUI support)
         """
         if isfile(page_name):
-            LOG.warning("GUI resources should specify a resource name and not "
-                        "a file path. This may cause unexpected behavior.")
+            log_deprecation("GUI resources should specify a resource name and "
+                            "not a file path.", "0.1.0")
             return page_name
         file, ext = splitext(page_name)
         if ext == ".qml":
