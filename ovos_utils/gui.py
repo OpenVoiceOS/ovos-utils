@@ -575,7 +575,7 @@ class GUIInterface:
     @property
     def page(self) -> Optional[str]:
         """
-        Return the active GUI page (file path) to show
+        Return the active GUI page name to show
         """
         return self._pages[self.current_page_idx] if len(self._pages) else None
 
