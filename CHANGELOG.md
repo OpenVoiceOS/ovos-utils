@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.35a5](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.35a5) (2023-07-04)
+## [0.0.35a6](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.35a6) (2023-07-06)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a4...0.0.35a5)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a5...0.0.35a6)
+
+**Merged pull requests:**
+
+- Enable GUI module resource file resolution [\#177](https://github.com/OpenVoiceOS/ovos-utils/pull/177) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.35a5](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a5) (2023-07-04)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a4...V0.0.35a5)
 
 **Fixed bugs:**
 
