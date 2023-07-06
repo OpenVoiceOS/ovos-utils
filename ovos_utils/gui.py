@@ -4,7 +4,7 @@ from typing import List, Union, Optional, Callable
 import time
 from collections import namedtuple
 from enum import IntEnum
-from os.path import join, splitext, isfile
+from os.path import join, splitext, isfile, isdir
 
 from ovos_utils import resolve_ovos_resource_file, resolve_resource_file
 from ovos_utils.log import LOG, log_deprecation
@@ -77,6 +77,29 @@ def can_use_gui(bus=None,
     if local:
         return can_use_local_gui()
     return can_use_local_gui() or is_gui_connected(bus)
+
+
+def get_ui_directories(root_dir: str) -> dict:
+    """
+    Get a dict of available UI directories by GUI framework.
+    @param root_dir: base directory to inspect for available UI directories
+    @return: Dict of framework name to UI resource directory
+    """
+    ui_directories = dict()
+    base_directory = root_dir
+    if isdir(join(base_directory, "gui")):
+        LOG.debug("Skill implements resources in `gui` directory")
+        ui_directories["all"] = join(base_directory, "gui")
+        return ui_directories
+    LOG.info("Checking for legacy UI directories")
+    if isdir(join(base_directory, "ui5")):
+        ui_directories["qt5"] = join(base_directory, "ui5")
+    if isdir(join(base_directory, "ui6")):
+        ui_directories["qt6"] = join(base_directory, "ui6")
+    if isdir(join(base_directory, "ui")) and "qt5" not in ui_directories:
+        LOG.debug("Handling `ui` directory as `qt5`")
+        ui_directories["qt5"] = join(base_directory, "ui")
+    return ui_directories
 
 
 def extend_about_data(about_data: Union[list, dict],
@@ -623,7 +646,8 @@ class GUIInterface:
         if not self.ui_directories:
             LOG.debug("No UI resources to upload")
             return
-        request_res_type = message.data.get("framework", "qt5")
+        request_res_type = message.data.get("framework") or "all" if "all" in \
+            self.ui_directories else "qt5"
         # Note that ui_directory "all" is a special case that will upload all
         # gui files, including all framework subdirectories
         if request_res_type not in self.ui_directories:

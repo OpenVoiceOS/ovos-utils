@@ -79,6 +79,19 @@ class TestGui(unittest.TestCase):
         from ovos_utils.gui import _GUIDict
         # TODO
 
+    def test_get_ui_directories(self):
+        from ovos_utils.gui import get_ui_directories
+        test_dir = join(dirname(__file__), "test_ui")
+
+        # gui dir (best practice)
+        dirs = get_ui_directories(test_dir)
+        self.assertEqual(dirs, {"all": join(test_dir, "gui")})
+
+        # ui and uid dirs (legacy)
+        dirs = get_ui_directories(join(test_dir, "legacy"))
+        self.assertEqual(dirs, {"qt5": join(test_dir, "legacy", "ui"),
+                                "qt6": join(test_dir, "legacy", "ui6")})
+
 
 class TestGuiInterface(unittest.TestCase):
     from ovos_utils.messagebus import FakeBus
