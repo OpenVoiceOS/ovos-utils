@@ -266,7 +266,8 @@ class TestGuiInterface(unittest.TestCase):
         self.assertEqual(msg.data['__from'], self.interface.skill_id)
         self.assertIsNone(msg.data["__idle"])
         self.assertIsInstance(msg.data["__animations"], bool)
-        self.assertEqual(msg.data["skill_paths"], self.interface.ui_directories)
+        self.assertEqual(msg.data["ui_directories"],
+                         self.interface.ui_directories)
 
         # Test resources resolved locally
         handled.clear()
@@ -287,7 +288,8 @@ class TestGuiInterface(unittest.TestCase):
         self.assertEqual(msg.data["__from"], self.interface.skill_id)
         self.assertEqual(msg.data["__idle"], override_idle)
         self.assertEqual(msg.data["__animations"], override_animations)
-        self.assertEqual(msg.data["skill_paths"], self.interface.ui_directories)
+        self.assertEqual(msg.data["ui_directories"],
+                         self.interface.ui_directories)
 
         # Test resources not resolved locally
         handled.clear()
@@ -305,7 +307,8 @@ class TestGuiInterface(unittest.TestCase):
         self.assertEqual(msg.data["__from"], self.interface.skill_id)
         self.assertEqual(msg.data["__idle"], override_idle)
         self.assertEqual(msg.data["__animations"], override_animations)
-        self.assertEqual(msg.data["skill_paths"], self.interface.ui_directories)
+        self.assertEqual(msg.data["ui_directories"],
+                         self.interface.ui_directories)
 
     def test_remove_page(self):
         real_remove_pages = self.interface.remove_pages
