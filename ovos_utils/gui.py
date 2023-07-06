@@ -636,11 +636,10 @@ class GUIInterface:
             for file in files:
                 try:
                     full_path: str = join(path, file)
-                    rel_path = full_path.replace(f"{res_dir}/", "", 1)
-                    fname = join(self.skill_id, rel_path)
+                    page_name = full_path.replace(f"{res_dir}/", "", 1)
                     with open(full_path, 'rb') as f:
                         file_bytes = f.read()
-                    pages[fname] = file_bytes.hex()
+                    pages[page_name] = file_bytes.hex()
                 except Exception as e:
                     LOG.exception(f"{file} not uploaded: {e}")
         self.bus.emit(message.forward("gui.page.upload",
