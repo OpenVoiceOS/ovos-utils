@@ -1,10 +1,10 @@
 from os import walk
-from typing import List, Union, Optional, Callable, Any
+from typing import List, Union, Optional, Callable
 
 import time
 from collections import namedtuple
 from enum import IntEnum
-from os.path import join
+from os.path import join, splitext, isfile, isdir
 
 from ovos_utils import resolve_ovos_resource_file, resolve_resource_file
 from ovos_utils.log import LOG, log_deprecation
@@ -77,6 +77,25 @@ def can_use_gui(bus=None,
     if local:
         return can_use_local_gui()
     return can_use_local_gui() or is_gui_connected(bus)
+
+
+def get_ui_directories(root_dir: str) -> dict:
+    """
+    Get a dict of available UI directories by GUI framework.
+    @param root_dir: base directory to inspect for available UI directories
+    @return: Dict of framework name to UI resource directory
+    """
+    ui_directories = dict()
+    base_directory = root_dir
+    if isdir(join(base_directory, "gui")):
+        LOG.debug("Skill implements resources in `gui` directory")
+        ui_directories["all"] = join(base_directory, "gui")
+        return ui_directories
+    LOG.info("Checking for legacy UI directories")
+    if isdir(join(base_directory, "ui")):
+        LOG.debug("Handling `ui` directory as `qt5`")
+        ui_directories["qt5"] = join(base_directory, "ui")
+    return ui_directories
 
 
 def extend_about_data(about_data: Union[list, dict],
@@ -488,7 +507,8 @@ class _GUIDict(dict):
 
 
 class GUIInterface:
-    """Interface to the Graphical User Interface, allows interaction with
+    """
+    Interface to the Graphical User Interface, allows interaction with
     the mycroft-gui from anywhere
 
     Values set in this class are synced to the GUI, accessible within QML
@@ -500,7 +520,7 @@ class GUIInterface:
         text: sessionData.time
     """
 
-    def __init__(self, skill_id: str, bus = None,
+    def __init__(self, skill_id: str, bus=None,
                  remote_server: str = None, config: dict = None,
                  ui_directories: dict = None):
         """
@@ -511,6 +531,8 @@ class GUIInterface:
         @param remote_server: Optional URL of a remote GUI server
         @param config: dict gui Configuration
         @param ui_directories: dict framework to directory containing resources
+            `all` key should reference a `gui` directory containing all
+            specific resource subdirectories
         """
         if not config:
             log_deprecation(f"Expected a dict config and got None.", "0.1.0")
@@ -525,7 +547,7 @@ class GUIInterface:
             self.config["remote-server"] = remote_server
         self._bus = bus
         self.__session_data = {}  # synced to GUI for use by this skill's pages
-        self.pages = []
+        self._pages = []
         self.current_page_idx = -1
         self._skill_id = skill_id
         self.on_gui_changed_callback = None
@@ -572,9 +594,9 @@ class GUIInterface:
     @property
     def page(self) -> Optional[str]:
         """
-        Return the active GUI page (file path) to show
+        Return the active GUI page name to show
         """
-        return self.pages[self.current_page_idx] if len(self.pages) else None
+        return self._pages[self.current_page_idx] if len(self._pages) else None
 
     @property
     def connected(self) -> bool:
@@ -585,6 +607,13 @@ class GUIInterface:
         if not self.bus:
             return False
         return can_use_gui(self.bus)
+
+    @property
+    def pages(self) -> List[str]:
+        """
+        Get a list of the active page ID's managed by this interface 
+        """
+        return self._pages
 
     def build_message_type(self, event: str) -> str:
         """
@@ -606,28 +635,36 @@ class GUIInterface:
 
     def upload_gui_pages(self, message: Message):
         """
-        Emit a response Message with all known GUI resources managed by
-        this interface.
+        Emit a response Message with all known GUI files managed by
+        this interface for the requested infrastructure
         @param message: `gui.request_page_upload` Message requesting pages
         """
         if not self.ui_directories:
             LOG.debug("No UI resources to upload")
             return
-        request_res_type = message.data.get("framework", "qt5")
+        request_res_type = message.data.get("framework") or "all" if "all" in \
+            self.ui_directories else "qt5"
+        # Note that ui_directory "all" is a special case that will upload all
+        # gui files, including all framework subdirectories
         if request_res_type not in self.ui_directories:
             LOG.warning(f"Requested UI files not available: {request_res_type}")
             return
-
+        LOG.debug(f"Requested upload resources for: {request_res_type}")
         pages = dict()
+        # `pages` keys are unique identifiers in the scope of this interface;
+        # if ui_directory is "all", then pages are prefixed with `<framework>/`
         res_dir = self.ui_directories[request_res_type]
         for path, _, files in walk(res_dir):
             for file in files:
-                full_path: str = join(path, file)
-                rel_path = full_path.replace(f"{res_dir}/", "", 1)
-                fname = join(self.skill_id, rel_path)
-                with open(full_path, 'r') as f:
-                    pages[fname] = f.read()
-
+                try:
+                    full_path: str = join(path, file)
+                    page_name = full_path.replace(f"{res_dir}/", "", 1)
+                    with open(full_path, 'rb') as f:
+                        file_bytes = f.read()
+                    pages[page_name] = file_bytes.hex()
+                except Exception as e:
+                    LOG.exception(f"{file} not uploaded: {e}")
+        # Note that `pages` in this context include file extensions
         self.bus.emit(message.forward("gui.page.upload",
                                       {"__from": self.skill_id,
                                        "framework": request_res_type,
@@ -717,7 +754,7 @@ class GUIInterface:
         the `release` method.
         """
         self.__session_data = {}
-        self.pages = []
+        self._pages = []
         self.current_page_idx = -1
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
@@ -743,7 +780,13 @@ class GUIInterface:
                                "params": params}))
 
     def _pages2uri(self, page_names: List[str]) -> List[str]:
-        # Convert pages to full reference
+        """
+        Get a list of resolved URIs from a list of string page names.
+        @param page_names: List of GUI resource names (file basenames) to locate
+        @return: List of resolved paths to the requested pages
+        """
+        # TODO: This method resolves absolute file paths. These will no longer
+        #       be used with the implementation of `ovos-gui`
         page_urls = []
         extra_dirs = list(self.ui_directories.values()) or list()
         for name in page_names:
@@ -765,21 +808,35 @@ class GUIInterface:
         LOG.debug(f"Resolved pages: {page_urls}")
         return page_urls
 
+    @staticmethod
+    def _normalize_page_name(page_name: str) -> str:
+        """
+        Normalize a requested GUI resource
+        @param page_name: string name of a GUI resource
+        @return: normalized string name (`.qml` removed for other GUI support)
+        """
+        if isfile(page_name):
+            log_deprecation("GUI resources should specify a resource name and "
+                            "not a file path.", "0.1.0")
+            return page_name
+        file, ext = splitext(page_name)
+        if ext == ".qml":
+            log_deprecation("GUI resources should exclude gui-specific file "
+                            f"extensions. This call should probably pass "
+                            f"`{file}`, instead of `{page_name}`", "0.1.0")
+            return file
+
+        return page_name
+
     # base gui interactions
     def show_page(self, name: str, override_idle: Union[bool, int] = None,
                   override_animations: bool = False):
         """
-        Begin showing the page in the GUI
-
-        Arguments:
-            name (str): Name of page (e.g "mypage.qml") to display
-            override_idle (boolean, int):
-                True: Takes over the resting page indefinitely
-                (int): Delays resting page for the specified number of
-                       seconds.
-            override_animations (boolean):
-                True: Disables showing all platform skill animations.
-                False: 'Default' always show animations.
+        Request to show a page in the GUI.
+        @param name: page resource requested
+        @param override_idle: number of seconds to override display for;
+            if True, override display indefinitely
+        @param override_animations: if True, disables all GUI animations
         """
         self.show_pages([name], 0, override_idle, override_animations)
 
@@ -787,20 +844,12 @@ class GUIInterface:
                    override_idle: Union[bool, int] = None,
                    override_animations: bool = False):
         """
-        Begin showing the list of pages in the GUI.
-
-        Arguments:
-            page_names (list): List of page names (str) to display, such as
-                               ["Weather.qml", "Forecast.qml", "Details.qml"]
-            index (int): Page number (0-based) to show initially.  For the
-                         above list a value of 1 would start on "Forecast.qml"
-            override_idle (boolean, int):
-                True: Takes over the resting page indefinitely
-                (int): Delays resting page for the specified number of
-                       seconds.
-            override_animations (boolean):
-                True: Disables showing all platform skill animations.
-                False: 'Default' always show animations.
+        Request to show a list of pages in the GUI.
+        @param page_names: list of page resources requested
+        @param index: position to insert pages at (default 0)
+        @param override_idle: number of seconds to override display for;
+            if True, override display indefinitely
+        @param override_animations: if True, disables all GUI animations
         """
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
@@ -813,7 +862,11 @@ class GUIInterface:
             LOG.error('Default index is larger than page list length')
             index = len(page_names) - 1
 
-        self.pages = page_names
+        # TODO: deprecate sending page_urls after ovos_gui implementation
+        page_urls = self._pages2uri(page_names)
+        page_names = [self._normalize_page_name(n) for n in page_names]
+
+        self._pages = page_names
         self.current_page_idx = index
 
         # First sync any data...
@@ -822,39 +875,40 @@ class GUIInterface:
         LOG.debug(f"Updating gui data: {data}")
         self.bus.emit(Message("gui.value.set", data))
 
-        page_urls = self._pages2uri(page_names)
-
         # finally tell gui what to show
         self.bus.emit(Message("gui.page.show",
                               {"page": page_urls,
+                               "page_names": page_names,
+                               "ui_directories": self.ui_directories,
                                "index": index,
                                "__from": self.skill_id,
                                "__idle": override_idle,
                                "__animations": override_animations}))
 
     def remove_page(self, page: str):
-        """Remove a single page from the GUI.
-
-        Arguments:
-            page (str): Page to remove from the GUI
+        """
+        Remove a single page from the GUI.
+        @param page: Name of page to remove
         """
         self.remove_pages([page])
 
     def remove_pages(self, page_names: List[str]):
         """
-        Remove a list of pages in the GUI.
-
-        Arguments:
-            page_names (list): List of page names (str) to display, such as
-                               ["Weather.qml", "Forecast.qml", "Other.qml"]
+        Request to remove a list of pages from the GUI.
+        @param page_names: list of page resources requested
         """
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
-        if not isinstance(page_names, list):
+        if isinstance(page_names, str):
             page_names = [page_names]
+        if not isinstance(page_names, list):
+            raise ValueError('page_names must be a list')
+        # TODO: deprecate sending page_urls after ovos_gui implementation
         page_urls = self._pages2uri(page_names)
+        page_names = [self._normalize_page_name(n) for n in page_names]
         self.bus.emit(Message("gui.page.delete",
                               {"page": page_urls,
+                               "page_names": page_names,
                                "__from": self.skill_id}))
 
     # Utils / Templates
@@ -1091,8 +1145,8 @@ class GUIInterface:
         """
         Remove an input box shown by `show_input_box`
         """
-        LOG.info(f"GUI pages length {len(self.pages)}")
-        if len(self.pages) > 1:
+        LOG.info(f"GUI pages length {len(self._pages)}")
+        if len(self._pages) > 1:
             self.remove_page("SYSTEM_InputBox.qml")
         else:
             self.release()
