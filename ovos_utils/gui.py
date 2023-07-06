@@ -92,11 +92,7 @@ def get_ui_directories(root_dir: str) -> dict:
         ui_directories["all"] = join(base_directory, "gui")
         return ui_directories
     LOG.info("Checking for legacy UI directories")
-    if isdir(join(base_directory, "ui5")):
-        ui_directories["qt5"] = join(base_directory, "ui5")
-    if isdir(join(base_directory, "ui6")):
-        ui_directories["qt6"] = join(base_directory, "ui6")
-    if isdir(join(base_directory, "ui")) and "qt5" not in ui_directories:
+    if isdir(join(base_directory, "ui")):
         LOG.debug("Handling `ui` directory as `qt5`")
         ui_directories["qt5"] = join(base_directory, "ui")
     return ui_directories

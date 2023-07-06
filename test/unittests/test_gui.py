@@ -89,8 +89,7 @@ class TestGui(unittest.TestCase):
 
         # ui and uid dirs (legacy)
         dirs = get_ui_directories(join(test_dir, "legacy"))
-        self.assertEqual(dirs, {"qt5": join(test_dir, "legacy", "ui"),
-                                "qt6": join(test_dir, "legacy", "ui6")})
+        self.assertEqual(dirs, {"qt5": join(test_dir, "legacy", "ui")})
 
 
 class TestGuiInterface(unittest.TestCase):
