@@ -556,6 +556,11 @@ class GUIInterface:
         if bus:
             self.set_bus(bus)
 
+        if self.ui_directories:
+            self.bus.emit(Message("gui.volunteer_page_upload",
+                                  {'skill_id': skill_id},
+                                  {'source': skill_id, "destination": ["gui"]}))
+
     @property
     def remote_url(self) -> Optional[str]:
         """Returns configuration value for url of remote-server."""
