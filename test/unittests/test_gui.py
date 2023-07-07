@@ -119,6 +119,10 @@ class TestGuiInterface(unittest.TestCase):
         upload_message = self.volunteered_upload.call_args[0][0]
         self.assertEqual(upload_message.data["skill_id"], self.iface_name)
 
+        # Test GUI init with no ui directories
+        self.GUIInterface("no_ui_dirs_gui", self.bus, None, self.config)
+        self.volunteered_upload.assert_called_once_with(upload_message)
+
     def test_build_message_type(self):
         name = "test"
         self.assertEqual(self.interface.build_message_type(name),
