@@ -100,6 +100,10 @@ class TestGuiInterface(unittest.TestCase):
     ui_base_dir = join(dirname(__file__), "test_ui")
     ui_dirs = {'qt5': join(ui_base_dir, 'ui')}
     iface_name = "test_interface"
+
+    volunteered_upload = Mock()
+    bus.on('gui.volunteer_page_upload', volunteered_upload)
+
     interface = GUIInterface(iface_name, bus, None, config, ui_dirs)
 
     def test_00_gui_interface_init(self):
@@ -111,6 +115,13 @@ class TestGuiInterface(unittest.TestCase):
         self.assertEqual(self.interface.skill_id, self.iface_name)
         self.assertIsNone(self.interface.page)
         self.assertIsInstance(self.interface.connected, bool)
+        self.volunteered_upload.assert_called_once()
+        upload_message = self.volunteered_upload.call_args[0][0]
+        self.assertEqual(upload_message.data["skill_id"], self.iface_name)
+
+        # Test GUI init with no ui directories
+        self.GUIInterface("no_ui_dirs_gui", self.bus, None, self.config)
+        self.volunteered_upload.assert_called_once_with(upload_message)
 
     def test_build_message_type(self):
         name = "test"
@@ -138,7 +149,7 @@ class TestGuiInterface(unittest.TestCase):
         # Upload default/legacy behavior (qt5 `ui` dir)
         message = Message('test', {}, {'context': "Test"})
         self.interface.upload_gui_pages(message)
-        self.assertTrue(handled.wait(10))
+        self.assertTrue(handled.wait(2))
 
         self.assertEqual(msg.context['context'], message.context['context'])
         self.assertEqual(msg.msg_type, "gui.page.upload")
@@ -164,7 +175,7 @@ class TestGuiInterface(unittest.TestCase):
                                                     'test_ui', 'gui')
         message = Message('test', {"framework": "all"}, {'context': "All"})
         self.interface.upload_gui_pages(message)
-        self.assertTrue(handled.wait(10))
+        self.assertTrue(handled.wait(2))
 
         self.assertEqual(msg.context['context'], message.context['context'])
         self.assertEqual(msg.msg_type, "gui.page.upload")
@@ -180,6 +191,13 @@ class TestGuiInterface(unittest.TestCase):
                          b"qt5", pages)
         self.assertEqual(bytes.fromhex(pages.get("qt6/test.qml")),
                          b"qt6", pages)
+
+        # Upload requested other skill
+        handled.clear()
+        message = Message('test', {"framework": "all",
+                                   "skill_id": "other_skill"})
+        self.interface.upload_gui_pages(message)
+        self.assertFalse(handled.wait(2))
 
     def test_register_handler(self):
         # TODO
