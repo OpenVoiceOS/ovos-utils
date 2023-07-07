@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.35a6](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.35a6) (2023-07-06)
+## [0.0.35a7](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.35a7) (2023-07-07)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a5...0.0.35a6)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a6...0.0.35a7)
+
+**Merged pull requests:**
+
+- Volunteer GUI upload on init [\#178](https://github.com/OpenVoiceOS/ovos-utils/pull/178) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.35a6](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a6) (2023-07-06)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a5...V0.0.35a6)
 
 **Merged pull requests:**
 
