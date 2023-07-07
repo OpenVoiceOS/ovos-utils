@@ -647,6 +647,12 @@ class GUIInterface:
         if not self.ui_directories:
             LOG.debug("No UI resources to upload")
             return
+
+        requested_skill = message.data.get("skill_id") or self._skill_id
+        if requested_skill != self._skill_id:
+            # GUI requesting a specific skill to upload other than this one
+            return
+
         request_res_type = message.data.get("framework") or "all" if "all" in \
             self.ui_directories else "qt5"
         # Note that ui_directory "all" is a special case that will upload all
