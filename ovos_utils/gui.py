@@ -556,11 +556,6 @@ class GUIInterface:
         if bus:
             self.set_bus(bus)
 
-        if self.ui_directories:
-            self.bus.emit(Message("gui.volunteer_page_upload",
-                                  {'skill_id': skill_id},
-                                  {'source': skill_id, "destination": ["gui"]}))
-
     @property
     def remote_url(self) -> Optional[str]:
         """Returns configuration value for url of remote-server."""
@@ -637,6 +632,11 @@ class GUIInterface:
         self.bus.on(msg_type, self.gui_set)
         self._events.append((msg_type, self.gui_set))
         self.bus.on("gui.request_page_upload", self.upload_gui_pages)
+        if self.ui_directories:
+            LOG.debug("Volunteering gui page upload")
+            self.bus.emit(Message("gui.volunteer_page_upload",
+                                  {'skill_id': self.skill_id},
+                                  {'source': self.skill_id, "destination": ["gui"]}))
 
     def upload_gui_pages(self, message: Message):
         """
