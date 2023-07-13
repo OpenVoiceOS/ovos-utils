@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.35a7](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.35a7) (2023-07-07)
+## [0.0.35a8](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.35a8) (2023-07-13)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a6...0.0.35a7)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a7...0.0.35a8)
+
+**Fixed bugs:**
+
+- fix ui directores [\#179](https://github.com/OpenVoiceOS/ovos-utils/pull/179) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.35a7](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a7) (2023-07-07)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a6...V0.0.35a7)
 
 **Merged pull requests:**
 
