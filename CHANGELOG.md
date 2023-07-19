@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.35a8](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.35a8) (2023-07-13)
+## [0.0.35a9](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.35a9) (2023-07-19)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a7...0.0.35a8)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a8...0.0.35a9)
+
+**Implemented enhancements:**
+
+- feat/threaded\_timeout\_util [\#169](https://github.com/OpenVoiceOS/ovos-utils/pull/169) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.35a8](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a8) (2023-07-13)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a7...V0.0.35a8)
 
 **Fixed bugs:**
 
