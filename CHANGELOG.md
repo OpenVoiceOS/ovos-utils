@@ -1,8 +1,8 @@
 # Changelog
 
-## [0.0.35a9](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.35a9) (2023-07-19)
+## [V0.0.35a9](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a9) (2023-07-19)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a8...0.0.35a9)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a8...V0.0.35a9)
 
 **Implemented enhancements:**
 
