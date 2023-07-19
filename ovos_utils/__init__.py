@@ -27,14 +27,18 @@ from ovos_utils.log import LOG, deprecated
 
 
 def threaded_timeout(timeout=5):
-    """decorator to run a function in a thread with timeout 
-    adapted from https://github.com/OpenJarbas/InGeo"""
+    """
+    Start a thread with a specified timeout. If timeout is exceeded, an
+    exception is raised and the thread is terminated.
+    Adapted from https://github.com/OpenJarbas/InGeo
+    @param timeout: Timeout in seconds to wait before terminating the process
+    """
     
     def deco(func):
-        
-        @functools.wraps(func)
+        @wraps(func)
         def wrapper(*args, **kwargs):
-            res = [Exception(f'function [{func.__name__}] timeout [{timeout}] exceeded!')]
+            res = [Exception(f'function [{func.__name__}] timeout '
+                             f'[{timeout}] exceeded!')]
 
             def func_wrapped():
                 try:
