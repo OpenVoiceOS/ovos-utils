@@ -1,89 +1,77 @@
 # Changelog
 
-## [0.0.34](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.34) (2023-06-15)
+## [V0.0.35a9](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a9) (2023-07-19)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a9...0.0.34)
-
-**Merged pull requests:**
-
-- Fix dev branch coverage action [\#166](https://github.com/OpenVoiceOS/ovos-utils/pull/166) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.34a9](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a9) (2023-06-15)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a8...V0.0.34a9)
-
-**Merged pull requests:**
-
-- Add timeout to `get_ip` to prevent tests failing on timeout [\#165](https://github.com/OpenVoiceOS/ovos-utils/pull/165) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.34a8](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a8) (2023-06-15)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a7...V0.0.34a8)
-
-**Merged pull requests:**
-
-- Cleanup deprecation logs [\#164](https://github.com/OpenVoiceOS/ovos-utils/pull/164) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.34a7](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a7) (2023-06-14)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a6...V0.0.34a7)
-
-**Merged pull requests:**
-
-- Add options to deprecation logging to configure logged caller [\#163](https://github.com/OpenVoiceOS/ovos-utils/pull/163) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.34a6](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a6) (2023-06-14)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a5...V0.0.34a6)
-
-**Fixed bugs:**
-
-- Fix compat. with `pages2uri` extra\_directories [\#162](https://github.com/OpenVoiceOS/ovos-utils/pull/162) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.34a5](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a5) (2023-06-13)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a3...V0.0.34a5)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a8...V0.0.35a9)
 
 **Implemented enhancements:**
 
-- Add deprecation log helpers [\#161](https://github.com/OpenVoiceOS/ovos-utils/pull/161) ([NeonDaniel](https://github.com/NeonDaniel))
-- bus upload qml [\#140](https://github.com/OpenVoiceOS/ovos-utils/pull/140) ([JarbasAl](https://github.com/JarbasAl))
+- feat/threaded\_timeout\_util [\#169](https://github.com/OpenVoiceOS/ovos-utils/pull/169) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.35a8](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a8) (2023-07-13)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a7...V0.0.35a8)
 
 **Fixed bugs:**
 
-- Codecov automation [\#159](https://github.com/OpenVoiceOS/ovos-utils/pull/159) ([NeonDaniel](https://github.com/NeonDaniel))
+- fix ui directores [\#179](https://github.com/OpenVoiceOS/ovos-utils/pull/179) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.35a7](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a7) (2023-07-07)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a6...V0.0.35a7)
 
 **Merged pull requests:**
 
-- Fix codecov automation [\#160](https://github.com/OpenVoiceOS/ovos-utils/pull/160) ([NeonDaniel](https://github.com/NeonDaniel))
+- Volunteer GUI upload on init [\#178](https://github.com/OpenVoiceOS/ovos-utils/pull/178) ([NeonDaniel](https://github.com/NeonDaniel))
 
-## [V0.0.34a3](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a3) (2023-06-09)
+## [V0.0.35a6](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a6) (2023-07-06)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a2...V0.0.34a3)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a5...V0.0.35a6)
+
+**Merged pull requests:**
+
+- Enable GUI module resource file resolution [\#177](https://github.com/OpenVoiceOS/ovos-utils/pull/177) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.35a5](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a5) (2023-07-04)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a4...V0.0.35a5)
 
 **Fixed bugs:**
 
-- Annotate GUI Module and refactor resource resolution [\#158](https://github.com/OpenVoiceOS/ovos-utils/pull/158) ([NeonDaniel](https://github.com/NeonDaniel))
+- Fix bug in `dev` branch with refactoring and added unit test [\#176](https://github.com/OpenVoiceOS/ovos-utils/pull/176) ([NeonDaniel](https://github.com/NeonDaniel))
 
-## [V0.0.34a2](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a2) (2023-06-08)
+## [V0.0.35a4](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a4) (2023-07-04)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34a1...V0.0.34a2)
-
-**Merged pull requests:**
-
-- Troubleshooting GUI shell plugin resource file resolution [\#157](https://github.com/OpenVoiceOS/ovos-utils/pull/157) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.34a1](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.34a1) (2023-06-08)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.33...V0.0.34a1)
-
-**Fixed bugs:**
-
-- Event Scheduler Interface tests [\#156](https://github.com/OpenVoiceOS/ovos-utils/pull/156) ([NeonDaniel](https://github.com/NeonDaniel))
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a3...V0.0.35a4)
 
 **Merged pull requests:**
 
-- Add unit test coverage for SkillApi [\#145](https://github.com/OpenVoiceOS/ovos-utils/pull/145) ([NeonDaniel](https://github.com/NeonDaniel))
+- SkillApi docs and tests [\#174](https://github.com/OpenVoiceOS/ovos-utils/pull/174) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.35a3](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a3) (2023-07-04)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a2...V0.0.35a3)
+
+**Closed issues:**
+
+- Non-blocking error when running on MacOS natively [\#175](https://github.com/OpenVoiceOS/ovos-utils/issues/175)
+
+## [V0.0.35a2](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a2) (2023-06-28)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a1...V0.0.35a2)
+
+**Merged pull requests:**
+
+- hotfix/missing\_value\_qml\_upload [\#173](https://github.com/OpenVoiceOS/ovos-utils/pull/173) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.35a1](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a1) (2023-06-21)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34...V0.0.35a1)
+
+**Merged pull requests:**
+
+- Add unit tests for shutdown/restart [\#170](https://github.com/OpenVoiceOS/ovos-utils/pull/170) ([NeonDaniel](https://github.com/NeonDaniel))
+- Fix dev branch coverage action [\#166](https://github.com/OpenVoiceOS/ovos-utils/pull/166) ([NeonDaniel](https://github.com/NeonDaniel))
 
 
 

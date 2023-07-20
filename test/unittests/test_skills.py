@@ -178,17 +178,48 @@ class TestLocations(unittest.TestCase):
 
 
 class TestSkillApi(unittest.TestCase):
+    from ovos_utils.skills.api import SkillApi
     bus = FakeBus()
+    SkillApi.connect_bus(bus)
 
     def test_skill_api_init(self):
         from ovos_utils.skills.api import SkillApi
-
-        test_api = SkillApi({"serialize": _api_method_1,
-                             "get_length": _api_method_2})
-        test_api.connect_bus(self.bus)
+        test_api = SkillApi({"serialize": {'help': '',
+                                           'type': 'test._api_method_1'},
+                             "get_length": {'help': '',
+                                            'type': 'test._api_method_2'}})
         self.assertEqual(test_api.bus, self.bus)
         self.assertEqual(SkillApi.bus, self.bus)
         self.assertIsNotNone(test_api.serialize)
         self.assertIsNotNone(test_api.get_length)
+        self.assertTrue(callable(test_api.serialize))
+        self.assertTrue(callable(test_api.get_length))
 
-    # TODO: Test SkillApi.get
+    def test_skill_api_get(self):
+        from ovos_utils.skills.api import SkillApi
+
+        def _valid_public_api(message):
+            self.bus.emit(message.response(
+                {"serialize": {'help': '', 'type': 'test._api_method_1'},
+                 "get_length": {'help': '', 'type': 'test._api_method_2'}}))
+
+        self.bus.on("test_skill.public_api", _valid_public_api)
+
+        # Test get valid API
+        api = SkillApi.get("test_skill")
+        self.assertIsInstance(api, SkillApi)
+        self.assertTrue(callable(api.serialize))
+        self.assertTrue(callable(api.get_length))
+
+        # Test second API
+        api2 = SkillApi.get("test_skill")
+        self.assertEqual(api.method_dict, api2.method_dict)
+
+        # Test invalid API
+        self.assertIsNone(SkillApi.get("other_skill"))
+
+        # Test get without bus
+        SkillApi.bus = None
+        with self.assertRaises(RuntimeError):
+            SkillApi.get("test_skill")
+        SkillApi.connect_bus(self.bus)
