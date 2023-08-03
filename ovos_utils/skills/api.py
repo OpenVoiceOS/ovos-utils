@@ -51,7 +51,8 @@ class SkillApi:
                         SkillApi.bus.wait_for_response(method_msg,
                                                        timeout=self.timeout)
                     if not response:
-                        LOG.error(f"Timed out waiting for {method_msg}")
+                        LOG.error(f"Timed out waiting for response to: "
+                                  f"{method_msg.msg_type} ({self.timeout}")
                         return None
                     elif 'result' not in response.data:
                         LOG.error(f"missing `result` in: {response.data}")
