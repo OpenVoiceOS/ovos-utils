@@ -2,7 +2,7 @@
 import time
 from datetime import datetime, timedelta
 from inspect import signature
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 from ovos_utils.intents.intent_service_interface import to_alnum
 from ovos_utils.log import LOG, log_deprecation, deprecated
 from ovos_utils.messagebus import FakeBus, FakeMessage as Message
