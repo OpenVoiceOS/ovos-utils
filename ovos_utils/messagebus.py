@@ -11,7 +11,6 @@ from ovos_utils import create_loop
 from ovos_utils.json_helper import merge_dict
 from ovos_utils.log import LOG, log_deprecation
 from ovos_utils.metrics import Stopwatch
-from ovos_utils.events import EventContainer as _EventContainer
 
 _DEFAULT_WS_CONFIG = {"host": "0.0.0.0",
                       "port": 8181,
@@ -605,11 +604,79 @@ def create_basic_wrapper(handler, on_error=None):
     return wrapper
 
 
-class EventContainer(_EventContainer):
-    def __init__(self, *args, **kwargs):
+class EventContainer:
+    def __init__(self, bus=None):
         log_deprecation("Import `ovos_utils.events.EventContainer", "0.1.0")
-        _EventContainer.__init__(self, *args, **kwargs)
+        self.bus = bus
+        self.events = []
 
+    def set_bus(self, bus):
+        self.bus = bus
+
+    def add(self, name, handler, once=False):
+        """Create event handler for executing intent or other event.
+        Args:
+            name (string): IntentParser name
+            handler (func): Method to call
+            once (bool, optional): Event handler will be removed after it has
+                                   been run once.
+        """
+
+        def once_wrapper(message):
+            # Remove registered one-time handler before invoking,
+            # allowing them to re-schedule themselves.
+            self.remove(name)
+            handler(message)
+
+        if handler:
+            if once:
+                self.bus.once(name, once_wrapper)
+                self.events.append((name, once_wrapper))
+            else:
+                self.bus.on(name, handler)
+                self.events.append((name, handler))
+
+            LOG.debug('Added event: {}'.format(name))
+
+    def remove(self, name):
+        """Removes an event from bus emitter and events list.
+        Args:
+            name (string): Name of Intent or Scheduler Event
+        Returns:
+            bool: True if found and removed, False if not found
+        """
+        LOG.debug("Removing event {}".format(name))
+        removed = False
+        for _name, _handler in list(self.events):
+            if name == _name:
+                try:
+                    self.events.remove((_name, _handler))
+                except ValueError:
+                    LOG.error('Failed to remove event {}'.format(name))
+                    pass
+                removed = True
+
+        # Because of function wrappers, the emitter doesn't always directly
+        # hold the _handler function, it sometimes holds something like
+        # 'wrapper(_handler)'.  So a call like:
+        #     self.bus.remove(_name, _handler)
+        # will not find it, leaving an event handler with that name left behind
+        # waiting to fire if it is ever re-installed and triggered.
+        # Remove all handlers with the given name, regardless of handler.
+        if removed:
+            self.bus.remove_all_listeners(name)
+        return removed
+
+    def __iter__(self):
+        return iter(self.events)
+
+    def clear(self):
+        """Unregister all registered handlers and clear the list of registered
+        events.
+        """
+        for e, f in self.events:
+            self.bus.remove(e, f)
+        self.events = []  # Remove reference to wrappers
 
 class BusService:
     """
