@@ -47,7 +47,81 @@ class TestEvents(unittest.TestCase):
 
     def test_create_basic_wrapper(self):
         from ovos_utils.events import create_basic_wrapper
-        # TODO
+
+        # Test invalid call to wrapped method
+        wrapped = create_basic_wrapper(Mock())
+        with self.assertRaises(TypeError):
+            wrapped()
+
+        test_message = Message("test")
+
+        # Test simple wrapper, no args
+        call_count = 0
+
+        def _no_args():
+            nonlocal call_count
+            call_count += 1
+
+        wrapped = create_basic_wrapper(_no_args)
+        self.assertEqual(call_count, 0)
+        wrapped(test_message)
+        self.assertEqual(call_count, 1)
+
+        # Test wrapper with message arg
+        called_with = None
+        def _with_arg(msg):
+            nonlocal called_with
+            called_with = msg
+
+        wrapped = create_basic_wrapper(_with_arg)
+        self.assertIsNone(called_with)
+        wrapped(test_message)
+        self.assertEqual(called_with, test_message)
+
+        # Test error callback
+        def _too_many_args(arg1, arg2):
+            pass
+
+        def _internal_exception():
+            raise RuntimeError
+
+        error_handler = Mock()
+        wrapped = create_basic_wrapper(_too_many_args, error_handler)
+        wrapped(test_message)
+        error_handler.assert_called_once()
+        self.assertIsInstance(error_handler.call_args[0][0], TypeError)
+
+        error_handler.reset_mock()
+        wrapped = create_basic_wrapper(_internal_exception, error_handler)
+        wrapped(test_message)
+        error_handler.assert_called_once()
+        self.assertIsInstance(error_handler.call_args[0][0], RuntimeError)
+
+        # Test wrapper with methods
+        class WrapperContainer:
+            no_args_calls = 0
+            with_args_calls = []
+
+            def no_args(self):
+                self.no_args_calls += 1
+
+            def with_args(self, message):
+                self.with_args_calls.append(message)
+
+            def call_wrapped_functions(self, message, with_args: bool):
+                if with_args:
+                    create_basic_wrapper(self.with_args)(message)
+                else:
+                    create_basic_wrapper(self.no_args)(message)
+
+        test_class = WrapperContainer()
+        test_class.call_wrapped_functions(test_message, False)
+        self.assertEqual(test_class.no_args_calls, 1)
+        self.assertEqual(test_class.with_args_calls, [])
+        test_class.call_wrapped_functions(test_message, True)
+        self.assertEqual(test_class.no_args_calls, 1)
+        self.assertEqual(test_class.with_args_calls, [test_message])
+
 
     def test_event_container(self):
         from ovos_utils.events import EventContainer

@@ -84,8 +84,10 @@ def create_wrapper(handler: Callable, skill_id: str,
     return wrapper
 
 
-def create_basic_wrapper(handler: Callable,
-                         on_error: Optional[Callable] = None) -> Callable:
+def create_basic_wrapper(handler: Callable[[Optional[Message]], None],
+                         on_error: Optional[Callable[[Exception],
+                                                     None]] = None) -> \
+        Callable[[Message], None]:
     """
     Create the default skill handler wrapper.
 
@@ -107,6 +109,7 @@ def create_basic_wrapper(handler: Callable,
             else:
                 handler(message)
         except Exception as e:
+            LOG.exception(e)
             if on_error:
                 on_error(e)
 
@@ -225,8 +228,10 @@ class EventSchedulerInterface:
         self.bus = bus
         self.events.set_bus(bus)
 
-    def set_id(self, sched_id):
-        """Attach the skill_id of the parent skill
+
+    def set_id(self, sched_id: str):
+        """
+        Attach the skill_id of the parent skill
 
         Args:
             sched_id (str): skill_id of the parent skill
@@ -234,8 +239,9 @@ class EventSchedulerInterface:
         # NOTE: can not rename sched_id kwarg to keep api compatibility
         self.skill_id = sched_id
 
-    def _create_unique_name(self, name):
-        """Return a name unique to this skill using the format
+    def _create_unique_name(self, name: str) -> str:
+        """
+        Return a name unique to this skill using the format
         [skill_id]:[name].
 
         Args:
@@ -246,8 +252,11 @@ class EventSchedulerInterface:
         """
         return self.skill_id + ':' + (name or '')
 
-    def _schedule_event(self, handler, when, data, name,
-                        repeat_interval=None, context=None):
+    def _schedule_event(self, handler: Callable[[Optional[Message]], None],
+                        when: datetime, data: Optional[dict],
+                        name: Optional[str],
+                        repeat_interval: Optional[Union[float, int]] = None,
+                        context: Optional[dict] = None):
         """Underlying method for schedule_event and schedule_repeating_event.
 
         Takes scheduling information and sends it off on the message bus.
@@ -278,11 +287,12 @@ class EventSchedulerInterface:
         data = data or {}
 
         def on_error(e):
-            LOG.exception(f'An error occurred executing the scheduled event {e}')
+            LOG.exception(f'An error occurred executing the scheduled event: '
+                          f'{e}')
 
         wrapped = create_basic_wrapper(handler, on_error)
         self.events.add(unique_name, wrapped, once=not repeat_interval)
-        event_data = {'time': when.timestamp(),
+        event_data = {'time': when.timestamp(),  # Epoch timestamp
                       'event': unique_name,
                       'repeat': repeat_interval,
                       'data': data}
@@ -291,8 +301,11 @@ class EventSchedulerInterface:
         self.bus.emit(Message('mycroft.scheduler.schedule_event',
                               data=event_data, context=context))
 
-    def schedule_event(self, handler, when, data=None, name=None,
-                       context=None):
+    def schedule_event(self, handler: Callable[[Optional[Message]], None],
+                        when: datetime,
+                        data: Optional[dict] = None,
+                        name: Optional[str] = None,
+                        context: Optional[dict] = None):
         """Schedule a single-shot event.
 
         Args:
@@ -310,9 +323,15 @@ class EventSchedulerInterface:
         """
         self._schedule_event(handler, when, data, name, context=context)
 
-    def schedule_repeating_event(self, handler, when, interval,
-                                 data=None, name=None, context=None):
-        """Schedule a repeating event.
+    def schedule_repeating_event(self,
+                                 handler: Callable[[Optional[Message]], None],
+                                 when: Optional[datetime],
+                                 interval: Union[float, int],
+                                 data: Optional[dict] = None,
+                                 name: Optional[str] = None,
+                                 context: Optional[dict] = None):
+        """
+        Schedule a repeating event.
 
         Args:
             handler:                method to be called
@@ -338,11 +357,13 @@ class EventSchedulerInterface:
             LOG.debug('The event is already scheduled, cancel previous '
                       'event if this scheduling should replace the last.')
 
-    def update_scheduled_event(self, name, data=None):
-        """Change data of event.
+    def update_scheduled_event(self, name: str, data: Optional[dict] = None):
+        """
+        Change data of event.
 
         Args:
             name (str): reference name of event (from original scheduling)
+            data (dict): new data to update event with
         """
         data = data or {}
         data = {
@@ -352,9 +373,9 @@ class EventSchedulerInterface:
         self.bus.emit(Message('mycroft.schedule.update_event',
                               data=data, context={"skill_id": self.skill_id}))
 
-    def cancel_scheduled_event(self, name):
-        """Cancel a pending event. The event will no longer be scheduled
-        to be executed
+    def cancel_scheduled_event(self, name: str):
+        """
+        Cancel a pending event. The event will no longer be scheduled.
 
         Args:
             name (str): reference name of event (from original scheduling)
@@ -368,8 +389,9 @@ class EventSchedulerInterface:
                                   data=data,
                                   context={"skill_id": self.skill_id}))
 
-    def get_scheduled_event_status(self, name):
-        """Get scheduled event data and return the amount of time left
+    def get_scheduled_event_status(self, name: str) -> int:
+        """
+        Get scheduled event data and return the amount of time left
 
         Args:
             name (str): reference name of event (from original scheduling)
@@ -398,14 +420,18 @@ class EventSchedulerInterface:
             raise Exception("Event Status Messagebus Timeout")
 
     def cancel_all_repeating_events(self):
-        """Cancel any repeating events started by the skill."""
+        """
+        Cancel any repeating events started by the skill.
+        """
         # NOTE: Gotta make a copy of the list due to the removes that happen
         #       in cancel_scheduled_event().
         for e in list(self.scheduled_repeats):
             self.cancel_scheduled_event(e)
 
     def shutdown(self):
-        """Shutdown the interface unregistering any event handlers."""
+        """
+        Shutdown the interface unregistering any event handlers.
+        """
         self.cancel_all_repeating_events()
         self.events.clear()
 
@@ -437,7 +463,7 @@ class EventSchedulerInterface:
         return self.skill_id
 
     @name.setter
-    @deprecated("self.sched_id has been deprecated! use self.skill_id instead",
+    @deprecated("self.name has been deprecated! use self.skill_id instead",
                 "0.1.0")
     def name(self, skill_id):
         """DEPRECATED: do not use, method only for api backwards compatibility
