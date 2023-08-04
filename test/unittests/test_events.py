@@ -1,3 +1,4 @@
+import inspect
 import unittest
 import datetime
 
@@ -122,26 +123,119 @@ class TestEvents(unittest.TestCase):
         self.assertEqual(test_class.no_args_calls, 1)
         self.assertEqual(test_class.with_args_calls, [test_message])
 
-
     def test_event_container(self):
         from ovos_utils.events import EventContainer
-        # TODO
+        container = EventContainer()
+        self.assertIsInstance(container.bus, FakeBus)
+        self.assertIsInstance(container.events, list)
 
-    def test_event_scheduler_interface(self):
-        from ovos_utils.events import EventSchedulerInterface, EventContainer
-        interface = EventSchedulerInterface(bus=self.bus, name="test")
-        self.assertEqual(interface.bus, self.bus)
-        self.assertIsInstance(interface.skill_id, str)
-        test_id = "testing"
-        interface.set_id(test_id)
-        self.assertEqual(interface.skill_id, test_id)
-        self.assertIsInstance(interface.events, EventContainer)
-        self.assertEqual(interface.events.bus, self.bus)
-        self.assertEqual(interface.scheduled_repeats, list())
+        # Test set bus
+        bus = FakeBus()
+        container.set_bus(bus)
+        self.assertEqual(bus, container.bus)
+
+        # Add simple
+        handler = Mock()
+        event_name = "test_event"
+        container.add(event_name, handler)
+        self.assertEqual(len(bus.ee.listeners(event_name)), 1)
+        self.assertEqual(container.events, [(event_name, handler)])
+
+        # Add second handler for same event
+        handler2 = Mock()
+        event_name = "test_event"
+        container.add(event_name, handler2)
+        self.assertEqual(len(bus.ee.listeners(event_name)), 2)
+        self.assertEqual(container.events, [(event_name, handler),
+                                            (event_name, handler2)])
+
+        # Add handler with once_wrapper
+        container.add("once_event", handler, once=True)
+        self.assertEqual(len(bus.ee.listeners("once_event")), 1)
+        new_event = container.events[-1]
+        self.assertEqual(new_event[0], "once_event")
+        self.assertNotEquals(new_event[1], handler)
+        self.assertEqual(len(inspect.signature(new_event[1]).parameters), 1)
+
+        # Test iterate events
+        for event in container:
+            self.assertIn(event, container.events)
+
+        # Remove simple
+        self.assertTrue(container.remove("once_event"))
+        self.assertEqual(bus.ee.listeners("once_event"), [])
+
+        # Remove multiple handlers
+        self.assertTrue(container.remove(event_name))
+        self.assertEqual(bus.ee.listeners(event_name), [])
+
+        # Test remove no listeners
+        self.assertFalse(container.remove(event_name))
+        self.assertFalse(container.remove(None))
+        self.assertEqual(container.events, [])
+
+        # Test clear
+        container.add(event_name, handler)
+        container.clear()
+        self.assertEqual(container.events, [])
+        self.assertEqual(bus.ee.listeners(event_name), [])
+
+
+class TestEventSchedulerInterface(unittest.TestCase):
+    from ovos_utils.events import EventSchedulerInterface
+    bus = FakeBus()
+    interface = EventSchedulerInterface(bus=bus, name="test")
+
+    def test_00_init(self):
+        from ovos_utils.events import EventContainer
+        self.assertEqual(self.interface.bus, self.bus)
+        self.assertIsInstance(self.interface.skill_id, str)
+        self.assertIsInstance(self.interface.events, EventContainer)
+        self.assertEqual(self.interface.events.bus, self.bus)
+        self.assertEqual(self.interface.scheduled_repeats, list())
 
         # Deprecated properties
-        self.assertEqual(interface.sched_id, interface.skill_id)
-        self.assertEqual(interface.name, interface.skill_id)
+        self.assertEqual(self.interface.sched_id, self.interface.skill_id)
+        self.assertEqual(self.interface.name, self.interface.skill_id)
+
+    def test_set_bus(self):
+        bus = FakeBus()
+        interface = self.EventSchedulerInterface(bus=bus, name="test")
+        interface.set_bus(self.bus)
+        self.assertEqual(interface.bus, self.bus)
+        self.assertEqual(interface.events.bus, self.bus)
+
+    def test_set_id(self):
+        test_id = "testing"
+        self.interface.set_id(test_id)
+        self.assertEqual(self.interface.skill_id, test_id)
+
+    def test_get_source_message(self):
+        message = self.interface._get_source_message()
+        self.assertIsInstance(message, Message)
+        self.assertEqual(message.context['skill_id'], self.interface.skill_id)
+
+    def test_create_unique_name(self):
+        test = "handler"
+        self.assertEqual(self.interface._create_unique_name(test),
+                         f"{self.interface.skill_id}:{test}")
+
+        self.assertEqual(self.interface._create_unique_name(""),
+                         f"{self.interface.skill_id}:")
+        self.assertEqual(self.interface._create_unique_name(None),
+                         f"{self.interface.skill_id}:")
+
+    def test__schedule_event(self):
+        # Test invalid time
+        with self.assertRaises(ValueError):
+            self.interface._schedule_event(Mock(), -10, None, None)
+        with self.assertRaises(TypeError):
+            self.interface._schedule_event(Mock(), None, None, None)
+
+        handle_schedule_event = Mock()
+        self.bus.on("mycroft.scheduler.schedule_event", handle_schedule_event)
+
+        self.bus.remove("mycroft.scheduler.schedule_event", handle_schedule_event)
 
         now_time = datetime.datetime.now(datetime.timezone.utc)
         self.assertAlmostEqual(now_time.timestamp(), time(), 0)
@@ -159,37 +253,35 @@ class TestEvents(unittest.TestCase):
 
         self.bus.on('mycroft.scheduler.schedule_event', on_schedule)
 
-        context = {
-            "test": time()
-        }
-
-        data = {
-            "test": True
-        }
-
+        name = None
+        context = {"test": time()}
+        data = {"test": True}
         callback = Mock()
         callback.__name__ = "test"
 
         # Schedule TZ Aware
         scheduled.clear()
-        interface.schedule_event(callback, event_time_tzaware, data,
+        self.interface._schedule_event(callback, event_time_tzaware, data, name,
                                  context=context)
         self.assertTrue(scheduled.wait(2))
         self.assertEqual(len(messages), 1)
 
         # Schedule TZ Naive
         scheduled.clear()
-        interface.schedule_event(callback, event_time_tznaive, data,
+        self.interface._schedule_event(callback, event_time_tznaive, data, name,
                                  context=context)
         self.assertTrue(scheduled.wait(2))
         self.assertEqual(len(messages), 2)
 
         # Schedule duration
-        interface.schedule_event(callback, event_time_seconds -
+        self.interface._schedule_event(callback, event_time_seconds -
                                  datetime.datetime.now().timestamp(),
-                                 data, context=context)
+                                 data, name, context=context)
         self.assertTrue(scheduled.wait(2))
         self.assertEqual(len(messages), 3)
+
+        # Schedule repeating
+        # TODO
 
         for event in messages:
             self.assertIsInstance(event, Message)
@@ -199,11 +291,72 @@ class TestEvents(unittest.TestCase):
             self.assertIsNone(event.data['repeat'])
             self.assertAlmostEqual(event.data['time'], event_time_seconds, 0)
 
-        # Schedule invalid
-        with self.assertRaises(ValueError):
-            interface.schedule_event(callback, -3.0)
+        self.bus.remove('mycroft.scheduler.schedule_event', on_schedule)
 
-        # TODO: Test Repeating, Update, Cancel, Get Status
+    def test_schedule_event(self):
+        real_schedule = self.interface._schedule_event
+        self.interface._schedule_event = Mock()
+        callback = Mock()
 
-        interface.shutdown()
-        self.assertEqual(interface.events.events, list())
+        self.interface.schedule_event(callback, -3.0)
+        self.interface._schedule_event.assert_called_with(callback, -3.0, None,
+                                                          None, context=None)
+        self.interface._schedule_event = real_schedule
+
+    def test_schedule_repeating_event(self):
+        real_schedule = self.interface._schedule_event
+        self.interface._schedule_event = Mock()
+        callback = Mock()
+        callback.__name__ = "repeat_test"
+
+        # Schedule no name event with no time
+        self.interface.schedule_repeating_event(callback, None, 30)
+        self.interface._schedule_event.assert_called_once()
+
+        # Schedule with name and time
+        event_time = datetime.datetime.now() + datetime.timedelta(hours=1)
+        self.interface.schedule_repeating_event(callback, event_time, 30,
+                                                name=callback.__name__)
+        self.interface._schedule_event.assert_called_with(callback, event_time,
+                                                          None,
+                                                          callback.__name__,
+                                                          30, None)
+
+        # Already scheduled, don't do it again
+        self.interface._schedule_event.reset_mock()
+        self.interface.scheduled_repeats.append(callback.__name__)
+        self.interface.schedule_repeating_event(callback, None, 30,
+                                                callback.__name__)
+        self.interface._schedule_event.assert_called_once()
+
+        self.interface._schedule_event = real_schedule
+
+    def test_update_scheduled_event(self):
+        # TODO
+        pass
+
+    def test_cancel_scheduled_event(self):
+        # TODO
+        pass
+
+    def test_get_scheduled_event_status(self):
+        # TODO
+        pass
+
+    def test_cancel_all_repeating_events(self):
+        # TODO
+        pass
+
+    def test_shutdown(self):
+        real_cancel_repeating = self.interface.cancel_all_repeating_events
+        real_clear = self.interface.events.clear
+        self.interface.cancel_all_repeating_events = Mock()
+        self.interface.events.clear = Mock()
+
+        self.interface.shutdown()
+        self.interface.cancel_all_repeating_events.assert_called_once()
+        self.interface.events.clear.assert_called_once()
+
+        self.interface.cancel_all_repeating_events = real_cancel_repeating
+        self.interface.events.clear = real_clear
+
