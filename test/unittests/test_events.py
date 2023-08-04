@@ -285,7 +285,8 @@ class TestEventSchedulerInterface(unittest.TestCase):
 
         for event in messages:
             self.assertIsInstance(event, Message)
-            self.assertEqual(event.context, context)
+            self.assertEqual(event.context['test'], context['test'])
+            self.assertEqual(event.context['skill_id'], self.interface.skill_id)
             self.assertEqual(event.data['data'], data)
             self.assertIsInstance(event.data['event'], str)
             self.assertIsNone(event.data['repeat'])
