@@ -70,6 +70,7 @@ class TestEvents(unittest.TestCase):
 
         # Test wrapper with message arg
         called_with = None
+
         def _with_arg(msg):
             nonlocal called_with
             called_with = msg
@@ -262,21 +263,21 @@ class TestEventSchedulerInterface(unittest.TestCase):
         # Schedule TZ Aware
         scheduled.clear()
         self.interface._schedule_event(callback, event_time_tzaware, data, name,
-                                 context=context)
+                                       context=context)
         self.assertTrue(scheduled.wait(2))
         self.assertEqual(len(messages), 1)
 
         # Schedule TZ Naive
         scheduled.clear()
         self.interface._schedule_event(callback, event_time_tznaive, data, name,
-                                 context=context)
+                                       context=context)
         self.assertTrue(scheduled.wait(2))
         self.assertEqual(len(messages), 2)
 
         # Schedule duration
         self.interface._schedule_event(callback, event_time_seconds -
-                                 datetime.datetime.now().timestamp(),
-                                 data, name, context=context)
+                                       datetime.datetime.now().timestamp(),
+                                       data, name, context=context)
         self.assertTrue(scheduled.wait(2))
         self.assertEqual(len(messages), 3)
 
@@ -327,8 +328,8 @@ class TestEventSchedulerInterface(unittest.TestCase):
         self.interface._schedule_event.reset_mock()
         self.interface.scheduled_repeats.append(callback.__name__)
         self.interface.schedule_repeating_event(callback, None, 30,
-                                                callback.__name__)
-        self.interface._schedule_event.assert_called_once()
+                                                name=callback.__name__)
+        self.interface._schedule_event.assert_not_called()
 
         self.interface._schedule_event = real_schedule
 
@@ -360,4 +361,3 @@ class TestEventSchedulerInterface(unittest.TestCase):
 
         self.interface.cancel_all_repeating_events = real_cancel_repeating
         self.interface.events.clear = real_clear
-
