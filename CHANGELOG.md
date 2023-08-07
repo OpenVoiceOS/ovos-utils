@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.36a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a1) (2023-08-07)
+## [0.0.36a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a2) (2023-08-07)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35...0.0.36a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a1...0.0.36a2)
+
+**Fixed bugs:**
+
+- HACK / speed up resolve\_ovos\_resource\_file [\#182](https://github.com/OpenVoiceOS/ovos-utils/pull/182) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.36a1](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a1) (2023-08-07)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35...V0.0.36a1)
 
 **Merged pull requests:**
 
