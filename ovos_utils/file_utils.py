@@ -18,6 +18,24 @@ from ovos_utils.log import LOG, log_deprecation
 from ovos_utils.system import search_mycroft_core_location
 
 
+def __HACK_preload():  # TODO - remove me soon, make resolve_ovos_resource_file FAST
+    """ there is some latency on initial wake word detection without this,
+     checks several ovos packages and needs to import them,
+     this method is speeding things up as a workaround,
+    main culprit is ovos_workshop which causes a scan of all OCP plugins (bug ?)"""
+    try:
+        import ovos_workshop
+    except ImportError:
+        pass
+    try:
+        import ovos_gui
+    except ImportError:
+        pass
+
+
+__HACK_preload()
+
+
 def get_temp_path(*args) -> str:
     """
     Generate a valid path in the system temp directory.
@@ -108,6 +126,7 @@ def resolve_ovos_resource_file(res_name: str,
 
     # let's look in mycroft/ovos-core if it's installed
     # (default core resources live here / backwards compat)
+    # TODO - remove me soon, spams deprecation logs
     try:
         import mycroft
         core_root = dirname(mycroft.__file__)
