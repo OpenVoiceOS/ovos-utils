@@ -605,13 +605,8 @@ def create_basic_wrapper(handler, on_error=None):
 
 
 class EventContainer:
-    """Container tracking messagbus handlers.
-
-    This container tracks events added by a skill, allowing unregistering
-    all events on shutdown.
-    """
-
     def __init__(self, bus=None):
+        log_deprecation("Import `ovos_utils.events.EventContainer", "0.1.0")
         self.bus = bus
         self.events = []
 
@@ -620,7 +615,6 @@ class EventContainer:
 
     def add(self, name, handler, once=False):
         """Create event handler for executing intent or other event.
-
         Args:
             name (string): IntentParser name
             handler (func): Method to call
@@ -646,7 +640,6 @@ class EventContainer:
 
     def remove(self, name):
         """Removes an event from bus emitter and events list.
-
         Args:
             name (string): Name of Intent or Scheduler Event
         Returns:
@@ -684,7 +677,6 @@ class EventContainer:
         for e, f in self.events:
             self.bus.remove(e, f)
         self.events = []  # Remove reference to wrappers
-
 
 class BusService:
     """
