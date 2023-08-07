@@ -18,7 +18,7 @@ from datetime import timedelta
 # interface with the AudioService via messagebus outside core
 from os.path import abspath
 
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, deprecated
 from ovos_utils.messagebus import get_mycroft_bus, dig_for_message, \
     FakeMessage as Message
 
@@ -223,10 +223,10 @@ class AudioServiceInterface(ClassicAudioServiceInterface):
         bus: Mycroft messagebus connection
     """
 
+    @deprecated("AudioServiceInterface has been deprecated, compatibility "
+                "layer in use. please move to OCPInterface", "0.1.0")
     def __init__(self, bus=None):
         super().__init__(bus)
-        LOG.warning("AudioServiceInterface has been deprecated, compatibility layer in use\n"
-                    "please move to OCPInterface")
 
     @staticmethod
     def _uri2meta(uri):

@@ -3,29 +3,49 @@ import unittest
 from os.path import join, dirname
 from sys import executable
 from subprocess import Popen, TimeoutExpired
+from time import sleep, time
 
 
 class TestHelpers(unittest.TestCase):
+    def test_threaded_timeout(self):
+        from ovos_utils import threaded_timeout
+
+        @threaded_timeout(2)
+        def long_runner():
+            sleep(10)
+            return True
+
+        @threaded_timeout()
+        def valid_runner():
+            return True
+
+        # Test decorated valid method
+        self.assertTrue(valid_runner)
+
+        start_time = time()
+        with self.assertRaises(Exception):
+            long_runner()
+        self.assertLess(time(), start_time + 3)
 
     def test_classproperty(self):
+        from ovos_utils import classproperty
         # TODO
-        pass
 
     def test_timed_lru_cache(self):
+        from ovos_utils import timed_lru_cache
         # TODO
-        pass
 
     def test_create_killable_daemon(self):
+        from ovos_utils import create_killable_daemon
         # TODO
-        pass
 
     def test_create_daemon(self):
+        from ovos_utils import create_daemon
         # TODO
-        pass
 
     def test_create_loop(self):
+        from ovos_utils import create_loop
         # TODO
-        pass
 
     def test_wait_for_exit_signal(self):
         test_file = join(dirname(__file__), "scripts", "wait_for_exit.py")

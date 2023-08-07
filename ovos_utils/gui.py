@@ -1,16 +1,15 @@
-from typing import List, Union
+from os import walk
+from typing import List, Union, Optional, Callable
 
 import time
 from collections import namedtuple
 from enum import IntEnum
-from os.path import join
-# from ovos_bus_client import MessageBusClient
+from os.path import join, splitext, isfile, isdir
 
 from ovos_utils import resolve_ovos_resource_file, resolve_resource_file
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, log_deprecation
 from ovos_utils.messagebus import wait_for_reply, get_mycroft_bus, Message
 from ovos_utils.system import is_installed, has_screen, is_process_running
-
 
 _default_gui_apps = (
     "mycroft-gui-app",
@@ -78,6 +77,25 @@ def can_use_gui(bus=None,
     if local:
         return can_use_local_gui()
     return can_use_local_gui() or is_gui_connected(bus)
+
+
+def get_ui_directories(root_dir: str) -> dict:
+    """
+    Get a dict of available UI directories by GUI framework.
+    @param root_dir: base directory to inspect for available UI directories
+    @return: Dict of framework name to UI resource directory
+    """
+    ui_directories = dict()
+    base_directory = root_dir
+    if isdir(join(base_directory, "gui")):
+        LOG.debug("Skill implements resources in `gui` directory")
+        ui_directories["all"] = join(base_directory, "gui")
+        return ui_directories
+    LOG.info("Checking for legacy UI directories")
+    if isdir(join(base_directory, "ui")):
+        LOG.debug("Handling `ui` directory as `qt5`")
+        ui_directories["qt5"] = join(base_directory, "ui")
+    return ui_directories
 
 
 def extend_about_data(about_data: Union[list, dict],
@@ -279,7 +297,7 @@ class GUITracker:
                 return i
         return None
 
-    def __insert_pages(self, namespace, pages):
+    def __insert_pages(self, namespace: str, pages: List[str]):
         """ Insert pages into the namespace
 
         Args:
@@ -304,7 +322,7 @@ class GUITracker:
         # Remove the page from the local reprensentation as well.
         self._loaded[0].pages.pop(pos)
 
-    def __insert_new_namespace(self, namespace, pages):
+    def __insert_new_namespace(self, namespace: str, pages: List[str]):
         """ Insert new namespace and pages.
 
         This first sends a message adding a new namespace at the
@@ -478,6 +496,7 @@ class _GUIDict(dict):
     This is a helper dictionary subclass. It ensures that values changed
     in it are propagated to the GUI service in real time.
     """
+
     def __init__(self, gui, **kwargs):
         self.gui = gui
         super().__init__(**kwargs)
@@ -488,7 +507,8 @@ class _GUIDict(dict):
 
 
 class GUIInterface:
-    """Interface to the Graphical User Interface, allows interaction with
+    """
+    Interface to the Graphical User Interface, allows interaction with
     the mycroft-gui from anywhere
 
     Values set in this class are synced to the GUI, accessible within QML
@@ -500,11 +520,22 @@ class GUIInterface:
         text: sessionData.time
     """
 
-    def __init__(self, skill_id, bus=None, remote_server=None, config=None):
+    def __init__(self, skill_id: str, bus=None,
+                 remote_server: str = None, config: dict = None,
+                 ui_directories: dict = None):
+        """
+        Create an interface to the GUI module. Values set here are exposed to
+        the GUI client as sessionData
+        @param skill_id: ID of this interface
+        @param bus: MessagebusClient object to connect to
+        @param remote_server: Optional URL of a remote GUI server
+        @param config: dict gui Configuration
+        @param ui_directories: dict framework to directory containing resources
+            `all` key should reference a `gui` directory containing all
+            specific resource subdirectories
+        """
         if not config:
-            LOG.warning(f"Expected a dict config and got None. This config"
-                        f"fallback behavior will be deprecated in a future "
-                        f"release")
+            log_deprecation(f"Expected a dict config and got None.", "0.1.0")
             try:
                 from ovos_config.config import read_mycroft_config
                 config = read_mycroft_config().get("gui", {})
@@ -516,21 +547,22 @@ class GUIInterface:
             self.config["remote-server"] = remote_server
         self._bus = bus
         self.__session_data = {}  # synced to GUI for use by this skill's pages
-        self.pages = []
+        self._pages = []
         self.current_page_idx = -1
         self._skill_id = skill_id
         self.on_gui_changed_callback = None
         self._events = []
+        self.ui_directories = ui_directories or dict()
         if bus:
             self.set_bus(bus)
 
     @property
-    def remote_url(self):
+    def remote_url(self) -> Optional[str]:
         """Returns configuration value for url of remote-server."""
         return self.config.get('remote-server')
 
     @remote_url.setter
-    def remote_url(self, val):
+    def remote_url(self, val: str):
         self.config["remote-server"] = val
 
     def set_bus(self, bus=None):
@@ -539,48 +571,119 @@ class GUIInterface:
 
     @property
     def bus(self):
+        """
+        Return the attached MessageBusClient
+        """
         return self._bus
 
     @bus.setter
     def bus(self, val):
-        self._bus = val
+        self.set_bus(val)
 
     @property
-    def skill_id(self):
+    def skill_id(self) -> str:
+        """
+        Return the ID of the module implementing this interface
+        """
         return self._skill_id
 
     @skill_id.setter
-    def skill_id(self, val):
+    def skill_id(self, val: str):
         self._skill_id = val
 
     @property
-    def page(self):
-        # the active GUI page (e.g. QML template) to show
-        return self.pages[self.current_page_idx] if len(self.pages) else None
+    def page(self) -> Optional[str]:
+        """
+        Return the active GUI page name to show
+        """
+        return self._pages[self.current_page_idx] if len(self._pages) else None
 
     @property
-    def connected(self):
-        """Returns True if at least 1 remote gui is connected or if gui is
-        installed and running locally, else False"""
+    def connected(self) -> bool:
+        """
+        Returns True if at least 1 remote gui is connected or if gui is
+        installed and running locally, else False
+        """
         if not self.bus:
             return False
         return can_use_gui(self.bus)
 
-    def build_message_type(self, event):
-        """Builds a message matching the output from the enclosure."""
+    @property
+    def pages(self) -> List[str]:
+        """
+        Get a list of the active page ID's managed by this interface 
+        """
+        return self._pages
+
+    def build_message_type(self, event: str) -> str:
+        """
+        Ensure the specified event prepends this interface's `skill_id`
+        """
         if not event.startswith(f'{self.skill_id}.'):
             event = f'{self.skill_id}.' + event
         return event
 
     # events
     def setup_default_handlers(self):
-        """Sets the handlers for the default messages."""
+        """
+        Sets the handlers for the default messages.
+        """
         msg_type = self.build_message_type('set')
         self.bus.on(msg_type, self.gui_set)
         self._events.append((msg_type, self.gui_set))
+        self.bus.on("gui.request_page_upload", self.upload_gui_pages)
+        if self.ui_directories:
+            LOG.debug("Volunteering gui page upload")
+            self.bus.emit(Message("gui.volunteer_page_upload",
+                                  {'skill_id': self.skill_id},
+                                  {'source': self.skill_id, "destination": ["gui"]}))
 
-    def register_handler(self, event, handler):
-        """Register a handler for GUI events.
+    def upload_gui_pages(self, message: Message):
+        """
+        Emit a response Message with all known GUI files managed by
+        this interface for the requested infrastructure
+        @param message: `gui.request_page_upload` Message requesting pages
+        """
+        if not self.ui_directories:
+            LOG.debug("No UI resources to upload")
+            return
+
+        requested_skill = message.data.get("skill_id") or self._skill_id
+        if requested_skill != self._skill_id:
+            # GUI requesting a specific skill to upload other than this one
+            return
+
+        request_res_type = message.data.get("framework") or "all" if "all" in \
+            self.ui_directories else "qt5"
+        # Note that ui_directory "all" is a special case that will upload all
+        # gui files, including all framework subdirectories
+        if request_res_type not in self.ui_directories:
+            LOG.warning(f"Requested UI files not available: {request_res_type}")
+            return
+        LOG.debug(f"Requested upload resources for: {request_res_type}")
+        pages = dict()
+        # `pages` keys are unique identifiers in the scope of this interface;
+        # if ui_directory is "all", then pages are prefixed with `<framework>/`
+        res_dir = self.ui_directories[request_res_type]
+        for path, _, files in walk(res_dir):
+            for file in files:
+                try:
+                    full_path: str = join(path, file)
+                    page_name = full_path.replace(f"{res_dir}/", "", 1)
+                    with open(full_path, 'rb') as f:
+                        file_bytes = f.read()
+                    pages[page_name] = file_bytes.hex()
+                except Exception as e:
+                    LOG.exception(f"{file} not uploaded: {e}")
+        # Note that `pages` in this context include file extensions
+        self.bus.emit(message.forward("gui.page.upload",
+                                      {"__from": self.skill_id,
+                                       "framework": request_res_type,
+                                       "pages": pages}))
+
+    def register_handler(self, event: str, handler: Callable):
+        """
+        Register a handler for GUI events.
 
         will be prepended with self.skill_id.XXX if missing in event
 
@@ -597,8 +700,9 @@ class GUIInterface:
         self._events.append((event, handler))
         self.bus.on(event, handler)
 
-    def set_on_gui_changed(self, callback):
-        """Registers a callback function to run when a value is
+    def set_on_gui_changed(self, callback: Callable):
+        """
+        Registers a callback function to run when a value is
         changed from the GUI.
 
         Arguments:
@@ -607,8 +711,9 @@ class GUIInterface:
         self.on_gui_changed_callback = callback
 
     # internals
-    def gui_set(self, message):
-        """Handler catching variable changes from the GUI.
+    def gui_set(self, message: Message):
+        """
+        Handler catching variable changes from the GUI.
 
         Arguments:
             message: Messagebus message
@@ -647,25 +752,30 @@ class GUIInterface:
         return self.__session_data.get(*args, **kwargs)
 
     def __contains__(self, key):
-        """Implements the "in" operation."""
+        """
+        Implements the "in" operation.
+        """
         return self.__session_data.__contains__(key)
 
     def clear(self):
-        """Reset the value dictionary, and remove namespace from GUI.
+        """
+        Reset the value dictionary, and remove namespace from GUI.
 
         This method does not close the GUI for a Skill. For this purpose see
         the `release` method.
         """
         self.__session_data = {}
-        self.pages = []
+        self._pages = []
         self.current_page_idx = -1
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
         self.bus.emit(Message("gui.clear.namespace",
                               {"__from": self.skill_id}))
 
-    def send_event(self, event_name, params=None):
-        """Trigger a gui event.
+    def send_event(self, event_name: str,
+                   params: Union[dict, list, str, int, float, bool] = None):
+        """
+        Trigger a gui event.
 
         Arguments:
             event_name (str): name of event to be triggered
@@ -680,14 +790,22 @@ class GUIInterface:
                                "event_name": event_name,
                                "params": params}))
 
-    def _pages2uri(self, page_names):
-        # Convert pages to full reference
+    def _pages2uri(self, page_names: List[str]) -> List[str]:
+        """
+        Get a list of resolved URIs from a list of string page names.
+        @param page_names: List of GUI resource names (file basenames) to locate
+        @return: List of resolved paths to the requested pages
+        """
+        # TODO: This method resolves absolute file paths. These will no longer
+        #       be used with the implementation of `ovos-gui`
         page_urls = []
+        extra_dirs = list(self.ui_directories.values()) or list()
         for name in page_names:
-            page = resolve_resource_file(name) or \
-                   resolve_resource_file(join('ui', name)) or \
-                   resolve_ovos_resource_file(name) or \
-                   resolve_ovos_resource_file(join('ui', name))
+            # Prefer plugin-specific resources first, then fallback to core
+            page = resolve_ovos_resource_file(name, extra_dirs) or \
+                   resolve_ovos_resource_file(join('ui', name), extra_dirs) or \
+                   resolve_resource_file(name, self.config) or \
+                   resolve_resource_file(join('ui', name), self.config)
 
             if page:
                 if self.remote_url:
@@ -697,42 +815,52 @@ class GUIInterface:
                 else:
                     page_urls.append("file://" + page)
             else:
-                LOG.error("Unable to find page: {}".format(name))
+                LOG.error(f"Unable to find page: {name}")
+        LOG.debug(f"Resolved pages: {page_urls}")
         return page_urls
 
-    # base gui interactions
-    def show_page(self, name, override_idle=None,
-                  override_animations=False):
-        """Begin showing the page in the GUI
+    @staticmethod
+    def _normalize_page_name(page_name: str) -> str:
+        """
+        Normalize a requested GUI resource
+        @param page_name: string name of a GUI resource
+        @return: normalized string name (`.qml` removed for other GUI support)
+        """
+        if isfile(page_name):
+            log_deprecation("GUI resources should specify a resource name and "
+                            "not a file path.", "0.1.0")
+            return page_name
+        file, ext = splitext(page_name)
+        if ext == ".qml":
+            log_deprecation("GUI resources should exclude gui-specific file "
+                            f"extensions. This call should probably pass "
+                            f"`{file}`, instead of `{page_name}`", "0.1.0")
+            return file
 
-        Arguments:
-            name (str): Name of page (e.g "mypage.qml") to display
-            override_idle (boolean, int):
-                True: Takes over the resting page indefinitely
-                (int): Delays resting page for the specified number of
-                       seconds.
-            override_animations (boolean):
-                True: Disables showing all platform skill animations.
-                False: 'Default' always show animations.
+        return page_name
+
+    # base gui interactions
+    def show_page(self, name: str, override_idle: Union[bool, int] = None,
+                  override_animations: bool = False):
+        """
+        Request to show a page in the GUI.
+        @param name: page resource requested
+        @param override_idle: number of seconds to override display for;
+            if True, override display indefinitely
+        @param override_animations: if True, disables all GUI animations
         """
         self.show_pages([name], 0, override_idle, override_animations)
 
-    def show_pages(self, page_names, index=0, override_idle=None,
-                   override_animations=False):
-        """Begin showing the list of pages in the GUI.
-
-        Arguments:
-            page_names (list): List of page names (str) to display, such as
-                               ["Weather.qml", "Forecast.qml", "Details.qml"]
-            index (int): Page number (0-based) to show initially.  For the
-                         above list a value of 1 would start on "Forecast.qml"
-            override_idle (boolean, int):
-                True: Takes over the resting page indefinitely
-                (int): Delays resting page for the specified number of
-                       seconds.
-            override_animations (boolean):
-                True: Disables showing all platform skill animations.
-                False: 'Default' always show animations.
+    def show_pages(self, page_names: List[str], index: int = 0,
+                   override_idle: Union[bool, int] = None,
+                   override_animations: bool = False):
+        """
+        Request to show a list of pages in the GUI.
+        @param page_names: list of page resources requested
+        @param index: position to insert pages at (default 0)
+        @param override_idle: number of seconds to override display for;
+            if True, override display indefinitely
+        @param override_animations: if True, disables all GUI animations
         """
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
@@ -745,54 +873,67 @@ class GUIInterface:
             LOG.error('Default index is larger than page list length')
             index = len(page_names) - 1
 
-        self.pages = page_names
+        # TODO: deprecate sending page_urls after ovos_gui implementation
+        page_urls = self._pages2uri(page_names)
+        page_names = [self._normalize_page_name(n) for n in page_names]
+
+        self._pages = page_names
         self.current_page_idx = index
 
         # First sync any data...
         data = self.__session_data.copy()
         data.update({'__from': self.skill_id})
+        LOG.debug(f"Updating gui data: {data}")
         self.bus.emit(Message("gui.value.set", data))
-        page_urls = self._pages2uri(page_names)
+
+        # finally tell gui what to show
         self.bus.emit(Message("gui.page.show",
                               {"page": page_urls,
+                               "page_names": page_names,
+                               "ui_directories": self.ui_directories,
                                "index": index,
                                "__from": self.skill_id,
                                "__idle": override_idle,
                                "__animations": override_animations}))
 
-    def remove_page(self, page):
-        """Remove a single page from the GUI.
-
-        Arguments:
-            page (str): Page to remove from the GUI
+    def remove_page(self, page: str):
         """
-        return self.remove_pages([page])
+        Remove a single page from the GUI.
+        @param page: Name of page to remove
+        """
+        self.remove_pages([page])
 
-    def remove_pages(self, page_names):
-        """Remove a list of pages in the GUI.
-
-        Arguments:
-            page_names (list): List of page names (str) to display, such as
-                               ["Weather.qml", "Forecast.qml", "Other.qml"]
+    def remove_pages(self, page_names: List[str]):
+        """
+        Request to remove a list of pages from the GUI.
+        @param page_names: list of page resources requested
         """
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
-        if not isinstance(page_names, list):
+        if isinstance(page_names, str):
             page_names = [page_names]
+        if not isinstance(page_names, list):
+            raise ValueError('page_names must be a list')
+        # TODO: deprecate sending page_urls after ovos_gui implementation
         page_urls = self._pages2uri(page_names)
+        page_names = [self._normalize_page_name(n) for n in page_names]
         self.bus.emit(Message("gui.page.delete",
                               {"page": page_urls,
+                               "page_names": page_names,
                                "__from": self.skill_id}))
 
     # Utils / Templates
 
     # backport - PR https://github.com/MycroftAI/mycroft-core/pull/2862
-    def show_notification(self, content, duration=10, action=None,
-                          noticetype="transient", style="info", callback_data=None):
+    def show_notification(self, content: str, duration: int = 10,
+                          action: str = None, noticetype: str = "transient",
+                          style: str = "info",
+                          callback_data: Optional[dict] = None):
         """Display a Notification on homepage in the GUI.
         Arguments:
             content (str): Main text content of a notification, Limited
             to two visual lines.
+            duration (int): seconds to display notification for
             action (str): Callback to any event registered by the skill
             to perform a certain action when notification is clicked.
             noticetype (str):
@@ -805,25 +946,26 @@ class GUIInterface:
                 error: displays a notification with error styling
             callback_data (dict): data dictionary available to use with action
         """
+        # TODO: Define enums for style and noticetype
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
-        if not callback_data:
-            # GUI does not accept NONE type when building models, send a empty dict
-            # Sending NONE will corrupt entries in the model
-            callback_data = {}
+        # GUI does not accept NONE type, send an empty dict
+        # Sending NONE will corrupt entries in the model
+        callback_data = callback_data or dict()
         self.bus.emit(Message("ovos.notification.api.set",
-                                    data={
-                                        "duration": duration,
-                                        "sender": self.skill_id,
-                                        "text": content,
-                                        "action": action,
-                                        "type": noticetype,
-                                        "style": style,
-                                        "callback_data": callback_data
-                                    }))
+                              data={
+                                  "duration": duration,
+                                  "sender": self.skill_id,
+                                  "text": content,
+                                  "action": action,
+                                  "type": noticetype,
+                                  "style": style,
+                                  "callback_data": callback_data
+                              }))
 
-    def show_controlled_notification(self, content, style="info"):
-        """Display a controlled Notification in the GUI.
+    def show_controlled_notification(self, content: str, style: str = "info"):
+        """
+        Display a controlled Notification in the GUI.
         Arguments:
             content (str): Main text content of a notification, Limited
             to two visual lines.
@@ -833,24 +975,29 @@ class GUIInterface:
                 success: displays a notification with success styling
                 error: displays a notification with error styling
         """
+        # TODO: Define enum for style
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
         self.bus.emit(Message("ovos.notification.api.set.controlled",
                               data={
-                                    "sender": self.skill_id,
-                                    "text": content,
-                                    "style": style
-                                }))
+                                  "sender": self.skill_id,
+                                  "text": content,
+                                  "style": style
+                              }))
 
     def remove_controlled_notification(self):
-        """Remove a controlled Notification in the GUI."""
+        """
+        Remove a controlled Notification in the GUI.
+        """
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
         self.bus.emit(Message("ovos.notification.api.remove.controlled"))
 
-    def show_text(self, text, title=None, override_idle=None,
-                  override_animations=False):
-        """Display a GUI page for viewing simple text.
+    def show_text(self, text: str, title: Optional[str] = None,
+                  override_idle: Union[int, bool] = None,
+                  override_animations: bool = False):
+        """
+        Display a GUI page for viewing simple text.
 
         Arguments:
             text (str): Main text content.  It will auto-paginate
@@ -868,10 +1015,13 @@ class GUIInterface:
         self.show_page("SYSTEM_TextFrame.qml", override_idle,
                        override_animations)
 
-    def show_image(self, url, caption=None,
-                   title=None, fill=None, background_color=None,
-                   override_idle=None, override_animations=False):
-        """Display a GUI page for viewing an image.
+    def show_image(self, url: str, caption: Optional[str] = None,
+                   title: Optional[str] = None,
+                   fill: str = None, background_color: str = None,
+                   override_idle: Union[int, bool] = None,
+                   override_animations: bool = False):
+        """
+        Display a GUI page for viewing an image.
 
         Arguments:
             url (str): Pointer to the image
@@ -897,10 +1047,13 @@ class GUIInterface:
         self.show_page("SYSTEM_ImageFrame.qml", override_idle,
                        override_animations)
 
-    def show_animated_image(self, url, caption=None,
-                            title=None, fill=None, background_color=None,
-                            override_idle=None, override_animations=False):
-        """Display a GUI page for viewing an image.
+    def show_animated_image(self, url: str, caption: Optional[str] = None,
+                            title: Optional[str] = None,
+                            fill: str = None, background_color: str = None,
+                            override_idle: Union[int, bool] = None,
+                            override_animations: bool = False):
+        """
+        Display a GUI page for viewing an image.
 
         Args:
             url (str): Pointer to the .gif image
@@ -926,9 +1079,11 @@ class GUIInterface:
         self.show_page("SYSTEM_AnimatedImageFrame.qml", override_idle,
                        override_animations)
 
-    def show_html(self, html, resource_url=None, override_idle=None,
-                  override_animations=False):
-        """Display an HTML page in the GUI.
+    def show_html(self, html: str, resource_url: Optional[str] = None,
+                  override_idle: Union[int, bool] = None,
+                  override_animations: bool = False):
+        """
+        Display an HTML page in the GUI.
 
         Args:
             html (str): HTML text to display
@@ -946,9 +1101,10 @@ class GUIInterface:
         self.show_page("SYSTEM_HtmlFrame.qml", override_idle,
                        override_animations)
 
-    def show_url(self, url, override_idle=None,
-                 override_animations=False):
-        """Display an HTML page in the GUI.
+    def show_url(self, url: str, override_idle: Union[int, bool] = None,
+                 override_animations: bool = False):
+        """
+        Display an HTML page in the GUI.
 
         Args:
             url (str): URL to render
@@ -964,9 +1120,22 @@ class GUIInterface:
         self.show_page("SYSTEM_UrlFrame.qml", override_idle,
                        override_animations)
 
-    def show_input_box(self, title=None, placeholder=None,
-                       confirm_text=None, exit_text=None,
-                       override_idle=None, override_animations=None):
+    def show_input_box(self, title: Optional[str] = None,
+                       placeholder: Optional[str] = None,
+                       confirm_text: Optional[str] = None,
+                       exit_text: Optional[str] = None,
+                       override_idle: Union[int, bool] = None,
+                       override_animations: bool = False):
+        """
+        Display a fullscreen UI for a user to enter text and confirm or cancel
+        @param title: title of input UI should describe what the input is
+        @param placeholder: default text hint to show in an empty entry box
+        @param confirm_text: text to display on the submit/confirm button
+        @param exit_text: text to display on the cancel/exit button
+        @param override_idle: if True, takes over the resting page indefinitely
+            else Delays resting page for the specified number of seconds.
+        @param override_animations: disable showing all platform animations
+        """
         self["title"] = title
         self["placeholder"] = placeholder
         self["skill_id_handler"] = self.skill_id
@@ -984,17 +1153,22 @@ class GUIInterface:
                        override_animations)
 
     def remove_input_box(self):
-        LOG.info(f"GUI pages length {len(self.pages)}")
-        if len(self.pages) > 1:
+        """
+        Remove an input box shown by `show_input_box`
+        """
+        LOG.info(f"GUI pages length {len(self._pages)}")
+        if len(self._pages) > 1:
             self.remove_page("SYSTEM_InputBox.qml")
         else:
             self.release()
 
     def release(self):
-        """Signal that this skill is no longer using the GUI,
+        """
+        Signal that this skill is no longer using the GUI,
         allow different platforms to properly handle this event.
         Also calls self.clear() to reset the state variables
-        Platforms can close the window or go back to previous page"""
+        Platforms can close the window or go back to previous page
+        """
         if not self.bus:
             raise RuntimeError("bus not set, did you call self.bind() ?")
         self.clear()
@@ -1002,7 +1176,8 @@ class GUIInterface:
                               {"skill_id": self.skill_id}))
 
     def shutdown(self):
-        """Shutdown gui interface.
+        """
+        Shutdown gui interface.
 
         Clear pages loaded through this interface and remove the bus events
         """

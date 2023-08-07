@@ -23,7 +23,44 @@ import kthread
 # TODO: Deprecate below imports
 from ovos_utils.file_utils import resolve_ovos_resource_file, resolve_resource_file
 from ovos_utils.network_utils import get_ip, get_external_ip, is_connected_dns, is_connected_http, is_connected
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, deprecated
+
+
+def threaded_timeout(timeout=5):
+    """
+    Start a thread with a specified timeout. If timeout is exceeded, an
+    exception is raised and the thread is terminated.
+    Adapted from https://github.com/OpenJarbas/InGeo
+    @param timeout: Timeout in seconds to wait before terminating the process
+    """
+    
+    def deco(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            res = [Exception(f'function [{func.__name__}] timeout '
+                             f'[{timeout}] exceeded!')]
+
+            def func_wrapped():
+                try:
+                    res[0] = func(*args, **kwargs)
+                except Exception as e:
+                    res[0] = e
+
+            t = Thread(target=func_wrapped)
+            t.daemon = True
+            try:
+                t.start()
+                t.join(timeout)
+            except Exception as je:
+                raise je
+            ret = res[0]
+            if isinstance(ret, BaseException):
+                raise ret
+            return ret
+
+        return wrapper
+
+    return deco
 
 
 class classproperty(property):
@@ -33,10 +70,10 @@ class classproperty(property):
         return self.fget(owner_cls)
 
 
+@deprecated("Anything depending on `mycroft`"
+            "should install `ovos-core` as a dependency", "0.1.0")
 def ensure_mycroft_import():
     # TODO: Deprecate in 0.1.0
-    LOG.warning("This method is deprecated. Anything depending on `mycroft`"
-                "should install `ovos-core` as a dependency")
     try:
         import mycroft
     except ImportError:
@@ -49,10 +86,10 @@ def ensure_mycroft_import():
             raise
 
 
+@deprecated("Code should import from the current"
+            "namespace; other system paths are irrelevant.", "0.1.0")
 def get_mycroft_root():
     # TODO: Deprecate in 0.1.0
-    LOG.warning("This method is deprecated. Code should import from the current"
-                "namespace; other system paths are irrelevant.")
     paths = [
         "/opt/venvs/mycroft-core/lib/python3.7/site-packages/",  # mark1/2
         "/opt/venvs/mycroft-core/lib/python3.4/site-packages/ ",  # old mark1 installs

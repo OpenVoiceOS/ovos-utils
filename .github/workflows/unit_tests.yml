@@ -52,10 +52,10 @@ jobs:
           python -m pip install build wheel
       - name: Install core repo
         run: |
-          pip install .[extras]
+          pip install -e .[extras]
       - name: Install test dependencies
         run: |
-          pip install pytest pytest-timeout pytest-cov mock
+          pip install pytest pytest-timeout pytest-cov
       - name: Run unittests
         run: |
           pytest --cov=ovos_utils --cov-report xml test/unittests
@@ -63,6 +63,7 @@ jobs:
           #       or they will overwrite previous invocations' coverage reports
           #       (for an example, see OVOS Skill Manager's workflow)
       - name: Upload coverage
+        if: "${{ matrix.python-version == '3.9' }}"
         env:
           CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
         uses: codecov/codecov-action@v2

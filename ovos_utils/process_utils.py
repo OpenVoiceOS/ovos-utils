@@ -292,6 +292,7 @@ class PIDLock:  # python 3+ 'class Lock'
     """
     @classmethod
     def init(cls):
+        # TODO: Path to deprecation
         try:
             from ovos_config.meta import get_xdg_base
             base_dir = get_xdg_base()

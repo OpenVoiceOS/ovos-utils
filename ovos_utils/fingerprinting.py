@@ -2,7 +2,7 @@ import platform
 import socket
 from enum import Enum
 from os.path import join, isfile
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, deprecated
 from ovos_utils.system import is_installed, is_running_from_module, has_screen, \
     get_desktop_environment, search_mycroft_core_location, is_process_running
 
@@ -21,16 +21,14 @@ class MycroftPlatform(str, Enum):
     OTHER = "unknown"
 
 
+@deprecated("fingerprinting utils are deprecated.", "0.1.0")
 def detect_platform():
-    LOG.warning("fingerprinting utils are deprecated. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     return max(((k, v) for k, v in classify_fingerprint().items()),
                key=lambda k: k[1])[0]
 
 
+@deprecated("fingerprinting utils are deprecated.", "0.1.0")
 def get_config_fingerprint(config=None):
-    LOG.warning("fingerprinting utils are deprecated. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     if not config:
         try:
             from ovos_config.config import read_mycroft_config
@@ -54,9 +52,8 @@ def get_config_fingerprint(config=None):
     }
 
 
+@deprecated("fingerprinting utils are deprecated.", "0.1.0")
 def get_platform_fingerprint():
-    LOG.warning("fingerprinting utils are deprecated. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     return {
         "hostname": socket.gethostname(),
         "platform": platform.platform(),
@@ -83,23 +80,20 @@ def get_platform_fingerprint():
     }
 
 
+@deprecated("fingerprinting utils are deprecated.", "0.1.0")
 def get_fingerprint():
-    LOG.warning("fingerprinting utils are deprecated. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     finger = get_platform_fingerprint()
     finger["configuration"] = get_config_fingerprint()
     return finger
 
 
+@deprecated("fingerprinting utils are deprecated.", "0.1.0")
 def core_supports_xdg():
-    LOG.warning("fingerprinting utils are deprecated. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     return True  # no longer optional
 
 
+@deprecated("fingerprinting utils are deprecated.", "0.1.0")
 def get_mycroft_version():
-    LOG.warning("fingerprinting utils are deprecated. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:  # ovos
         from mycroft.version import OVOS_VERSION_STR
         return OVOS_VERSION_STR
@@ -139,9 +133,8 @@ def get_mycroft_version():
         return None
 
 
+@deprecated("fingerprinting utils are deprecated.", "0.1.0")
 def is_chatterbox_core():
-    LOG.warning("fingerprinting utils are deprecated. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         import chatterbox
         return True
@@ -149,9 +142,8 @@ def is_chatterbox_core():
         return False
 
 
+@deprecated("fingerprinting utils are deprecated.", "0.1.0")
 def is_neon_core():
-    LOG.warning("fingerprinting utils are deprecated. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         import neon_core
         return True
@@ -159,9 +151,8 @@ def is_neon_core():
         return False
 
 
+@deprecated("fingerprinting utils are deprecated.", "0.1.0")
 def is_mycroft_core():
-    LOG.warning("fingerprinting utils are deprecated. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     try:
         import mycroft
         return True
@@ -169,33 +160,28 @@ def is_mycroft_core():
         return False
 
 
+@deprecated("fingerprinting utils are deprecated.", "0.1.0")
 def is_vanilla_mycroft_core():
-    LOG.warning("fingerprinting utils are deprecated. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     return is_mycroft_core() and not is_ovos()
 
 
+@deprecated("fingerprinting utils are deprecated.", "0.1.0")
 def is_holmes():
-    LOG.warning("fingerprinting utils are deprecated. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     return "HolmesV" in (get_mycroft_version() or "") or is_mycroft_lib()
 
 
+@deprecated("fingerprinting utils are deprecated.", "0.1.0")
 def is_mycroft_lib():
-    LOG.warning("fingerprinting utils are deprecated. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     return "mycroft-lib" in (get_mycroft_version() or "")
 
 
+@deprecated("fingerprinting utils are deprecated.", "0.1.0")
 def is_ovos():
-    LOG.warning("fingerprinting utils are deprecated. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     return is_running_from_module("ovos-core")
 
 
+@deprecated("fingerprinting utils are deprecated.", "0.1.0")
 def classify_platform_print(fingerprint=None):
-    LOG.warning("fingerprinting utils are deprecated. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     fingerprint = fingerprint or get_platform_fingerprint()
     # key, val pairs that indicate a certain platform
     fingerprints = {
@@ -354,9 +340,8 @@ def classify_platform_print(fingerprint=None):
     return {k: v / m for k, v in key_counts.items()}
 
 
+@deprecated("fingerprinting utils are deprecated.", "0.1.0")
 def classify_config_print(fingerprint=None):
-    LOG.warning("fingerprinting utils are deprecated. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     fingerprint = fingerprint or get_config_fingerprint()
 
     # key, val pairs that indicate a certain platform
@@ -476,9 +461,8 @@ def classify_config_print(fingerprint=None):
     return {k: v / m for k, v in key_counts.items()}
 
 
+@deprecated("fingerprinting utils are deprecated.", "0.1.0")
 def classify_fingerprint():
-    LOG.warning("fingerprinting utils are deprecated. This submodule "
-                "will be removed in ovos_utils 0.1.0")
     plat = classify_platform_print()
     conf = classify_config_print()
     for k, v in conf.items():
