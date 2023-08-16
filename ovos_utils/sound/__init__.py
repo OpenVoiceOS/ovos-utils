@@ -108,29 +108,27 @@ def _find_player(uri):
 
     # scan installed executables that can handle playback
     sox_play = find_executable("play")
-    pulse_play = find_executable("paplay")
-    alsa_play = find_executable("aplay")
-    mpg123_play = find_executable("mpg123")
-    ogg123_play = find_executable("ogg123")
-
-    player = None
     # sox should handle almost every format, but fails in some urls
     if sox_play:
-        player = sox_play + f" --type {ext} %1"
+        return sox_play + f" --type {ext} %1"
     # determine best available player
-    else:
-        if "ogg" in ext and ogg123_play:
-            player = ogg123_play + " -q %1"
-        # wav file
-        if 'wav' in ext:
-            if pulse_play:
-                player = pulse_play + " %1"
-            elif alsa_play:
-                player = alsa_play + " %1"
-        # guess mp3
-        elif mpg123_play:
-            player = mpg123_play + " %1"
-    return player
+    ogg123_play = find_executable("ogg123")
+    if "ogg" in ext and ogg123_play:
+        return ogg123_play + " -q %1"
+    # wav file
+    if 'wav' in ext:
+        pulse_play = find_executable("paplay")
+        if pulse_play:
+            return pulse_play + " %1"
+        alsa_play = find_executable("aplay")
+        if alsa_play:
+            return alsa_play + " %1"
+    # guess mp3
+    mpg123_play = find_executable("mpg123")
+    if mpg123_play:
+        return mpg123_play + " %1"
+    LOG.error("Can't find player for: %s", uri)
+    return None
 
 
 def play_audio(uri, play_cmd=None, environment=None):
