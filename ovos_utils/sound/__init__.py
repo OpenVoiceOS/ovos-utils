@@ -32,6 +32,19 @@ def _get_pulse_environment(config):
     else:
         return os.environ
 
+def _play_specific_sound(sound_name):
+    audio_file = resolve_resource_file(
+        read_mycroft_config().get('sounds', {}).get(sound_name))
+
+    if not audio_file:
+        LOG.warning("Could not find '%s' audio file!", sound_name)
+        return
+
+    process = play_audio(audio_file)
+    if not process:
+        LOG.warning("Unable to play '%s' audio file!", sound_name)
+    return process
+
 
 def play_acknowledge_sound():
     """Acknowledge a successful request.
@@ -40,47 +53,17 @@ def play_acknowledge_sound():
     require a verbal response. This is intended to provide simple feedback
     to the user that their request was handled successfully.
     """
-    audio_file = resolve_resource_file(
-        read_mycroft_config().get('sounds', {}).get('acknowledge'))
-
-    if not audio_file:
-        LOG.warning("Could not find 'acknowledge' audio file!")
-        return
-
-    process = play_audio(audio_file)
-    if not process:
-        LOG.warning("Unable to play 'acknowledge' audio file!")
-    return process
+    return _play_specific_sound('acknowledge')
 
 
 def play_listening_sound():
     """Audibly indicate speech recording started."""
-    audio_file = resolve_resource_file(
-        read_mycroft_config().get('sounds', {}).get('start_listening'))
-
-    if not audio_file:
-        LOG.warning("Could not find 'start_listening' audio file!")
-        return
-
-    process = play_audio(audio_file)
-    if not process:
-        LOG.warning("Unable to play 'start_listening' audio file!")
-    return process
+    return _play_specific_sound('start_listening')
 
 
 def play_end_listening_sound():
     """Audibly indicate speech recording is no longer happening."""
-    audio_file = resolve_resource_file(
-        read_mycroft_config().get('sounds', {}).get('end_listening'))
-
-    if not audio_file:
-        LOG.debug("Could not find 'end_listening' audio file!")
-        return
-
-    process = play_audio(audio_file)
-    if not process:
-        LOG.warning("Unable to play 'end_listening' audio file!")
-    return process
+    return _play_specific_sound('end_listening')
 
 
 def play_error_sound():
@@ -90,17 +73,7 @@ def play_error_sound():
     require a verbal response. This is intended to provide simple feedback
     to the user that their request was NOT handled successfully.
     """
-    audio_file = resolve_resource_file(
-        read_mycroft_config().get('sounds', {}).get('error'))
-
-    if not audio_file:
-        LOG.warning("Could not find 'error' audio file!")
-        return
-
-    process = play_audio(audio_file)
-    if not process:
-        LOG.warning("Unable to play 'error' audio file!")
-    return process
+    return _play_specific_sound('error')
 
 
 def _find_player(uri):
