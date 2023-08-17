@@ -1,8 +1,20 @@
 # Changelog
 
-## [0.0.36a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a2) (2023-08-07)
+## [0.0.36a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a3) (2023-08-17)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a1...0.0.36a2)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a2...0.0.36a3)
+
+**Fixed bugs:**
+
+- remove \_HACK [\#184](https://github.com/OpenVoiceOS/ovos-utils/pull/184) ([JarbasAl](https://github.com/JarbasAl))
+
+**Closed issues:**
+
+- \_\_HACK\_preload in file\_utils.py causes circular import when launching ovos\_dinkum\_listener [\#183](https://github.com/OpenVoiceOS/ovos-utils/issues/183)
+
+## [V0.0.36a2](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a2) (2023-08-07)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a1...V0.0.36a2)
 
 **Fixed bugs:**
 
