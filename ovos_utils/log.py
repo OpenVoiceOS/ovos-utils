@@ -30,6 +30,24 @@ class LOG:
     `OVOS_DEFAULT_LOG_LEVEL`. Note that log level may be overridden by
      configuration when calling `LOG.init`.
 
+    The config file can have a "logging" section
+
+    {
+        "logging": {
+	    "log_level": "INFO",  // default log level
+            "logs": {
+                "path": "/opt/ovos/logs/",
+                "max_bytes": 50000000,
+                "backup_count": 3
+            }.
+            "bus": {  // override for different services
+	        "log_level": "DEBUG"
+	     },
+        },
+        ....
+    }
+
+
     Usage:
         >>> LOG.debug('My message: %s', debug_str)
         13:12:43.673 - :<module>:1 - DEBUG - My message: hi
@@ -166,8 +184,17 @@ def init_service_logger(service_name):
     except ImportError:
         LOG.warning("ovos_config not available. Falling back to defaults")
         _cfg = dict()
-    _log_level = _cfg.get("log_level", "INFO")
+    # First try the logging section
+    log_config = _cfg.get("logging")
+    # get the "logs" from the root level if there is one
     _logs_conf = _cfg.get("logs") or {}
+    if log_config:
+        # if "logs" is defined in "logging" use that
+        _logs_conf = log_config.get("logs") or _logs_conf
+        _cfg = log_config.get(service_name) or log_config
+        # if "logs" is redefined in "logging.<service_name>" use that
+        _logs_conf = _cfg.get("logs") or _logs_conf
+    _log_level = _cfg.get("log_level", "INFO")
     _logs_conf["level"] = _log_level
     LOG.name = service_name
     LOG.init(_logs_conf)  # read log level from config
