@@ -120,7 +120,7 @@ class TestIntentServiceInterface(unittest.TestCase):
         first_msg = register_vocab.call_args_list[0].args[0]
         second_msg = register_vocab.call_args_list[1].args[0]
         third_msg = register_vocab.call_args_list[2].args[0]
-        self.assertEqual(first_msg.as_dict, message.as_dict)
+        self.assertEqual(first_msg.serialize(), message.serialize())
         self.assertEqual(second_msg.context, message.context)
         self.assertEqual(second_msg.data['entity_value'], 'test2')
         self.assertEqual(second_msg.data['entity_type'], 'test_intent')
@@ -239,7 +239,7 @@ class TestIntentServiceInterface(unittest.TestCase):
         self.assertTrue(event.wait(2))
         self.assertEqual(handle_detach.call_count, 2)
         new_message = handle_detach.call_args[0][0]
-        self.assertEqual(message.as_dict, new_message.as_dict)
+        self.assertEqual(message.serialize(), new_message.serialize())
 
         self.bus.remove("detach_intent", handle_detach)
 
