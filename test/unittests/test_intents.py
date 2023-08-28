@@ -115,11 +115,13 @@ class TestIntentServiceInterface(unittest.TestCase):
                                                      ['test2', 'test3'],
                                                      'en-us')
         self.assertTrue(event.wait(2))
-        sleep(1)  # TODO: Better method to wait for all of the expected calls
+        while len(register_vocab.call_args_list) < 3:
+            # TODO: Better method to wait for all of the expected calls
+            sleep(0.2)
         self.assertEqual(register_vocab.call_count, 3)
-        first_msg = register_vocab.call_args_list[0].args[0]
-        second_msg = register_vocab.call_args_list[1].args[0]
-        third_msg = register_vocab.call_args_list[2].args[0]
+        first_msg = register_vocab.call_args_list[0][0][0]
+        second_msg = register_vocab.call_args_list[1][0][0]
+        third_msg = register_vocab.call_args_list[2][0][0]
         self.assertEqual(first_msg.serialize(), message.serialize())
         self.assertEqual(second_msg.context, message.context)
         self.assertEqual(second_msg.data['entity_value'], 'test2')
