@@ -314,13 +314,14 @@ class IntentServiceInterface:
     def detach_all(self):
         """
         Detach all intents associated with this interface and remove all
-        internal references
+        internal references to intents and handlers.
         """
         for name in self.intent_names:
             self.remove_intent(name)
-        # TODO: Is this valid? `detach_intent` doesn't clear references
-        self.registered_intents = []
-        self.detached_intents = []
+        if self.registered_intents:
+            LOG.error(f"Expected an empty list; got: {self.registered_intents}")
+            self.registered_intents = []
+        self.detached_intents = []  # Explicitly remove all intent references
 
     def get_intent(self, intent_name: str) -> Optional[object]:
         """
