@@ -216,7 +216,7 @@ class IntentServiceInterface:
                                        if pair[0] != intent_name]
         self.bus.emit(msg.forward("detach_intent",
                                   {"intent_name":
-                                   f"{self.skill_id}.{intent_name}"}))
+                                   f"{self.skill_id}:{intent_name}"}))
 
     def intent_is_detached(self, intent_name: str) -> bool:
         """

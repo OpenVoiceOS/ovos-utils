@@ -231,7 +231,7 @@ class TestIntentServiceInterface(unittest.TestCase):
         message = handle_detach.call_args[0][0]
         self.assertEqual(message.msg_type, "detach_intent")
         self.assertEqual(message.data['intent_name'],
-                         f"{self.intent_interface.skill_id}.{test_name}")
+                         f"{self.intent_interface.skill_id}:{test_name}")
         self.assertEqual(message.context['skill_id'],
                          self.intent_interface.skill_id)
 
