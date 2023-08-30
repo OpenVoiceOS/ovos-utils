@@ -4,8 +4,9 @@ import time
 
 from copy import deepcopy
 from distutils.spawn import find_executable
+from ovos_bus_client import Message
 from ovos_utils.file_utils import resolve_resource_file
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, log_deprecation
 from ovos_utils.signal import check_for_signal
 
 try:
@@ -32,7 +33,7 @@ def _get_pulse_environment(config):
     else:
         return os.environ
 
-def _play_specific_sound(sound_name):
+def _play_specific_sound(sound_name, bus=None):
     audio_file = resolve_resource_file(
         read_mycroft_config().get('sounds', {}).get(sound_name))
 
@@ -40,40 +41,40 @@ def _play_specific_sound(sound_name):
         LOG.warning("Could not find '%s' audio file!", sound_name)
         return
 
-    process = play_audio(audio_file)
+    process = play_audio(audio_file, bus=bus)
     if not process:
         LOG.warning("Unable to play '%s' audio file!", sound_name)
     return process
 
 
-def play_acknowledge_sound():
+def play_acknowledge_sound(bus=None):
     """Acknowledge a successful request.
 
     This method plays a sound to acknowledge a request that does not
     require a verbal response. This is intended to provide simple feedback
     to the user that their request was handled successfully.
     """
-    return _play_specific_sound('acknowledge')
+    return _play_specific_sound('acknowledge', bus=bus)
 
 
-def play_listening_sound():
+def play_listening_sound(bus=None):
     """Audibly indicate speech recording started."""
-    return _play_specific_sound('start_listening')
+    return _play_specific_sound('start_listening', bus=bus)
 
 
-def play_end_listening_sound():
+def play_end_listening_sound(bus=None):
     """Audibly indicate speech recording is no longer happening."""
-    return _play_specific_sound('end_listening')
+    return _play_specific_sound('end_listening', bus=bus)
 
 
-def play_error_sound():
+def play_error_sound(bus=None):
     """Audibly indicate a failed request.
 
     This method plays a error sound to signal an error that does not
     require a verbal response. This is intended to provide simple feedback
     to the user that their request was NOT handled successfully.
     """
-    return _play_specific_sound('error')
+    return _play_specific_sound('error', bus=bus)
 
 
 def _find_player(uri):
@@ -108,8 +109,13 @@ def _find_player(uri):
     return None
 
 
-def play_audio(uri, play_cmd=None, environment=None):
+def play_audio(uri, play_cmd=None, environment=None, bus=None):
     """Play an audio file.
+
+    This is a helper function that should take a bus argument and
+    sends the uri as a mycroft.audio.queue message returning True.
+
+    If the bus is not passed the fallback behaviour is as follows:
 
     This wraps the other play_* functions, choosing the correct one based on
     the file extension. The function will return directly and play the file
@@ -121,7 +127,19 @@ def play_audio(uri, play_cmd=None, environment=None):
 
     Returns: subprocess.Popen object. None if the format is not supported or
              an error occurs playing the file.
+
     """
+
+    if bus is not None:
+        LOG.debug(f"play_audio() will now emit mycroft.audio.queue for: {uri}")
+        bus.emit(Message("mycroft.audio.queue",
+                         {"filename": uri}))
+        return True
+
+    log_deprecation(
+        "Calling ovos_utils.sound.play_audio() should pass the 'bus' arg",
+        "0.1.0")
+
     config = read_mycroft_config()
     environment = environment or _get_pulse_environment(config)
 
