@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.36a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a3) (2023-08-17)
+## [0.0.36a4](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a4) (2023-09-05)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a2...0.0.36a3)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a3...0.0.36a4)
+
+**Implemented enhancements:**
+
+- IntentServiceInterface Tests and Minor Fixes [\#186](https://github.com/OpenVoiceOS/ovos-utils/pull/186) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.36a3](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a3) (2023-08-17)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a2...V0.0.36a3)
 
 **Fixed bugs:**
 
