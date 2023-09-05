@@ -1,18 +1,18 @@
 import os
 import subprocess
 import time
-
 from copy import deepcopy
 from distutils.spawn import find_executable
-from ovos_bus_client import Message
+
 from ovos_utils.file_utils import resolve_resource_file
-from ovos_utils.log import LOG, log_deprecation
+from ovos_utils.log import LOG, deprecated
 from ovos_utils.signal import check_for_signal
 
 try:
     from ovos_config.config import read_mycroft_config
 except ImportError:
     LOG.warning("Config not provided and ovos_config not available")
+
 
     def read_mycroft_config():
         return dict()
@@ -33,48 +33,51 @@ def _get_pulse_environment(config):
     else:
         return os.environ
 
-def _play_specific_sound(sound_name, bus=None):
+
+def _play_default_sound_locally(sound_name):
     audio_file = resolve_resource_file(
         read_mycroft_config().get('sounds', {}).get(sound_name))
-
     if not audio_file:
-        LOG.warning("Could not find '%s' audio file!", sound_name)
+        LOG.warning(f"Could not find '{sound_name}' audio file!")
         return
-
-    process = play_audio(audio_file, bus=bus)
+    process = play_audio(audio_file)
     if not process:
-        LOG.warning("Unable to play '%s' audio file!", sound_name)
+        LOG.warning(f"Unable to play '{sound_name}' audio file!")
     return process
 
 
-def play_acknowledge_sound(bus=None):
+@deprecated("please emit mycroft.audio.play_sound instead", "0.1.0")
+def play_acknowledge_sound():
     """Acknowledge a successful request.
 
     This method plays a sound to acknowledge a request that does not
     require a verbal response. This is intended to provide simple feedback
     to the user that their request was handled successfully.
     """
-    return _play_specific_sound('acknowledge', bus=bus)
+    return _play_default_sound_locally('acknowledge')
 
 
-def play_listening_sound(bus=None):
+@deprecated("please emit mycroft.audio.play_sound instead", "0.1.0")
+def play_listening_sound():
     """Audibly indicate speech recording started."""
-    return _play_specific_sound('start_listening', bus=bus)
+    return _play_default_sound_locally('start_listening')
 
 
-def play_end_listening_sound(bus=None):
+@deprecated("please emit mycroft.audio.play_sound instead", "0.1.0")
+def play_end_listening_sound():
     """Audibly indicate speech recording is no longer happening."""
-    return _play_specific_sound('end_listening', bus=bus)
+    return _play_default_sound_locally('end_listening')
 
 
-def play_error_sound(bus=None):
+@deprecated("please emit mycroft.audio.play_sound instead", "0.1.0")
+def play_error_sound():
     """Audibly indicate a failed request.
 
     This method plays a error sound to signal an error that does not
     require a verbal response. This is intended to provide simple feedback
     to the user that their request was NOT handled successfully.
     """
-    return _play_specific_sound('error', bus=bus)
+    return _play_default_sound_locally('error')
 
 
 def _find_player(uri):
@@ -109,13 +112,9 @@ def _find_player(uri):
     return None
 
 
-def play_audio(uri, play_cmd=None, environment=None, bus=None):
+@deprecated("please emit mycroft.audio.play_sound instead", "0.1.0")
+def play_audio(uri, play_cmd=None, environment=None):
     """Play an audio file.
-
-    This is a helper function that should take a bus argument and
-    sends the uri as a mycroft.audio.queue message returning True.
-
-    If the bus is not passed the fallback behaviour is as follows:
 
     This wraps the other play_* functions, choosing the correct one based on
     the file extension. The function will return directly and play the file
@@ -127,19 +126,7 @@ def play_audio(uri, play_cmd=None, environment=None, bus=None):
 
     Returns: subprocess.Popen object. None if the format is not supported or
              an error occurs playing the file.
-
     """
-
-    if bus is not None:
-        LOG.debug(f"play_audio() will now emit mycroft.audio.queue for: {uri}")
-        bus.emit(Message("mycroft.audio.queue",
-                         {"filename": uri}))
-        return True
-
-    log_deprecation(
-        "Calling ovos_utils.sound.play_audio() should pass the 'bus' arg",
-        "0.1.0")
-
     config = read_mycroft_config()
     environment = environment or _get_pulse_environment(config)
 
@@ -180,6 +167,7 @@ def play_audio(uri, play_cmd=None, environment=None, bus=None):
         return None
 
 
+@deprecated("please emit mycroft.audio.play_sound instead", "0.1.0")
 def play_wav(uri, play_cmd=None, environment=None):
     """ Play a wav-file.
 
@@ -200,6 +188,7 @@ def play_wav(uri, play_cmd=None, environment=None):
         return None
 
 
+@deprecated("please emit mycroft.audio.play_sound instead", "0.1.0")
 def play_mp3(uri, play_cmd=None, environment=None):
     """ Play a mp3-file.
 
@@ -220,6 +209,7 @@ def play_mp3(uri, play_cmd=None, environment=None):
         return None
 
 
+@deprecated("please emit mycroft.audio.play_sound instead", "0.1.0")
 def play_ogg(uri, play_cmd=None, environment=None):
     """ Play a ogg-file.
 
@@ -240,6 +230,7 @@ def play_ogg(uri, play_cmd=None, environment=None):
         return None
 
 
+@deprecated("please use ovos-dinkum-listener in recording mode instead", "0.1.0")
 def record(file_path, duration, rate, channels):
     """Simple function to record from the default mic.
 
@@ -261,6 +252,8 @@ def record(file_path, duration, rate, channels):
     return subprocess.Popen(command)
 
 
+@deprecated("file signals have been removed,"
+            " TODO add new bus message for this method", "0.1.0")
 def is_speaking():
     """Determine if Text to Speech is occurring
 
@@ -270,6 +263,8 @@ def is_speaking():
     return check_for_signal("isSpeaking", -1)
 
 
+@deprecated("file signals have been removed,"
+            " use session_id and recognizer_loop:audio_output_end to track this", "0.1.0")
 def wait_while_speaking():
     """Pause as long as Text to Speech is still happening
 
