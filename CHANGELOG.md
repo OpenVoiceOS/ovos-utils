@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.36a4](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a4) (2023-09-05)
+## [0.0.36a5](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a5) (2023-09-05)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a3...0.0.36a4)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a4...0.0.36a5)
+
+**Implemented enhancements:**
+
+- Only scan for executables if a good one has not yet been found [\#187](https://github.com/OpenVoiceOS/ovos-utils/pull/187) ([lbt](https://github.com/lbt))
+
+## [V0.0.36a4](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a4) (2023-09-05)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a3...V0.0.36a4)
 
 **Implemented enhancements:**
 
