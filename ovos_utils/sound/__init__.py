@@ -115,6 +115,10 @@ def _find_player(uri):
     ogg123_play = find_executable("ogg123")
     if "ogg" in ext and ogg123_play:
         return ogg123_play + " -q %1"
+    pw_play = find_executable("pw-play")
+    # pw_play handles both wav and mp3
+    if pw_play:
+        return pw_play + " %1"
     # wav file
     if 'wav' in ext:
         pulse_play = find_executable("paplay")
