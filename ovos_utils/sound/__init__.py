@@ -112,7 +112,6 @@ def _find_player(uri):
     return None
 
 
-@deprecated("please emit mycroft.audio.play_sound instead", "0.1.0")
 def play_audio(uri, play_cmd=None, environment=None):
     """Play an audio file.
 
