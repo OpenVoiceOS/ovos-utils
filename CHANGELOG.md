@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.36a5](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a5) (2023-09-05)
+## [0.0.36a6](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a6) (2023-09-13)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a4...0.0.36a5)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a5...0.0.36a6)
+
+**Merged pull requests:**
+
+- refactor/less\_gui\_spam [\#191](https://github.com/OpenVoiceOS/ovos-utils/pull/191) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.36a5](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a5) (2023-09-05)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a4...V0.0.36a5)
 
 **Implemented enhancements:**
 
