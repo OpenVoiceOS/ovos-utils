@@ -502,8 +502,10 @@ class _GUIDict(dict):
         super().__init__(**kwargs)
 
     def __setitem__(self, key, value):
-        super(_GUIDict, self).__setitem__(key, value)
-        self.gui._sync_data()
+        old = self[key]
+        if old != value:
+            super(_GUIDict, self).__setitem__(key, value)
+            self.gui._sync_data()
 
 
 class GUIInterface:
@@ -732,6 +734,9 @@ class GUIInterface:
 
     def __setitem__(self, key, value):
         """Implements set part of dict-like behaviour with named keys."""
+        old = self.__session_data[key]
+        if old == value:  # no need to sync
+            return
 
         # cast to helper dict subclass that syncs data
         if isinstance(value, dict) and not isinstance(value, _GUIDict):
