@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.36a6](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a6) (2023-09-13)
+## [0.0.36a7](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a7) (2023-09-17)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a5...0.0.36a6)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a6...0.0.36a7)
+
+**Fixed bugs:**
+
+- hotfix/gui\_sync [\#192](https://github.com/OpenVoiceOS/ovos-utils/pull/192) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.36a6](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a6) (2023-09-13)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a5...V0.0.36a6)
 
 **Merged pull requests:**
 
