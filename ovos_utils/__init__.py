@@ -29,6 +29,10 @@ from ovos_utils.network_utils import get_ip, get_external_ip, is_connected_dns, 
 def backwards_compat(classic_core=None, pre_008=None, no_core=None):
     """
     Decorator to run a different method if specific ovos-core versions are detected
+
+    classic_core - mycroft-core latest dev branch (abandonware)
+    pre_008 - marked by introduction of ovos_core module, introduces transformer and pipeline plugins
+    no_core - skills running standalone via ovos-workshop, eg, ovos-docker, unknown what core version it is connected to
     """
 
     def backwards_compat_decorator(func):

@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 from os.path import exists, isfile
 from typing import List, Tuple, Optional
@@ -5,6 +6,7 @@ from typing import List, Tuple, Optional
 from ovos_utils import backwards_compat
 from ovos_utils.log import LOG, deprecated
 from ovos_utils.messagebus import get_mycroft_bus, Message, dig_for_message, get_message_lang
+
 
 # TODO - calling these or not will depend on ovos-workshop version
 #  where are these called?
@@ -25,6 +27,7 @@ def to_alnum(skill_id: str) -> str:
 
 
 # used in deprecated util - file_utils.load_regex_from_file
+# used in MycroftSkill.register_regex
 def munge_regex(regex: str, skill_id: str) -> str:
     """
     Insert skill id as letters into match groups.
@@ -39,6 +42,7 @@ def munge_regex(regex: str, skill_id: str) -> str:
     return base.join(regex.split('(?P<'))
 
 
+# used in MycroftSkill.register_adapt_intent
 def munge_intent_parser(intent_parser, name, skill_id):
     """
     Rename intent keywords to make them skill exclusive
@@ -90,13 +94,56 @@ def munge_intent_parser(intent_parser, name, skill_id):
     intent_parser.at_least_one = at_least_one
 
 
+def unmunge_intent_parser(intent_parser, skill_id):
+    # unMunge parser name
+    if intent_parser.name.startswith(f'{skill_id}:'):
+        intent_parser.name = intent_parser.name.replace(f'{skill_id}:', "")
+
+    # unMunge keywords
+    skill_id = to_alnum(skill_id)
+    # unMunge required keyword
+    reqs = []
+    for i in intent_parser.requires:
+        if i[0].startswith(skill_id):
+            unmunged = i[0][len(skill_id):]
+            kw = (unmunged, unmunged)
+            reqs.append(kw)
+        else:
+            reqs.append(i)
+    intent_parser.requires = reqs
+
+    # unMunge optional keywords
+    opts = []
+    for i in intent_parser.optional:
+        if i[0].startswith(skill_id):
+            unmunged = i[0][len(skill_id):]
+            kw = (unmunged, unmunged)
+            opts.append(kw)
+        else:
+            opts.append(i)
+    intent_parser.optional = opts
+
+    # unMunge at_least_one keywords
+    at_least_one = []
+    for i in intent_parser.at_least_one:
+        element = [e[len(skill_id):] if e.startswith(skill_id) else e
+                   for e in i]
+        at_least_one.append(tuple(element))
+    intent_parser.at_least_one = at_least_one
+
+
 @dataclass
 class IntentHandler:
     """ contains references to intent methods registered in the IntentServiceInterface"""
     name: str  # the intent name
     skill_id: str  # the skill_id the intent belongs to
     intent_message: str  # the bus event that triggers the intent (usually munged skill_id + name)
+    register_message: Message  # to enable/disable on demand
     detached: bool = True
+
+    def register(self, bus):
+        bus.emit(self.register_message)
+        self.detached = False
 
 
 class IntentServiceInterface:
@@ -114,14 +161,37 @@ class IntentServiceInterface:
         self.intents: List[IntentHandler] = []
 
     @property
+    def alphanumeric_skill_id(self) -> str:
+        """
+        Skill id converted to only alphanumeric characters and "_".
+        Non alphanumeric characters are converted to "_"
+        """
+        return ''.join(c if c.isalnum() else '_'
+                       for c in str(self.skill_id))
+
+    @property
     @deprecated("self.registered_intents has been deprecated, iterate over self.intents instead", "0.1.0")
     def registered_intents(self) -> List[Tuple[str, object]]:
-        return [(e.name, {}) for e in self.intents]  # TODO - whats the return type?
+        return [(e.name, e) for e in self.intents if not e.detached]
 
     @property
     @deprecated("self.detached_intents has been deprecated, iterate over self.intents instead", "0.1.0")
     def detached_intents(self) -> List[Tuple[str, object]]:
-        return [(e.name, {}) for e in self.intents if e.detached]  # TODO - whats the return type?
+        return [(e.name, e) for e in self.intents if e.detached]
+
+    def enable_intent(self, name: str):
+        for intent in self.intents:
+            if intent.name == name and intent.detached:
+                intent.register(self.bus)
+                return True
+        return False
+
+    def disable_intent(self, name: str):
+        for intent in self.intents:
+            if intent.name == name and not intent.detached:
+                self.remove_intent(name)
+                return True
+        return False
 
     @property
     def intent_names(self) -> List[str]:
@@ -161,7 +231,9 @@ class IntentServiceInterface:
         @param aliases: List of alternative keyword values
         @param lang: BCP-47 language code of entity and aliases
         """
-        self.register_keyword(name=vocab_type, samples=[entity] + aliases, lang=lang)
+        # keyword_type = self.alphanumeric_skill_id + entity_type
+        vocab_type = vocab_type.replace(self.alphanumeric_skill_id, "")  # unmunge
+        return self.register_keyword(name=vocab_type, samples=[entity] + aliases, lang=lang)
 
     def __register_keyword_classic(self, name: str, samples: list,
                                    lang: str = None, skill_id: str = None):
@@ -169,6 +241,8 @@ class IntentServiceInterface:
         msg = dig_for_message() or Message("")
         msg.context["skill_id"] = skill_id
 
+        # munge as expected by classic core
+        name = self.alphanumeric_skill_id + name
         for s in samples:
             entity_data = {'entity_value': s,
                            'entity_type': name,
@@ -201,8 +275,10 @@ class IntentServiceInterface:
             from named match group.
         @param lang: BCP-47 language code of regex
         """
+        unmunged = regex  # TODO undo output of munge_regex()
         name = ""  # TODO - get from regex_str
-        self.register_regex_entity(name=name, samples=[regex], lang=lang)
+        re.compile(unmunged)  # validate regex
+        self.register_regex_entity(name=name, samples=[unmunged], lang=lang)
 
     def __register_regex_entity_classic(self, name: str, samples: list,
                                         lang: str = None, skill_id: str = None):
@@ -210,6 +286,7 @@ class IntentServiceInterface:
         msg = dig_for_message() or Message("")
         msg.context["skill_id"] = self.skill_id
         regex = samples[0]
+        re.compile(regex)  # validate regex
         self.bus.emit(msg.forward("register_vocab",
                                   {'regex': regex,
                                    'lang': lang,
@@ -223,6 +300,8 @@ class IntentServiceInterface:
     def register_regex_entity(self, name: str, samples: list, lang: str = None, skill_id: str = None):
         msg = dig_for_message() or Message("")
         msg.context["skill_id"] = self.skill_id
+        for regex in samples:
+            re.compile(regex)  # validate regex
         self.bus.emit(msg.forward("intent.service:register_regex_entity",
                                   {"name": name,
                                    "skill_id": skill_id or self.skill_id,
@@ -232,21 +311,23 @@ class IntentServiceInterface:
 
     @deprecated("register_adapt_intent has been deprecated,"
                 " use register_keyword_intent instead", "0.1.0")
-    def register_adapt_intent(self, name: str, intent_parser: object):
+    def register_adapt_intent(self, name: str, intent_parser: object) -> IntentHandler:
         """
         Register an Adapt intent parser object. Serializes the intent_parser
         and sends it over the messagebus to registered.
         @param name: string intent name (without skill_id prefix)
         @param intent_parser: Adapt Intent object
         """
-        self.register_keyword_intent(name=name,
-                                     required=intent_parser.requires,
-                                     at_least_one=intent_parser.at_least_one,
-                                     optional=intent_parser.optional)
+        # undo munge_intent_parser()
+        intent_parser = unmunge_intent_parser(intent_parser, self.skill_id)
+        return self.register_keyword_intent(name=name,
+                                            required=intent_parser.requires,
+                                            at_least_one=intent_parser.at_least_one,
+                                            optional=intent_parser.optional)
 
     def __register_keyword_intent_classic(self, name: str, required: list,
                                           optional: list = None, at_least_one: list = None,
-                                          excluded: list = None, lang=None, skill_id: str = None):
+                                          excluded: list = None, lang=None, skill_id: str = None) -> IntentHandler:
         skill_id = skill_id or self.skill_id
         msg = dig_for_message() or Message("")
         msg.context["skill_id"] = self.skill_id
@@ -254,52 +335,48 @@ class IntentServiceInterface:
         if excluded:
             LOG.error(f"excluded keywords only available in ovos-core >= 0.0.8,"
                       f" intent {name} may misbehave")
-
-        self.bus.emit(msg.forward("register_intent",
-                                  {"name": name,
-                                   "skill_id": skill_id,
-                                   "lang": lang or get_message_lang(msg),
-                                   "optional": optional,
-                                   "excludes": excluded,
-                                   "requires": required,
-                                   "at_least_one": at_least_one}
-                                  ))
-
-        for intent in self.intents:
-            if intent.name == name:  # intent in detached mode
-                intent.detached = False  # mark as re-enabled
-                break
-        else:  # new intent
-            intent_message = f"{name}:{skill_id}"
-            self.intents.append(IntentHandler(name=name, intent_message=intent_message,
-                                              skill_id=skill_id, detached=False))
+        msg = msg.forward("register_intent",
+                          {"name": name,
+                           "skill_id": skill_id,
+                           "lang": lang or get_message_lang(msg),
+                           "optional": optional,
+                           "excludes": excluded,
+                           "requires": required,
+                           "at_least_one": at_least_one}
+                          )
+        self.bus.emit(msg)
+        return self._add_intent(name, skill_id, msg)
 
     @backwards_compat(pre_008=__register_keyword_intent_classic,
                       classic_core=__register_keyword_intent_classic,
                       no_core=__register_keyword_intent_classic)  # TODO - drop no_core once widely used in the wild
     def register_keyword_intent(self, name: str, required: list,
                                 optional: list = None, at_least_one: list = None,
-                                excluded: list = None, lang=None, skill_id: str = None):
+                                excluded: list = None, lang=None, skill_id: str = None) -> IntentHandler:
         msg = dig_for_message() or Message("")
         msg.context["skill_id"] = self.skill_id
-        self.bus.emit(msg.forward("intent.service.register_keyword_intent",
-                                  {"name": name,
-                                   "skill_id": skill_id or self.skill_id,
-                                   "lang": lang or get_message_lang(msg),
-                                   "optional": optional,
-                                   "excludes": excluded,
-                                   "requires": required,
-                                   "at_least_one": at_least_one}
-                                  ))
-        self._add_intent(name, skill_id)
+        msg = msg.forward("intent.service.register_keyword_intent",
+                          {"name": name,
+                           "skill_id": skill_id or self.skill_id,
+                           "lang": lang or get_message_lang(msg),
+                           "optional": optional,
+                           "excludes": excluded,
+                           "requires": required,
+                           "at_least_one": at_least_one}
+                          )
+        self.bus.emit(msg)
+        return self._add_intent(name, skill_id, msg)
 
     @deprecated(f"detach_intent replaced by remove_intent", "0.1.0")
     def detach_intent(self, intent_name: str):
         """
+        intent_name: munged intent_name  f'{self.skill_id}:{name}'
+
         DEPRECATED: Use `remove_intent` instead, all other methods from this
         class expect intent_name; this was the weird one expecting the internal
         munged intent_name with skill_id.
         """
+        # used in MycroftSkill.detach
         name = intent_name.split(':')[1]
         self.remove_intent(name)
 
@@ -359,8 +436,22 @@ class IntentServiceInterface:
         @param word: word to register (context keyword value)
         @param origin: original origin of the context (for cross context)
         """
+        # unmunge context = self._alphanumeric_skill_id + context
+        context = context[len(self.alphanumeric_skill_id):]
         self.set_context(context, word, origin)
 
+    def _set_context_old(self, context: str, word: str, origin: str):
+        msg = dig_for_message() or Message("")
+        msg.context["skill_id"] = self.skill_id
+        # munge as expected by classic core
+        context = self.alphanumeric_skill_id + context
+        self.bus.emit(msg.forward('add_context',
+                                  {'context': context, 'word': word,
+                                   'origin': origin}))
+
+    @backwards_compat(classic_core=_set_context_old,
+                      pre_008=_set_context_old,
+                      no_core=_set_context_old)
     def set_context(self, context: str, word: str, origin: str):
         """
         Set a Session context.
@@ -381,8 +472,20 @@ class IntentServiceInterface:
         Remove an Adapt context.
         @param context: context keyword name to remove
         """
+        # unmunge context = self._alphanumeric_skill_id + context
+        context = context[len(self.alphanumeric_skill_id):]
         self.remove_context(context)
 
+    def _remove_context_old(self, context: str):
+        msg = dig_for_message() or Message("")
+        msg.context["skill_id"] = self.skill_id
+        # munge as expected by classic core
+        context = self.alphanumeric_skill_id + context
+        self.bus.emit(msg.forward('remove_context', {'context': context}))
+
+    @backwards_compat(classic_core=_remove_context_old,
+                      pre_008=_remove_context_old,
+                      no_core=_remove_context_old)
     def remove_context(self, context: str):
         """
         Remove a Session Context.
@@ -395,7 +498,7 @@ class IntentServiceInterface:
     @deprecated("register_padatious_intent has been deprecated,"
                 " use register_intent instead", "0.1.0")
     def register_padatious_intent(self, intent_name: str, filename: str,
-                                  lang: str):
+                                  lang: str) -> IntentHandler:
         """
         Register a Padatious intent file with the intent service.
         @param intent_name: Unique intent identifier
@@ -410,69 +513,74 @@ class IntentServiceInterface:
         with open(filename) as f:
             samples = [_ for _ in f.read().split("\n") if _
                        and not _.startswith("#")]
-        self.register_intent(name=intent_name, samples=samples, lang=lang)
+        skill_id, intent_file = intent_name.split(":")  # munged
+        intent_name = intent_file.replace(".intent", "")
+        return self.register_intent(name=intent_name, samples=samples,
+                                    lang=lang, skill_id=skill_id)
 
-    def __register_intent_classic(self, name: str, samples: list, lang=None, skill_id: str = None):
+    def __register_intent_classic(self, name: str, samples: list,
+                                  lang=None, skill_id: str = None) -> IntentHandler:
         """ does not support 'samples' only 'file_name',
         old namespace,
-        ovos-workshop sends munged name,
-        no IntentHandler objects """
+        core expects munged name"""
+        skill_id = skill_id or self.skill_id
         filename = f"/tmp/{name}_{skill_id}_{lang}.intent"
         with open(filename, "w") as f:
             f.write("\n".join(samples))
 
         data = {'file_name': filename,  # samples not supported
-                'name': name,  # ovos-workshop sends intent_name munged
+                'name': f"{skill_id}:{name}",  # old core expects munged name
                 "skill_id": skill_id,
                 'lang': lang}
-
         msg = dig_for_message() or Message("")
         msg.context["skill_id"] = self.skill_id
-        self.bus.emit(msg.forward("padatious:register_intent", data))
+        msg = msg.forward("padatious:register_intent", data)
+        self.bus.emit(msg)
+        return self._add_intent(name, skill_id, msg)
 
-        skill_id, unmunged = name.split(":", 1)
-        self._add_intent(unmunged, skill_id)
-
-    def __register_intent_old(self, name: str, samples: list, lang=None, skill_id: str = None):
-        """ old namespace,
-        ovos-workshop sends munged name,
-         no IntentHandler objects"""
-
+    def __register_intent_old(self, name: str, samples: list,
+                              lang=None, skill_id: str = None) -> IntentHandler:
+        """ old namespace, core expects munged name"""
+        skill_id = skill_id or self.skill_id
         data = {"samples": samples,
-                'name': name,  # ovos-workshop sends intent_name munged
+                'name': f"{skill_id}:{name}",  # old core expects munged name
                 "skill_id": skill_id,
                 'lang': lang}
-
         msg = dig_for_message() or Message("")
         msg.context["skill_id"] = self.skill_id
-        self.bus.emit(msg.forward("padatious:register_intent", data))
-
-        skill_id, unmunged = name.split(":", 1)
-        self._add_intent(unmunged, skill_id)
+        msg = msg.forward("padatious:register_intent", data)
+        self.bus.emit(msg)
+        return self._add_intent(name, skill_id, msg)
 
     @backwards_compat(pre_008=__register_intent_old,
                       no_core=__register_intent_old,
                       classic_core=__register_intent_classic)
-    def register_intent(self, name: str, samples: list, lang=None, skill_id: str = None):
+    def register_intent(self, name: str, samples: list,
+                        lang=None, skill_id: str = None) -> IntentHandler:
+        skill_id = skill_id or self.skill_id
         msg = dig_for_message() or Message("")
         msg.context["skill_id"] = self.skill_id
-        self.bus.emit(msg.forward("intent.service:register_intent",
-                                  {"name": name,
-                                   "skill_id": skill_id or self.skill_id,
-                                   "lang": lang or get_message_lang(msg),
-                                   "samples": samples}
-                                  ))
-        self._add_intent(name, skill_id)
+        msg = msg.forward("intent.service:register_intent",
+                          {"name": name,  # not munged
+                           "skill_id": skill_id,
+                           "lang": lang or get_message_lang(msg),
+                           "samples": samples}
+                          )
+        self.bus.emit(msg)
+        return self._add_intent(name, skill_id, msg)
 
-    def _add_intent(self, name, skill_id):
+    def _add_intent(self, name: str, skill_id: str, message: Message) -> IntentHandler:
         for intent in self.intents:
-            if intent.name == name:  # intent in detached mode
+            if intent.name == name and intent.skill_id == skill_id:  # intent in detached mode
                 intent.detached = False  # mark as re-enabled
-                break
+                return intent
         else:  # new intent
             intent_message = f"{name}:{skill_id}"
-            self.intents.append(IntentHandler(name=name, intent_message=intent_message,
-                                              skill_id=skill_id, detached=False))
+            intent = IntentHandler(name=name, intent_message=intent_message,
+                                   skill_id=skill_id, detached=False,
+                                   register_message=message)
+            self.intents.append(intent)
+            return intent
 
     @deprecated("register_padatious_entity has been deprecated,"
                 " use register_entity instead", "0.1.0")
@@ -485,6 +593,9 @@ class IntentServiceInterface:
         @param filename: Absolute file path to entity file
         @param lang: BCP-47 language code of registered intent
         """
+        #             name = f"{self.skill_id}:{basename(entity_file)}_" \
+        #                    f"{md5(entity_file.encode('utf-8')).hexdigest()}"
+        skill_id, entity_name = entity_name.split(":")
         if not isinstance(filename, str):
             raise ValueError('Filename path must be a string')
         if not exists(filename):
@@ -492,14 +603,8 @@ class IntentServiceInterface:
         with open(filename) as f:
             samples = [_ for _ in f.read().split("\n") if _
                        and not _.startswith("#")]
-        msg = dig_for_message() or Message("")
-        if "skill_id" not in msg.context:
-            msg.context["skill_id"] = self.skill_id
-        self.bus.emit(msg.forward('padatious:register_entity',
-                                  {'file_name': filename,
-                                   "samples": samples,
-                                   'name': entity_name,
-                                   'lang': lang}))
+        self.register_entity(name=entity_name, samples=samples,
+                             lang=lang, skill_id=skill_id)
 
     def __register_entity_classic(self, name: str, samples: list, lang: str = None, skill_id: str = None):
         """file_name instead of samples, old bus api, old namespace"""
@@ -508,6 +613,8 @@ class IntentServiceInterface:
         filename = f"/tmp/{name}_{skill_id}_{lang}.entity"
         with open(filename, "w") as f:
             f.write("\n".join(samples))
+        # expects munged name
+        name = f"{skill_id}:{name}"
         self.bus.emit(msg.forward("padatious:register_entity",
                                   {"name": name,
                                    "skill_id": skill_id or self.skill_id,
@@ -519,6 +626,8 @@ class IntentServiceInterface:
         """old bus api, old namespace"""
         msg = dig_for_message() or Message("")
         msg.context["skill_id"] = self.skill_id
+        # expects munged name
+        name = f"{skill_id}:{name}"
         self.bus.emit(msg.forward("padatious:register_entity",
                                   {"name": name,
                                    "skill_id": skill_id or self.skill_id,
