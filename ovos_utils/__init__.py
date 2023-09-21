@@ -22,8 +22,51 @@ import kthread
 
 # TODO: Deprecate below imports
 from ovos_utils.file_utils import resolve_ovos_resource_file, resolve_resource_file
-from ovos_utils.network_utils import get_ip, get_external_ip, is_connected_dns, is_connected_http, is_connected
 from ovos_utils.log import LOG, deprecated
+from ovos_utils.network_utils import get_ip, get_external_ip, is_connected_dns, is_connected_http, is_connected
+
+
+def backwards_compat(classic_core=None, pre_008=None, no_core=None):
+    """
+    Decorator to run a different method if specific ovos-core versions are detected
+    """
+
+    def backwards_compat_decorator(func):
+        is_classic = False
+        is_old = False
+        is_standalone = True
+        try:
+            from mycroft.version import CORE_VERSION_STR  # all classic mycroft and ovos versions
+            is_classic = True
+            is_standalone = False
+
+            try:
+                from ovos_core.version import OVOS_VERSION_MINOR  # ovos-core >= 0.0.8
+                is_classic = False
+            except ImportError:
+                is_old = True
+                try:
+                    from mycroft.version import OVOS_VERSION_MINOR  # ovos-core <= 0.0.7
+                    is_classic = False
+                except:
+                    is_standalone = True
+
+        except:
+            is_standalone = True
+
+        @wraps(func)
+        def func_wrapper(*args, **kwargs):
+            if is_classic and callable(classic_core):
+                return classic_core(*args, **kwargs)
+            if is_old and callable(pre_008):
+                return pre_008(*args, **kwargs)
+            if is_standalone and callable(no_core):
+                return no_core(*args, **kwargs)
+            return func(*args, **kwargs)
+
+        return func_wrapper
+
+    return backwards_compat_decorator
 
 
 def threaded_timeout(timeout=5):
@@ -33,7 +76,7 @@ def threaded_timeout(timeout=5):
     Adapted from https://github.com/OpenJarbas/InGeo
     @param timeout: Timeout in seconds to wait before terminating the process
     """
-    
+
     def deco(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -66,6 +109,7 @@ def threaded_timeout(timeout=5):
 class classproperty(property):
     """Decorator for a Class-level property.
     Credit to Denis Rhyzhkov on Stackoverflow: https://stackoverflow.com/a/13624858/1280629"""
+
     def __get__(self, owner_self, owner_cls):
         return self.fget(owner_cls)
 
