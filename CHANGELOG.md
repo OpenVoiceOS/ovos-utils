@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.36a7](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a7) (2023-09-17)
+## [0.0.36a8](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a8) (2023-09-26)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a6...0.0.36a7)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a7...0.0.36a8)
+
+**Implemented enhancements:**
+
+- Support "logging" section to allow per-service log level changes [\#189](https://github.com/OpenVoiceOS/ovos-utils/pull/189) ([lbt](https://github.com/lbt))
+
+## [V0.0.36a7](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a7) (2023-09-17)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a6...V0.0.36a7)
 
 **Fixed bugs:**
 
