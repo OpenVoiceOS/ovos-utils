@@ -53,7 +53,7 @@ class FakeBus:
             try:  # replicate side effects
                 from ovos_bus_client.session import Session, SessionManager
                 sess = SessionManager.sessions.get(self.session_id) or \
-                       SessionManager.default_session
+                       Session(self.session_id)
                 message.context["session"] = sess.serialize()
             except ImportError:  # don't care
                 message.context["session"] = {"session_id": self.session_id}
