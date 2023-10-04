@@ -59,7 +59,7 @@ class FakeBus:
                 message.context["session"] = {"session_id": self.session_id}
         self.ee.emit("message", message.serialize())
         self.ee.emit(message.msg_type, message)
-        self.on_message(message)
+        self.on_message(message.serialize())
 
     def on_message(self, *args):
         """
