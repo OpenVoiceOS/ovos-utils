@@ -30,9 +30,17 @@ def dig_for_message():
 class FakeBus:
     def __init__(self, *args, **kwargs):
         self.started_running = False
+        self.session_id = "default"
         self.ee = kwargs.get("emitter") or BaseEventEmitter()
         self.ee.on("error", self.on_error)
         self.on_open()
+        try:
+            self.session_id = kwargs["session"].session_id
+        except:
+            pass  # don't care
+
+        self.on("ovos.session.update_default",
+                self.on_default_session_update)
 
     def on(self, msg_type, handler):
         self.ee.on(msg_type, handler)
@@ -41,8 +49,47 @@ class FakeBus:
         self.ee.once(msg_type, handler)
 
     def emit(self, message):
+        if "session" not in message.context:
+            try:  # replicate side effects
+                from ovos_bus_client.session import Session, SessionManager
+                sess = SessionManager.sessions.get(self.session_id) or \
+                       SessionManager.default_session
+                message.context["session"] = sess.serialize()
+            except ImportError:  # don't care
+                message.context["session"] = {"session_id": self.session_id}
         self.ee.emit("message", message.serialize())
         self.ee.emit(message.msg_type, message)
+        self.on_message(message)
+
+    def on_message(self, *args):
+        """
+        Handle an incoming websocket message
+        @param args:
+            message (str): serialized Message
+        """
+        if len(args) == 1:
+            message = args[0]
+        else:
+            message = args[1]
+        parsed_message = Message.deserialize(message)
+        try:  # replicate side effects
+            from ovos_bus_client.session import Session, SessionManager
+            sess = Session.from_message(parsed_message)
+            if sess.session_id != "default":
+                # 'default' can only be updated by core
+                SessionManager.update(sess)
+        except ImportError:
+            pass  # don't care
+
+    def on_default_session_update(self, message):
+        try:  # replicate side effects
+            from ovos_bus_client.session import Session, SessionManager
+            new_session = message.data["session_data"]
+            sess = Session.deserialize(new_session)
+            SessionManager.update(sess, make_default=True)
+            LOG.debug("synced default_session")
+        except ImportError:
+            pass  # don't care
 
     def wait_for_message(self, message_type, timeout=3.0):
         """Wait for a message of a specific type.
@@ -135,13 +182,13 @@ class _MutableMessage(type):
             from ovos_bus_client.message import Message as _MycroftMessage
             if isinstance(instance, _MycroftMessage):
                 return True
-        except:
+        except ImportError:
             pass
         try:
             from mycroft_bus_client.message import Message as _MycroftMessage
             if isinstance(instance, _MycroftMessage):
                 return True
-        except:
+        except ImportError:
             pass
         return super().__instancecheck__(instance)
 
@@ -154,12 +201,12 @@ class FakeMessage(metaclass=_MutableMessage):
         try:  # most common case
             from ovos_bus_client import Message as _M
             return _M(*args, **kwargs)
-        except:
+        except ImportError:
             pass
         try:  # some old install that upgraded during migration period
             from mycroft_bus_client import Message as _M
             return _M(*args, **kwargs)
-        except:  # FakeMessage
+        except ImportError:  # FakeMessage
             return super().__new__(cls)
 
     def __init__(self, msg_type, data=None, context=None):
