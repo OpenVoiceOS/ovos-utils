@@ -102,7 +102,8 @@ class TestIntentServiceInterface(unittest.TestCase):
         message = register_vocab.call_args[0][0]
         self.assertEqual(message.msg_type, "register_vocab")
         self.assertEqual(message.context,
-                         {"skill_id": self.intent_interface.skill_id})
+                         {"skill_id": self.intent_interface.skill_id,
+                          "session": message.context["session"]})
         data = message.data
         self.assertEqual(data['entity_value'], 'test')
         self.assertEqual(data['entity_type'], 'test_intent')
