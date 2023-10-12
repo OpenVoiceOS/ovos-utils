@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.36a8](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a8) (2023-09-26)
+## [0.0.36a9](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a9) (2023-10-12)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a7...0.0.36a8)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a8...0.0.36a9)
+
+**Implemented enhancements:**
+
+- update FakeBus to support session [\#195](https://github.com/OpenVoiceOS/ovos-utils/pull/195) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.36a8](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a8) (2023-09-26)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a7...V0.0.36a8)
 
 **Implemented enhancements:**
 
