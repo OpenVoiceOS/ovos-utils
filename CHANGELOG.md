@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.36a9](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a9) (2023-10-12)
+## [0.0.36a10](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a10) (2023-10-19)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a8...0.0.36a9)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a9...0.0.36a10)
+
+**Fixed bugs:**
+
+- fix/scheduled\_event message.context [\#196](https://github.com/OpenVoiceOS/ovos-utils/pull/196) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.36a9](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a9) (2023-10-12)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a8...V0.0.36a9)
 
 **Implemented enhancements:**
 
