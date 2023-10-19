@@ -298,6 +298,7 @@ class EventSchedulerInterface:
 
         message = self._get_source_message()
         context = context or message.context
+        context["skill_id"] = self.skill_id
         self.bus.emit(Message('mycroft.scheduler.schedule_event',
                               data=event_data, context=context))
 
