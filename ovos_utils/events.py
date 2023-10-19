@@ -297,8 +297,9 @@ class EventSchedulerInterface:
                       'data': data}
 
         message = self._get_source_message()
-        self.bus.emit(message.reply('mycroft.scheduler.schedule_event',
-                                    data=event_data, context=context))
+        context = context or message.context
+        self.bus.emit(Message('mycroft.scheduler.schedule_event',
+                              data=event_data, context=context))
 
     def schedule_event(self, handler: Callable[[Optional[Message]], None],
                        when: Union[datetime, int, float],
