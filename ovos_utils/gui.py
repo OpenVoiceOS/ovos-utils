@@ -819,8 +819,6 @@ class GUIInterface:
                     page_urls.append(page)
                 else:
                     page_urls.append("file://" + page)
-            else:
-                LOG.error(f"Unable to find page: {name}")
         LOG.debug(f"Resolved pages: {page_urls}")
         return page_urls
 
