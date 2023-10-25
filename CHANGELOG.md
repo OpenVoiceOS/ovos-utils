@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.36a12](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a12) (2023-10-25)
+## [0.0.36](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36) (2023-10-25)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a11...0.0.36a12)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a12...0.0.36)
+
+**Closed issues:**
+
+- Import `EventSchedulerInterface` from ovos-bus-client [\#168](https://github.com/OpenVoiceOS/ovos-utils/issues/168)
+
+## [V0.0.36a12](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a12) (2023-10-25)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a11...V0.0.36a12)
 
 **Fixed bugs:**
 
