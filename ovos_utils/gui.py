@@ -820,7 +820,9 @@ class GUIInterface:
                 else:
                     page_urls.append("file://" + page)
             else:
-                LOG.error(f"Unable to find page: {name}")
+                # This is expected; with `ovos-gui`, pages are referenced by ID
+                # rather than filename in order to support multiple frameworks
+                LOG.debug(f"Requested page not resolved to a file: {page}")
         LOG.debug(f"Resolved pages: {page_urls}")
         return page_urls
 
