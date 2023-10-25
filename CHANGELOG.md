@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.36a10](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a10) (2023-10-19)
+## [0.0.36a11](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a11) (2023-10-25)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a9...0.0.36a10)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a10...0.0.36a11)
+
+**Merged pull requests:**
+
+- deprecate the sound utils module [\#190](https://github.com/OpenVoiceOS/ovos-utils/pull/190) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.36a10](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a10) (2023-10-19)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a9...V0.0.36a10)
 
 **Fixed bugs:**
 
