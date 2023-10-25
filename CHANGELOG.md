@@ -1,8 +1,20 @@
 # Changelog
 
-## [0.0.36a11](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a11) (2023-10-25)
+## [0.0.36a12](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36a12) (2023-10-25)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a10...0.0.36a11)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a11...0.0.36a12)
+
+**Fixed bugs:**
+
+- \[GUI\] `_pages2uri` reports page not found when omitting extension [\#194](https://github.com/OpenVoiceOS/ovos-utils/issues/194)
+
+**Merged pull requests:**
+
+- Remove error log for GUI resource resolution [\#198](https://github.com/OpenVoiceOS/ovos-utils/pull/198) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.36a11](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a11) (2023-10-25)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a10...V0.0.36a11)
 
 **Merged pull requests:**
 
