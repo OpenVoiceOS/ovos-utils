@@ -1,77 +1,116 @@
 # Changelog
 
-## [V0.0.35a9](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a9) (2023-07-19)
+## [0.0.36](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.36) (2023-10-25)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a8...V0.0.35a9)
-
-**Implemented enhancements:**
-
-- feat/threaded\_timeout\_util [\#169](https://github.com/OpenVoiceOS/ovos-utils/pull/169) ([JarbasAl](https://github.com/JarbasAl))
-
-## [V0.0.35a8](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a8) (2023-07-13)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a7...V0.0.35a8)
-
-**Fixed bugs:**
-
-- fix ui directores [\#179](https://github.com/OpenVoiceOS/ovos-utils/pull/179) ([JarbasAl](https://github.com/JarbasAl))
-
-## [V0.0.35a7](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a7) (2023-07-07)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a6...V0.0.35a7)
-
-**Merged pull requests:**
-
-- Volunteer GUI upload on init [\#178](https://github.com/OpenVoiceOS/ovos-utils/pull/178) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.35a6](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a6) (2023-07-06)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a5...V0.0.35a6)
-
-**Merged pull requests:**
-
-- Enable GUI module resource file resolution [\#177](https://github.com/OpenVoiceOS/ovos-utils/pull/177) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.35a5](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a5) (2023-07-04)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a4...V0.0.35a5)
-
-**Fixed bugs:**
-
-- Fix bug in `dev` branch with refactoring and added unit test [\#176](https://github.com/OpenVoiceOS/ovos-utils/pull/176) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.35a4](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a4) (2023-07-04)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a3...V0.0.35a4)
-
-**Merged pull requests:**
-
-- SkillApi docs and tests [\#174](https://github.com/OpenVoiceOS/ovos-utils/pull/174) ([NeonDaniel](https://github.com/NeonDaniel))
-
-## [V0.0.35a3](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a3) (2023-07-04)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a2...V0.0.35a3)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a12...0.0.36)
 
 **Closed issues:**
 
-- Non-blocking error when running on MacOS natively [\#175](https://github.com/OpenVoiceOS/ovos-utils/issues/175)
+- Import `EventSchedulerInterface` from ovos-bus-client [\#168](https://github.com/OpenVoiceOS/ovos-utils/issues/168)
 
-## [V0.0.35a2](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a2) (2023-06-28)
+## [V0.0.36a12](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a12) (2023-10-25)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35a1...V0.0.35a2)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a11...V0.0.36a12)
 
-**Merged pull requests:**
+**Fixed bugs:**
 
-- hotfix/missing\_value\_qml\_upload [\#173](https://github.com/OpenVoiceOS/ovos-utils/pull/173) ([JarbasAl](https://github.com/JarbasAl))
-
-## [V0.0.35a1](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.35a1) (2023-06-21)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.34...V0.0.35a1)
+- \[GUI\] `_pages2uri` reports page not found when omitting extension [\#194](https://github.com/OpenVoiceOS/ovos-utils/issues/194)
 
 **Merged pull requests:**
 
-- Add unit tests for shutdown/restart [\#170](https://github.com/OpenVoiceOS/ovos-utils/pull/170) ([NeonDaniel](https://github.com/NeonDaniel))
-- Fix dev branch coverage action [\#166](https://github.com/OpenVoiceOS/ovos-utils/pull/166) ([NeonDaniel](https://github.com/NeonDaniel))
+- Remove error log for GUI resource resolution [\#198](https://github.com/OpenVoiceOS/ovos-utils/pull/198) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.36a11](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a11) (2023-10-25)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a10...V0.0.36a11)
+
+**Merged pull requests:**
+
+- deprecate the sound utils module [\#190](https://github.com/OpenVoiceOS/ovos-utils/pull/190) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.36a10](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a10) (2023-10-19)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a9...V0.0.36a10)
+
+**Fixed bugs:**
+
+- fix/scheduled\_event message.context [\#196](https://github.com/OpenVoiceOS/ovos-utils/pull/196) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.36a9](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a9) (2023-10-12)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a8...V0.0.36a9)
+
+**Implemented enhancements:**
+
+- update FakeBus to support session [\#195](https://github.com/OpenVoiceOS/ovos-utils/pull/195) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.36a8](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a8) (2023-09-26)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a7...V0.0.36a8)
+
+**Implemented enhancements:**
+
+- Support "logging" section to allow per-service log level changes [\#189](https://github.com/OpenVoiceOS/ovos-utils/pull/189) ([lbt](https://github.com/lbt))
+
+## [V0.0.36a7](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a7) (2023-09-17)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a6...V0.0.36a7)
+
+**Fixed bugs:**
+
+- hotfix/gui\_sync [\#192](https://github.com/OpenVoiceOS/ovos-utils/pull/192) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.36a6](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a6) (2023-09-13)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a5...V0.0.36a6)
+
+**Merged pull requests:**
+
+- refactor/less\_gui\_spam [\#191](https://github.com/OpenVoiceOS/ovos-utils/pull/191) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.36a5](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a5) (2023-09-05)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a4...V0.0.36a5)
+
+**Implemented enhancements:**
+
+- Only scan for executables if a good one has not yet been found [\#187](https://github.com/OpenVoiceOS/ovos-utils/pull/187) ([lbt](https://github.com/lbt))
+
+## [V0.0.36a4](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a4) (2023-09-05)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a3...V0.0.36a4)
+
+**Implemented enhancements:**
+
+- IntentServiceInterface Tests and Minor Fixes [\#186](https://github.com/OpenVoiceOS/ovos-utils/pull/186) ([NeonDaniel](https://github.com/NeonDaniel))
+
+## [V0.0.36a3](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a3) (2023-08-17)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a2...V0.0.36a3)
+
+**Fixed bugs:**
+
+- remove \_HACK [\#184](https://github.com/OpenVoiceOS/ovos-utils/pull/184) ([JarbasAl](https://github.com/JarbasAl))
+
+**Closed issues:**
+
+- \_\_HACK\_preload in file\_utils.py causes circular import when launching ovos\_dinkum\_listener [\#183](https://github.com/OpenVoiceOS/ovos-utils/issues/183)
+
+## [V0.0.36a2](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a2) (2023-08-07)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36a1...V0.0.36a2)
+
+**Fixed bugs:**
+
+- HACK / speed up resolve\_ovos\_resource\_file [\#182](https://github.com/OpenVoiceOS/ovos-utils/pull/182) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.36a1](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.36a1) (2023-08-07)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.35...V0.0.36a1)
+
+**Merged pull requests:**
+
+- Update `events` module docs and default values [\#181](https://github.com/OpenVoiceOS/ovos-utils/pull/181) ([NeonDaniel](https://github.com/NeonDaniel))
 
 
 

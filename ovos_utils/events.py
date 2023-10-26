@@ -1,11 +1,10 @@
-
 import time
 from datetime import datetime, timedelta
 from inspect import signature
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 from ovos_utils.intents.intent_service_interface import to_alnum
 from ovos_utils.log import LOG, log_deprecation, deprecated
-from ovos_utils.messagebus import FakeBus, FakeMessage as Message
+from ovos_utils.messagebus import FakeBus, FakeMessage as Message, dig_for_message
 
 
 def unmunge_message(message: Message, skill_id: str) -> Message:
@@ -44,9 +43,12 @@ def get_handler_name(handler: Callable) -> str:
         return handler.__name__
 
 
-def create_wrapper(handler: Callable, skill_id: str,
-                   on_start: Callable, on_end: Callable,
-                   on_error: Callable) -> Callable:
+def create_wrapper(handler: Callable[..., None],
+                   skill_id: str,
+                   on_start: Callable[[Message], None],
+                   on_end: Callable[[Message], None],
+                   on_error: Callable[..., None]) \
+        -> Callable[[Message], None]:
     """
     Create the default skill handler wrapper.
     This wrapper handles things like metrics, reporting handler start/stop
@@ -54,9 +56,11 @@ def create_wrapper(handler: Callable, skill_id: str,
 
     @param handler: method/function to call
     @param skill_id: skill_id for associated skill
-    @param on_start: function to call before executing the handler
+    @param on_start: function to call before executing the handler. Called
+        optionally with the Message
     @param on_end: function to call after executing the handler
-    @param on_error: function to call for error reporting
+    @param on_error: function to call for error reporting. Called with the
+        exception, and optionally the Message associated with the exception
     @return: callable implementing the passed methods
     """
 
@@ -84,8 +88,10 @@ def create_wrapper(handler: Callable, skill_id: str,
     return wrapper
 
 
-def create_basic_wrapper(handler: Callable,
-                         on_error: Optional[Callable] = None) -> Callable:
+def create_basic_wrapper(handler: Callable[..., None],
+                         on_error: Optional[Callable[[Exception],
+                                            None]] = None) -> \
+        Callable[[Message], None]:
     """
     Create the default skill handler wrapper.
 
@@ -107,6 +113,7 @@ def create_basic_wrapper(handler: Callable,
             else:
                 handler(message)
         except Exception as e:
+            LOG.exception(e)
             if on_error:
                 on_error(e)
 
@@ -128,14 +135,13 @@ class EventContainer:
     def set_bus(self, bus):
         self.bus = bus
 
-    def add(self, name: str, handler: Callable, once: bool = False):
+    def add(self, name: str, handler: Callable[[Message], None],
+            once: bool = False):
         """
         Create event handler for executing intent or other event.
-
-        Arguments:
-            name: IntentParser name
-            handler: Method to call
-            once: Event handler will be removed after it has been run once.
+        @param name: Event (Message.msg_type) to register
+        @param handler: Callback method to register to `name`
+        @param once: If true, only call `handler` once
         """
 
         def once_wrapper(message):
@@ -152,25 +158,22 @@ class EventContainer:
                 self.bus.on(name, handler)
                 self.events.append((name, handler))
 
-            LOG.debug('Added event: {}'.format(name))
+            LOG.debug(f'Added event: {name}')
 
     def remove(self, name: str) -> bool:
         """
         Removes an event from bus emitter and events list.
-
-        Args:
-            name (string): Name of Intent or Scheduler Event
-        Returns:
-            bool: True if found and removed, False if not found
+        @param name: vent (Message.msg_type) to remove
+        @return: True if found and removed, False if not found
         """
-        LOG.debug("Removing event {}".format(name))
+        LOG.debug(f"Removing event {name}")
         removed = False
         for _name, _handler in list(self.events):
             if name == _name:
                 try:
                     self.events.remove((_name, _handler))
                 except ValueError:
-                    LOG.error('Failed to remove event {}'.format(name))
+                    LOG.error(f'Failed to remove event {name}')
                     pass
                 removed = True
 
@@ -225,8 +228,9 @@ class EventSchedulerInterface:
         self.bus = bus
         self.events.set_bus(bus)
 
-    def set_id(self, sched_id):
-        """Attach the skill_id of the parent skill
+    def set_id(self, sched_id: str):
+        """
+        Attach the skill_id of the parent skill
 
         Args:
             sched_id (str): skill_id of the parent skill
@@ -234,41 +238,45 @@ class EventSchedulerInterface:
         # NOTE: can not rename sched_id kwarg to keep api compatibility
         self.skill_id = sched_id
 
-    def _create_unique_name(self, name):
-        """Return a name unique to this skill using the format
-        [skill_id]:[name].
+    def _get_source_message(self):
+        message = dig_for_message() or Message("")
+        message.context['skill_id'] = self.skill_id
+        return message
 
-        Args:
-            name:   Name to use internally
-
-        Returns:
-            str: name unique to this skill
+    def _create_unique_name(self, name: str) -> str:
         """
+        Return a name unique to this skill using the format [skill_id]:[name].
+        @param name: Name to use internally
+        @return name unique to this skill
+        """
+        # TODO: Is a null name valid or should it raise an exception?
         return self.skill_id + ':' + (name or '')
 
-    def _schedule_event(self, handler, when, data, name,
-                        repeat_interval=None, context=None):
-        """Underlying method for schedule_event and schedule_repeating_event.
-
+    def _schedule_event(self, handler: Callable[[Optional[Message]], None],
+                        when: Union[datetime, int, float],
+                        data: Optional[dict],
+                        name: Optional[str],
+                        repeat_interval: Optional[Union[float, int]] = None,
+                        context: Optional[dict] = None):
+        """
+        Underlying method for schedule_event and schedule_repeating_event.
         Takes scheduling information and sends it off on the message bus.
+        @param handler: method to be called at the scheduled time(s)
+        @param when: time (tzaware or default to system tz) or delta seconds to
+            first call the handler
+        @param data: Message data to send to `handler
+        @param name: Event name, must be unique in the context of this object
+        @param repeat_interval:  time in seconds between calls
+        @param context: Message context to send to `handler`
 
-        Args:
-            handler:                method to be called
-            when (datetime):        time (in system timezone) for first
-                                    calling the handler, or None to
-                                    initially trigger <frequency> seconds
-                                    from now
-            data (dict, optional):  data to send when the handler is called
-            name (str, optional):   reference name, must be unique
-            repeat_interval (float/int):  time in seconds between calls
-            context (dict, optional): message context to send
-                                      when the handler is called
         """
         if isinstance(when, (int, float)):
             if when < 0:
                 raise ValueError(f"Expected datetime or positive int/float. "
                                  f"got: {when}")
             when = datetime.now() + timedelta(seconds=when)
+        if not isinstance(when, datetime):
+            raise TypeError(f"Expected datetime, int, or float but got: {when}")
         if not name:
             name = self.skill_id + handler.__name__
         unique_name = self._create_unique_name(name)
@@ -278,83 +286,87 @@ class EventSchedulerInterface:
         data = data or {}
 
         def on_error(e):
-            LOG.exception(f'An error occurred executing the scheduled event {e}')
+            LOG.exception(f'An error occurred executing the scheduled event: '
+                          f'{e}')
 
         wrapped = create_basic_wrapper(handler, on_error)
         self.events.add(unique_name, wrapped, once=not repeat_interval)
-        event_data = {'time': when.timestamp(),
+        event_data = {'time': when.timestamp(),  # Epoch timestamp
                       'event': unique_name,
                       'repeat': repeat_interval,
                       'data': data}
-        context = context or {}
+
+        message = self._get_source_message()
+        context = context or message.context
         context["skill_id"] = self.skill_id
         self.bus.emit(Message('mycroft.scheduler.schedule_event',
                               data=event_data, context=context))
 
-    def schedule_event(self, handler, when, data=None, name=None,
-                       context=None):
-        """Schedule a single-shot event.
-
-        Args:
-            handler:               method to be called
-            when (datetime/int/float):   datetime (in system timezone) or
-                                   number of seconds in the future when the
-                                   handler should be called
-            data (dict, optional): data to send when the handler is called
-            name (str, optional):  reference name
-                                   NOTE: This will not warn or replace a
-                                   previously scheduled event of the same
-                                   name.
-            context (dict, optional): message context to send
-                                      when the handler is called
+    def schedule_event(self, handler: Callable[[Optional[Message]], None],
+                       when: Union[datetime, int, float],
+                       data: Optional[dict] = None,
+                       name: Optional[str] = None,
+                       context: Optional[dict] = None):
+        """
+        Schedule a single-shot event.
+        @param handler: method to be called at the scheduled time(s)
+        @param when: time (tzaware or default to system tz) or delta seconds
+            to first call the handler
+        @param data: Message data to send to `handler
+        @param name: Event name, must be unique in the context of this object
+        @param context: Message context to send to `handler`
         """
         self._schedule_event(handler, when, data, name, context=context)
 
-    def schedule_repeating_event(self, handler, when, interval,
-                                 data=None, name=None, context=None):
-        """Schedule a repeating event.
-
-        Args:
-            handler:                method to be called
-            when (datetime):        time (in system timezone) for first
-                                    calling the handler, or None to
-                                    initially trigger <frequency> seconds
-                                    from now
-            interval (float/int):   time in seconds between calls
-            data (dict, optional):  data to send when the handler is called
-            name (str, optional):   reference name, must be unique
-            context (dict, optional): message context to send
-                                      when the handler is called
+    def schedule_repeating_event(self,
+                                 handler: Callable[[Optional[Message]], None],
+                                 when: Optional[Union[datetime, int, float]],
+                                 interval: Union[float, int],
+                                 data: Optional[dict] = None,
+                                 name: Optional[str] = None,
+                                 context: Optional[dict] = None):
         """
+        Schedule a repeating event.
+        @param handler: method to be called at the scheduled time(s)
+        @param when: time (tzaware or default to system tz) or delta seconds to
+            first call the handler. If None, first call is in `repeat_interval`
+        @param data: Message data to send to `handler
+        @param name: Event name, must be unique in the context of this object
+        @param interval:  time in seconds between calls
+        @param context: Message context to send to `handler`
+        """
+        # Ensure name is defined to avoid re-scheduling
+        name = name or self.skill_id + handler.__name__
+
         # Do not schedule if this event is already scheduled by the skill
         if name not in self.scheduled_repeats:
             # If only interval is given set to trigger in [interval] seconds
             # from now.
             if not when:
                 when = datetime.now() + timedelta(seconds=interval)
-            self._schedule_event(handler, when, data, name, interval,
-                                 context=context)
+            self._schedule_event(handler, when, data, name, interval, context)
         else:
             LOG.debug('The event is already scheduled, cancel previous '
                       'event if this scheduling should replace the last.')
 
-    def update_scheduled_event(self, name, data=None):
-        """Change data of event.
+    def update_scheduled_event(self, name: str, data: Optional[dict] = None):
+        """
+        Change data of event.
 
         Args:
             name (str): reference name of event (from original scheduling)
+            data (dict): new data to update event with
         """
-        data = data or {}
         data = {
             'event': self._create_unique_name(name),
-            'data': data
+            'data': data or {}
         }
-        self.bus.emit(Message('mycroft.schedule.update_event',
-                              data=data, context={"skill_id": self.skill_id}))
+        message = self._get_source_message()
+        self.bus.emit(message.forward('mycroft.schedule.update_event', data))
 
-    def cancel_scheduled_event(self, name):
-        """Cancel a pending event. The event will no longer be scheduled
-        to be executed
+    def cancel_scheduled_event(self, name: str):
+        """
+        Cancel a pending event. The event will no longer be scheduled.
 
         Args:
             name (str): reference name of event (from original scheduling)
@@ -364,12 +376,13 @@ class EventSchedulerInterface:
         if name in self.scheduled_repeats:
             self.scheduled_repeats.remove(name)
         if self.events.remove(unique_name):
-            self.bus.emit(Message('mycroft.scheduler.remove_event',
-                                  data=data,
-                                  context={"skill_id": self.skill_id}))
+            message = self._get_source_message()
+            self.bus.emit(message.forward('mycroft.scheduler.remove_event',
+                                          data))
 
-    def get_scheduled_event_status(self, name):
-        """Get scheduled event data and return the amount of time left
+    def get_scheduled_event_status(self, name: str) -> int:
+        """
+        Get scheduled event data and return the amount of time left
 
         Args:
             name (str): reference name of event (from original scheduling)
@@ -384,8 +397,8 @@ class EventSchedulerInterface:
         data = {'name': event_name}
 
         reply_name = f'mycroft.event_status.callback.{event_name}'
-        msg = Message('mycroft.scheduler.get_event', data=data,
-                      context={"skill_id": self.skill_id})
+        message = self._get_source_message()
+        msg = message.forward('mycroft.scheduler.get_event', data)
         status = self.bus.wait_for_response(msg, reply_type=reply_name)
 
         if status:
@@ -398,14 +411,18 @@ class EventSchedulerInterface:
             raise Exception("Event Status Messagebus Timeout")
 
     def cancel_all_repeating_events(self):
-        """Cancel any repeating events started by the skill."""
+        """
+        Cancel any repeating events started by the skill.
+        """
         # NOTE: Gotta make a copy of the list due to the removes that happen
         #       in cancel_scheduled_event().
         for e in list(self.scheduled_repeats):
             self.cancel_scheduled_event(e)
 
     def shutdown(self):
-        """Shutdown the interface unregistering any event handlers."""
+        """
+        Shutdown the interface unregistering any event handlers.
+        """
         self.cancel_all_repeating_events()
         self.events.clear()
 
@@ -437,7 +454,7 @@ class EventSchedulerInterface:
         return self.skill_id
 
     @name.setter
-    @deprecated("self.sched_id has been deprecated! use self.skill_id instead",
+    @deprecated("self.name has been deprecated! use self.skill_id instead",
                 "0.1.0")
     def name(self, skill_id):
         """DEPRECATED: do not use, method only for api backwards compatibility

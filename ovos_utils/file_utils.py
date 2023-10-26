@@ -108,6 +108,7 @@ def resolve_ovos_resource_file(res_name: str,
 
     # let's look in mycroft/ovos-core if it's installed
     # (default core resources live here / backwards compat)
+    # TODO - remove me soon, spams deprecation logs
     try:
         import mycroft
         core_root = dirname(mycroft.__file__)
