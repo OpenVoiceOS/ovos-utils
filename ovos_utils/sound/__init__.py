@@ -17,12 +17,12 @@ except ImportError:
     def read_mycroft_config():
         return dict()
 
-# Create a custom environment to use that can be ducked by a phone role.
-# This is kept separate from the normal os.environ to ensure that the TTS
-# role isn't affected and that any thirdparty software launched through
-# a mycroft process can select if they wish to honor this.
+# Create a custom environment to use that can let duck a music role.
+# This is kept separate from the normal os.environ to ensure that
+# any thirdparty software launched through
+# a ovos process can select if they wish to honor this.
 _ENVIRONMENT = deepcopy(os.environ)
-_ENVIRONMENT['PULSE_PROP'] = 'media.role=music'
+_ENVIRONMENT['PULSE_PROP'] = 'media.role=phone'
 
 
 def _get_pulse_environment(config):
