@@ -8,7 +8,7 @@ import collections
 import copy
 
 
-class FaceplateGrid(collections.MutableSequence):
+class FaceplateGrid(collections.abc.MutableSequence):
     encoded = None
     str_grid = None
     pad_char = "."
