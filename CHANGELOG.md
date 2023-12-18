@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.37a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.37a1) (2023-11-08)
+## [0.0.37a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.37a2) (2023-12-18)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36...0.0.37a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.37a1...0.0.37a2)
+
+**Fixed bugs:**
+
+- update imports for py 3.10 compat [\#202](https://github.com/OpenVoiceOS/ovos-utils/pull/202) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.37a1](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.37a1) (2023-11-08)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.36...V0.0.37a1)
 
 **Fixed bugs:**
 
