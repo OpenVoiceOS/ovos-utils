@@ -4,11 +4,11 @@ from ovos_utils.log import LOG
 from ovos_utils.messagebus import get_mycroft_bus
 import random
 from time import sleep
-import collections
+from collections.abc import MutableSequence
 import copy
 
 
-class FaceplateGrid(collections.abc.MutableSequence):
+class FaceplateGrid(MutableSequence):
     encoded = None
     str_grid = None
     pad_char = "."
