@@ -17,7 +17,21 @@ import os
 import sys
 from logging.handlers import RotatingFileHandler
 from os.path import join
-from typing import List
+from pathlib import Path
+from typing import Optional, List, Set
+
+
+ALL_SERVICES = {"bus",
+                "audio",
+                "skills",
+                "voice",
+                "gui",
+                "ovos",
+                "phal",
+                "phal-admin",
+                "hivemind",
+                "hivemind-voice-sat"}
+
 
 
 class LOG:
@@ -78,18 +92,17 @@ class LOG:
 
     @classmethod
     def init(cls, config=None):
-
+        from ovos_utils.xdg_utils import xdg_state_home
         try:
             from ovos_config.meta import get_xdg_base
-            default_base = get_xdg_base()
+            xdg_base = get_xdg_base()
         except ImportError:
-            default_base = os.environ.get("OVOS_CONFIG_BASE_FOLDER") or \
-                           "mycroft"
-        from ovos_utils.xdg_utils import xdg_state_home
+            xdg_base = os.environ.get("OVOS_CONFIG_BASE_FOLDER") or "mycroft"
 
+        xdg_path = os.path.join(xdg_state_home(), xdg_base)
+        
         config = config or {}
-        cls.base_path = config.get("path") or \
-                        f"{xdg_state_home()}/{default_base}"
+        cls.base_path = config.get("path") or xdg_path
         cls.max_bytes = config.get("max_bytes", 50000000)
         cls.backup_count = config.get("backup_count", 3)
         cls.level = config.get("level") or LOG.level
@@ -278,3 +291,72 @@ def deprecated(log_message: str, deprecation_version: str):
         return log_wrapper
 
     return wrapped
+
+
+def get_log_path(service: str, directories: Optional[List[str]] = None) \
+    -> Optional[str]:
+    """
+    Get the path to the log directory for a given service.
+    Default behaviour is to check the configured paths for the service.
+    If a list of directories is provided, check that list for the service log
+
+    Args:
+        service: service name
+        directories: (optional) list of directories to check for service
+
+    Returns:
+        path to log directory for service
+    """
+    from ovos_utils.xdg_utils import xdg_state_home
+    try:
+        from ovos_config import Configuration
+        from ovos_config.meta import get_xdg_base
+    except ImportError:
+        xdg_base = os.environ.get("OVOS_CONFIG_BASE_FOLDER", "mycroft")
+        return os.path.join(xdg_state_home(), xdg_base)
+
+    if directories:
+        for directory in directories:
+            file = os.path.join(directory, f"{service}.log")
+            if os.path.exists(file):
+                return directory
+        return None
+    
+    config = Configuration().get("logging", dict()).get("logs", dict())
+    # service specific config or default config location
+    path = config.get(service, {}).get("path") or config.get("path")
+    # default xdg location
+    if not path:
+        path = os.path.join(xdg_state_home(), get_xdg_base())
+    
+    return path
+
+
+def get_log_paths() -> Set[str]:
+    """
+    Get all log paths for all service logs
+    Different services may have different log paths
+
+    Returns:
+        set of paths to log directories
+    """
+    paths = set()
+    ALL_SERVICES.union({s.replace("-", "_") for s in ALL_SERVICES})
+    for service in ALL_SERVICES:
+        paths.add(get_log_path(service))
+    
+    return paths
+
+def get_available_logs(directories: Optional[List[str]] = None) -> List[str]:
+    """
+    Get a list of all available log files
+    Args:
+        directories: (optional) list of directories to check for service
+
+    Returns:
+        list of log files
+    """
+    directories = directories or get_log_paths()
+    return [Path(f).stem for path in directories
+            for f in os.listdir(path) if Path(f).suffix == ".log"]
+    
