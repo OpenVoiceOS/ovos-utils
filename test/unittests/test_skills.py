@@ -69,7 +69,7 @@ class TestAudioservice(unittest.TestCase):
 
 
 class TestLocations(unittest.TestCase):
-    @patch("ovos_utils.skills.locations.get_plugin_skills")
+    @patch("ovos_plugin_manager.skills.get_plugin_skills")
     def test_get_installed_skill_ids(self, plugins):
         plugins.return_value = (['plugin_dir', 'plugin_dir_2'],
                                 ['plugin_id', 'plugin_id_2'])

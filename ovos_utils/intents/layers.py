@@ -5,7 +5,8 @@ LOG.warning("IntentLayers moved to ovos_workshop.decorators.layers")
 try:
     from ovos_workshop.decorators.layers import IntentLayers
 except ImportError:
-    from ovos_utils.messagebus import get_mycroft_bus, FakeMessage as Message
+    import ovos_utils.messagebus
+
     from time import sleep
     
     class IntentLayers:
@@ -13,7 +14,7 @@ except ImportError:
             # TODO: Deprecate in 0.1.0
             LOG.error(f"This module is deprecated, import from `ovos_workshop.skills.layers")
             layers = layers or []
-            self.bus = bus or get_mycroft_bus()
+            self.bus = bus or ovos_utils.messagebus.get_mycroft_bus()
             # make intent levels for N layers
             self.layers = layers
             self.current_layer = 0
@@ -22,12 +23,12 @@ except ImportError:
     
         def disable_intent(self, intent_name):
             """Disable a registered intent"""
-            self.bus.emit(Message("mycroft.skill.disable_intent",
+            self.bus.emit(ovos_utils.messagebus.Message("mycroft.skill.disable_intent",
                                   {"intent_name": intent_name}))
     
         def enable_intent(self, intent_name):
             """Reenable a registered self intent"""
-            self.bus.emit(Message("mycroft.skill.enable_intent",
+            self.bus.emit(ovos_utils.messagebus.Message("mycroft.skill.enable_intent",
                                   {"intent_name": intent_name}))
     
         def reset(self):

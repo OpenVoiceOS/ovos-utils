@@ -2,12 +2,13 @@ import time
 from datetime import datetime, timedelta
 from inspect import signature
 from typing import Callable, Optional, Union
+
+import ovos_utils.messagebus
 from ovos_utils.intents.intent_service_interface import to_alnum
 from ovos_utils.log import LOG, log_deprecation, deprecated
-from ovos_utils.messagebus import FakeBus, FakeMessage as Message, dig_for_message
 
 
-def unmunge_message(message: Message, skill_id: str) -> Message:
+def unmunge_message(message, skill_id: str):
     """
     Restore message keywords by removing the Letterified skill ID.
     Args:
@@ -16,7 +17,8 @@ def unmunge_message(message: Message, skill_id: str) -> Message:
     Returns:
         Message without clear keywords
     """
-    if isinstance(message, Message) and isinstance(message.data, dict):
+    if isinstance(message, ovos_utils.messagebus.Message) and \
+            isinstance(message.data, dict):
         skill_id = to_alnum(skill_id)
         for key in list(message.data.keys()):
             if key.startswith(skill_id):
@@ -45,10 +47,10 @@ def get_handler_name(handler: Callable) -> str:
 
 def create_wrapper(handler: Callable[..., None],
                    skill_id: str,
-                   on_start: Callable[[Message], None],
-                   on_end: Callable[[Message], None],
+                   on_start: Callable[..., None],
+                   on_end: Callable[..., None],
                    on_error: Callable[..., None]) \
-        -> Callable[[Message], None]:
+        -> Callable[..., None]:
     """
     Create the default skill handler wrapper.
     This wrapper handles things like metrics, reporting handler start/stop
@@ -90,8 +92,8 @@ def create_wrapper(handler: Callable[..., None],
 
 def create_basic_wrapper(handler: Callable[..., None],
                          on_error: Optional[Callable[[Exception],
-                                            None]] = None) -> \
-        Callable[[Message], None]:
+                         None]] = None) -> \
+        Callable[..., None]:
     """
     Create the default skill handler wrapper.
 
@@ -129,13 +131,13 @@ class EventContainer:
     """
 
     def __init__(self, bus=None):
-        self.bus = bus or FakeBus()
+        self.bus = bus or ovos_utils.messagebus.FakeBus()
         self.events = []
 
     def set_bus(self, bus):
         self.bus = bus
 
-    def add(self, name: str, handler: Callable[[Message], None],
+    def add(self, name: str, handler: Callable[..., None],
             once: bool = False):
         """
         Create event handler for executing intent or other event.
@@ -239,7 +241,7 @@ class EventSchedulerInterface:
         self.skill_id = sched_id
 
     def _get_source_message(self):
-        message = dig_for_message() or Message("")
+        message = ovos_utils.messagebus.dig_for_message() or ovos_utils.messagebus.Message("")
         message.context['skill_id'] = self.skill_id
         return message
 
@@ -252,7 +254,7 @@ class EventSchedulerInterface:
         # TODO: Is a null name valid or should it raise an exception?
         return self.skill_id + ':' + (name or '')
 
-    def _schedule_event(self, handler: Callable[[Optional[Message]], None],
+    def _schedule_event(self, handler: Callable[..., None],
                         when: Union[datetime, int, float],
                         data: Optional[dict],
                         name: Optional[str],
@@ -299,10 +301,10 @@ class EventSchedulerInterface:
         message = self._get_source_message()
         context = context or message.context
         context["skill_id"] = self.skill_id
-        self.bus.emit(Message('mycroft.scheduler.schedule_event',
-                              data=event_data, context=context))
+        self.bus.emit(ovos_utils.messagebus.Message('mycroft.scheduler.schedule_event',
+                                                    data=event_data, context=context))
 
-    def schedule_event(self, handler: Callable[[Optional[Message]], None],
+    def schedule_event(self, handler: Callable[..., None],
                        when: Union[datetime, int, float],
                        data: Optional[dict] = None,
                        name: Optional[str] = None,
@@ -319,7 +321,7 @@ class EventSchedulerInterface:
         self._schedule_event(handler, when, data, name, context=context)
 
     def schedule_repeating_event(self,
-                                 handler: Callable[[Optional[Message]], None],
+                                 handler: Callable[..., None],
                                  when: Optional[Union[datetime, int, float]],
                                  interval: Union[float, int],
                                  data: Optional[dict] = None,

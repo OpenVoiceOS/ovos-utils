@@ -2,7 +2,7 @@ from os.path import exists, isfile
 from threading import RLock
 from typing import List, Tuple, Optional
 
-from ovos_utils.messagebus import get_mycroft_bus, Message, dig_for_message
+import ovos_utils.messagebus
 from ovos_utils.log import LOG, log_deprecation
 
 LOG.warning("ovos_utils.intents moved to ovos_workshop.intents")
@@ -125,7 +125,7 @@ except:
             self.set_bus(val)
 
         def set_bus(self, bus=None):
-            self._bus = bus or get_mycroft_bus()
+            self._bus = bus or ovos_utils.messagebus.get_mycroft_bus()
 
         def set_id(self, skill_id: str):
             self.skill_id = skill_id
@@ -140,7 +140,7 @@ except:
             @param aliases: List of alternative keyword values
             @param lang: BCP-47 language code of entity and aliases
             """
-            msg = dig_for_message() or Message("")
+            msg = ovos_utils.messagebus.dig_for_message() or ovos_utils.messagebus.Message("")
             if "skill_id" not in msg.context:
                 msg.context["skill_id"] = self.skill_id
 
@@ -170,7 +170,7 @@ except:
                 from named match group.
             @param lang: BCP-47 language code of regex
             """
-            msg = dig_for_message() or Message("")
+            msg = ovos_utils.messagebus.dig_for_message() or ovos_utils.messagebus.Message("")
             if "skill_id" not in msg.context:
                 msg.context["skill_id"] = self.skill_id
             self.bus.emit(msg.forward("register_vocab",
@@ -183,7 +183,7 @@ except:
             @param name: string intent name (without skill_id prefix)
             @param intent_parser: Adapt Intent object
             """
-            msg = dig_for_message() or Message("")
+            msg = ovos_utils.messagebus.dig_for_message() or ovos_utils.messagebus.Message("")
             if "skill_id" not in msg.context:
                 msg.context["skill_id"] = self.skill_id
             self.bus.emit(msg.forward("register_intent", intent_parser.__dict__))
@@ -209,7 +209,7 @@ except:
             `detach_intent` Message is emitted for the intent service to handle.
             @param intent_name: Registered intent to remove/detach (no skill_id)
             """
-            msg = dig_for_message() or Message("")
+            msg = ovos_utils.messagebus.dig_for_message() or ovos_utils.messagebus.Message("")
             if "skill_id" not in msg.context:
                 msg.context["skill_id"] = self.skill_id
             if intent_name in self.intent_names:
@@ -244,7 +244,7 @@ except:
             @param word: word to register (context keyword value)
             @param origin: original origin of the context (for cross context)
             """
-            msg = dig_for_message() or Message("")
+            msg = ovos_utils.messagebus.dig_for_message() or ovos_utils.messagebus.Message("")
             if "skill_id" not in msg.context:
                 msg.context["skill_id"] = self.skill_id
             self.bus.emit(msg.forward('add_context',
@@ -256,7 +256,7 @@ except:
             Remove an Adapt context.
             @param context: context keyword name to remove
             """
-            msg = dig_for_message() or Message("")
+            msg = ovos_utils.messagebus.dig_for_message() or ovos_utils.messagebus.Message("")
             if "skill_id" not in msg.context:
                 msg.context["skill_id"] = self.skill_id
             self.bus.emit(msg.forward('remove_context', {'context': context}))
@@ -281,7 +281,7 @@ except:
                     "samples": samples,
                     'name': intent_name,
                     'lang': lang}
-            msg = dig_for_message() or Message("")
+            msg = ovos_utils.messagebus.dig_for_message() or ovos_utils.messagebus.Message("")
             if "skill_id" not in msg.context:
                 msg.context["skill_id"] = self.skill_id
             self.bus.emit(msg.forward("padatious:register_intent", data))
@@ -303,7 +303,7 @@ except:
             with open(filename) as f:
                 samples = [_ for _ in f.read().split("\n") if _
                            and not _.startswith("#")]
-            msg = dig_for_message() or Message("")
+            msg = ovos_utils.messagebus.dig_for_message() or ovos_utils.messagebus.Message("")
             if "skill_id" not in msg.context:
                 msg.context["skill_id"] = self.skill_id
             self.bus.emit(msg.forward('padatious:register_entity',
@@ -384,14 +384,15 @@ class IntentQueryApi:
     """
 
     def __init__(self, bus=None, timeout=5):
+        LOG.warning("IntentQueryApi has been deprecated and will be removed in 0.1.0")
         if bus is None:
-            bus = get_mycroft_bus()
+            bus = ovos_utils.messagebus.get_mycroft_bus()
         self.bus = bus
         self.timeout = timeout
 
     def get_adapt_intent(self, utterance, lang="en-us"):
         """ get best adapt intent for utterance """
-        msg = Message("intent.service.adapt.get",
+        msg = ovos_utils.messagebus.Message("intent.service.adapt.get",
                       {"utterance": utterance, "lang": lang},
                       context={"destination": "intent_service",
                                "source": "intent_api"})
@@ -407,7 +408,7 @@ class IntentQueryApi:
 
     def get_padatious_intent(self, utterance, lang="en-us"):
         """ get best padatious intent for utterance """
-        msg = Message("intent.service.padatious.get",
+        msg = ovos_utils.messagebus.Message("intent.service.padatious.get",
                       {"utterance": utterance, "lang": lang},
                       context={"destination": "intent_service",
                                "source": "intent_api"})
@@ -422,7 +423,7 @@ class IntentQueryApi:
 
     def get_intent(self, utterance, lang="en-us"):
         """ get best intent for utterance """
-        msg = Message("intent.service.intent.get",
+        msg = ovos_utils.messagebus.Message("intent.service.intent.get",
                       {"utterance": utterance, "lang": lang},
                       context={"destination": "intent_service",
                                "source": "intent_api"})
@@ -451,7 +452,7 @@ class IntentQueryApi:
         return None  # raise some error here maybe? this should never happen
 
     def get_skills_manifest(self):
-        msg = Message("intent.service.skills.get",
+        msg = ovos_utils.messagebus.Message("intent.service.skills.get",
                       context={"destination": "intent_service",
                                "source": "intent_api"})
         resp = self.bus.wait_for_response(msg,
@@ -464,7 +465,7 @@ class IntentQueryApi:
         return data["skills"]
 
     def get_active_skills(self, include_timestamps=False):
-        msg = Message("intent.service.active_skills.get",
+        msg = ovos_utils.messagebus.Message("intent.service.active_skills.get",
                       context={"destination": "intent_service",
                                "source": "intent_api"})
         resp = self.bus.wait_for_response(msg,
@@ -479,7 +480,7 @@ class IntentQueryApi:
         return [s[0] for s in data["skills"]]
 
     def get_adapt_manifest(self):
-        msg = Message("intent.service.adapt.manifest.get",
+        msg = ovos_utils.messagebus.Message("intent.service.adapt.manifest.get",
                       context={"destination": "intent_service",
                                "source": "intent_api"})
         resp = self.bus.wait_for_response(msg,
@@ -492,7 +493,7 @@ class IntentQueryApi:
         return data["intents"]
 
     def get_padatious_manifest(self):
-        msg = Message("intent.service.padatious.manifest.get",
+        msg = ovos_utils.messagebus.Message("intent.service.padatious.manifest.get",
                       context={"destination": "intent_service",
                                "source": "intent_api"})
         resp = self.bus.wait_for_response(msg,
@@ -511,7 +512,7 @@ class IntentQueryApi:
                 "padatious": padatious}
 
     def get_vocab_manifest(self):
-        msg = Message("intent.service.adapt.vocab.manifest.get",
+        msg = ovos_utils.messagebus.Message("intent.service.adapt.vocab.manifest.get",
                       context={"destination": "intent_service",
                                "source": "intent_api"})
         reply_msg_type = 'intent.service.adapt.vocab.manifest'
@@ -534,7 +535,7 @@ class IntentQueryApi:
                 for voc in vocab]
 
     def get_regex_manifest(self):
-        msg = Message("intent.service.adapt.vocab.manifest.get",
+        msg = ovos_utils.messagebus.Message("intent.service.adapt.vocab.manifest.get",
                       context={"destination": "intent_service",
                                "source": "intent_api"})
         reply_msg_type = 'intent.service.adapt.vocab.manifest'
@@ -558,7 +559,7 @@ class IntentQueryApi:
                 for voc in vocab]
 
     def get_entities_manifest(self):
-        msg = Message("intent.service.padatious.entities.manifest.get",
+        msg = ovos_utils.messagebus.Message("intent.service.padatious.entities.manifest.get",
                       context={"destination": "intent_service",
                                "source": "intent_api"})
         reply_msg_type = 'intent.service.padatious.entities.manifest'
