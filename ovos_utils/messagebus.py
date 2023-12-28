@@ -1,7 +1,6 @@
 import json
 import time
 from copy import deepcopy
-from inspect import signature
 from threading import Event
 
 # from ovos_utils.configuration import read_mycroft_config, get_default_lang
@@ -9,13 +8,11 @@ from pyee import BaseEventEmitter
 
 from ovos_utils import create_loop
 from ovos_utils.json_helper import merge_dict
-from ovos_utils.log import LOG, log_deprecation
-from ovos_utils.metrics import Stopwatch
+from ovos_utils.log import LOG, log_deprecation, deprecated
 
-_DEFAULT_WS_CONFIG = {"host": "0.0.0.0",
-                      "port": 8181,
-                      "route": "/core",
-                      "ssl": False}
+log_deprecation("decode_binary_message, send_binary_file_message, send_binary_data_message, \
+    send_message, wait_for_reply, listen_once_for_message, get_message_lang, get_websocket, get_mycroft_bus, \
+    listen_for_message have moved to ovos_bus_client.util", "0.1.0")
 
 
 def dig_for_message():
@@ -358,372 +355,196 @@ class Message(FakeMessage):
         FakeMessage.__init__(self, *args, **kwargs)
 
 
-def get_message_lang(message=None):
-    """Get the language from the message or the default language.
-    Args:
-        message: message to check for language code.
-    Returns:
-        The language code from the message or the default language.
-    """
-    try:
-        from ovos_config.locale import get_default_lang
-        default_lang = get_default_lang()
-    except ImportError:
-        LOG.warning("ovos_config not available. Using default lang en-us")
-        default_lang = "en-us"
-    message = message or dig_for_message()
-    if not message:
-        return default_lang
-    lang = message.data.get("lang") or message.context.get("lang") or default_lang
-    return lang.lower()
+try:
+    from ovos_bus_client.util import decode_binary_message, send_binary_file_message, send_binary_data_message, \
+        send_message, wait_for_reply, listen_once_for_message, get_message_lang, get_websocket, get_mycroft_bus, \
+        listen_for_message
 
+except:
+    _DEFAULT_WS_CONFIG = {"host": "0.0.0.0",
+                          "port": 8181,
+                          "route": "/core",
+                          "ssl": False}
 
-def get_websocket(host, port, route='/', ssl=False, threaded=True):
-    """
-    Returns a connection to a websocket
-    """
-    from ovos_bus_client import MessageBusClient
-
-    client = MessageBusClient(host, port, route, ssl)
-    if threaded:
-        client.run_in_thread()
-    return client
-
-
-def get_mycroft_bus(host: str = None, port: int = None, route: str = None,
-                    ssl: bool = None):
-    """
-    Returns a connection to the mycroft messagebus
-    """
-    try:
-        from ovos_config.config import read_mycroft_config
-        config = read_mycroft_config().get('websocket') or dict()
-    except ImportError:
-        LOG.warning("ovos_config not available. Falling back to default WS")
-        config = dict()
-    host = host or config.get('host') or _DEFAULT_WS_CONFIG['host']
-    port = port or config.get('port') or _DEFAULT_WS_CONFIG['port']
-    route = route or config.get('route') or _DEFAULT_WS_CONFIG['route']
-    if ssl is None:
-        ssl = config.get('ssl') if 'ssl' in config else \
-            _DEFAULT_WS_CONFIG['ssl']
-    return get_websocket(host, port, route, ssl)
-
-
-def listen_for_message(msg_type, handler, bus=None):
-    """
-    Continuously listens and reacts to a specific messagetype on the mycroft messagebus
-
-    NOTE: when finished you should call bus.remove(msg_type, handler)
-    """
-    bus = bus or get_mycroft_bus()
-    bus.on(msg_type, handler)
-    return bus
-
-
-def listen_once_for_message(msg_type, handler, bus=None):
-    """
-    listens and reacts once to a specific messagetype on the mycroft messagebus
-    """
-    auto_close = bus is None
-    bus = bus or get_mycroft_bus()
-
-    def _handler(message):
-        handler(message)
-        if auto_close:
-            bus.close()
-
-    bus.once(msg_type, _handler)
-    return bus
-
-
-def wait_for_reply(message, reply_type=None, timeout=3.0, bus=None):
-    """Send a message and wait for a response.
-
-    Args:
-        message (FakeMessage or str or dict): message object or type to send
-        reply_type (str): the message type of the expected reply.
-                          Defaults to "<message.type>.response".
-        timeout: seconds to wait before timeout, defaults to 3
-    Returns:
-        The received message or None if the response timed out
-    """
-    auto_close = bus is None
-    bus = bus or get_mycroft_bus()
-    if isinstance(message, str):
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def get_message_lang(message=None):
+        """Get the language from the message or the default language.
+        Args:
+            message: message to check for language code.
+        Returns:
+            The language code from the message or the default language.
+        """
         try:
-            message = json.loads(message)
-        except:
-            pass
-    if isinstance(message, str):
-        message = FakeMessage(message)
-    elif isinstance(message, dict):
-        message = FakeMessage(message["type"],
-                              message.get("data"),
-                              message.get("context"))
-    elif not isinstance(message, FakeMessage):
-        raise ValueError
-    response = bus.wait_for_response(message, reply_type, timeout)
-    if auto_close:
-        bus.close()
-    return response
+            from ovos_config.locale import get_default_lang
+            default_lang = get_default_lang()
+        except ImportError:
+            LOG.warning("ovos_config not available. Using default lang en-us")
+            default_lang = "en-us"
+        message = message or dig_for_message()
+        if not message:
+            return default_lang
+        lang = message.data.get("lang") or message.context.get("lang") or default_lang
+        return lang.lower()
 
 
-def send_message(message, data=None, context=None, bus=None):
-    auto_close = bus is None
-    bus = bus or get_mycroft_bus()
-    if isinstance(message, str):
-        if isinstance(data, dict) or isinstance(context, dict):
-            message = FakeMessage(message, data, context)
-        else:
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def get_websocket(host, port, route='/', ssl=False, threaded=True):
+        """
+        Returns a connection to a websocket
+        """
+        from ovos_bus_client import MessageBusClient
+
+        client = MessageBusClient(host, port, route, ssl)
+        if threaded:
+            client.run_in_thread()
+        return client
+
+
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def get_mycroft_bus(host: str = None, port: int = None, route: str = None,
+                        ssl: bool = None):
+        """
+        Returns a connection to the mycroft messagebus
+        """
+        try:
+            from ovos_config.config import read_mycroft_config
+            config = read_mycroft_config().get('websocket') or dict()
+        except ImportError:
+            LOG.warning("ovos_config not available. Falling back to default WS")
+            config = dict()
+        host = host or config.get('host') or _DEFAULT_WS_CONFIG['host']
+        port = port or config.get('port') or _DEFAULT_WS_CONFIG['port']
+        route = route or config.get('route') or _DEFAULT_WS_CONFIG['route']
+        if ssl is None:
+            ssl = config.get('ssl') if 'ssl' in config else \
+                _DEFAULT_WS_CONFIG['ssl']
+        return get_websocket(host, port, route, ssl)
+
+
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def listen_for_message(msg_type, handler, bus=None):
+        """
+        Continuously listens and reacts to a specific messagetype on the mycroft messagebus
+
+        NOTE: when finished you should call bus.remove(msg_type, handler)
+        """
+        bus = bus or get_mycroft_bus()
+        bus.on(msg_type, handler)
+        return bus
+
+
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def listen_once_for_message(msg_type, handler, bus=None):
+        """
+        listens and reacts once to a specific messagetype on the mycroft messagebus
+        """
+        auto_close = bus is None
+        bus = bus or get_mycroft_bus()
+
+        def _handler(message):
+            handler(message)
+            if auto_close:
+                bus.close()
+
+        bus.once(msg_type, _handler)
+        return bus
+
+
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def wait_for_reply(message, reply_type=None, timeout=3.0, bus=None):
+        """Send a message and wait for a response.
+
+        Args:
+            message (FakeMessage or str or dict): message object or type to send
+            reply_type (str): the message type of the expected reply.
+                              Defaults to "<message.type>.response".
+            timeout: seconds to wait before timeout, defaults to 3
+        Returns:
+            The received message or None if the response timed out
+        """
+        auto_close = bus is None
+        bus = bus or get_mycroft_bus()
+        if isinstance(message, str):
             try:
                 message = json.loads(message)
             except:
-                message = FakeMessage(message)
-    if isinstance(message, dict):
-        message = FakeMessage(message["type"],
-                              message.get("data"),
-                              message.get("context"))
-    if not isinstance(message, FakeMessage):
-        raise ValueError
-    bus.emit(message)
-    if auto_close:
-        bus.close()
+                pass
+        if isinstance(message, str):
+            message = FakeMessage(message)
+        elif isinstance(message, dict):
+            message = FakeMessage(message["type"],
+                                  message.get("data"),
+                                  message.get("context"))
+        elif not isinstance(message, FakeMessage):
+            raise ValueError
+        response = bus.wait_for_response(message, reply_type, timeout)
+        if auto_close:
+            bus.close()
+        return response
 
 
-def send_binary_data_message(binary_data, msg_type="mycroft.binary.data",
-                             msg_data=None, msg_context=None, bus=None):
-    msg_data = msg_data or {}
-    msg = {
-        "type": msg_type,
-        "data": merge_dict(msg_data, {"binary": binary_data.hex()}),
-        "context": msg_context or None
-    }
-    send_message(msg, bus=bus)
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def send_message(message, data=None, context=None, bus=None):
+        auto_close = bus is None
+        bus = bus or get_mycroft_bus()
+        if isinstance(message, str):
+            if isinstance(data, dict) or isinstance(context, dict):
+                message = FakeMessage(message, data, context)
+            else:
+                try:
+                    message = json.loads(message)
+                except:
+                    message = FakeMessage(message)
+        if isinstance(message, dict):
+            message = FakeMessage(message["type"],
+                                  message.get("data"),
+                                  message.get("context"))
+        if not isinstance(message, FakeMessage):
+            raise ValueError
+        bus.emit(message)
+        if auto_close:
+            bus.close()
 
 
-def send_binary_file_message(filepath, msg_type="mycroft.binary.file",
-                             msg_context=None, bus=None):
-    with open(filepath, 'rb') as f:
-        binary_data = f.read()
-    msg_data = {"path": filepath}
-    send_binary_data_message(binary_data, msg_type=msg_type, msg_data=msg_data,
-                             msg_context=msg_context, bus=bus)
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def send_binary_data_message(binary_data, msg_type="mycroft.binary.data",
+                                 msg_data=None, msg_context=None, bus=None):
+        msg_data = msg_data or {}
+        msg = {
+            "type": msg_type,
+            "data": merge_dict(msg_data, {"binary": binary_data.hex()}),
+            "context": msg_context or None
+        }
+        send_message(msg, bus=bus)
 
 
-def decode_binary_message(message):
-    if isinstance(message, str):
-        try:  # json string
-            message = json.loads(message)
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def send_binary_file_message(filepath, msg_type="mycroft.binary.file",
+                                 msg_context=None, bus=None):
+        with open(filepath, 'rb') as f:
+            binary_data = f.read()
+        msg_data = {"path": filepath}
+        send_binary_data_message(binary_data, msg_type=msg_type, msg_data=msg_data,
+                                 msg_context=msg_context, bus=bus)
+
+
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def decode_binary_message(message):
+        if isinstance(message, str):
+            try:  # json string
+                message = json.loads(message)
+                binary_data = message.get("binary") or message["data"]["binary"]
+            except:  # hex string
+                binary_data = message
+        elif isinstance(message, dict):
+            # data field or serialized message
             binary_data = message.get("binary") or message["data"]["binary"]
-        except:  # hex string
-            binary_data = message
-    elif isinstance(message, dict):
-        # data field or serialized message
-        binary_data = message.get("binary") or message["data"]["binary"]
-    else:
-        # message object
-        binary_data = message.data["binary"]
-    # decode hex string
-    return bytearray.fromhex(binary_data)
+        else:
+            # message object
+            binary_data = message.data["binary"]
+        # decode hex string
+        return bytearray.fromhex(binary_data)
 
-
-def to_alnum(skill_id):
-    """Convert a skill id to only alphanumeric characters
-
-     Non alpha-numeric characters are converted to "_"
-
-    Args:
-        skill_id (str): identifier to be converted
-    Returns:
-        (str) String of letters
-    """
-    return ''.join(c if c.isalnum() else '_' for c in str(skill_id))
-
-
-def unmunge_message(message, skill_id):
-    """Restore message keywords by removing the Letterified skill ID.
-    Args:
-        message (FakeMessage): Intent result message
-        skill_id (str): skill identifier
-    Returns:
-        Message without clear keywords
-    """
-    if hasattr(message, "data") and isinstance(message.data, dict):
-        skill_id = to_alnum(skill_id)
-        for key in list(message.data.keys()):
-            if key.startswith(skill_id):
-                # replace the munged key with the real one
-                new_key = key[len(skill_id):]
-                message.data[new_key] = message.data.pop(key)
-
-    return message
-
-
-def get_handler_name(handler):
-    """Name (including class if available) of handler function.
-
-    Args:
-        handler (function): Function to be named
-
-    Returns:
-        string: handler name as string
-    """
-    if '__self__' in dir(handler) and 'name' in dir(handler.__self__):
-        return handler.__self__.name + '.' + handler.__name__
-    else:
-        return handler.__name__
-
-
-def create_wrapper(handler, skill_id, on_start, on_end, on_error):
-    """Create the default skill handler wrapper.
-
-    This wrapper handles things like metrics, reporting handler start/stop
-    and errors.
-        handler (callable): method/function to call
-        skill_id: skill_id for associated skill
-        on_start (function): function to call before executing the handler
-        on_end (function): function to call after executing the handler
-        on_error (function): function to call for error reporting
-    """
-
-    def wrapper(message):
-        stopwatch = Stopwatch()
-        try:
-            message = unmunge_message(message, skill_id)
-            if on_start:
-                on_start(message)
-
-            with stopwatch:
-                if len(signature(handler).parameters) == 0:
-                    handler()
-                else:
-                    handler(message)
-
-        except Exception as e:
-            if on_error:
-                if len(signature(on_error).parameters) == 2:
-                    on_error(e, message)
-                else:
-                    on_error(e)
-        finally:
-            if on_end:
-                on_end(message)
-
-            # Send timing metrics
-            context = message.context
-            if context and 'ident' in context:
-                try:
-                    from mycroft.metrics import report_timing
-                    report_timing(context['ident'], 'skill_handler', stopwatch,
-                                  {'handler': handler.__name__,
-                                   'skill_id': skill_id})
-                except ImportError:
-                    pass
-
-    return wrapper
-
-
-def create_basic_wrapper(handler, on_error=None):
-    """Create the default skill handler wrapper.
-
-    This wrapper handles things like metrics, reporting handler start/stop
-    and errors.
-
-    Args:
-        handler (callable): method/function to call
-        on_error (function): function to call to report error.
-
-    Returns:
-        Wrapped callable
-    """
-
-    def wrapper(message):
-        try:
-            if len(signature(handler).parameters) == 0:
-                handler()
-            else:
-                handler(message)
-        except Exception as e:
-            if on_error:
-                on_error(e)
-
-    return wrapper
-
-
-class EventContainer:
-    def __init__(self, bus=None):
-        log_deprecation("Import `ovos_utils.events.EventContainer", "0.1.0")
-        self.bus = bus
-        self.events = []
-
-    def set_bus(self, bus):
-        self.bus = bus
-
-    def add(self, name, handler, once=False):
-        """Create event handler for executing intent or other event.
-        Args:
-            name (string): IntentParser name
-            handler (func): Method to call
-            once (bool, optional): Event handler will be removed after it has
-                                   been run once.
-        """
-
-        def once_wrapper(message):
-            # Remove registered one-time handler before invoking,
-            # allowing them to re-schedule themselves.
-            self.remove(name)
-            handler(message)
-
-        if handler:
-            if once:
-                self.bus.once(name, once_wrapper)
-                self.events.append((name, once_wrapper))
-            else:
-                self.bus.on(name, handler)
-                self.events.append((name, handler))
-
-            LOG.debug('Added event: {}'.format(name))
-
-    def remove(self, name):
-        """Removes an event from bus emitter and events list.
-        Args:
-            name (string): Name of Intent or Scheduler Event
-        Returns:
-            bool: True if found and removed, False if not found
-        """
-        LOG.debug("Removing event {}".format(name))
-        removed = False
-        for _name, _handler in list(self.events):
-            if name == _name:
-                try:
-                    self.events.remove((_name, _handler))
-                except ValueError:
-                    LOG.error('Failed to remove event {}'.format(name))
-                    pass
-                removed = True
-
-        # Because of function wrappers, the emitter doesn't always directly
-        # hold the _handler function, it sometimes holds something like
-        # 'wrapper(_handler)'.  So a call like:
-        #     self.bus.remove(_name, _handler)
-        # will not find it, leaving an event handler with that name left behind
-        # waiting to fire if it is ever re-installed and triggered.
-        # Remove all handlers with the given name, regardless of handler.
-        if removed:
-            self.bus.remove_all_listeners(name)
-        return removed
-
-    def __iter__(self):
-        return iter(self.events)
-
-    def clear(self):
-        """Unregister all registered handlers and clear the list of registered
-        events.
-        """
-        for e, f in self.events:
-            self.bus.remove(e, f)
-        self.events = []  # Remove reference to wrappers
 
 class BusService:
     """
@@ -739,6 +560,7 @@ class BusService:
 
     """
 
+    @deprecated("deprecated without replacement", "0.1.0")
     def __init__(self, message, trigger_messages=None, bus=None):
         self.bus = bus or get_mycroft_bus()
         self.response = message
@@ -786,6 +608,7 @@ class BusFeedProvider:
 
     """
 
+    @deprecated("deprecated without replacement", "0.1.0")
     def __init__(self, trigger_message, name=None, bus=None, config=None):
         """
            initialize responder
@@ -873,6 +696,7 @@ class BusQuery:
 
     """
 
+    @deprecated("deprecated without replacement", "0.1.0")
     def __init__(self, message, bus=None):
         self.bus = bus or get_mycroft_bus()
         self._waiting = False
@@ -939,6 +763,7 @@ class BusFeedConsumer:
 
     """
 
+    @deprecated("deprecated without replacement", "0.1.0")
     def __init__(self, query_message, name=None, timeout=5, bus=None,
                  config=None):
         self.query_message = query_message

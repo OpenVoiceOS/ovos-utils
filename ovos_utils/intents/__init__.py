@@ -2,11 +2,14 @@ from ovos_utils.intents.intent_service_interface import IntentQueryApi, \
     IntentServiceInterface
 from ovos_utils.intents.converse import ConverseTracker
 from ovos_utils.intents.layers import IntentLayers
+from ovos_utils.log import log_deprecation
+
+log_deprecation("ovos_utils.intents moved to ovos_workshop.intents", "0.1.0")
 
 try:
-    from adapt.intent import IntentBuilder, Intent
+    from ovos_workshop.intents import *
+
 except ImportError:
-    # adapt is optional, these classes are mainly syntactic sugar
 
     class Intent:
         def __init__(self, name, requires, at_least_one, optional):

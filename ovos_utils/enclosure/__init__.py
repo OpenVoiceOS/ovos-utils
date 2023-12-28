@@ -3,7 +3,9 @@ from ovos_utils.fingerprinting import detect_platform, MycroftPlatform
 from enum import Enum
 from os.path import exists
 from typing import Optional
-from ovos_utils.log import LOG, deprecated
+from ovos_utils.log import deprecated, log_deprecation
+
+log_deprecation("ovos_utils.enclosure has been deprecated!", "0.1.0")
 
 
 class MycroftEnclosures(str, Enum):

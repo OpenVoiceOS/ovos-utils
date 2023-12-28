@@ -52,6 +52,7 @@ jobs:
           python -m pip install build wheel
       - name: Install core repo
         run: |
+          pip install -r requirements/test.txt
           pip install -e .[extras]
       - name: Install test dependencies
         run: |
