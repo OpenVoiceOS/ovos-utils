@@ -4,6 +4,7 @@ from ovos_utils.intents.intent_service_interface import IntentQueryApi
 from ovos_utils.log import LOG
 from ovos_utils.messagebus import FakeMessage as Message
 
+LOG.warning("ConverseTracker has been deprecated without replacement, it will be removed in 0.1.0")
 
 class ConverseTracker:
     """ Using the messagebus this class recreates/keeps track of the state
