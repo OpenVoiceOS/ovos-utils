@@ -1,8 +1,21 @@
 # Changelog
 
-## [0.0.37a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.37a2) (2023-12-18)
+## [0.0.37a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.37a3) (2023-12-28)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.37a1...0.0.37a2)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.37a2...0.0.37a3)
+
+**Closed issues:**
+
+- decouple concerns from bus/workshop [\#205](https://github.com/OpenVoiceOS/ovos-utils/issues/205)
+- ROADMAP - ovos-utils 0.1.0 [\#117](https://github.com/OpenVoiceOS/ovos-utils/issues/117)
+
+**Merged pull requests:**
+
+- LAST ALPHA [\#206](https://github.com/OpenVoiceOS/ovos-utils/pull/206) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.37a2](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.37a2) (2023-12-18)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.37a1...V0.0.37a2)
 
 **Fixed bugs:**
 
