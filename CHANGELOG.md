@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.0.37a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.37a3) (2023-12-28)
+## [0.0.37a4](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.37a4) (2023-12-28)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.37a2...0.0.37a3)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.37a3...0.0.37a4)
+
+**Merged pull requests:**
+
+- deprecate bus utils [\#207](https://github.com/OpenVoiceOS/ovos-utils/pull/207) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.0.37a3](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.37a3) (2023-12-28)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.37a2...V0.0.37a3)
 
 **Closed issues:**
 
