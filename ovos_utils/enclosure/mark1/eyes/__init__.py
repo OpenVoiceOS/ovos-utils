@@ -1,6 +1,6 @@
 from ovos_utils.log import log_deprecation
 
-log_deprecation("ovos_utils.enclosure.mark1.faceplate moved to https://github.com/OpenVoiceOS/ovos-mark1-utils", "0.1.0")
+log_deprecation("ovos_utils.enclosure.mark1.eyes moved to https://github.com/OpenVoiceOS/ovos-mark1-utils", "0.1.0")
 
 
 try:
