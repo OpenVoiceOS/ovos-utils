@@ -1,8 +1,8 @@
 # Changelog
 
-## [0.0.37a4](https://github.com/OpenVoiceOS/ovos-utils/tree/0.0.37a4) (2023-12-28)
+## [V0.0.37a4](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.0.37a4) (2023-12-28)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.37a3...0.0.37a4)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.37a3...V0.0.37a4)
 
 **Merged pull requests:**
 
