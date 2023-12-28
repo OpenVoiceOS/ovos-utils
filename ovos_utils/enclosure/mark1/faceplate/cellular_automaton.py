@@ -1,10 +1,10 @@
 import copy
 import random
 
-from ovos_utils.log import LOG
+from ovos_utils.log import log_deprecation
 
-LOG.warning("ovos_utils.enclosure.mark1.faceplate moved to https://github.com/OpenVoiceOS/ovos-mark1-utils ;"
-            " this module will be removed in version 0.1.0")
+log_deprecation("ovos_utils.enclosure.mark1.faceplate moved to https://github.com/OpenVoiceOS/ovos-mark1-utils", "0.1.0")
+
 
 try:
     from ovos_mark1.faceplate.cellular_automaton import *

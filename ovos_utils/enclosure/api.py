@@ -1,6 +1,7 @@
-from ovos_utils.log import LOG
+from ovos_utils.log import log_deprecation
 
-LOG.warning("EnclosureApi has moved to ovos_bus_client.apis.enclosure")
+log_deprecation("EnclosureApi has moved to ovos_bus_client.apis.enclosure", "0.1.0")
+
 
 try:
     from ovos_bus_client.apis.enclosure import EnclosureApi

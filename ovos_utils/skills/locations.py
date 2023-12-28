@@ -7,7 +7,7 @@ from ovos_config.locations import get_xdg_data_save_path, get_xdg_data_dirs
 
 from ovos_utils.log import LOG, log_deprecation
 
-LOG.warning("ovos_utils.skills.locations moved to ovos_plugin_manager.skills")
+log_deprecation("ovos_utils.skills.locations moved to ovos_plugin_manager.skills", "0.1.0")
 
 try:
     from ovos_plugin_manager.skills import *

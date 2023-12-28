@@ -1,6 +1,6 @@
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, log_deprecation
 
-LOG.warning("ovos_utils.skills.api moved to ovos_workshop.skills.api")
+log_deprecation("ovos_utils.skills.api moved to ovos_workshop.skills.api", "0.1.0")
 
 try:
     from ovos_workshop.skills.api import SkillApi
