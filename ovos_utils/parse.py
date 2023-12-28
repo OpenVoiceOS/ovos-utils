@@ -1,6 +1,7 @@
-from difflib import SequenceMatcher
 import re
+from difflib import SequenceMatcher
 from enum import IntEnum, auto
+
 from ovos_utils.log import LOG
 
 try:
@@ -113,4 +114,3 @@ def remove_parentheses(answer):
     if not answer:
         return None
     return answer
-

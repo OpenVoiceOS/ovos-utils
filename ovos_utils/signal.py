@@ -1,9 +1,7 @@
-import tempfile
-import time
-
 import os
 import os.path
-
+import tempfile
+import time
 
 from ovos_utils.log import LOG, log_deprecation
 

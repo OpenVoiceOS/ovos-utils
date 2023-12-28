@@ -4,25 +4,8 @@ import re
 import shutil
 import subprocess
 import sys
-import sysconfig
-from enum import Enum
-from os.path import expanduser, exists, join
 
 from ovos_utils.log import LOG
-
-
-# TODO: Deprecate MycroftRootLocations in 0.1.0
-class MycroftRootLocations(str, Enum):
-    PICROFT = "/home/pi/mycroft-core"
-    BIGSCREEN = "/home/mycroft/mycroft-core"
-    OVOS = "/usr/lib/python3.9/site-packages"
-    OLD_MARK1 = "/opt/venvs/mycroft-core/lib/python3.4/site-packages"
-    MARK1 = "/opt/venvs/mycroft-core/lib/python3.7/site-packages"
-    MARK2 = "/opt/mycroft"
-    HOME = expanduser("~/mycroft-core")  # git clones
-
-
-_USER_DEFINED_ROOT = None
 
 
 def is_running_from_module(module_name):
@@ -178,51 +161,6 @@ def check_service_active(service_name, sudo=False, user=False) -> bool:
     return state == 0
 
 
-# platform fingerprinting
-def set_root_path(path):
-    global _USER_DEFINED_ROOT
-    _USER_DEFINED_ROOT = path
-    LOG.info(f"mycroft root set to {path}")
-
-
-def find_root_from_sys_path():
-    """Find mycroft root folder from sys.path, eg. venv site-packages."""
-    for p in [path for path in sys.path if path != '']:
-        if exists(join(p, 'mycroft', 'configuration', 'mycroft.conf')):
-            return p
-    else:
-        return None
-
-
-def find_root_from_sitepackages():
-    """Find root from system or venv's sitepackages."""
-    site = sysconfig.get_paths()['platlib']
-    if exists(join(site, 'mycroft', 'configuration', 'mycroft.conf')):
-        return site
-    else:
-        return None
-
-
-def search_mycroft_core_location():
-    """Check python path (.venv), system packages and finally known mycroft
-    locations."""
-    # downstream wants to override the root location
-    if _USER_DEFINED_ROOT:
-        return _USER_DEFINED_ROOT
-    # if we are in a .venv that should take precedence over everything else
-    if find_root_from_sitepackages():
-        return find_root_from_sitepackages()
-    # if there is a system wide install that should take precedence over
-    # hardcoded locations
-    elif find_root_from_sys_path():
-        return find_root_from_sys_path()
-    # finally look at default locations
-    for p in MycroftRootLocations:
-        if os.path.isdir(p):
-            return p
-    return None
-
-
 def get_desktop_environment():
     # From http://stackoverflow.com/questions/2035657/what-is-my-current-desktop-environment
     # and http://ubuntuforums.org/showthread.php?t=652320
@@ -306,7 +244,7 @@ def has_screen():
             have_display = b"device_name=" in subprocess.check_output("tvservice -n 2>&1", shell=True)
         except Exception as e:
             pass
-        
+
     # fallback check using matplotlib if available
     # seems to be foolproof and OS agnostic 
     # but do not want to drag the dependency
@@ -345,4 +283,3 @@ def module_property(func):
 
     module.__getattr__ = patched_getattr
     return func
-

@@ -3,19 +3,16 @@ import csv
 import os
 import re
 import tempfile
+from os import walk
+from os.path import dirname, splitext, join
 from threading import RLock
 from typing import Optional, List
-
-from os import walk
-from os.path import dirname
-from os.path import splitext, join
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 from ovos_utils.bracket_expansion import expand_options
 from ovos_utils.log import LOG, log_deprecation
-from ovos_utils.system import search_mycroft_core_location
 
 
 def get_temp_path(*args) -> str:
