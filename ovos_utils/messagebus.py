@@ -1,7 +1,6 @@
 import json
 import time
 from copy import deepcopy
-from inspect import signature
 from threading import Event
 
 # from ovos_utils.configuration import read_mycroft_config, get_default_lang
@@ -9,15 +8,11 @@ from pyee import BaseEventEmitter
 
 from ovos_utils import create_loop
 from ovos_utils.json_helper import merge_dict
-from ovos_utils.log import LOG, log_deprecation
-from ovos_utils.metrics import Stopwatch
-from ovos_utils.events import EventContainer, get_handler_name, create_basic_wrapper, create_wrapper, unmunge_message
+from ovos_utils.log import LOG, log_deprecation, deprecated
 
-
-_DEFAULT_WS_CONFIG = {"host": "0.0.0.0",
-                      "port": 8181,
-                      "route": "/core",
-                      "ssl": False}
+log_deprecation("decode_binary_message, send_binary_file_message, send_binary_data_message, \
+    send_message, wait_for_reply, listen_once_for_message, get_message_lang, get_websocket, get_mycroft_bus, \
+    listen_for_message have moved to ovos_bus_client.util", "0.1.0")
 
 
 def dig_for_message():
@@ -360,187 +355,195 @@ class Message(FakeMessage):
         FakeMessage.__init__(self, *args, **kwargs)
 
 
-def get_message_lang(message=None):
-    """Get the language from the message or the default language.
-    Args:
-        message: message to check for language code.
-    Returns:
-        The language code from the message or the default language.
-    """
-    try:
-        from ovos_config.locale import get_default_lang
-        default_lang = get_default_lang()
-    except ImportError:
-        LOG.warning("ovos_config not available. Using default lang en-us")
-        default_lang = "en-us"
-    message = message or dig_for_message()
-    if not message:
-        return default_lang
-    lang = message.data.get("lang") or message.context.get("lang") or default_lang
-    return lang.lower()
+try:
+    from ovos_bus_client.util import decode_binary_message, send_binary_file_message, send_binary_data_message, \
+        send_message, wait_for_reply, listen_once_for_message, get_message_lang, get_websocket, get_mycroft_bus, \
+        listen_for_message
 
+except:
+    _DEFAULT_WS_CONFIG = {"host": "0.0.0.0",
+                          "port": 8181,
+                          "route": "/core",
+                          "ssl": False}
 
-def get_websocket(host, port, route='/', ssl=False, threaded=True):
-    """
-    Returns a connection to a websocket
-    """
-    from ovos_bus_client import MessageBusClient
-
-    client = MessageBusClient(host, port, route, ssl)
-    if threaded:
-        client.run_in_thread()
-    return client
-
-
-def get_mycroft_bus(host: str = None, port: int = None, route: str = None,
-                    ssl: bool = None):
-    """
-    Returns a connection to the mycroft messagebus
-    """
-    try:
-        from ovos_config.config import read_mycroft_config
-        config = read_mycroft_config().get('websocket') or dict()
-    except ImportError:
-        LOG.warning("ovos_config not available. Falling back to default WS")
-        config = dict()
-    host = host or config.get('host') or _DEFAULT_WS_CONFIG['host']
-    port = port or config.get('port') or _DEFAULT_WS_CONFIG['port']
-    route = route or config.get('route') or _DEFAULT_WS_CONFIG['route']
-    if ssl is None:
-        ssl = config.get('ssl') if 'ssl' in config else \
-            _DEFAULT_WS_CONFIG['ssl']
-    return get_websocket(host, port, route, ssl)
-
-
-def listen_for_message(msg_type, handler, bus=None):
-    """
-    Continuously listens and reacts to a specific messagetype on the mycroft messagebus
-
-    NOTE: when finished you should call bus.remove(msg_type, handler)
-    """
-    bus = bus or get_mycroft_bus()
-    bus.on(msg_type, handler)
-    return bus
-
-
-def listen_once_for_message(msg_type, handler, bus=None):
-    """
-    listens and reacts once to a specific messagetype on the mycroft messagebus
-    """
-    auto_close = bus is None
-    bus = bus or get_mycroft_bus()
-
-    def _handler(message):
-        handler(message)
-        if auto_close:
-            bus.close()
-
-    bus.once(msg_type, _handler)
-    return bus
-
-
-def wait_for_reply(message, reply_type=None, timeout=3.0, bus=None):
-    """Send a message and wait for a response.
-
-    Args:
-        message (FakeMessage or str or dict): message object or type to send
-        reply_type (str): the message type of the expected reply.
-                          Defaults to "<message.type>.response".
-        timeout: seconds to wait before timeout, defaults to 3
-    Returns:
-        The received message or None if the response timed out
-    """
-    auto_close = bus is None
-    bus = bus or get_mycroft_bus()
-    if isinstance(message, str):
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def get_message_lang(message=None):
+        """Get the language from the message or the default language.
+        Args:
+            message: message to check for language code.
+        Returns:
+            The language code from the message or the default language.
+        """
         try:
-            message = json.loads(message)
-        except:
-            pass
-    if isinstance(message, str):
-        message = FakeMessage(message)
-    elif isinstance(message, dict):
-        message = FakeMessage(message["type"],
-                              message.get("data"),
-                              message.get("context"))
-    elif not isinstance(message, FakeMessage):
-        raise ValueError
-    response = bus.wait_for_response(message, reply_type, timeout)
-    if auto_close:
-        bus.close()
-    return response
+            from ovos_config.locale import get_default_lang
+            default_lang = get_default_lang()
+        except ImportError:
+            LOG.warning("ovos_config not available. Using default lang en-us")
+            default_lang = "en-us"
+        message = message or dig_for_message()
+        if not message:
+            return default_lang
+        lang = message.data.get("lang") or message.context.get("lang") or default_lang
+        return lang.lower()
 
 
-def send_message(message, data=None, context=None, bus=None):
-    auto_close = bus is None
-    bus = bus or get_mycroft_bus()
-    if isinstance(message, str):
-        if isinstance(data, dict) or isinstance(context, dict):
-            message = FakeMessage(message, data, context)
-        else:
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def get_websocket(host, port, route='/', ssl=False, threaded=True):
+        """
+        Returns a connection to a websocket
+        """
+        from ovos_bus_client import MessageBusClient
+
+        client = MessageBusClient(host, port, route, ssl)
+        if threaded:
+            client.run_in_thread()
+        return client
+
+
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def get_mycroft_bus(host: str = None, port: int = None, route: str = None,
+                        ssl: bool = None):
+        """
+        Returns a connection to the mycroft messagebus
+        """
+        try:
+            from ovos_config.config import read_mycroft_config
+            config = read_mycroft_config().get('websocket') or dict()
+        except ImportError:
+            LOG.warning("ovos_config not available. Falling back to default WS")
+            config = dict()
+        host = host or config.get('host') or _DEFAULT_WS_CONFIG['host']
+        port = port or config.get('port') or _DEFAULT_WS_CONFIG['port']
+        route = route or config.get('route') or _DEFAULT_WS_CONFIG['route']
+        if ssl is None:
+            ssl = config.get('ssl') if 'ssl' in config else \
+                _DEFAULT_WS_CONFIG['ssl']
+        return get_websocket(host, port, route, ssl)
+
+
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def listen_for_message(msg_type, handler, bus=None):
+        """
+        Continuously listens and reacts to a specific messagetype on the mycroft messagebus
+
+        NOTE: when finished you should call bus.remove(msg_type, handler)
+        """
+        bus = bus or get_mycroft_bus()
+        bus.on(msg_type, handler)
+        return bus
+
+
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def listen_once_for_message(msg_type, handler, bus=None):
+        """
+        listens and reacts once to a specific messagetype on the mycroft messagebus
+        """
+        auto_close = bus is None
+        bus = bus or get_mycroft_bus()
+
+        def _handler(message):
+            handler(message)
+            if auto_close:
+                bus.close()
+
+        bus.once(msg_type, _handler)
+        return bus
+
+
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def wait_for_reply(message, reply_type=None, timeout=3.0, bus=None):
+        """Send a message and wait for a response.
+
+        Args:
+            message (FakeMessage or str or dict): message object or type to send
+            reply_type (str): the message type of the expected reply.
+                              Defaults to "<message.type>.response".
+            timeout: seconds to wait before timeout, defaults to 3
+        Returns:
+            The received message or None if the response timed out
+        """
+        auto_close = bus is None
+        bus = bus or get_mycroft_bus()
+        if isinstance(message, str):
             try:
                 message = json.loads(message)
             except:
-                message = FakeMessage(message)
-    if isinstance(message, dict):
-        message = FakeMessage(message["type"],
-                              message.get("data"),
-                              message.get("context"))
-    if not isinstance(message, FakeMessage):
-        raise ValueError
-    bus.emit(message)
-    if auto_close:
-        bus.close()
+                pass
+        if isinstance(message, str):
+            message = FakeMessage(message)
+        elif isinstance(message, dict):
+            message = FakeMessage(message["type"],
+                                  message.get("data"),
+                                  message.get("context"))
+        elif not isinstance(message, FakeMessage):
+            raise ValueError
+        response = bus.wait_for_response(message, reply_type, timeout)
+        if auto_close:
+            bus.close()
+        return response
 
 
-def send_binary_data_message(binary_data, msg_type="mycroft.binary.data",
-                             msg_data=None, msg_context=None, bus=None):
-    msg_data = msg_data or {}
-    msg = {
-        "type": msg_type,
-        "data": merge_dict(msg_data, {"binary": binary_data.hex()}),
-        "context": msg_context or None
-    }
-    send_message(msg, bus=bus)
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def send_message(message, data=None, context=None, bus=None):
+        auto_close = bus is None
+        bus = bus or get_mycroft_bus()
+        if isinstance(message, str):
+            if isinstance(data, dict) or isinstance(context, dict):
+                message = FakeMessage(message, data, context)
+            else:
+                try:
+                    message = json.loads(message)
+                except:
+                    message = FakeMessage(message)
+        if isinstance(message, dict):
+            message = FakeMessage(message["type"],
+                                  message.get("data"),
+                                  message.get("context"))
+        if not isinstance(message, FakeMessage):
+            raise ValueError
+        bus.emit(message)
+        if auto_close:
+            bus.close()
 
 
-def send_binary_file_message(filepath, msg_type="mycroft.binary.file",
-                             msg_context=None, bus=None):
-    with open(filepath, 'rb') as f:
-        binary_data = f.read()
-    msg_data = {"path": filepath}
-    send_binary_data_message(binary_data, msg_type=msg_type, msg_data=msg_data,
-                             msg_context=msg_context, bus=bus)
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def send_binary_data_message(binary_data, msg_type="mycroft.binary.data",
+                                 msg_data=None, msg_context=None, bus=None):
+        msg_data = msg_data or {}
+        msg = {
+            "type": msg_type,
+            "data": merge_dict(msg_data, {"binary": binary_data.hex()}),
+            "context": msg_context or None
+        }
+        send_message(msg, bus=bus)
 
 
-def decode_binary_message(message):
-    if isinstance(message, str):
-        try:  # json string
-            message = json.loads(message)
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def send_binary_file_message(filepath, msg_type="mycroft.binary.file",
+                                 msg_context=None, bus=None):
+        with open(filepath, 'rb') as f:
+            binary_data = f.read()
+        msg_data = {"path": filepath}
+        send_binary_data_message(binary_data, msg_type=msg_type, msg_data=msg_data,
+                                 msg_context=msg_context, bus=bus)
+
+
+    @deprecated("moved to ovos_bus_client.util", "0.1.0")
+    def decode_binary_message(message):
+        if isinstance(message, str):
+            try:  # json string
+                message = json.loads(message)
+                binary_data = message.get("binary") or message["data"]["binary"]
+            except:  # hex string
+                binary_data = message
+        elif isinstance(message, dict):
+            # data field or serialized message
             binary_data = message.get("binary") or message["data"]["binary"]
-        except:  # hex string
-            binary_data = message
-    elif isinstance(message, dict):
-        # data field or serialized message
-        binary_data = message.get("binary") or message["data"]["binary"]
-    else:
-        # message object
-        binary_data = message.data["binary"]
-    # decode hex string
-    return bytearray.fromhex(binary_data)
-
-
-def to_alnum(skill_id):
-    """Convert a skill id to only alphanumeric characters
-
-     Non alpha-numeric characters are converted to "_"
-
-    Args:
-        skill_id (str): identifier to be converted
-    Returns:
-        (str) String of letters
-    """
-    return ''.join(c if c.isalnum() else '_' for c in str(skill_id))
+        else:
+            # message object
+            binary_data = message.data["binary"]
+        # decode hex string
+        return bytearray.fromhex(binary_data)
 
 
 class BusService:
@@ -557,6 +560,7 @@ class BusService:
 
     """
 
+    @deprecated("deprecated without replacement", "0.1.0")
     def __init__(self, message, trigger_messages=None, bus=None):
         self.bus = bus or get_mycroft_bus()
         self.response = message
@@ -604,6 +608,7 @@ class BusFeedProvider:
 
     """
 
+    @deprecated("deprecated without replacement", "0.1.0")
     def __init__(self, trigger_message, name=None, bus=None, config=None):
         """
            initialize responder
@@ -691,6 +696,7 @@ class BusQuery:
 
     """
 
+    @deprecated("deprecated without replacement", "0.1.0")
     def __init__(self, message, bus=None):
         self.bus = bus or get_mycroft_bus()
         self._waiting = False
@@ -757,6 +763,7 @@ class BusFeedConsumer:
 
     """
 
+    @deprecated("deprecated without replacement", "0.1.0")
     def __init__(self, query_message, name=None, timeout=5, bus=None,
                  config=None):
         self.query_message = query_message

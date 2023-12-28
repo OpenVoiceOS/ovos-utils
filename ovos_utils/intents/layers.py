@@ -1,6 +1,6 @@
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, log_deprecation
 
-LOG.warning("IntentLayers moved to ovos_workshop.decorators.layers")
+log_deprecation("IntentLayers moved to ovos_workshop.decorators.layers", "0.1.0")
 
 try:
     from ovos_workshop.decorators.layers import IntentLayers

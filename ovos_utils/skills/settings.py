@@ -6,7 +6,7 @@ from json_database import JsonStorageXDG, JsonStorage
 
 from ovos_utils.log import LOG, log_deprecation, deprecated
 
-LOG.warning("ovos_utils.skills.settings moved to ovos_workshop.settings")
+log_deprecation("ovos_utils.skills.settings moved to ovos_workshop.settings", "0.1.0")
 
 try:
     from ovos_workshop.settings import *

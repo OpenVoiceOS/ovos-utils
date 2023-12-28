@@ -14,9 +14,9 @@
 #
 from datetime import timedelta
 
-from ovos_utils.log import LOG, deprecated
+from ovos_utils.log import deprecated, log_deprecation
 
-LOG.warning("ClassicAudioServiceInterface and OCPInterface moved to ovos_bus_client.apis.ocp")
+log_deprecation("ClassicAudioServiceInterface and OCPInterface moved to ovos_bus_client.apis.ocp", "0.1.0")
 
 try:
     from ovos_bus_client.apis.ocp import OCPInterface, ClassicAudioServiceInterface, ensure_uri

@@ -5,8 +5,7 @@ from typing import List, Tuple, Optional
 import ovos_utils.messagebus
 from ovos_utils.log import LOG, log_deprecation
 
-LOG.warning("ovos_utils.intents moved to ovos_workshop.intents")
-
+log_deprecation("ovos_utils.intents moved to ovos_workshop.intents", "0.1.0")
 
 try:
     from ovos_workshop.intents import *
