@@ -5,6 +5,8 @@ from os.path import exists
 from typing import Optional
 from ovos_utils.log import LOG, deprecated
 
+LOG.warning("ovos_utils.enclosure has been deprecated! this module will be removed in version 0.1.0")
+
 
 class MycroftEnclosures(str, Enum):
     # TODO: Deprecate in 0.1.0

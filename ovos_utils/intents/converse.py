@@ -1,8 +1,10 @@
 import time
 
+import ovos_utils.messagebus
 from ovos_utils.intents.intent_service_interface import IntentQueryApi
 from ovos_utils.log import LOG
-from ovos_utils.messagebus import FakeMessage as Message
+
+LOG.warning("ConverseTracker has been deprecated without replacement, it will be removed in 0.1.0")
 
 
 class ConverseTracker:
@@ -90,8 +92,8 @@ class ConverseTracker:
             if skill[0] == skill_id:
                 cls.active_skills.remove(skill)
                 if not silent:
-                    cls.bus.emit(Message("converse.skill.deactivated",
-                                         {"skill_id": skill[0]}))
+                    cls.bus.emit(ovos_utils.messagebus.Message("converse.skill.deactivated",
+                                                               {"skill_id": skill[0]}))
 
     @classmethod
     def add_active_skill(cls, skill_id):
@@ -106,8 +108,8 @@ class ConverseTracker:
             cls.active_skills.insert(0, [skill_id, time.time()])
             # this might be sent more than once and it's perfectly fine
             # it's just a new info message not consumed anywhere by default
-            cls.bus.emit(Message("converse.skill.activated",
-                                 {"skill_id": skill_id}))
+            cls.bus.emit(ovos_utils.messagebus.Message("converse.skill.activated",
+                                                       {"skill_id": skill_id}))
         else:
             LOG.warning('Skill ID was empty, won\'t add to list of '
                         'active skills.')
