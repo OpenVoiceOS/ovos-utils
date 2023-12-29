@@ -8,7 +8,7 @@ def get_version():
     """ Find the version of the package"""
     version = None
     version_file = os.path.join(BASEDIR, 'ovos_utils', 'version.py')
-    major, minor, build, alpha = (None, None, None, None)
+    major, minor, build, alpha, post = (None, None, None, None, None)
     with open(version_file) as f:
         for line in f:
             if 'VERSION_MAJOR' in line:
@@ -19,6 +19,8 @@ def get_version():
                 build = line.split('=')[1].strip()
             elif 'VERSION_ALPHA' in line:
                 alpha = line.split('=')[1].strip()
+            elif 'VERSION_POST' in line:
+                post = line.split('=')[1].strip()
 
             if ((major and minor and build and alpha) or
                     '# END_VERSION_BLOCK' in line):
@@ -26,6 +28,8 @@ def get_version():
     version = f"{major}.{minor}.{build}"
     if alpha and int(alpha) > 0:
         version += f"a{alpha}"
+    elif post and int(post) > 0:
+        version += f"post{post}"
     return version
 
 
