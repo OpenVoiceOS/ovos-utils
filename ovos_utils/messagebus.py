@@ -36,8 +36,7 @@ def get_handler_name(*args, **kwargs):
 def merge_dict(*args, **kwargs):
     log_deprecation("Import from `ovos_utils.json_helper`", "0.1.0")
     from ovos_utils.json_helper import merge_dict
-    return get_handler_name(*args, **kwargs)
-
+    return merge_dict(*args, **kwargs)
 
 
 def dig_for_message():
