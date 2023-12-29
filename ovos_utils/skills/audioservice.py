@@ -22,7 +22,8 @@ try:
     from ovos_bus_client.apis.ocp import OCPInterface, ClassicAudioServiceInterface, ensure_uri
 except ImportError:
     from os.path import abspath
-    from ovos_utils.messagebus import get_mycroft_bus, dig_for_message, FakeMessage as Message
+    from ovos_utils.messagebus import get_mycroft_bus
+    from ovos_utils.fakebus import Message, dig_for_message
     
     def ensure_uri(s: str):
         """

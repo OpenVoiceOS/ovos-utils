@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from inspect import signature
 from typing import Callable, Optional, Union
 
-import ovos_utils.messagebus
-from ovos_utils.intents.intent_service_interface import to_alnum
+from ovos_utils.fakebus import Message, FakeBus, dig_for_message
+from ovos_utils.file_utils import to_alnum
 from ovos_utils.log import LOG, log_deprecation, deprecated
 
 
@@ -17,7 +17,7 @@ def unmunge_message(message, skill_id: str):
     Returns:
         Message without clear keywords
     """
-    if isinstance(message, ovos_utils.messagebus.Message) and \
+    if isinstance(message, Message) and \
             isinstance(message.data, dict):
         skill_id = to_alnum(skill_id)
         for key in list(message.data.keys()):
@@ -131,7 +131,7 @@ class EventContainer:
     """
 
     def __init__(self, bus=None):
-        self.bus = bus or ovos_utils.messagebus.FakeBus()
+        self.bus = bus or FakeBus()
         self.events = []
 
     def set_bus(self, bus):
@@ -241,7 +241,7 @@ class EventSchedulerInterface:
         self.skill_id = sched_id
 
     def _get_source_message(self):
-        message = ovos_utils.messagebus.dig_for_message() or ovos_utils.messagebus.Message("")
+        message = dig_for_message() or Message("")
         message.context['skill_id'] = self.skill_id
         return message
 
@@ -301,7 +301,7 @@ class EventSchedulerInterface:
         message = self._get_source_message()
         context = context or message.context
         context["skill_id"] = self.skill_id
-        self.bus.emit(ovos_utils.messagebus.Message('mycroft.scheduler.schedule_event',
+        self.bus.emit(Message('mycroft.scheduler.schedule_event',
                                                     data=event_data, context=context))
 
     def schedule_event(self, handler: Callable[..., None],

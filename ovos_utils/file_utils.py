@@ -18,6 +18,19 @@ from ovos_utils.log import LOG, log_deprecation
 from ovos_utils.system import search_mycroft_core_location
 
 
+def to_alnum(skill_id: str) -> str:
+    """
+    Convert a skill id to only alphanumeric characters
+     Non-alphanumeric characters are converted to "_"
+
+    Args:
+        skill_id (str): identifier to be converted
+    Returns:
+        (str) String of letters
+    """
+    return ''.join(c if c.isalnum() else '_' for c in str(skill_id))
+
+
 def get_temp_path(*args) -> str:
     """
     Generate a valid path in the system temp directory.
@@ -244,7 +257,6 @@ def load_vocabulary(basedir: str, skill_id: str) -> dict:
     Returns:
         dict with intent_type as keys and list of list of lists as value.
     """
-    from ovos_utils.intents.intent_service_interface import to_alnum
 
     vocabs = {}
     for path, _, files in walk(basedir):

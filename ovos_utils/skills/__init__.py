@@ -1,6 +1,4 @@
 from ovos_config.config import read_mycroft_config, update_mycroft_config
-from ovos_utils.messagebus import wait_for_reply
-from ovos_utils.skills.locations import get_default_skills_directory, get_installed_skill_ids
 from ovos_utils.log import LOG, deprecated
 
 
@@ -30,6 +28,10 @@ def get_non_properties(obj):
 
 
 def skills_loaded(bus=None):
+    try:
+        from ovos_bus_client.util import wait_for_reply
+    except:
+        from ovos_utils.messagebus import wait_for_reply
     reply = wait_for_reply('mycroft.skills.all_loaded',
                            'mycroft.skills.all_loaded.response',
                            bus=bus)
@@ -38,35 +40,47 @@ def skills_loaded(bus=None):
     return False
 
 
+@deprecated("This reference is deprecated, use "
+            "`ovos_workshop.permissions.blacklist_skill", "0.1.0")
 def blacklist_skill(skill, config=None):
     config = config or read_mycroft_config()
-    skills_config = config.get("skills", {})
-    blacklisted_skills = skills_config.get("blacklisted_skills", [])
-    if skill not in blacklisted_skills:
-        blacklisted_skills.append(skill)
-        conf = {
-            "skills": {
-                "blacklisted_skills": blacklisted_skills
+    try:
+        from ovos_workshop.permissions import blacklist_skill as _wl
+        return _wl(skill, config)
+    except ImportError:
+        skills_config = config.get("skills", {})
+        blacklisted_skills = skills_config.get("blacklisted_skills", [])
+        if skill not in blacklisted_skills:
+            blacklisted_skills.append(skill)
+            conf = {
+                "skills": {
+                    "blacklisted_skills": blacklisted_skills
+                }
             }
-        }
-        update_mycroft_config(conf)
-        return True
+            update_mycroft_config(conf)
+            return True
     return False
 
 
+@deprecated("This reference is deprecated, use "
+            "`ovos_workshop.permissions.whitelist_skill", "0.1.0")
 def whitelist_skill(skill, config=None):
     config = config or read_mycroft_config()
-    skills_config = config.get("skills", {})
-    blacklisted_skills = skills_config.get("blacklisted_skills", [])
-    if skill in blacklisted_skills:
-        blacklisted_skills.pop(skill)
-        conf = {
-            "skills": {
-                "blacklisted_skills": blacklisted_skills
+    try:
+        from ovos_workshop.permissions import whitelist_skill as _wl
+        return _wl(skill, config)
+    except ImportError:
+        skills_config = config.get("skills", {})
+        blacklisted_skills = skills_config.get("blacklisted_skills", [])
+        if skill in blacklisted_skills:
+            blacklisted_skills.pop(skill)
+            conf = {
+                "skills": {
+                    "blacklisted_skills": blacklisted_skills
+                }
             }
-        }
-        update_mycroft_config(conf)
-        return True
+            update_mycroft_config(conf)
+            return True
     return False
 
 
@@ -89,12 +103,14 @@ def make_priority_skill(skill, config=None):
 
 
 @deprecated("This reference is deprecated, use "
-            "`ovos_utils.skills.locations.get_default_skill_dir", "0.1.0")
+            "`ovos_plugin_manager.skills.get_default_skill_dir", "0.1.0")
 def get_skills_folder(config=None):
+    from ovos_utils.skills.locations import get_default_skills_directory
     return get_default_skills_directory(config)
 
 
 @deprecated("This reference is deprecated, use "
-            "`ovos_utils.skills.locations.get_installed_skill_ids", "0.1.0")
+            "`ovos_plugin_manager.skills.get_installed_skill_ids", "0.1.0")
 def get_installed_skills(config=None):
+    from ovos_utils.skills.locations import get_installed_skill_ids
     return get_installed_skill_ids(config)
