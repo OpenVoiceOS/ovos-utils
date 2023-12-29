@@ -22,9 +22,8 @@ from signal import signal, SIGKILL, SIGINT, SIGTERM, \
 from threading import Event
 from time import sleep, monotonic
 
-
-from ovos_utils.log import LOG
 from ovos_utils.file_utils import get_temp_path
+from ovos_utils.log import LOG
 
 
 @dataclass
@@ -290,6 +289,7 @@ class PIDLock:  # python 3+ 'class Lock'
     of the same type is started, this class will 'attempt' to stop the
     previously running process and then change the process ID in the lock file.
     """
+
     @classmethod
     def init(cls):
         # TODO: Path to deprecation
@@ -301,6 +301,7 @@ class PIDLock:  # python 3+ 'class Lock'
                         "'mycroft' basedir")
             base_dir = "mycroft"
         cls.DIRECTORY = cls.DIRECTORY or get_temp_path(base_dir)
+
     #
     # Class constants
     DIRECTORY = None

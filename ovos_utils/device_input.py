@@ -1,5 +1,6 @@
 import subprocess
 from distutils.spawn import find_executable
+
 from ovos_utils.gui import is_gui_installed
 from ovos_utils.log import LOG
 

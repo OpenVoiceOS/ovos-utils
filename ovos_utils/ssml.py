@@ -70,7 +70,7 @@ class SSMLBuilder:
             raise TypeError('Parameter text must not be None')
         if len(self.text) and not self.text.endswith(" "):
             self.text += " "
-        self.text += "<amazon:effect vocal-tract-length=\"+20%\">" + text\
+        self.text += "<amazon:effect vocal-tract-length=\"+20%\">" + text \
                      + "</amazon:effect>"
         return self
 
@@ -80,7 +80,7 @@ class SSMLBuilder:
             raise TypeError('Parameter text must not be None')
         if len(self.text) and not self.text.endswith(" "):
             self.text += " "
-        self.text += "<amazon:effect vocal-tract-length=\"-20%\">" + text\
+        self.text += "<amazon:effect vocal-tract-length=\"-20%\">" + text \
                      + "</amazon:effect> "
         return self
 

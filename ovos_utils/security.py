@@ -1,11 +1,13 @@
-import platform
-import pexpect
-from socket import gethostname
-from os.path import exists, join
-from os import makedirs
 import os
+import platform
 import random
 import string
+from os import makedirs
+from os.path import exists, join
+from socket import gethostname
+
+import pexpect
+
 from ovos_utils.log import LOG
 
 try:
