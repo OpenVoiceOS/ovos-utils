@@ -93,8 +93,8 @@ class TestGui(unittest.TestCase):
 
 
 class TestGuiInterface(unittest.TestCase):
-    from ovos_utils.messagebus import FakeBus
-    from ovos_utils.gui import GUIInterface
+    from ovos_utils.fakebus import FakeBus
+    from ovos_bus_client.apis.gui import GUIInterface
     bus = FakeBus()
     config = {"extension": "test"}
     ui_base_dir = join(dirname(__file__), "test_ui")

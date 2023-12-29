@@ -6,7 +6,7 @@ try:
     from ovos_workshop.skills.api import SkillApi
 except:
     from typing import Dict, Optional
-    from ovos_utils.messagebus import Message
+    from ovos_utils.fakebus import Message
 
 
     class SkillApi:

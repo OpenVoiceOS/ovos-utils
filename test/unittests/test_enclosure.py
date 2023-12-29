@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from ovos_utils.messagebus import FakeBus, Message
+from ovos_utils.fakebus import FakeBus, Message
 
 
 class TestEnclosureAPI(unittest.TestCase):
