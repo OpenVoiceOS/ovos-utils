@@ -3,7 +3,7 @@ from threading import Event
 from time import sleep
 from unittest.mock import Mock
 
-from ovos_utils.messagebus import FakeBus
+from ovos_utils.fakebus import FakeBus
 
 
 class TestIntent(unittest.TestCase):

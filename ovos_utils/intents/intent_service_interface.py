@@ -5,23 +5,14 @@ from typing import List, Tuple, Optional
 import ovos_utils.messagebus
 from ovos_utils.log import LOG, log_deprecation
 
+from ovos_utils.file_utils import to_alnum  # backwards compat import
+
 log_deprecation("ovos_utils.intents moved to ovos_workshop.intents", "0.1.0")
+
 
 try:
     from ovos_workshop.intents import *
 except:
-    def to_alnum(skill_id: str) -> str:
-        """
-        Convert a skill id to only alphanumeric characters
-         Non-alphanumeric characters are converted to "_"
-
-        Args:
-            skill_id (str): identifier to be converted
-        Returns:
-            (str) String of letters
-        """
-        return ''.join(c if c.isalnum() else '_' for c in str(skill_id))
-
 
     def munge_regex(regex: str, skill_id: str) -> str:
         """

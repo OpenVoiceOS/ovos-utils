@@ -7,7 +7,7 @@ try:
     from ovos_bus_client.apis.enclosure import EnclosureApi
     
 except ImportError:
-    from ovos_utils.messagebus import FakeMessage as Message, dig_for_message
+    from ovos_utils.fakebus import Message, dig_for_message
     
     class EnclosureAPI:
         """

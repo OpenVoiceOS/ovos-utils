@@ -8,8 +8,9 @@ from os.path import join, splitext, isfile, isdir
 
 from ovos_utils import resolve_ovos_resource_file, resolve_resource_file
 from ovos_utils.log import LOG, log_deprecation
-from ovos_utils.messagebus import wait_for_reply, get_mycroft_bus, Message
 from ovos_utils.system import is_installed, has_screen, is_process_running
+from ovos_utils.fakebus import Message
+
 
 _default_gui_apps = (
     "mycroft-gui-app",
@@ -49,6 +50,10 @@ def is_gui_connected(bus=None) -> bool:
     @param bus: MessageBusClient to use for query
     @return: True if GUI is connected
     """
+    try:
+        from ovos_bus_client.util import wait_for_reply
+    except:
+        from ovos_utils.messagebus import wait_for_reply
     response = wait_for_reply("gui.status.request",
                               "gui.status.request.response", bus=bus)
     if response:
@@ -105,7 +110,9 @@ def extend_about_data(about_data: Union[list, dict],
     @param about_data: list of dict key, val information to add to the GUI
     @param bus: MessageBusClient object to emit update on
     """
-    bus = bus or get_mycroft_bus()
+    if not bus:
+        from ovos_bus_client.util import get_mycroft_bus
+        bus = get_mycroft_bus()
     if isinstance(about_data, list):
         bus.emit(Message("smartspeaker.extension.extend.about",
                          {"display_list": about_data}))
@@ -119,7 +126,10 @@ def extend_about_data(about_data: Union[list, dict],
 
 class GUIWidgets:
     def __init__(self, bus=None):
-        self.bus = bus or get_mycroft_bus()
+        if not bus:
+            from ovos_bus_client.util import get_mycroft_bus
+            bus = get_mycroft_bus()
+        self.bus = bus
 
     def show_widget(self, widget_type, widget_data):
         LOG.debug("Showing widget: " + widget_type)
@@ -150,7 +160,10 @@ class GUITracker:
 
     def __init__(self, bus=None,
                  host='0.0.0.0', port=8181, route='/core', ssl=False):
-        self.bus = bus or get_mycroft_bus(host, port, route, ssl)
+        if not bus:
+            from ovos_bus_client.util import get_mycroft_bus
+            bus = get_mycroft_bus(host, port, route, ssl)
+        self.bus = bus
         self._active_skill = None
         self._is_idle = False
         self.idle_ts = 0
@@ -568,7 +581,10 @@ class GUIInterface:
         self.config["remote-server"] = val
 
     def set_bus(self, bus=None):
-        self._bus = bus or get_mycroft_bus()
+        if not bus:
+            from ovos_bus_client.util import get_mycroft_bus
+            bus = get_mycroft_bus()
+        self._bus = bus
         self.setup_default_handlers()
 
     @property

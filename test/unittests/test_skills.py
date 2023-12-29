@@ -3,7 +3,7 @@ from os import environ
 from os.path import isdir, join, dirname, basename
 from unittest.mock import patch
 
-from ovos_utils.messagebus import FakeBus, Message
+from ovos_utils.fakebus import FakeBus, Message
 from ovos_utils.skills.locations import get_skill_directories
 from ovos_utils.skills.locations import get_default_skills_directory
 from ovos_utils.skills.locations import get_installed_skill_ids

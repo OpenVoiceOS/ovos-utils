@@ -7,7 +7,7 @@ from threading import Event
 from time import time
 from unittest.mock import Mock
 
-from ovos_utils.messagebus import FakeBus, Message
+from ovos_utils.fakebus import FakeBus, Message
 
 
 class TestEvents(unittest.TestCase):
