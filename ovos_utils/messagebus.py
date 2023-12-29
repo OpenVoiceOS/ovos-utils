@@ -7,12 +7,37 @@ from threading import Event
 from pyee import BaseEventEmitter
 
 from ovos_utils import create_loop
-from ovos_utils.json_helper import merge_dict
 from ovos_utils.log import LOG, log_deprecation, deprecated
+from ovos_utils.events import EventContainer as _EC
 
 log_deprecation("decode_binary_message, send_binary_file_message, send_binary_data_message, \
     send_message, wait_for_reply, listen_once_for_message, get_message_lang, get_websocket, get_mycroft_bus, \
     listen_for_message have moved to ovos_bus_client.util", "0.1.0")
+
+
+class EventContainer(_EC):
+    def __init__(self, bus=None):
+        log_deprecation("Import from `ovos_utils.events`", "0.1.0")
+        _EC.__init__(self, bus=bus)
+
+
+def create_wrapper(*args, **kwargs):
+    log_deprecation("Import from `ovos_utils.events`", "0.1.0")
+    from ovos_utils.events import create_wrapper
+    return create_wrapper(*args, **kwargs)
+
+
+def get_handler_name(*args, **kwargs):
+    log_deprecation("Import from `ovos_utils.events`", "0.1.0")
+    from ovos_utils.events import get_handler_name
+    return get_handler_name(*args, **kwargs)
+
+
+def merge_dict(*args, **kwargs):
+    log_deprecation("Import from `ovos_utils.json_helper`", "0.1.0")
+    from ovos_utils.json_helper import merge_dict
+    return get_handler_name(*args, **kwargs)
+
 
 
 def dig_for_message():

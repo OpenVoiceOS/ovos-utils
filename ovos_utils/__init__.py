@@ -183,19 +183,11 @@ def wait_for_exit_signal():
         LOG.debug(f"Exiting on KeyboardInterrupt")
 
 
-def get_handler_name(handler):
-    """Name (including class if available) of handler function.
-
-    Arguments:
-        handler (function): Function to be named
-
-    Returns:
-        string: handler name as string
-    """
-    if '__self__' in dir(handler) and 'name' in dir(handler.__self__):
-        return handler.__self__.name + '.' + handler.__name__
-    else:
-        return handler.__name__
+def get_handler_name(*args, **kwargs):
+    from ovos_utils.log import log_deprecation
+    log_deprecation("Import from `ovos_utils.events`", "0.1.0")
+    from ovos_utils.events import get_handler_name
+    return get_handler_name(*args, **kwargs)
 
 
 def camel_case_split(identifier: str) -> str:
