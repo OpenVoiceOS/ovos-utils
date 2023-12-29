@@ -3,7 +3,7 @@ from threading import RLock
 from typing import List, Tuple, Optional
 
 import ovos_utils.messagebus
-from ovos_utils.log import LOG, log_deprecation
+from ovos_utils.log import LOG, log_deprecation, deprecated
 
 from ovos_utils.file_utils import to_alnum  # backwards compat import
 
@@ -373,8 +373,8 @@ class IntentQueryApi:
     Query Intent Service at runtime
     """
 
+    @deprecated("IntentQueryApi has been deprecated without replacement", "0.1.0")
     def __init__(self, bus=None, timeout=5):
-        LOG.warning("IntentQueryApi has been deprecated and will be removed in 0.1.0")
         if bus is None:
             bus = ovos_utils.messagebus.get_mycroft_bus()
         self.bus = bus

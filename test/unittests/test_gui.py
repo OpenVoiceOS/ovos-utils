@@ -227,8 +227,8 @@ class TestGuiInterface(unittest.TestCase):
         # TODO
         pass
 
-    @patch('ovos_utils.gui.resolve_resource_file')
-    @patch('ovos_utils.gui.resolve_ovos_resource_file')
+    @patch('ovos_bus_client.apis.gui.resolve_resource_file')
+    @patch('ovos_bus_client.apis.gui.resolve_ovos_resource_file')
     def test_pages2uri(self, ovos_res, res):
         def _resolve(name, config):
             self.assertEqual(config, self.interface.config)

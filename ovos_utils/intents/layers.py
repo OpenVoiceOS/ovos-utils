@@ -1,6 +1,5 @@
-from ovos_utils.log import LOG, log_deprecation
+from ovos_utils.log import LOG, deprecated
 
-log_deprecation("IntentLayers moved to ovos_workshop.decorators.layers", "0.1.0")
 
 try:
     from ovos_workshop.decorators.layers import IntentLayers
@@ -10,9 +9,9 @@ except ImportError:
     from time import sleep
     
     class IntentLayers:
+
+        @deprecated("IntentLayers moved to ovos_workshop.decorators.layers", "0.1.0")
         def __init__(self, bus=None, layers=None):
-            # TODO: Deprecate in 0.1.0
-            LOG.error(f"This module is deprecated, import from `ovos_workshop.skills.layers")
             layers = layers or []
             self.bus = bus or ovos_utils.messagebus.get_mycroft_bus()
             # make intent levels for N layers
