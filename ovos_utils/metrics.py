@@ -5,6 +5,7 @@ class Stopwatch:
     """
         Simple time measuring class.
     """
+
     def __init__(self):
         self.timestamp = None
         self.time = None
@@ -57,4 +58,3 @@ class Stopwatch:
             return str(self.time or cur_time - self.timestamp)
         else:
             return 'Not started'
-

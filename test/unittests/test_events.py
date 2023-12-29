@@ -185,7 +185,7 @@ class TestEvents(unittest.TestCase):
 class TestEventSchedulerInterface(unittest.TestCase):
     from ovos_utils.events import EventSchedulerInterface
     bus = FakeBus()
-    interface = EventSchedulerInterface(bus=bus, name="test")
+    interface = EventSchedulerInterface(bus=bus, skill_id="test")
 
     def test_00_init(self):
         from ovos_utils.events import EventContainer
@@ -195,13 +195,9 @@ class TestEventSchedulerInterface(unittest.TestCase):
         self.assertEqual(self.interface.events.bus, self.bus)
         self.assertEqual(self.interface.scheduled_repeats, list())
 
-        # Deprecated properties
-        self.assertEqual(self.interface.sched_id, self.interface.skill_id)
-        self.assertEqual(self.interface.name, self.interface.skill_id)
-
     def test_set_bus(self):
         bus = FakeBus()
-        interface = self.EventSchedulerInterface(bus=bus, name="test")
+        interface = self.EventSchedulerInterface(bus=bus, skill_id="test")
         interface.set_bus(self.bus)
         self.assertEqual(interface.bus, self.bus)
         self.assertEqual(interface.events.bus, self.bus)
