@@ -4,12 +4,18 @@ import time
 from ovos_utils import create_loop
 from ovos_utils.fakebus import dig_for_message, FakeMessage, Message, FakeBus
 from ovos_utils.log import LOG, log_deprecation, deprecated
-
+from ovos_utils.events import EventContainer as _EC
 
 log_deprecation("decode_binary_message, send_binary_file_message, send_binary_data_message, \
     send_message, wait_for_reply, listen_once_for_message, get_message_lang, get_websocket, get_mycroft_bus, \
     listen_for_message have moved to ovos_bus_client.util", "0.1.0")
 log_deprecation("dig_for_message, FakeMessage, FakeBus moved to ovos_utils.fakebus", "0.1.0")
+
+
+class EventContainer(_EC):
+    def __init__(self, bus=None):
+        log_deprecation("Import from `ovos_utils.events`", "0.1.0")
+        _EC.__init__(self, bus=bus)
 
 
 def create_wrapper(*args, **kwargs):
