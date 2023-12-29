@@ -13,17 +13,12 @@
 import datetime
 import re
 from functools import lru_cache, wraps
-from os.path import isdir, join
 from threading import Thread, Event
-from time import monotonic_ns
-from time import sleep
+from time import monotonic_ns, sleep
 
 import kthread
 
-# TODO: Deprecate below imports
-from ovos_utils.file_utils import resolve_ovos_resource_file, resolve_resource_file
-from ovos_utils.network_utils import get_ip, get_external_ip, is_connected_dns, is_connected_http, is_connected
-from ovos_utils.log import LOG, deprecated
+from ovos_utils.log import LOG
 
 
 def threaded_timeout(timeout=5):
@@ -33,7 +28,7 @@ def threaded_timeout(timeout=5):
     Adapted from https://github.com/OpenJarbas/InGeo
     @param timeout: Timeout in seconds to wait before terminating the process
     """
-    
+
     def deco(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -66,39 +61,9 @@ def threaded_timeout(timeout=5):
 class classproperty(property):
     """Decorator for a Class-level property.
     Credit to Denis Rhyzhkov on Stackoverflow: https://stackoverflow.com/a/13624858/1280629"""
+
     def __get__(self, owner_self, owner_cls):
         return self.fget(owner_cls)
-
-
-@deprecated("Anything depending on `mycroft`"
-            "should install `ovos-core` as a dependency", "0.1.0")
-def ensure_mycroft_import():
-    # TODO: Deprecate in 0.1.0
-    try:
-        import mycroft
-    except ImportError:
-        import sys
-        from ovos_utils import get_mycroft_root
-        MYCROFT_ROOT_PATH = get_mycroft_root()
-        if MYCROFT_ROOT_PATH is not None:
-            sys.path.append(MYCROFT_ROOT_PATH)
-        else:
-            raise
-
-
-@deprecated("Code should import from the current"
-            "namespace; other system paths are irrelevant.", "0.1.0")
-def get_mycroft_root():
-    # TODO: Deprecate in 0.1.0
-    paths = [
-        "/opt/venvs/mycroft-core/lib/python3.7/site-packages/",  # mark1/2
-        "/opt/venvs/mycroft-core/lib/python3.4/site-packages/ ",  # old mark1 installs
-        "/home/pi/mycroft-core"  # picroft
-    ]
-    for p in paths:
-        if isdir(join(p, "mycroft")):
-            return p
-    return None
 
 
 def timed_lru_cache(

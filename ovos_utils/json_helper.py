@@ -1,9 +1,5 @@
 import json
 from copy import copy
-# TODO: Deprecate unused imports
-from json_database.utils import is_jsonifiable, get_key_recursively, \
-    get_key_recursively_fuzzy, get_value_recursively_fuzzy, \
-    get_value_recursively, jsonify_recursively
 
 
 def nested_get(base, key_list):

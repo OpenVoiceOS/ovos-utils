@@ -1,6 +1,7 @@
 from datetime import datetime
-from dateutil.tz import gettz, tzlocal
 from typing import Any
+
+from dateutil.tz import gettz, tzlocal
 
 # used to calculate timespans
 DAYS_IN_1_YEAR = 365.2425

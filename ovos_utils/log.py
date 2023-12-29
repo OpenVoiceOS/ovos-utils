@@ -19,6 +19,7 @@ from logging.handlers import RotatingFileHandler
 from os.path import join
 from typing import List
 
+
 class LOG:
     """
     Custom logger class that acts like logging.Logger
@@ -83,12 +84,12 @@ class LOG:
             default_base = get_xdg_base()
         except ImportError:
             default_base = os.environ.get("OVOS_CONFIG_BASE_FOLDER") or \
-                "mycroft"
+                           "mycroft"
         from ovos_utils.xdg_utils import xdg_state_home
 
         config = config or {}
         cls.base_path = config.get("path") or \
-            f"{xdg_state_home()}/{default_base}"
+                        f"{xdg_state_home()}/{default_base}"
         cls.max_bytes = config.get("max_bytes", 50000000)
         cls.backup_count = config.get("backup_count", 3)
         cls.level = config.get("level") or LOG.level
@@ -190,7 +191,6 @@ def init_service_logger(service_name):
         LOG.warning("ovos_config not available. Falling back to defaults")
         _cfg = dict()
 
-
     # First try and get the "logging" section
     log_config = _cfg.get("logging")
     # For compatibility we try to get the "logs" from the root level
@@ -265,6 +265,7 @@ def deprecated(log_message: str, deprecation_version: str):
     @param log_message: Deprecation log message
     @param deprecation_version: package version in which deprecation will occur
     """
+
     def wrapped(func):
         @functools.wraps(func)
         def log_wrapper(*args, **kwargs):
@@ -273,6 +274,7 @@ def deprecated(log_message: str, deprecation_version: str):
                             func_module=func.__module__,
                             deprecation_version=deprecation_version)
             return func(*args, **kwargs)
+
         return log_wrapper
 
     return wrapped

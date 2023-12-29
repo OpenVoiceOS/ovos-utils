@@ -3,9 +3,7 @@ from typing import Optional
 
 import requests
 
-
 from ovos_utils.log import LOG
-
 
 _DEFAULT_TEST_CONFIG = {
     "ip_url": 'https://api.ipify.org',
@@ -15,7 +13,7 @@ _DEFAULT_TEST_CONFIG = {
     "web_url_secondary": "https://checkonline.home-assistant.io/online.txt",
     "captive_portal_url": "http://nmcheck.gnome.org/check_network_status.txt",
     "captive_portal_text": "NetworkManager is online"
-    }
+}
 
 
 def get_network_tests_config():
@@ -140,4 +138,3 @@ def check_captive_portal(host: Optional[str] = None,
         LOG.exception("Error checking for captive portal")
 
     return captive_portal
-
