@@ -2,9 +2,7 @@ import time
 
 import ovos_utils.messagebus
 from ovos_utils.intents.intent_service_interface import IntentQueryApi
-from ovos_utils.log import LOG, log_deprecation
-
-log_deprecation("ConverseTracker has been deprecated without replacement", "0.1.0")
+from ovos_utils.log import LOG, deprecated
 
 
 class ConverseTracker:
@@ -19,6 +17,10 @@ class ConverseTracker:
     converse_timeout = 5  # MAGIC NUMBER  hard coded in mycroft-core
     last_conversed = None
     intent_api = None
+
+    @deprecated("ConverseTracker has been deprecated without replacement", "0.1.0")
+    def __init__(self):
+        pass
 
     @classmethod
     def connect_bus(cls, mycroft_bus):
