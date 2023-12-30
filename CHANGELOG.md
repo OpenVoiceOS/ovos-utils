@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.1.0a5](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a5) (2023-12-30)
+## [0.1.0a6](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a6) (2023-12-30)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a4...0.1.0a5)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a5...0.1.0a6)
+
+**Implemented enhancements:**
+
+- Feat/ovos logs script [\#203](https://github.com/OpenVoiceOS/ovos-utils/pull/203) ([emphasize](https://github.com/emphasize))
+
+## [V0.1.0a5](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.1.0a5) (2023-12-30)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a4...V0.1.0a5)
 
 **Merged pull requests:**
 
