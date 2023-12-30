@@ -85,8 +85,8 @@ def get_ui_directories(root_dir: str) -> dict:
         LOG.debug("Skill implements resources in `gui` directory")
         ui_directories["all"] = join(base_directory, "gui")
         return ui_directories
-    LOG.info("Checking for legacy UI directories")
+
     if isdir(join(base_directory, "ui")):
-        LOG.debug("Handling `ui` directory as `qt5`")
+        LOG.debug("legacy UI directory found - Handling `ui` directory as `qt5`")
         ui_directories["qt5"] = join(base_directory, "ui")
     return ui_directories
