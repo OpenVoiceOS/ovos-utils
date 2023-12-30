@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.0a5](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a5) (2023-12-30)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a4...0.1.0a5)
+
+**Merged pull requests:**
+
+- fix/log\_spam [\#213](https://github.com/OpenVoiceOS/ovos-utils/pull/213) ([JarbasAl](https://github.com/JarbasAl))
+
+## [V0.1.0a4](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.1.0a4) (2023-12-29)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a3...V0.1.0a4)
+
 ## [V0.1.0a3](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.1.0a3) (2023-12-29)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.0.38...V0.1.0a3)
