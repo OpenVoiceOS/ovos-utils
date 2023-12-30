@@ -20,7 +20,6 @@ from os.path import join
 from pathlib import Path
 from typing import Optional, List, Set
 
-
 ALL_SERVICES = {"bus",
                 "audio",
                 "skills",
@@ -31,7 +30,6 @@ ALL_SERVICES = {"bus",
                 "phal-admin",
                 "hivemind",
                 "hivemind-voice-sat"}
-
 
 
 class LOG:
@@ -100,7 +98,7 @@ class LOG:
             xdg_base = os.environ.get("OVOS_CONFIG_BASE_FOLDER") or "mycroft"
 
         xdg_path = os.path.join(xdg_state_home(), xdg_base)
-        
+
         config = config or {}
         cls.base_path = config.get("path") or xdg_path
         cls.max_bytes = config.get("max_bytes", 50000000)
@@ -242,7 +240,6 @@ def log_deprecation(log_message: str = "DEPRECATED",
         determination. i.e. an internal exception handling method should log the
         first call external to that package
     """
-    import inspect
     stack = inspect.stack()[1:]  # [0] is this method
     call_info = "Unknown Origin"
     origin_module = func_module
@@ -294,7 +291,7 @@ def deprecated(log_message: str, deprecation_version: str):
 
 
 def get_log_path(service: str, directories: Optional[List[str]] = None) \
-    -> Optional[str]:
+        -> Optional[str]:
     """
     Get the path to the log directory for a given service.
     Default behaviour is to check the configured paths for the service.
@@ -307,6 +304,13 @@ def get_log_path(service: str, directories: Optional[List[str]] = None) \
     Returns:
         path to log directory for service
     """
+    if directories:
+        for directory in directories:
+            file = os.path.join(directory, f"{service}.log")
+            if os.path.exists(file):
+                return directory
+        return None
+
     from ovos_utils.xdg_utils import xdg_state_home
     try:
         from ovos_config import Configuration
@@ -315,20 +319,13 @@ def get_log_path(service: str, directories: Optional[List[str]] = None) \
         xdg_base = os.environ.get("OVOS_CONFIG_BASE_FOLDER", "mycroft")
         return os.path.join(xdg_state_home(), xdg_base)
 
-    if directories:
-        for directory in directories:
-            file = os.path.join(directory, f"{service}.log")
-            if os.path.exists(file):
-                return directory
-        return None
-    
     config = Configuration().get("logging", dict()).get("logs", dict())
     # service specific config or default config location
     path = config.get(service, {}).get("path") or config.get("path")
     # default xdg location
     if not path:
         path = os.path.join(xdg_state_home(), get_xdg_base())
-    
+
     return path
 
 
@@ -344,8 +341,9 @@ def get_log_paths() -> Set[str]:
     ALL_SERVICES.union({s.replace("-", "_") for s in ALL_SERVICES})
     for service in ALL_SERVICES:
         paths.add(get_log_path(service))
-    
+
     return paths
+
 
 def get_available_logs(directories: Optional[List[str]] = None) -> List[str]:
     """
@@ -359,4 +357,3 @@ def get_available_logs(directories: Optional[List[str]] = None) -> List[str]:
     directories = directories or get_log_paths()
     return [Path(f).stem for path in directories
             for f in os.listdir(path) if Path(f).suffix == ".log"]
-    
