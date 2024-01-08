@@ -1,12 +1,10 @@
 import mimetypes
 from dataclasses import dataclass
 from enum import IntEnum
-from os.path import join, dirname
 from typing import Optional, Tuple, List, Union
 
 import orjson
 
-from ovos_utils.json_helper import merge_dict
 from ovos_utils.log import LOG, deprecated
 
 OCP_ID = "ovos.common_play"
@@ -186,13 +184,6 @@ class MediaEntry:
                 self.__setattr__(k, v)
 
     @property
-    def info(self) -> dict:
-        """
-        Return a dict representation of this MediaEntry + infocard for QML model
-        """
-        return merge_dict(self.as_dict, self.infocard)
-
-    @property
     def infocard(self) -> dict:
         """
         Return dict data used for a UI display
@@ -245,24 +236,39 @@ class MediaEntry:
         # dict comparison
         return other == self.infocard
 
-    def __repr__(self):
-        return str(self.as_dict)
 
-    def __str__(self):
-        return str(self.as_dict)
-
-
+@dataclass
 class Playlist(list):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._position = 0
+    title: str = ""
+    position: int = 0
+    length: int = 0  # in seconds
+    image: str = ""
+    match_confidence: int = 0  # 0 - 100
+    skill_id: str = OCP_ID
+    skill_icon: str = ""
 
     @property
-    def position(self) -> int:
+    def infocard(self) -> dict:
         """
-        Return the current position in the playlist
+        Return dict data used for a UI display
+        (model shared with MediaEntry)
         """
-        return self._position
+        return {
+            "duration": self.length,
+            "track": self.title,
+            "image": self.image,
+            "album": self.skill_id,
+            "source": self.skill_icon,
+            "uri": ""
+        }
+
+    @property
+    def as_dict(self) -> dict:
+        """
+        Return a dict representation of this MediaEntry
+        """
+        # orjson handles dataclasses directly
+        return orjson.loads(orjson.dumps(self).decode("utf-8"))
 
     @property
     def entries(self) -> List[MediaEntry]:
@@ -314,22 +320,22 @@ class Playlist(list):
         """
         Move to the first entry in the playlist
         """
-        self._position = 0
+        self.position = 0
 
     def clear(self) -> None:
         """
         Remove all entries from the Playlist and reset the position
         """
         super().clear()
-        self._position = 0
+        self.position = 0
 
     def sort_by_conf(self):
         """
         Sort the Playlist by `match_confidence` with high confidence first
         """
-        self.sort(key=lambda k: k.match_confidence
-        if isinstance(k, MediaEntry) else
-        k.get("match_confidence", 0), reverse=True)
+        self.sort(
+            key=lambda k: k.match_confidence if isinstance(k, MediaEntry)
+            else k.get("match_confidence", 0), reverse=True)
 
     def add_entry(self, entry: MediaEntry, index: int = -1) -> None:
         """
@@ -382,7 +388,7 @@ class Playlist(list):
         Set the position in the playlist to a specific index
         @param idx: Index to set position to
         """
-        self._position = idx
+        self.position = idx
         self._validate_position()
 
     def goto_track(self, track: Union[MediaEntry, dict]) -> None:
@@ -424,7 +430,7 @@ class Playlist(list):
         if self.position < 0 or self.position >= len(self):
             LOG.error(f"Playlist pointer is in an invalid position "
                       f"({self.position}! Going to start of playlist")
-            self._position = 0
+            self.position = 0
 
     def __contains__(self, item):
         if isinstance(item, dict):
@@ -434,3 +440,31 @@ class Playlist(list):
                 if e.uri == item.uri:
                     return True
         return False
+
+
+if __name__ == "__main__":
+    m = MediaEntry("1")
+    m2 = MediaEntry("2")
+    m3 = MediaEntry("3")
+    p = Playlist("My Jams")  # it's a list subclass
+    p.append(m)
+    p.add_entry(m2)
+    p.add_entry(m3, 0)
+    assert p[0] is m3
+    assert p[1] is m
+    assert m in p
+    assert m2 in p
+    assert m3 in p
+    print(p.entries)
+    np = [m3, m, m2]
+    assert p == np
+    assert np == p
+    assert p == p.entries
+    print(p.position)
+    p.goto_track(m2)
+    print(p.position)
+    p.goto_start()
+    print(p.position)
+    p.set_position(1)
+    print(p.position)
+
