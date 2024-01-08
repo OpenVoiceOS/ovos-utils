@@ -153,7 +153,7 @@ class MediaEntry:
     status: TrackState = TrackState.DISAMBIGUATION
     media_type: MediaType = MediaType.GENERIC
     length: int = 0  # in seconds
-    image: str = join(dirname(__file__), "res/ui/images/ocp_bg.png")
+    image: str = ""
     skill_icon: str = ""
     javascript: str = ""  # to execute once webview is loaded
 
