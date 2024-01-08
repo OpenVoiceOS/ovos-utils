@@ -447,8 +447,9 @@ if __name__ == "__main__":
     m2 = MediaEntry("2")
     m3 = MediaEntry("3")
     p = Playlist("My Jams")  # it's a list subclass
+    print(p)  # Playlist(title='My Jams', position=0, length=0, image='', match_confidence=0, skill_id='ovos.common_play', skill_icon='')
     p.append(m)
-    p.add_entry(m2)
+    p += [m2]
     p.add_entry(m3, 0)
     assert p[0] is m3
     assert p[1] is m
@@ -466,5 +467,6 @@ if __name__ == "__main__":
     p.goto_start()
     print(p.position)
     p.set_position(1)
-    print(p.position)
+    print(p)  # Playlist(title='My Jams', position=1, length=0, image='', match_confidence=0, skill_id='ovos.common_play', skill_icon='')
+
 
