@@ -129,8 +129,9 @@ class MediaType(IntEnum):
 
 
 def available_extractors():
-    from ovos_plugin_common_play.ocp.utils import available_extractors as _real
-    return _real()  # TODO
+    from ovos_plugin_manager.ocp import StreamHandler
+    return ["/", "http:", "https:", "file:"] + \
+        [f"{sei}//" for sei in StreamHandler().supported_seis]
 
 
 def find_mime(uri):
