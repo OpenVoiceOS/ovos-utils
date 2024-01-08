@@ -7,7 +7,7 @@ from typing import Optional, Tuple, List, Union
 import orjson
 
 from ovos_utils.json_helper import merge_dict
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, deprecated
 
 OCP_ID = "ovos.common_play"
 
@@ -128,10 +128,19 @@ class MediaType(IntEnum):
     ADULT_AUDIO = 71  # for content filtering
 
 
+@deprecated("import ovos_utils.available_extractors from ovos_plugin_manager.ocp instead", "0.1.0")
 def available_extractors():
-    from ovos_plugin_manager.ocp import StreamHandler
-    return ["/", "http:", "https:", "file:"] + \
-        [f"{sei}//" for sei in StreamHandler().supported_seis]
+    # TODO - delete me, still imported in ovos-bus-client, but never made it into a non-alpha
+    try:
+        from ovos_plugin_manager.ocp import available_extractors as _ax
+    except ImportError:
+        try:
+            # before move to OPM
+            from ovos_plugin_common_play.ocp.utils import available_extractors as _ax
+        except ImportError:
+            LOG.error("please install/update ovos_plugin_manager")
+            raise
+    return _ax()
 
 
 def find_mime(uri):
