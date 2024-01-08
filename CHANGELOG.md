@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.1.0a7](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a7) (2024-01-06)
+## [0.1.0a8](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a8) (2024-01-08)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a6...0.1.0a7)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a7...0.1.0a8)
+
+**Implemented enhancements:**
+
+- refactor/ocp\_utils [\#216](https://github.com/OpenVoiceOS/ovos-utils/pull/216) ([NeonJarbas](https://github.com/NeonJarbas))
+
+## [V0.1.0a7](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.1.0a7) (2024-01-06)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a6...V0.1.0a7)
 
 **Merged pull requests:**
 
