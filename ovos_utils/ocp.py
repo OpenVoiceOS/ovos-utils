@@ -293,7 +293,7 @@ class Playlist(list):
             "match_confidence": self.match_confidence,
             "skill_id": self.skill_id,
             "skill_icon": self.skill_icon,
-            "playlist": [e.as_dict for e in self]
+            "playlist": [e.as_dict for e in self.entries]
         }
         return data
 
