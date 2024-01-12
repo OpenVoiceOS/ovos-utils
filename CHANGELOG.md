@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.1.0a8](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a8) (2024-01-08)
+## [0.1.0a9](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a9) (2024-01-12)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a7...0.1.0a8)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a8...0.1.0a9)
+
+**Implemented enhancements:**
+
+- OCP serialization [\#218](https://github.com/OpenVoiceOS/ovos-utils/pull/218) ([NeonJarbas](https://github.com/NeonJarbas))
+
+## [V0.1.0a8](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.1.0a8) (2024-01-08)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a7...V0.1.0a8)
 
 **Implemented enhancements:**
 
