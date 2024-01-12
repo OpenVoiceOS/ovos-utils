@@ -2,7 +2,7 @@ import mimetypes
 from dataclasses import dataclass
 from enum import IntEnum
 from typing import Optional, Tuple, List, Union
-
+import inspect
 import orjson
 
 from ovos_utils.log import LOG, deprecated
@@ -222,6 +222,20 @@ class MediaEntry:
         # orjson handles dataclasses directly
         return orjson.loads(orjson.dumps(self).decode("utf-8"))
 
+    @staticmethod
+    def from_dict(track: dict):
+        if track.get("playlist"):
+            kwargs = {k: v for k, v in track.items()
+                    if k in inspect.signature(Playlist).parameters}
+            playlist = Playlist(**kwargs)
+            for e in track["playlist"]:
+                playlist.add_entry(e)
+            return playlist
+        else:
+            kwargs = {k: v for k, v in track.items()
+                      if k in inspect.signature(MediaEntry).parameters}
+            return MediaEntry(**kwargs)
+
     @property
     def mimetype(self) -> Optional[Tuple[Optional[str], Optional[str]]]:
         """
@@ -262,13 +276,26 @@ class Playlist(list):
             "uri": ""
         }
 
+    @staticmethod
+    def from_dict(track: dict):
+        return MediaEntry.from_dict(track)
+
     @property
     def as_dict(self) -> dict:
         """
         Return a dict representation of this MediaEntry
         """
-        # orjson handles dataclasses directly
-        return orjson.loads(orjson.dumps(self).decode("utf-8"))
+        data = {
+            "title": self.title,
+            "position": self.position,
+            "length": self.length,
+            "image": self.image,
+            "match_confidence": self.match_confidence,
+            "skill_id": self.skill_id,
+            "skill_icon": self.skill_icon,
+            "playlist": [e.as_dict for e in self]
+        }
+        return data
 
     @property
     def entries(self) -> List[MediaEntry]:
@@ -278,7 +305,7 @@ class Playlist(list):
         entries = []
         for e in self:
             if isinstance(e, dict):
-                e = MediaEntry(**e)
+                e = MediaEntry.from_dict(e)
             if isinstance(e, MediaEntry):
                 entries.append(e)
         return entries
@@ -293,7 +320,7 @@ class Playlist(list):
         self._validate_position()
         track = self[self.position]
         if isinstance(track, dict):
-            track = MediaEntry(**track)
+            track = MediaEntry.from_dict(track)
         return track
 
     @property
@@ -334,7 +361,7 @@ class Playlist(list):
         Sort the Playlist by `match_confidence` with high confidence first
         """
         self.sort(
-            key=lambda k: k.match_confidence if isinstance(k, MediaEntry)
+            key=lambda k: k.match_confidence if isinstance(k, (MediaEntry, Playlist))
             else k.get("match_confidence", 0), reverse=True)
 
     def add_entry(self, entry: MediaEntry, index: int = -1) -> None:
@@ -344,10 +371,15 @@ class Playlist(list):
         @param index: index to insert entry at (default -1 to append)
         """
         assert isinstance(index, int)
-        # TODO: Handle index out of range
+        if index > len(self):
+            raise ValueError(f"Invalid index {index} requested, "
+                             f"playlist only has {len(self)} entries")
+
         if isinstance(entry, dict):
-            entry = MediaEntry(**entry)
-        assert isinstance(entry, MediaEntry)
+            entry = MediaEntry.from_dict(entry)
+
+        assert isinstance(entry, (MediaEntry, Playlist))
+
         if index == -1:
             index = len(self)
 
@@ -365,7 +397,7 @@ class Playlist(list):
             self.pop(entry)
             return
         if isinstance(entry, dict):
-            entry = MediaEntry(**entry)
+            entry = MediaEntry.from_dict(entry)
         assert isinstance(entry, MediaEntry)
         for idx, e in enumerate(self.entries):
             if e == entry:
@@ -396,15 +428,22 @@ class Playlist(list):
         Go to the requested track in the playlist
         @param track: MediaEntry to find and go to in the playlist
         """
+        if isinstance(track, dict):
+            track = MediaEntry.from_dict(track)
+
+        assert isinstance(track, (MediaEntry, Playlist))
+
         if isinstance(track, MediaEntry):
             requested_uri = track.uri
         else:
-            requested_uri = track.get("uri", "")
+            requested_uri = track.title
+
         for idx, t in enumerate(self):
             if isinstance(t, MediaEntry):
                 pl_entry_uri = t.uri
             else:
-                pl_entry_uri = t.get("uri", "")
+                pl_entry_uri = t.title
+
             if requested_uri == pl_entry_uri:
                 self.set_position(idx)
                 LOG.debug(f"New playlist position: {self.position}")
@@ -434,7 +473,7 @@ class Playlist(list):
 
     def __contains__(self, item):
         if isinstance(item, dict):
-            item = MediaEntry(**item)
+            item = MediaEntry.from_dict(item)
         if isinstance(item, MediaEntry):
             for e in self.entries:
                 if e.uri == item.uri:
