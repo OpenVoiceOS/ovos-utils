@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.1.0a9](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a9) (2024-01-12)
+## [0.1.0a10](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a10) (2024-01-15)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a8...0.1.0a9)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a9...0.1.0a10)
+
+**Merged pull requests:**
+
+- clarify datetime arg [\#219](https://github.com/OpenVoiceOS/ovos-utils/pull/219) ([emphasize](https://github.com/emphasize))
+
+## [V0.1.0a9](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.1.0a9) (2024-01-12)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a8...V0.1.0a9)
 
 **Implemented enhancements:**
 
