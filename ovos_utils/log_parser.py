@@ -190,13 +190,15 @@ console = Console()
 
 EXPECTED_DATE_FORMAT = "YYYY-MM-DD" if date_format == "YMD" else "DD-MM-YYYY"
 EXPECTED_DATE = "2023-12-01" if date_format == "YMD" else "01-12-2023"
-EXPECTED_DATETIME_FORMAT = f"[{EXPECTED_DATE_FORMAT}] HH:MM[:SS] {'AM/PM' if not use24h else ''}"
-EXPECTED_TIME = f"09:00:05 {'PM' if not use24h else ''}"
+EXPECTED_DATETIME_FORMAT = f'"[{EXPECTED_DATE_FORMAT}] HH:MM[:SS]{" AM/PM" if not use24h else ""}"'
+EXPECTED_TIME = f'"09:00:05{" PM" if not use24h else ""}"'
 
 LOGSOPTHELP = """logs to be sliced 
-\nmultiple: -l bus -l audio"""
-STARTTIMEHELP = f"""start time of the log slice (default: since service restart, input format: {EXPECTED_DATETIME_FORMAT.strip()})
-\n   Example: -s \"{EXPECTED_DATE} 12:00{' AM/PM' if not use24h else ''}\" / -s 12:00:05{' AM/PM' if not use24h else ''}"""
+\n\nmultiple: -l bus -l audio"""
+STARTTIMEHELP = f"""start time of the log slice (default: since service restart,
+input format: {EXPECTED_DATETIME_FORMAT})
+\n\nExample: -s \"{EXPECTED_DATE} 12:00{' AM/PM' if not use24h else ''}\" / -s
+ {'"' if not use24h else ''}12:00:05{' AM/PM"' if not use24h else ''}"""
 
 click.rich_click.STYLE_ARGUMENT = "dark_red"
 click.rich_click.STYLE_OPTION = "dark_red"
@@ -335,7 +337,7 @@ def slice(start, until, logs, paths, file):
     \b
     > Examples:  
     > ovos-logs slice                                            # Slice all logs from service start up until now  
-    > ovos-logs slice -s 01-12-2023 -u 01-12-2023 17:00:20       # Slice all logs from the start of december the first until 17:00:20  
+    > ovos-logs slice -s 01-12-2023 -u '01-12-2023 17:00:20'     # Slice all logs from the start of december the first until 17:00:20  
     > ovos-logs slice -l bus -l skills -f ~/myslice.log          # Slice skills.log and bus.log from service start up until now and dump it to the file ~/myslice.log  
     """
     logs_present = []
@@ -346,8 +348,10 @@ def slice(start, until, logs, paths, file):
         logs_present = get_available_logs(paths)
 
     start, end = parse_timeframe(start, until, paths)
-    if end is None or start is None:
-        return console.print(f"Need a valid end time in the format ")
+    if start is None:
+        return console.print(f"Need a valid start time in the format {EXPECTED_DATETIME_FORMAT}")
+    elif end is None:
+        return console.print(f"Need a valid end time in the format {EXPECTED_DATETIME_FORMAT}")
     elif start > end:
         return console.print(f"Start time [{start}] is after end time [{end}]")
 
@@ -458,9 +462,9 @@ def list(error, warning, exception, debug, start, until, logs, paths, file):
     can be specified.  
     \b
     > Examples:  
-    > ovos-logs list -x                                          # List all exceptions from service start up until now  
-    > ovos-logs list -e -w -s 01-12-2023 -u 01-12-2023 17:00:20  # List all errors and warnings from the start of december the first until 17:00:20  
-    > ovos-logs list -x -l bus -l skills -f                      # List all exceptions from skills.log and bus.log and dump it to the file ~/list_xxx_xxx.log  
+    > ovos-logs list -x                                           # List all exceptions from service start up until now  
+    > ovos-logs list -e -w -s 01-12-2023 -u '01-12-2023 17:00:20' # List all errors and warnings from the start of december the first until 17:00:20  
+    > ovos-logs list -x -l bus -l skills -f                       # List all exceptions from skills.log and bus.log and dump it to the file ~/list_xxx_xxx.log  
     """
     if not any([error, warning, debug, exception]):
         return console.print("Need at least one of --error, --warning, --exception or --debug")
@@ -474,7 +478,9 @@ def list(error, warning, exception, debug, start, until, logs, paths, file):
         logs_present = get_available_logs(paths)
 
     start, end = parse_timeframe(start, until, paths)
-    if end is None or start is None:
+    if start is None:
+        return console.print(f"Need a valid start time in the format {EXPECTED_DATETIME_FORMAT}")
+    elif end is None:
         return console.print(f"Need a valid end time in the format {EXPECTED_DATETIME_FORMAT}")
     elif start > end:
         return console.print(f"Start time [{start}] is after end time [{end}]")
@@ -580,8 +586,8 @@ def show(log, paths):
     Optionally the directory where the logs are stored (`-p`) can be specified.  
     \b
     > Examples:  
-    > ovos-logs show -l skills                                  # Display skills.log   
-    > ovos-logs show -l debug -p ~/custom_path/                 # Display debug.log from a custom path     
+    > ovos-logs show -l skills                                    # Display skills.log   
+    > ovos-logs show -l debug -p ~/custom_path/                   # Display debug.log from a custom path     
     """
     if not any(os.path.exists(os.path.join(path, f"{log}.log")) for path in paths):
         return console.print(f"File does not exist")
@@ -604,10 +610,10 @@ def reduce(size, date, logs, paths):
     Optionally the directory where the logs are stored (`-p`) can be specified.  
     \b
     > Examples:  
-    > ovos-logs reduce                                        # Reduce all logs to 0 bytes  
-    > ovos-logs reduce -s 1000000                             # Reduce all logs to ~1MB (latest logs)  
-    > ovos-logs reduce -d "1-12-2023 17:00"                   # Reduce all logs to entries after the specified date/time  
-    > ovos-logs reduce -s 1000000 -l skills -l bus            # Reduce skills.log and bus.log to ~1MB (latest logs)  
+    > ovos-logs reduce                                            # Reduce all logs to 0 bytes  
+    > ovos-logs reduce -s 1000000                                 # Reduce all logs to ~1MB (latest logs)  
+    > ovos-logs reduce -d "1-12-2023 17:00"                       # Reduce all logs to entries after the specified date/time  
+    > ovos-logs reduce -s 1000000 -l skills -l bus                # Reduce skills.log and bus.log to ~1MB (latest logs)  
     """
 
     if date:
