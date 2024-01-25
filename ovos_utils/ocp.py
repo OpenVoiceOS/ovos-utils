@@ -1,10 +1,10 @@
+import inspect
 import mimetypes
 from dataclasses import dataclass
 from enum import IntEnum
 from typing import Optional, Tuple, List, Union
-import inspect
-import orjson
 
+import orjson
 from ovos_utils.log import LOG, deprecated
 
 OCP_ID = "ovos.common_play"
@@ -23,16 +23,17 @@ class MatchConfidence(IntEnum):
 
 class TrackState(IntEnum):
     DISAMBIGUATION = 1  # media result, not queued for playback
-
     PLAYING_SKILL = 20  # Skill is handling playback internally
-    PLAYING_AUDIO = 21  # Skill forwarded playback to audio service
+    PLAYING_AUDIOSERVICE = 21  ## DEPRECATED - used in ovos 0.0.7
     PLAYING_VIDEO = 22  # Skill forwarded playback to video service
+    PLAYING_AUDIO = 23  # Skill forwarded playback to audio service
     PLAYING_MPRIS = 24  # External media player is handling playback
     PLAYING_WEBVIEW = 25  # Media playback handled in browser (eg. javascript)
 
     QUEUED_SKILL = 30  # Waiting playback to be handled inside skill
-    QUEUED_AUDIO = 31  # Waiting playback in audio service
+    QUEUED_AUDIOSERVICE = 31  ## DEPRECATED - used in ovos 0.0.7
     QUEUED_VIDEO = 32  # Waiting playback in video service
+    QUEUED_AUDIO = 33  # Waiting playback in audio service
     QUEUED_WEBVIEW = 34  # Waiting playback in browser service
 
 
@@ -80,6 +81,7 @@ class PlaybackType(IntEnum):
     # eg spotify / mycroft common play
     VIDEO = 1  # Video results
     AUDIO = 2  # Results should be played audio only
+    AUDIO_SERVICE = 3  ## DEPRECATED - used in ovos 0.0.7
     MPRIS = 4  # External MPRIS compliant player
     WEBVIEW = 5  # webview, render a url instead of media player
     UNDEFINED = 100  # data not available, hopefully status will be updated soon..
@@ -91,6 +93,7 @@ class PlaybackMode(IntEnum):
     AUDIO_ONLY = 10  # only consider audio entries
     VIDEO_ONLY = 20  # only consider video entries
     FORCE_AUDIO = 30  # cast video to audio unconditionally
+    FORCE_AUDIOSERVICE = 40  ## DEPRECATED - used in ovos 0.0.7
     EVENTS_ONLY = 50  # only emit ocp events, do not display or play anything.
     # allows integration with external interfaces
 
