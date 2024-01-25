@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.1.0a11](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a11) (2024-01-25)
+## [0.1.0a12](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a12) (2024-01-25)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a10...0.1.0a11)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a11...0.1.0a12)
+
+**Fixed bugs:**
+
+- fix/ocp\_playlist [\#221](https://github.com/OpenVoiceOS/ovos-utils/pull/221) ([NeonJarbas](https://github.com/NeonJarbas))
+
+## [V0.1.0a11](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.1.0a11) (2024-01-25)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a10...V0.1.0a11)
 
 **Fixed bugs:**
 
