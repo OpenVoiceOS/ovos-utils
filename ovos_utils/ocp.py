@@ -264,6 +264,10 @@ class Playlist(list):
     skill_id: str = OCP_ID
     skill_icon: str = ""
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+        list.__init__(self, *args)
+
     @property
     def infocard(self) -> dict:
         """
