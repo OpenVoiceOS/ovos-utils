@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.1.0a10](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a10) (2024-01-15)
+## [0.1.0a11](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a11) (2024-01-25)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a9...0.1.0a10)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a10...0.1.0a11)
+
+**Fixed bugs:**
+
+- fix/restore deprecated OCP enums compat [\#220](https://github.com/OpenVoiceOS/ovos-utils/pull/220) ([NeonJarbas](https://github.com/NeonJarbas))
+
+## [V0.1.0a10](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.1.0a10) (2024-01-15)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a9...V0.1.0a10)
 
 **Merged pull requests:**
 
