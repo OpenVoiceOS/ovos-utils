@@ -1,8 +1,17 @@
 # Changelog
 
-## [0.1.0a12](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a12) (2024-01-25)
+## [0.1.0a13](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a13) (2024-01-30)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a11...0.1.0a12)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a12...0.1.0a13)
+
+**Merged pull requests:**
+
+- Update rapidfuzz requirement from ~=2.0 to ~=3.6 in /requirements [\#224](https://github.com/OpenVoiceOS/ovos-utils/pull/224) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Update pexpect requirement from ~=4.6 to ~=4.9 in /requirements [\#223](https://github.com/OpenVoiceOS/ovos-utils/pull/223) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [V0.1.0a12](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.1.0a12) (2024-01-25)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a11...V0.1.0a12)
 
 **Fixed bugs:**
 
