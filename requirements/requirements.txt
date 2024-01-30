@@ -1,5 +1,5 @@
 pexpect~=4.9
-requests~=2.26
+requests~=2.31
 json_database~=0.7
 kthread~=0.2
 watchdog
