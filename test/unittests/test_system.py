@@ -8,10 +8,6 @@ class TestSystem(unittest.TestCase):
         self.assertFalse(is_running_from_module("mycroft"))
         self.assertTrue(is_running_from_module("unittest"))
 
-    def test_ntp_sync(self):
-        # TODO
-        pass
-
     @patch("subprocess.Popen")
     def test_system_shutdown(self, popen):
         from ovos_utils.system import system_shutdown
