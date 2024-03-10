@@ -1,8 +1,36 @@
 # Changelog
 
-## [0.1.0a13](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a13) (2024-01-30)
+## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a12...0.1.0a13)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a16...HEAD)
+
+**Merged pull requests:**
+
+- chore\(docs\): add a long description to PyPi [\#229](https://github.com/OpenVoiceOS/ovos-utils/pull/229) ([mikejgray](https://github.com/mikejgray))
+
+## [V0.1.0a16](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.1.0a16) (2024-03-10)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a15...V0.1.0a16)
+
+**Merged pull requests:**
+
+- chore\(docs\): rename readme.md to README.md [\#230](https://github.com/OpenVoiceOS/ovos-utils/pull/230) ([mikejgray](https://github.com/mikejgray))
+
+## [V0.1.0a15](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.1.0a15) (2024-02-18)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a13...V0.1.0a15)
+
+**Closed issues:**
+
+- Move mark1 module to PHAL Plugin [\#123](https://github.com/OpenVoiceOS/ovos-utils/issues/123)
+
+**Merged pull requests:**
+
+- Option for systemd-timesyncd [\#200](https://github.com/OpenVoiceOS/ovos-utils/pull/200) ([builderjer](https://github.com/builderjer))
+
+## [V0.1.0a13](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.1.0a13) (2024-01-30)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a12...V0.1.0a13)
 
 **Merged pull requests:**
 
