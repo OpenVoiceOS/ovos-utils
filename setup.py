@@ -51,6 +51,8 @@ def required(requirements_file):
         return [pkg for pkg in requirements
                 if pkg.strip() and not pkg.startswith("#")]
 
+with open("README.md", "r") as f:
+    long_description = f.read()
 
 setup(
     name='ovos_utils',
@@ -66,8 +68,10 @@ setup(
     include_package_data=True,
     license='Apache',
     author='jarbasAI',
-    author_email='jarbasai@mailfence.com',
-    description='collection of simple utilities for use across the mycroft ecosystem',
+    author_email='jarbas@openvoiceos.com',
+    description='collection of simple utilities for use across the openvoiceos ecosystem',
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     entry_points={
         'console_scripts': [
             'ovos-logs=ovos_utils.log_parser:ovos_logs'
