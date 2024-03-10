@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.1.0a16](https://github.com/OpenVoiceOS/ovos-utils/tree/0.1.0a16) (2024-03-10)
+## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a15...0.1.0a16)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a16...HEAD)
+
+**Merged pull requests:**
+
+- chore\(docs\): add a long description to PyPi [\#229](https://github.com/OpenVoiceOS/ovos-utils/pull/229) ([mikejgray](https://github.com/mikejgray))
+
+## [V0.1.0a16](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.1.0a16) (2024-03-10)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a15...V0.1.0a16)
 
 **Merged pull requests:**
 
