@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a16...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V...HEAD)
+
+**Fixed bugs:**
+
+- feat: mac support for ram cache [\#231](https://github.com/OpenVoiceOS/ovos-utils/pull/231) ([mikejgray](https://github.com/mikejgray))
+
+## [V](https://github.com/OpenVoiceOS/ovos-utils/tree/V) (2024-03-10)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a16...V)
 
 **Merged pull requests:**
 
