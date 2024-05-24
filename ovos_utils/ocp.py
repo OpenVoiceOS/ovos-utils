@@ -228,7 +228,11 @@ class MediaEntry:
     @staticmethod
     def from_dict(track: dict) -> 'MediaEntry':
         if "uri" not in track:
-            raise ValueError("track dictionary does not contain 'uri', it is not a valid MediaEntry")
+            LOG.error("track dictionary does not contain 'uri', it is not a valid MediaEntry")
+            # raise ValueError("track dictionary does not contain 'uri', it is not a valid MediaEntry")
+            LOG.warning("DEPRECATED: use dict2entry() for Playlists and PluginStreams,"
+                        " MediaEntry.from_dict is only for regular media, will start throwing ValueError in 0.1.0")
+            return dict2entry(track)
         kwargs = {k: v for k, v in track.items()
                   if k in inspect.signature(MediaEntry).parameters}
         return MediaEntry(**kwargs)
@@ -558,8 +562,9 @@ def dict2entry(track: dict) -> Union[PluginStream, MediaEntry, Playlist]:
         return Playlist.from_dict(track)
     elif track.get("extractor_id"):
         return PluginStream.from_dict(track)
-    else:
+    elif track.get("uri"):
         return MediaEntry.from_dict(track)
+    raise ValueError("track dictionary is not a valid MediaEntry, Playlist or PluginStream")
 
 
 if __name__ == "__main__":
