@@ -545,7 +545,7 @@ class Playlist(list):
             item = dict2entry(item)
         for e in self.entries:
             if isinstance(item, PluginStream) and isinstance(e, PluginStream):
-                if e.stream == item.stream:
+                if e.stream == item.stream and e.extractor_id == item.extractor_id:
                     return True
             elif isinstance(item, MediaEntry) and isinstance(e, MediaEntry):
                 if e.uri == item.uri:
