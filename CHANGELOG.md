@@ -4,6 +4,10 @@
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V...HEAD)
 
+**Implemented enhancements:**
+
+- Add Damerau-Levenshtein similarity matching [\#248](https://github.com/OpenVoiceOS/ovos-utils/pull/248) ([femelo](https://github.com/femelo))
+
 **Fixed bugs:**
 
 - feat: mac support for ram cache [\#231](https://github.com/OpenVoiceOS/ovos-utils/pull/231) ([mikejgray](https://github.com/mikejgray))
@@ -27,10 +31,6 @@
 ## [V0.1.0a15](https://github.com/OpenVoiceOS/ovos-utils/tree/V0.1.0a15) (2024-02-18)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a13...V0.1.0a15)
-
-**Closed issues:**
-
-- Move mark1 module to PHAL Plugin [\#123](https://github.com/OpenVoiceOS/ovos-utils/issues/123)
 
 **Merged pull requests:**
 
