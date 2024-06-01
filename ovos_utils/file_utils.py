@@ -16,6 +16,36 @@ from ovos_utils.bracket_expansion import expand_options
 from ovos_utils.log import LOG, log_deprecation
 
 
+def ensure_directory_exists(directory, domain=None):
+    """ Create a directory and give access rights to all
+
+    Args:
+        domain (str): The IPC domain.  Basically a subdirectory to prevent
+            overlapping signal filenames.
+
+    Returns:
+        str: a path to the directory
+    """
+    if domain:
+        directory = os.path.join(directory, domain)
+
+    # Expand and normalize the path
+    directory = os.path.normpath(directory)
+    directory = os.path.expanduser(directory)
+
+    if not os.path.isdir(directory):
+        try:
+            save = os.umask(0)
+            os.makedirs(directory, 0o777)  # give everyone rights to r/w here
+        except OSError:
+            LOG.warning("Failed to create: " + directory)
+            pass
+        finally:
+            os.umask(save)
+
+    return directory
+
+
 def to_alnum(skill_id: str) -> str:
     """
     Convert a skill id to only alphanumeric characters
