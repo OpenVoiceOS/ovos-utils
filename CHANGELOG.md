@@ -12,6 +12,10 @@
 
 - feat: mac support for ram cache [\#231](https://github.com/OpenVoiceOS/ovos-utils/pull/231) ([mikejgray](https://github.com/mikejgray))
 
+**Merged pull requests:**
+
+- deprecate/signal utils [\#249](https://github.com/OpenVoiceOS/ovos-utils/pull/249) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [V](https://github.com/OpenVoiceOS/ovos-utils/tree/V) (2024-03-10)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0a16...V)
