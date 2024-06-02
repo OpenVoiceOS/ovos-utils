@@ -3,9 +3,10 @@ import os.path
 import tempfile
 import time
 
-from ovos_utils.log import LOG, log_deprecation
+from ovos_utils.log import LOG, log_deprecation, deprecated
 
 
+@deprecated("ovos_utils.signal module has been deprecated!", "0.2.0")
 def get_ipc_directory(domain=None, config=None):
     """Get the directory used for Inter Process Communication
 
@@ -23,8 +24,8 @@ def get_ipc_directory(domain=None, config=None):
     if config is None:
         log_deprecation(f"Expected a dict config and got None.", "0.1.0")
         try:
-            from ovos_config.config import read_mycroft_config
-            config = read_mycroft_config()
+            from ovos_config.config import Configuration
+            config = Configuration()
         except ImportError:
             LOG.warning("Config not provided and ovos_config not available")
             config = dict()
@@ -35,6 +36,7 @@ def get_ipc_directory(domain=None, config=None):
     return ensure_directory_exists(path, domain)
 
 
+@deprecated("use 'from ovos_utils.file_utils import ensure_directory_exists' instead", "0.2.0")
 def ensure_directory_exists(directory, domain=None):
     """ Create a directory and give access rights to all
 
@@ -45,26 +47,11 @@ def ensure_directory_exists(directory, domain=None):
     Returns:
         str: a path to the directory
     """
-    if domain:
-        directory = os.path.join(directory, domain)
-
-    # Expand and normalize the path
-    directory = os.path.normpath(directory)
-    directory = os.path.expanduser(directory)
-
-    if not os.path.isdir(directory):
-        try:
-            save = os.umask(0)
-            os.makedirs(directory, 0o777)  # give everyone rights to r/w here
-        except OSError:
-            LOG.warning("Failed to create: " + directory)
-            pass
-        finally:
-            os.umask(save)
-
-    return directory
+    from ovos_utils.file_utils import ensure_directory_exists as _ede
+    return _ede(directory, domain)
 
 
+@deprecated("ovos_utils.signal module has been deprecated!", "0.2.0")
 def create_file(filename):
     """ Create the file filename and create any directories needed
 
@@ -79,6 +66,7 @@ def create_file(filename):
         f.write('')
 
 
+@deprecated("ovos_utils.signal module has been deprecated!", "0.2.0")
 def create_signal(signal_name, config=None):
     """Create a named signal
 
@@ -96,6 +84,7 @@ def create_signal(signal_name, config=None):
         return False
 
 
+@deprecated("ovos_utils.signal module has been deprecated!", "0.2.0")
 def check_for_signal(signal_name, sec_lifetime=0, config=None):
     """See if a named signal exists
 
