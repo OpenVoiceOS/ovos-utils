@@ -38,7 +38,7 @@ def fuzzy_match(x, against, strategy=MatchStrategy.SIMPLE_RATIO):
                down to 0.0 for no match at all.
     """
     strategy = _validate_matching_strategy(strategy)
-    LOG.debug(f"matching strategy: {strategy}")
+    # LOG.debug(f"matching strategy: {strategy}")
     if strategy == MatchStrategy.RATIO:
         score = rapidfuzz.fuzz.ratio(x, against) / 100
     elif strategy == MatchStrategy.PARTIAL_RATIO:
