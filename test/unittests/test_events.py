@@ -155,7 +155,7 @@ class TestEvents(unittest.TestCase):
         self.assertEqual(len(bus.ee.listeners("once_event")), 1)
         new_event = container.events[-1]
         self.assertEqual(new_event[0], "once_event")
-        self.assertNotEquals(new_event[1], handler)
+        self.assertNotEqual(new_event[1], handler)
         self.assertEqual(len(inspect.signature(new_event[1]).parameters), 1)
 
         # Test iterate events

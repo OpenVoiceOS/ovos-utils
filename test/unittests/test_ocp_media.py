@@ -70,7 +70,7 @@ class TestMediaEntry(unittest.TestCase):
         new_entry = MediaEntry.from_dict(dict_data)
         self.assertEqual(from_dict, new_entry)
 
-        self.assertIsInstance(MediaEntry.from_dict({}), MediaEntry)
+        self.assertIsInstance(MediaEntry.from_dict({"uri": "xxx"}), MediaEntry)
 
 
 class TestPlaylist(unittest.TestCase):

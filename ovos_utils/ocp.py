@@ -226,18 +226,16 @@ class MediaEntry:
         return orjson.loads(orjson.dumps(self).decode("utf-8"))
 
     @staticmethod
-    def from_dict(track: dict):
-        if track.get("playlist"):
-            kwargs = {k: v for k, v in track.items()
-                    if k in inspect.signature(Playlist).parameters}
-            playlist = Playlist(**kwargs)
-            for e in track["playlist"]:
-                playlist.add_entry(e)
-            return playlist
-        else:
-            kwargs = {k: v for k, v in track.items()
-                      if k in inspect.signature(MediaEntry).parameters}
-            return MediaEntry(**kwargs)
+    def from_dict(track: dict) -> 'MediaEntry':
+        if "uri" not in track:
+            LOG.error("track dictionary does not contain 'uri', it is not a valid MediaEntry")
+            # raise ValueError("track dictionary does not contain 'uri', it is not a valid MediaEntry")
+            LOG.warning("DEPRECATED: use dict2entry() for Playlists and PluginStreams,"
+                        " MediaEntry.from_dict is only for regular media, will start throwing ValueError in 0.1.0")
+            return dict2entry(track)
+        kwargs = {k: v for k, v in track.items()
+                  if k in inspect.signature(MediaEntry).parameters}
+        return MediaEntry(**kwargs)
 
     @property
     def mimetype(self) -> Optional[Tuple[Optional[str], Optional[str]]]:
@@ -252,6 +250,63 @@ class MediaEntry:
             other = other.infocard
         # dict comparison
         return other == self.infocard
+
+
+@dataclass
+class PluginStream:
+    stream: str
+    extractor_id: str
+    title: str = ""
+    artist: str = ""
+    match_confidence: int = 0  # 0 - 100
+    skill_id: str = OCP_ID
+    playback: PlaybackType = PlaybackType.UNDEFINED
+    status: TrackState = TrackState.DISAMBIGUATION
+    media_type: MediaType = MediaType.GENERIC
+    length: int = 0  # in seconds
+    image: str = ""
+    skill_icon: str = ""
+
+    @property
+    def infocard(self) -> dict:
+        """
+        Return dict data used for a UI display
+        (model shared with MediaEntry)
+        """
+        return {
+            "duration": self.length,
+            "track": self.title,
+            "image": self.image,
+            "album": self.skill_id,
+            "source": self.skill_icon,
+            "uri": f"{self.extractor_id}//{self.stream}"
+        }
+
+    @property
+    def as_media_entry(self) -> MediaEntry:
+        kwargs = {k: v for k, v in self.as_dict.items()
+                  if k in inspect.signature(MediaEntry).parameters}
+        # TODO - in a couple major versions this should be deprecated
+        kwargs["uri"] = f"{self.extractor_id}//{self.stream}"
+        return MediaEntry(**kwargs)
+
+    @property
+    def as_dict(self) -> dict:
+        """
+        Return a dict representation of this MediaEntry
+        """
+        # orjson handles dataclasses directly
+        return orjson.loads(orjson.dumps(self).decode("utf-8"))
+
+    @staticmethod
+    def from_dict(track: dict) -> 'PluginStream':
+        if "extractor_id" not in track:
+            raise ValueError("track dictionary does not contain 'extractor_id', it is not a valid PluginStream")
+        if "stream" not in track:
+            raise ValueError("track dictionary does not contain 'stream', it is not a valid PluginStream")
+        kwargs = {k: v for k, v in track.items()
+                  if k in inspect.signature(PluginStream).parameters}
+        return PluginStream(**kwargs)
 
 
 @dataclass
@@ -284,8 +339,15 @@ class Playlist(list):
         }
 
     @staticmethod
-    def from_dict(track: dict):
-        return MediaEntry.from_dict(track)
+    def from_dict(track: dict) -> 'Playlist':
+        if "playlist" not in track:
+            raise ValueError("track dictionary does not contain 'playlist' entries, it is not a valid Playlist")
+        kwargs = {k: v for k, v in track.items()
+                if k in inspect.signature(Playlist).parameters}
+        playlist = Playlist(**kwargs)
+        for e in track.get("playlist", []):
+            playlist.add_entry(e)
+        return playlist
 
     @property
     def as_dict(self) -> dict:
@@ -305,20 +367,20 @@ class Playlist(list):
         return data
 
     @property
-    def entries(self) -> List[MediaEntry]:
+    def entries(self) -> List[Union[MediaEntry, PluginStream]]:
         """
         Return a list of MediaEntry objects in the playlist
         """
         entries = []
         for e in self:
             if isinstance(e, dict):
-                e = MediaEntry.from_dict(e)
-            if isinstance(e, MediaEntry):
+                e = dict2entry(e)
+            if isinstance(e, (MediaEntry, PluginStream)):
                 entries.append(e)
         return entries
 
     @property
-    def current_track(self) -> Optional[MediaEntry]:
+    def current_track(self) -> Optional[Union[MediaEntry, PluginStream]]:
         """
         Return the current MediaEntry or None if the playlist is empty
         """
@@ -327,7 +389,7 @@ class Playlist(list):
         self._validate_position()
         track = self[self.position]
         if isinstance(track, dict):
-            track = MediaEntry.from_dict(track)
+            track = dict2entry(track)
         return track
 
     @property
@@ -371,7 +433,7 @@ class Playlist(list):
             key=lambda k: k.match_confidence if isinstance(k, (MediaEntry, Playlist))
             else k.get("match_confidence", 0), reverse=True)
 
-    def add_entry(self, entry: MediaEntry, index: int = -1) -> None:
+    def add_entry(self, entry: Union[MediaEntry, PluginStream], index: int = -1) -> None:
         """
         Add an entry at the requested index
         @param entry: MediaEntry to add to playlist
@@ -383,9 +445,9 @@ class Playlist(list):
                              f"playlist only has {len(self)} entries")
 
         if isinstance(entry, dict):
-            entry = MediaEntry.from_dict(entry)
+            entry = dict2entry(entry)
 
-        assert isinstance(entry, (MediaEntry, Playlist))
+        assert isinstance(entry, (MediaEntry, Playlist, PluginStream))
 
         if index == -1:
             index = len(self)
@@ -395,7 +457,7 @@ class Playlist(list):
 
         self.insert(index, entry)
 
-    def remove_entry(self, entry: Union[int, dict, MediaEntry]) -> None:
+    def remove_entry(self, entry: Union[int, dict, MediaEntry, PluginStream]) -> None:
         """
         Remove the requested entry from the playlist or raise a ValueError
         @param entry: index or MediaEntry to remove from the playlist
@@ -404,8 +466,8 @@ class Playlist(list):
             self.pop(entry)
             return
         if isinstance(entry, dict):
-            entry = MediaEntry.from_dict(entry)
-        assert isinstance(entry, MediaEntry)
+            entry = dict2entry(entry)
+        assert isinstance(entry, (MediaEntry, PluginStream))
         for idx, e in enumerate(self.entries):
             if e == entry:
                 self.pop(idx)
@@ -413,7 +475,7 @@ class Playlist(list):
         else:
             raise ValueError(f"entry not in playlist: {entry}")
 
-    def replace(self, new_list: List[Union[dict, MediaEntry]]) -> None:
+    def replace(self, new_list: List[Union[dict, MediaEntry, PluginStream]]) -> None:
         """
         Replace the contents of this Playlist with new_list
         @param new_list: list of MediaEntry or dict objects to set this list to
@@ -430,24 +492,28 @@ class Playlist(list):
         self.position = idx
         self._validate_position()
 
-    def goto_track(self, track: Union[MediaEntry, dict]) -> None:
+    def goto_track(self, track: Union[MediaEntry, dict, PluginStream]) -> None:
         """
         Go to the requested track in the playlist
         @param track: MediaEntry to find and go to in the playlist
         """
         if isinstance(track, dict):
-            track = MediaEntry.from_dict(track)
+            track = dict2entry(track)
 
-        assert isinstance(track, (MediaEntry, Playlist))
+        assert isinstance(track, (MediaEntry, Playlist, PluginStream))
 
         if isinstance(track, MediaEntry):
             requested_uri = track.uri
+        elif isinstance(track, PluginStream):
+            requested_uri = track.stream
         else:
             requested_uri = track.title
 
         for idx, t in enumerate(self):
             if isinstance(t, MediaEntry):
                 pl_entry_uri = t.uri
+            elif isinstance(t, PluginStream):
+                pl_entry_uri = t.stream
             else:
                 pl_entry_uri = t.title
 
@@ -480,12 +546,25 @@ class Playlist(list):
 
     def __contains__(self, item):
         if isinstance(item, dict):
-            item = MediaEntry.from_dict(item)
-        if isinstance(item, MediaEntry):
-            for e in self.entries:
+            item = dict2entry(item)
+        for e in self.entries:
+            if isinstance(item, PluginStream) and isinstance(e, PluginStream):
+                if e.stream == item.stream and e.extractor_id == item.extractor_id:
+                    return True
+            elif isinstance(item, MediaEntry) and isinstance(e, MediaEntry):
                 if e.uri == item.uri:
                     return True
         return False
+
+
+def dict2entry(track: dict) -> Union[PluginStream, MediaEntry, Playlist]:
+    if track.get("playlist"):
+        return Playlist.from_dict(track)
+    elif track.get("extractor_id"):
+        return PluginStream.from_dict(track)
+    elif track.get("uri"):
+        return MediaEntry.from_dict(track)
+    raise ValueError("track dictionary is not a valid MediaEntry, Playlist or PluginStream")
 
 
 if __name__ == "__main__":
