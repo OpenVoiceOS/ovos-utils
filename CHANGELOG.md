@@ -7,6 +7,7 @@
 **Implemented enhancements:**
 
 - Add Damerau-Levenshtein similarity matching [\#248](https://github.com/OpenVoiceOS/ovos-utils/pull/248) ([femelo](https://github.com/femelo))
+- fix/dont\_lie\_about\_being\_a\_uri [\#246](https://github.com/OpenVoiceOS/ovos-utils/pull/246) ([JarbasAl](https://github.com/JarbasAl))
 
 **Fixed bugs:**
 
