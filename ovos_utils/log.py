@@ -191,16 +191,37 @@ class LOG:
         cls._get_real_logger().exception(*args, **kwargs)
 
 
+def _monitor_log_level():
+    _logs_conf = get_logs_config(LOG.name)
+    if hash(_logs_conf) != _monitor_log_level.config_hash:
+        _monitor_log_level.config_hash = hash(_logs_conf)
+        LOG.init(_logs_conf)
+        LOG.info("updated LOG level")
+
+
+_monitor_log_level.config_hash = None
+
+
 def init_service_logger(service_name):
-    # this is makes all logs from this service be configured to write to service_name.log file
-    # if this is not called in every __main__.py entrypoint logs will be written
-    # to a generic OVOS.log file shared across all services
+    _logs_conf = get_logs_config(service_name)
+    _monitor_log_level.config_hash = hash(_logs_conf)
+    LOG.name = service_name
+    LOG.init(_logs_conf)  # setup the LOG instance
     try:
-        from ovos_config.config import read_mycroft_config
-        _cfg = read_mycroft_config()
+        from ovos_config import Configuration
+        Configuration.set_config_watcher(_monitor_log_level)
     except ImportError:
-        LOG.warning("ovos_config not available. Falling back to defaults")
-        _cfg = dict()
+        LOG.warning("Can not monitor config LOG level changes")
+
+
+def get_logs_config(service_name=None, _cfg=None) -> dict:
+    if _cfg is None:
+        try:
+            from ovos_config import Configuration
+            _cfg = Configuration()
+        except ImportError:
+            LOG.warning("ovos_config not available. Falling back to defaults")
+            _cfg = {}
 
     # First try and get the "logging" section
     log_config = _cfg.get("logging")
@@ -213,15 +234,14 @@ def init_service_logger(service_name):
         # where per-service "logs" are not defined
         _logs_conf = log_config.get("logs") or _logs_conf
         # Now get our config by service name
-        _cfg = log_config.get(service_name) or log_config
-        # and if "logs" is redefined in "logging.<service_name>" use that
-        _logs_conf = _cfg.get("logs") or _logs_conf
+        if service_name:
+            _cfg = log_config.get(service_name) or log_config
+            # and if "logs" is redefined in "logging.<service_name>" use that
+            _logs_conf = _cfg.get("logs") or _logs_conf
     # Grab the log level from whatever section we found, defaulting to INFO
     _log_level = _cfg.get("log_level", "INFO")
-    # and write it into the "logs" config
     _logs_conf["level"] = _log_level
-    LOG.name = service_name
-    LOG.init(_logs_conf)  # setup the LOG instance
+    return _logs_conf
 
 
 def log_deprecation(log_message: str = "DEPRECATED",
