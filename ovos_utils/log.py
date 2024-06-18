@@ -104,7 +104,8 @@ class LOG:
         cls.base_path = config.get("path") or xdg_path
         cls.max_bytes = config.get("max_bytes", 50000000)
         cls.backup_count = config.get("backup_count", 3)
-        cls.level = config.get("level") or LOG.level
+        level = config.get("level") or LOG.level
+        cls.set_level(level)
         cls.diagnostic_mode = config.get("diagnostic", False)
 
     @classmethod
