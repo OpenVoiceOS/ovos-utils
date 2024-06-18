@@ -12,6 +12,7 @@
 #
 import functools
 import inspect
+import json
 import logging
 import os
 import sys
@@ -193,8 +194,9 @@ class LOG:
 
 def _monitor_log_level():
     _logs_conf = get_logs_config(LOG.name)
-    if hash(_logs_conf) != _monitor_log_level.config_hash:
-        _monitor_log_level.config_hash = hash(_logs_conf)
+    hax = hash(json.dumps(_logs_conf, sort_keys=True, indent=2))
+    if hax != _monitor_log_level.config_hash:
+        _monitor_log_level.config_hash = hax
         LOG.init(_logs_conf)
         LOG.info("updated LOG level")
 
@@ -204,7 +206,7 @@ _monitor_log_level.config_hash = None
 
 def init_service_logger(service_name):
     _logs_conf = get_logs_config(service_name)
-    _monitor_log_level.config_hash = hash(_logs_conf)
+    _monitor_log_level.config_hash = hash(json.dumps(_logs_conf, sort_keys=True, indent=2))
     LOG.name = service_name
     LOG.init(_logs_conf)  # setup the LOG instance
     try:
