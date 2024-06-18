@@ -11,6 +11,7 @@
 
 **Fixed bugs:**
 
+- fix/log\_level\_cfg [\#252](https://github.com/OpenVoiceOS/ovos-utils/pull/252) ([JarbasAl](https://github.com/JarbasAl))
 - fix/log\_spam [\#251](https://github.com/OpenVoiceOS/ovos-utils/pull/251) ([JarbasAl](https://github.com/JarbasAl))
 - feat: mac support for ram cache [\#231](https://github.com/OpenVoiceOS/ovos-utils/pull/231) ([mikejgray](https://github.com/mikejgray))
 
