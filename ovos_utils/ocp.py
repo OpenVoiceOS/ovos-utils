@@ -5,6 +5,7 @@ from enum import IntEnum
 from typing import Optional, Tuple, List, Union
 
 import orjson
+
 from ovos_utils.log import LOG, deprecated
 
 OCP_ID = "ovos.common_play"
@@ -310,14 +311,7 @@ class PluginStream:
 
 
 @dataclass
-class _Listdataclass(list):
-    """this is needed for proper **kwarg resolution
-     of a dataclass that is a subclass of a list"""
-    def __init__(self, *args, **kwargs):
-        list.__init__(self, *args)
-
-@dataclass
-class Playlist(_Listdataclass):
+class Playlist(list):
     title: str = ""
     artist: str = ""
     position: int = 0
@@ -327,6 +321,16 @@ class Playlist(_Listdataclass):
     skill_icon: str = ""
     playback: PlaybackType = PlaybackType.UNDEFINED
     media_type: MediaType = MediaType.GENERIC
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        for k, v in kwargs.items():
+            if hasattr(self, k):
+                self.__setattr__(k, v)
+        if len(args) == 1 and isinstance(args[0], list):
+            args = args[0]
+        for e in args:
+            self.add_entry(e)
 
     @property
     def length(self):
@@ -353,7 +357,7 @@ class Playlist(_Listdataclass):
         if "playlist" not in track:
             raise ValueError("track dictionary does not contain 'playlist' entries, it is not a valid Playlist")
         kwargs = {k: v for k, v in track.items()
-                if k in inspect.signature(Playlist).parameters}
+                  if k in inspect.signature(Playlist).parameters}
         playlist = Playlist(**kwargs)
         for e in track.get("playlist", []):
             playlist.add_entry(e)
@@ -602,6 +606,5 @@ if __name__ == "__main__":
     p.goto_start()
     print(p.position)
     p.set_position(1)
-    print(p)  # Playlist(title='My Jams', position=1, length=0, image='', match_confidence=0, skill_id='ovos.common_play', skill_icon='')
-
-
+    print(
+        p)  # Playlist(title='My Jams', position=1, length=0, image='', match_confidence=0, skill_id='ovos.common_play', skill_icon='')

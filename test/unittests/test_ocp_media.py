@@ -76,7 +76,8 @@ class TestMediaEntry(unittest.TestCase):
 class TestPlaylist(unittest.TestCase):
     def test_properties(self):
         # Empty Playlist
-        pl = Playlist()
+        pl = Playlist(title="empty playlist")
+        self.assertEqual(pl.title, "empty playlist")
         self.assertEqual(pl.position, 0)
         self.assertEqual(pl.entries, [])
         self.assertIsNone(pl.current_track)
@@ -84,7 +85,8 @@ class TestPlaylist(unittest.TestCase):
         self.assertTrue(pl.is_last_track)
 
         # Playlist of dicts
-        pl = Playlist(valid_search_results)
+        pl = Playlist(valid_search_results, title="my playlist")
+        self.assertEqual(pl.title, "my playlist")
         self.assertEqual(pl.position, 0)
         self.assertEqual(len(pl), len(valid_search_results))
         self.assertEqual(len(pl.entries), len(valid_search_results))
