@@ -120,7 +120,6 @@ def play_audio(uri, play_cmd=None, environment=None):
         LOG.exception(e)
         return None
 
-
 def get_sound_duration(path: str, base_dir: Optional[str] = "") -> float:
     """return sound duration, in seconds"""
     if base_dir and path.startswith("snd/"):
@@ -136,14 +135,6 @@ def get_sound_duration(path: str, base_dir: Optional[str] = "") -> float:
             frames = f.getnframes()
             rate = f.getframerate()
         return frames / float(rate)
-    media_info = find_executable("mediainfo")
-    if media_info:
-        args = (media_info, path)
-        popen = subprocess.Popen(args, stdout=subprocess.PIPE)
-        popen.wait()
-        output = popen.stdout.read().decode("utf-8").split("Duration")[1].split("\n")[0]
-        output = "".join([c for c in output if c.isdigit()])
-        return int(output) / 1000
     ffprobe = find_executable("ffprobe")
     if ffprobe:
         args = (ffprobe, "-show_entries", "format=duration", "-i", path)
@@ -151,4 +142,25 @@ def get_sound_duration(path: str, base_dir: Optional[str] = "") -> float:
         popen.wait()
         output = popen.stdout.read().decode("utf-8")
         return float(output.split("duration=")[-1].split("\n")[0])
+    media_info = find_executable("mediainfo")
+    if media_info:
+        args = (media_info, path)
+        popen = subprocess.Popen(args, stdout=subprocess.PIPE)
+        popen.wait()
+        output = popen.stdout.read().decode("utf-8").split("Duration")[1].split("\n")[0].split(":")[-1]
+        t = 0
+        if " h" in output:
+            h, output = output.split(" h")
+            t += int(h) * 60 * 60
+        if " min" in output:
+            m, output = output.split(" min")
+            t += int(m) * 60
+        if " s" in output:
+            m, output = output.split(" s")
+            t += int(m)
+        if " ms" in output:
+            m, output = output.split(" ms")
+            t += int(m) / 1000
+        return t
     raise RuntimeError("Failed to determine sound length, please install mediainfo or ffprobe")
+
