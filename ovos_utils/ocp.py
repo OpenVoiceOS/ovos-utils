@@ -310,18 +310,28 @@ class PluginStream:
 
 
 @dataclass
-class Playlist(list):
+class _Listdataclass(list):
+    """this is needed for proper **kwarg resolution
+     of a dataclass that is a subclass of a list"""
+    def __init__(self, *args, **kwargs):
+        list.__init__(self, *args)
+
+@dataclass
+class Playlist(_Listdataclass):
     title: str = ""
+    artist: str = ""
     position: int = 0
-    length: int = 0  # in seconds
     image: str = ""
     match_confidence: int = 0  # 0 - 100
     skill_id: str = OCP_ID
     skill_icon: str = ""
+    playback: PlaybackType = PlaybackType.UNDEFINED
+    media_type: MediaType = MediaType.GENERIC
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(**kwargs)
-        list.__init__(self, *args)
+    @property
+    def length(self):
+        """calc the length value based on all entries"""
+        return sum([e.length for e in self.entries])
 
     @property
     def infocard(self) -> dict:
