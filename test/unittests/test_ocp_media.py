@@ -103,6 +103,7 @@ class TestMediaEntry(unittest.TestCase):
                                match_confidence=dict_data["match_confidence"],
                                playback=PlaybackType.AUDIO,
                                skill_icon=dict_data["skill_icon"],
+                               skill_id=dict_data["skill_id"],
                                media_type=dict_data["media_type"],
                                artist=dict_data["artist"])
         self.assertEqual(from_init, from_dict)
