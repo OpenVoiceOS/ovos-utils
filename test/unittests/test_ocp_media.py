@@ -98,7 +98,8 @@ class TestMediaEntry(unittest.TestCase):
         dict_data = dict_search_results[1]
         from_dict = MediaEntry.from_dict(dict_data)
         self.assertIsInstance(from_dict, MediaEntry)
-        from_init = MediaEntry(dict_data["uri"], dict_data["title"],
+        from_init = MediaEntry(uri=dict_data["uri"],
+                               title=dict_data["title"],
                                image=dict_data["image"],
                                match_confidence=dict_data["match_confidence"],
                                playback=PlaybackType.AUDIO,
