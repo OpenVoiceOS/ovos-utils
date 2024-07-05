@@ -13,6 +13,7 @@
 
 **Fixed bugs:**
 
+- fix/detect\_ovos\_gui\_app [\#258](https://github.com/OpenVoiceOS/ovos-utils/pull/258) ([JarbasAl](https://github.com/JarbasAl))
 - fix/ocp\_playlist [\#256](https://github.com/OpenVoiceOS/ovos-utils/pull/256) ([JarbasAl](https://github.com/JarbasAl))
 - fix/sound\_duration [\#255](https://github.com/OpenVoiceOS/ovos-utils/pull/255) ([JarbasAl](https://github.com/JarbasAl))
 - fix/log\_level\_cfg [\#252](https://github.com/OpenVoiceOS/ovos-utils/pull/252) ([JarbasAl](https://github.com/JarbasAl))
