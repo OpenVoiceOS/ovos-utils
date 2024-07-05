@@ -7,10 +7,9 @@ from ovos_utils.system import is_installed, has_screen, is_process_running
 
 _default_gui_apps = (
     "ovos-gui-app",
-    "mycroft-gui-app",
     "ovos-shell",
-    "mycroft-embedded-shell",
-    "plasmashell"
+    "mycroft-gui-app",
+    "mycroft-embedded-shell"
 )
 
 
@@ -34,7 +33,14 @@ def is_gui_running(applications: List[str] = _default_gui_apps) -> bool:
     Return true if a GUI application is running
     @param applications: list of applications to check for
     """
-    return any((is_process_running(app) for app in applications))
+    deprecated = any((is_process_running(app) for app in applications
+                      if app.startswith("mycroft-")))
+    if deprecated:
+        LOG.warning("you are running a deprecated mycroft-gui version, "
+                    "please move to a OVOS maintained version")
+        return True
+    return any((is_process_running(app) for app in applications
+                if not app.startswith("mycroft-")))
 
 
 def is_gui_connected(bus=None) -> bool:
