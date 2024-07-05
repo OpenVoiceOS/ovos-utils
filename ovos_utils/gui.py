@@ -6,6 +6,7 @@ from ovos_bus_client.util import wait_for_reply
 from ovos_utils.system import is_installed, has_screen, is_process_running
 
 _default_gui_apps = (
+    "ovos-gui-app",
     "mycroft-gui-app",
     "ovos-shell",
     "mycroft-embedded-shell",
