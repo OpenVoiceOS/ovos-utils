@@ -17,6 +17,7 @@ class TestLog(unittest.TestCase):
 
     def test_log(self):
         import ovos_utils.log
+        importlib.reload(ovos_utils.log)
         from ovos_utils.log import LOG
         # Default log config
         self.assertEqual(LOG.base_path, "stdout")
