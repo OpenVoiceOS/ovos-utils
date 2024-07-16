@@ -60,9 +60,61 @@ class TestLog(unittest.TestCase):
         self.assertEqual(len(lines), 1)
         self.assertTrue(lines[0].endswith("This will print\n"))
 
-    def test_init_service_logger(self):
-        from ovos_utils.log import init_service_logger
-        # TODO
+        # Init with backup
+        test_config['max_bytes'] = 2
+        test_config['backup_count'] = 1
+        test_config['level'] = 'INFO'
+        LOG.init(test_config)
+        LOG.name = "rotate"
+        LOG.info("first")
+        LOG.info("second")
+        LOG.debug("third")
+        log_1 = join(LOG.base_path, f"{LOG.name}.log.1")
+        log = join(LOG.base_path, f"{LOG.name}.log")
+        with open(log_1) as f:
+            lines = f.readlines()
+        self.assertEqual(len(lines), 1)
+        self.assertTrue(lines[0].endswith("first\n"))
+        with open(log) as f:
+            lines = f.readlines()
+        self.assertEqual(len(lines), 1)
+        self.assertTrue(lines[0].endswith("second\n"))
+
+        LOG.info("fourth")
+        with open(log_1) as f:
+            lines = f.readlines()
+        self.assertEqual(len(lines), 1)
+        self.assertTrue(lines[0].endswith("second\n"))
+        with open(log) as f:
+            lines = f.readlines()
+        self.assertEqual(len(lines), 1)
+        self.assertTrue(lines[0].endswith("fourth\n"))
+
+    @patch("ovos_utils.log.get_logs_config")
+    @patch("ovos_config.Configuration.set_config_watcher")
+    def test_init_service_logger(self, set_config_watcher, log_config):
+        from ovos_utils.log import init_service_logger, LOG
+
+        # Test log init with default config
+        log_config.return_value = dict()
+        LOG.level = "ERROR"
+        init_service_logger("default")
+        from ovos_utils.log import LOG
+        set_config_watcher.assert_called_once()
+        self.assertEqual(LOG.name, "default")
+        self.assertEqual(LOG.level, "ERROR")
+
+        # Test log init with config
+        set_config_watcher.reset_mock()
+        log_config.return_value = {"path": self.test_dir,
+                                   "level": "DEBUG"}
+        init_service_logger("configured")
+        from ovos_utils.log import LOG
+        set_config_watcher.assert_called_once()
+        self.assertEqual(LOG.name, "configured")
+        self.assertEqual(LOG.level, "DEBUG")
+        LOG.debug("This will print")
+        self.assertTrue(isfile(join(self.test_dir, "configured.log")))
 
     @patch("ovos_utils.log.LOG.create_logger")
     def test_log_deprecation(self, create_logger):
@@ -115,3 +167,46 @@ class TestLog(unittest.TestCase):
         log_msg = log_warning.call_args[0][0]
         self.assertIn('version=1.0.0', log_msg, log_msg)
         self.assertIn('test deprecation', log_msg, log_msg)
+
+    def test_monitor_log_level(self):
+        from ovos_utils.log import _monitor_log_level
+        # TODO
+
+    def test_get_logs_config(self):
+        from ovos_utils.log import get_logs_config
+
+        # Test original config with `logs` section and no `logging` section
+
+        # Test `logging.logs` config with no service config
+
+        # Test `logging.logs` config with `logging.<service>` overrides
+
+        # Test `logs` config with `logging.<service>` overrides
+
+        # Test `logging.<service>` config with no `logs` or `logging.logs`
+
+    def test_get_log_path(self):
+        from ovos_utils.log import get_log_path
+
+        # Test with multiple populated directories
+
+        # Test with specified empty directory
+
+        # Test path from configuration
+
+    @patch('ovos_utils.log.get_log_path')
+    def test_get_log_paths(self, get_log_path):
+        from ovos_utils.log import get_log_paths
+
+        # Test services with different configured paths
+
+    @patch('ovos_utils.log.get_log_paths')
+    def test_get_available_logs(self, get_log_paths):
+        from ovos_utils.log import get_available_logs
+
+        # Test with specified directories containing logs and other files
+
+        # Test with no log directories
+        self.assertEqual(get_available_logs([dirname(__file__)]), [])
+        get_log_paths.return_value = []
+        self.assertEqual(get_available_logs(), [])

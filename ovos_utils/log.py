@@ -205,11 +205,16 @@ def _monitor_log_level():
 _monitor_log_level.config_hash = None
 
 
-def init_service_logger(service_name):
+def init_service_logger(service_name: str):
+    """
+    Initialize `LOG` for the specified service
+    @param service_name: Name of service to configure `LOG` for
+    """
     _logs_conf = get_logs_config(service_name)
-    _monitor_log_level.config_hash = hash(json.dumps(_logs_conf, sort_keys=True, indent=2))
+    _monitor_log_level.config_hash = hash(json.dumps(_logs_conf, sort_keys=True,
+                                                     indent=2))
     LOG.name = service_name
-    LOG.init(_logs_conf)  # setup the LOG instance
+    LOG.init(_logs_conf)  # set up the LOG instance
     try:
         from ovos_config import Configuration
         Configuration.set_config_watcher(_monitor_log_level)
@@ -217,7 +222,14 @@ def init_service_logger(service_name):
         LOG.warning("Can not monitor config LOG level changes")
 
 
-def get_logs_config(service_name=None, _cfg=None) -> dict:
+def get_logs_config(service_name: Optional[str] = None,
+                    _cfg: Optional[dict] = None) -> dict:
+    """
+    Get logging configuration for the specified service
+    @param service_name: Name of service to get logging configuration for
+    @param _cfg: Configuration to parse
+    @return: dict logging configuration for the specified service
+    """
     if _cfg is None:
         try:
             from ovos_config import Configuration
@@ -342,9 +354,9 @@ def get_log_path(service: str, directories: Optional[List[str]] = None) \
         xdg_base = os.environ.get("OVOS_CONFIG_BASE_FOLDER", "mycroft")
         return os.path.join(xdg_state_home(), xdg_base)
 
-    config = Configuration().get("logging", dict()).get("logs", dict())
+    config = get_logs_config(service_name=service)
     # service specific config or default config location
-    path = config.get(service, {}).get("path") or config.get("path")
+    path = config.get("path")
     # default xdg location
     if not path:
         path = os.path.join(xdg_state_home(), get_xdg_base())
@@ -375,7 +387,7 @@ def get_available_logs(directories: Optional[List[str]] = None) -> List[str]:
         directories: (optional) list of directories to check for service
 
     Returns:
-        list of log files
+        list of log file basenames (i.e. "audio", "skills")
     """
     directories = directories or get_log_paths()
     return [Path(f).stem for path in directories
