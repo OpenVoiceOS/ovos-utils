@@ -276,6 +276,9 @@ class TestLog(unittest.TestCase):
         from ovos_utils.log import get_available_logs
 
         # Test with specified directories containing logs and other files
+        real_log_path = join(dirname(__file__), "test_logs")
+        get_log_paths.return_value = [dirname(__file__), real_log_path]
+        self.assertEqual(get_available_logs(), ["real"])
 
         # Test with no log directories
         self.assertEqual(get_available_logs([dirname(__file__)]), [])
