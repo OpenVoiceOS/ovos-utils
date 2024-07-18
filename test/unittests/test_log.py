@@ -200,12 +200,14 @@ class TestLog(unittest.TestCase):
 
         # Callback with no change
         _monitor_log_level()
+        self.assertEqual(get_config.call_count, 2)
         log.init.assert_called_once_with(get_config.return_value)
         log.info.assert_called_once()
 
         # Callback with change
         get_config.return_value["changed"] = True
         _monitor_log_level()
+        self.assertEqual(get_config.call_count, 3)
         self.assertEqual(log.init.call_count, 2)
         log.init.assert_called_with(get_config.return_value)
 
