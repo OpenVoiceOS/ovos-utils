@@ -72,6 +72,8 @@ class TestLog(unittest.TestCase):
         LOG.debug("third")
         log_1 = join(LOG.base_path, f"{LOG.name}.log.1")
         log = join(LOG.base_path, f"{LOG.name}.log")
+
+        # Log rotated once
         with open(log_1) as f:
             lines = f.readlines()
         self.assertEqual(len(lines), 1)
@@ -82,6 +84,7 @@ class TestLog(unittest.TestCase):
         self.assertTrue(lines[0].endswith("second\n"))
 
         LOG.info("fourth")
+        # Log rotated again
         with open(log_1) as f:
             lines = f.readlines()
         self.assertEqual(len(lines), 1)
@@ -90,6 +93,18 @@ class TestLog(unittest.TestCase):
             lines = f.readlines()
         self.assertEqual(len(lines), 1)
         self.assertTrue(lines[0].endswith("fourth\n"))
+
+        # Multiple log rotations within a short period of time
+        for i in range(100):
+            LOG.info(str(i))
+        with open(log_1) as f:
+            lines = f.readlines()
+        self.assertEqual(len(lines), 1)
+        self.assertTrue(lines[0].endswith("98\n"))
+        with open(log) as f:
+            lines = f.readlines()
+        self.assertEqual(len(lines), 1)
+        self.assertTrue(lines[0].endswith("99\n"))
 
     @patch("ovos_utils.log.get_logs_config")
     @patch("ovos_config.Configuration.set_config_watcher")
@@ -175,16 +190,48 @@ class TestLog(unittest.TestCase):
 
     def test_get_logs_config(self):
         from ovos_utils.log import get_logs_config
+        valid_config = {"level": "DEBUG",
+                        "path": self.test_dir,
+                        "max_bytes": 1000,
+                        "backup_count": 2,
+                        "diagnostic": False}
+        valid_config_2 = {"max_bytes": 100000,
+                          "diagnostic": True}
+        logs_config = {"path": self.test_dir,
+                       "max_bytes": 1000,
+                       "backup_count": 2,
+                       "diagnostic": False}
+        legacy_config = {"log_level": "DEBUG",
+                         "logs": logs_config}
+
+        logging_config = {"logging": {"log_level": "DEBUG",
+                                      "logs": logs_config,
+                                      "test_service": {"log_level": "WARNING",
+                                                       "logs": valid_config_2}
+                                      }
+                          }
 
         # Test original config with `logs` section and no `logging` section
+        self.assertEqual(get_logs_config("", legacy_config), valid_config)
 
         # Test `logging.logs` config with no service config
+        self.assertEqual(get_logs_config("service", logging_config), valid_config)
 
         # Test `logging.logs` config with `logging.<service>` overrides
+        expected_config = {**valid_config_2, **{"level": "WARNING"}}
+        self.assertEqual(get_logs_config("test_service", logging_config),
+                         expected_config)
 
         # Test `logs` config with `logging.<service>` overrides
+        logging_config["logs"] = logging_config["logging"].pop("logs")
+        self.assertEqual(get_logs_config("test_service", logging_config),
+                         expected_config)
 
         # Test `logging.<service>` config with no `logs` or `logging.logs`
+        logging_config["logging"].pop("log_level")
+        logging_config.pop("logs")
+        self.assertEqual(get_logs_config("test_service", logging_config),
+                         expected_config)
 
     def test_get_log_path(self):
         from ovos_utils.log import get_log_path

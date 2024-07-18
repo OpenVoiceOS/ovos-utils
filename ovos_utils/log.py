@@ -239,20 +239,23 @@ def get_logs_config(service_name: Optional[str] = None,
             _cfg = {}
 
     # First try and get the "logging" section
-    log_config = _cfg.get("logging")
+    logging_conf = _cfg.get("logging")
     # For compatibility we try to get the "logs" from the root level
     # and default to empty which is used in case there is no logging
     # section
     _logs_conf = _cfg.get("logs") or {}
-    if log_config:  # We found a logging section
+    if logging_conf:  # We found a logging section
         # if "logs" is defined in "logging" use that as the default
         # where per-service "logs" are not defined
-        _logs_conf = log_config.get("logs") or _logs_conf
+        _logs_conf = logging_conf.get("logs") or _logs_conf
         # Now get our config by service name
         if service_name:
-            _cfg = log_config.get(service_name) or log_config
-            # and if "logs" is redefined in "logging.<service_name>" use that
-            _logs_conf = _cfg.get("logs") or _logs_conf
+            _cfg = logging_conf.get(service_name) or logging_conf
+        else:
+            # No service name specified, use `logging` configuration
+            _cfg = logging_conf
+        # and if "logs" is redefined in "logging.<service_name>" use that
+        _logs_conf = _cfg.get("logs") or _logs_conf
     # Grab the log level from whatever section we found, defaulting to INFO
     _log_level = _cfg.get("log_level", "INFO")
     _logs_conf["level"] = _log_level
