@@ -370,7 +370,7 @@ def get_log_path(service: str, directories: Optional[List[str]] = None) \
     return path
 
 
-def get_log_paths() -> Set[str]:
+def get_log_paths(config: Optional[dict] = None) -> Set[str]:
     """
     Get all log paths for all service logs
     Different services may have different log paths
@@ -379,9 +379,20 @@ def get_log_paths() -> Set[str]:
         set of paths to log directories
     """
     paths = set()
-    svc_names = ALL_SERVICES.union({s.replace("-", "_") for s in ALL_SERVICES})
-    for service in svc_names:
-        paths.add(get_log_path(service))
+    if not config:
+        try:
+            from ovos_config import Configuration
+            config = Configuration()
+        except ImportError:
+            LOG.warning("ovos_config not available. Falling back to defaults")
+            config = dict()
+
+    for name, service_config in config.get("logging", {}).items():
+        if not isinstance(service_config, dict) or name == "logs":
+            continue
+        if service_config.get("path"):
+            paths.add(service_config.get("path"))
+    paths.add(get_log_path(""))
 
     return paths
 

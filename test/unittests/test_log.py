@@ -272,27 +272,24 @@ class TestLog(unittest.TestCase):
         self.assertEqual(get_log_path("test"), self.test_dir)
         get_config.assert_called_once_with(service_name="test")
 
-    @patch('ovos_utils.log.get_log_path')
-    def test_get_log_paths(self, get_log_path):
-        from ovos_utils.log import get_log_paths, ALL_SERVICES
+    @patch('ovos_config.Configuration')
+    def test_get_log_paths(self, config):
+        from ovos_utils.log import get_log_paths
 
-        def mock_get_path_different(service) -> str:
-            return service
+        config_no_modules = {"logging": {"logs": {"path": "default_path"}}}
 
-        def mock_get_path_same(service) -> str:
-            return "log_path"
+        # Test default config path from Configuration (no module overrides)
+        config.return_value = config_no_modules
+        self.assertEqual(get_log_paths(), {"default_path"})
 
         # Test services with different configured paths
-        get_log_path.side_effect = mock_get_path_different
-        paths = get_log_paths()
-        for svc in ALL_SERVICES:
-            self.assertIn(svc, paths)
-            if '-' in svc:
-                self.assertIn(svc.replace('-', '_'), paths)
+        config_multi_modules = {"logging": {"logs": {"path": "default_path"},
+                                            "module_1": {"path": "path_1"},
+                                            "module_2": {"path": "path_2"},
+                                            "module_3": {"path": "path_1"}}}
+        self.assertEqual(get_log_paths(config_multi_modules),
+                         {"default_path", "path_1", "path_2"})
 
-        # Test services with same path
-        get_log_path.side_effect = mock_get_path_same
-        self.assertEqual(get_log_paths(), {"log_path"})
 
     @patch('ovos_utils.log.get_log_paths')
     def test_get_available_logs(self, get_log_paths):
