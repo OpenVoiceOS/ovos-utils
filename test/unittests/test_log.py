@@ -233,14 +233,21 @@ class TestLog(unittest.TestCase):
         self.assertEqual(get_logs_config("test_service", logging_config),
                          expected_config)
 
-    def test_get_log_path(self):
+    @patch("ovos_utils.log.get_logs_config")
+    def test_get_log_path(self, get_config):
         from ovos_utils.log import get_log_path
 
-        # Test with multiple populated directories
+        real_log_path = join(dirname(__file__), "test_logs")
+        test_paths = [self.test_dir, dirname(__file__), real_log_path]
 
-        # Test with specified empty directory
+        # Test with multiple populated directories
+        self.assertEqual(get_log_path("real", test_paths), real_log_path)
+        self.assertIsNone(get_log_path("fake", test_paths))
 
         # Test path from configuration
+        get_config.return_value = {"path": self.test_dir}
+        self.assertEqual(get_log_path("test"), self.test_dir)
+        get_config.assert_called_once_with(service_name="test")
 
     @patch('ovos_utils.log.get_log_path')
     def test_get_log_paths(self, get_log_path):
