@@ -2,6 +2,7 @@ import os
 import shutil
 import unittest
 import importlib
+from copy import deepcopy
 
 from os.path import join, dirname, isdir, isfile
 from unittest.mock import patch, Mock
@@ -184,9 +185,29 @@ class TestLog(unittest.TestCase):
         self.assertIn('version=1.0.0', log_msg, log_msg)
         self.assertIn('test deprecation', log_msg, log_msg)
 
-    def test_monitor_log_level(self):
+    @patch("ovos_utils.log.get_logs_config")
+    @patch("ovos_utils.log.LOG")
+    def test_monitor_log_level(self, log, get_config):
         from ovos_utils.log import _monitor_log_level
-        # TODO
+
+        log.name = "TEST"
+        get_config.return_value = {"changed": False}
+
+        _monitor_log_level()
+        get_config.assert_called_once_with("TEST")
+        log.init.assert_called_once_with(get_config.return_value)
+        log.info.assert_called_once()
+
+        # Callback with no change
+        _monitor_log_level()
+        log.init.assert_called_once_with(get_config.return_value)
+        log.info.assert_called_once()
+
+        # Callback with change
+        get_config.return_value["changed"] = True
+        _monitor_log_level()
+        self.assertEqual(log.init.call_count, 2)
+        log.init.assert_called_with(get_config.return_value)
 
     def test_get_logs_config(self):
         from ovos_utils.log import get_logs_config
