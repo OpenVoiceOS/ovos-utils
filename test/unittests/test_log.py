@@ -251,9 +251,25 @@ class TestLog(unittest.TestCase):
 
     @patch('ovos_utils.log.get_log_path')
     def test_get_log_paths(self, get_log_path):
-        from ovos_utils.log import get_log_paths
+        from ovos_utils.log import get_log_paths, ALL_SERVICES
+
+        def mock_get_path_different(service) -> str:
+            return service
+
+        def mock_get_path_same(service) -> str:
+            return "log_path"
 
         # Test services with different configured paths
+        get_log_path.side_effect = mock_get_path_different
+        paths = get_log_paths()
+        for svc in ALL_SERVICES:
+            self.assertIn(svc, paths)
+            if '-' in svc:
+                self.assertIn(svc.replace('-', '_'), paths)
+
+        # Test services with same path
+        get_log_path.side_effect = mock_get_path_same
+        self.assertEqual(get_log_paths(), {"log_path"})
 
     @patch('ovos_utils.log.get_log_paths')
     def test_get_available_logs(self, get_log_paths):

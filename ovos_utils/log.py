@@ -29,6 +29,8 @@ ALL_SERVICES = {"bus",
                 "ovos",
                 "phal",
                 "phal-admin",
+                "enclosure",
+                "admin",
                 "hivemind",
                 "hivemind-voice-sat"}
 
@@ -341,6 +343,7 @@ def get_log_path(service: str, directories: Optional[List[str]] = None) \
 
     Returns:
         path to log directory for service
+        (returned path may be `None` if `directories` is specified)
     """
     if directories:
         for directory in directories:
@@ -376,8 +379,8 @@ def get_log_paths() -> Set[str]:
         set of paths to log directories
     """
     paths = set()
-    ALL_SERVICES.union({s.replace("-", "_") for s in ALL_SERVICES})
-    for service in ALL_SERVICES:
+    svc_names = ALL_SERVICES.union({s.replace("-", "_") for s in ALL_SERVICES})
+    for service in svc_names:
         paths.add(get_log_path(service))
 
     return paths
