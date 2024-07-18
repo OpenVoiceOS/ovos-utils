@@ -2,7 +2,6 @@ import os
 import shutil
 import unittest
 import importlib
-from copy import deepcopy
 
 from os.path import join, dirname, isdir, isfile
 from unittest.mock import patch, Mock
