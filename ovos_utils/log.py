@@ -21,19 +21,6 @@ from os.path import join
 from pathlib import Path
 from typing import Optional, List, Set
 
-ALL_SERVICES = {"bus",
-                "audio",
-                "skills",
-                "voice",
-                "gui",
-                "ovos",
-                "phal",
-                "phal-admin",
-                "enclosure",
-                "admin",
-                "hivemind",
-                "hivemind-voice-sat"}
-
 
 class LOG:
     """
