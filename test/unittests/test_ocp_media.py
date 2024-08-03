@@ -155,6 +155,9 @@ class TestPlaylist(unittest.TestCase):
         for idx, e in enumerate(pl.as_dict["playlist"]):
             self.assertEqual(MediaEntry.from_dict(e), search_results[idx])
 
+        # test serialize/deserialize
+        self.assertEqual(Playlist.from_dict(pl.as_dict), pl)
+
     def test_goto_start(self):
         # TODO
         pass
