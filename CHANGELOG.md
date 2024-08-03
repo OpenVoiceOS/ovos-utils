@@ -13,12 +13,17 @@
 
 **Fixed bugs:**
 
+- fix/playlist\_deserialization [\#262](https://github.com/OpenVoiceOS/ovos-utils/pull/262) ([JarbasAl](https://github.com/JarbasAl))
 - fix/detect\_ovos\_gui\_app [\#258](https://github.com/OpenVoiceOS/ovos-utils/pull/258) ([JarbasAl](https://github.com/JarbasAl))
 - fix/ocp\_playlist [\#256](https://github.com/OpenVoiceOS/ovos-utils/pull/256) ([JarbasAl](https://github.com/JarbasAl))
 - fix/sound\_duration [\#255](https://github.com/OpenVoiceOS/ovos-utils/pull/255) ([JarbasAl](https://github.com/JarbasAl))
 - fix/log\_level\_cfg [\#252](https://github.com/OpenVoiceOS/ovos-utils/pull/252) ([JarbasAl](https://github.com/JarbasAl))
 - fix/log\_spam [\#251](https://github.com/OpenVoiceOS/ovos-utils/pull/251) ([JarbasAl](https://github.com/JarbasAl))
 - feat: mac support for ram cache [\#231](https://github.com/OpenVoiceOS/ovos-utils/pull/231) ([mikejgray](https://github.com/mikejgray))
+
+**Closed issues:**
+
+- "systemctl restart" not working when using with ovos-phal-plugin-system [\#259](https://github.com/OpenVoiceOS/ovos-utils/issues/259)
 
 **Merged pull requests:**
 
