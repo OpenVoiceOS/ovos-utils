@@ -13,6 +13,7 @@
 
 **Fixed bugs:**
 
+- fix/plugin\_stream\_extraction [\#263](https://github.com/OpenVoiceOS/ovos-utils/pull/263) ([JarbasAl](https://github.com/JarbasAl))
 - fix/playlist\_deserialization [\#262](https://github.com/OpenVoiceOS/ovos-utils/pull/262) ([JarbasAl](https://github.com/JarbasAl))
 - fix/detect\_ovos\_gui\_app [\#258](https://github.com/OpenVoiceOS/ovos-utils/pull/258) ([JarbasAl](https://github.com/JarbasAl))
 - fix/ocp\_playlist [\#256](https://github.com/OpenVoiceOS/ovos-utils/pull/256) ([JarbasAl](https://github.com/JarbasAl))
