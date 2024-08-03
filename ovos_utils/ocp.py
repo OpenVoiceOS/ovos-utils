@@ -342,7 +342,10 @@ class Playlist(list):
         super().__init__()
         for k, v in kwargs.items():
             if hasattr(self, k):
-                self.__setattr__(k, v)
+                try:
+                    self.__setattr__(k, v)
+                except AttributeError:
+                    continue
         if len(args) == 1 and isinstance(args[0], list):
             args = args[0]
         for e in args:
@@ -351,7 +354,8 @@ class Playlist(list):
     @property
     def length(self):
         """calc the length value based on all entries"""
-        return sum([e.length for e in self.entries])
+        # -1 is for live streams
+        return max(-1, sum([e.length for e in self.entries]))
 
     @property
     def infocard(self) -> dict:
@@ -372,9 +376,8 @@ class Playlist(list):
     def from_dict(track: dict) -> 'Playlist':
         if "playlist" not in track:
             raise ValueError("track dictionary does not contain 'playlist' entries, it is not a valid Playlist")
-        kwargs = {k: v for k, v in track.items()
-                  if k in inspect.signature(Playlist).parameters}
-        playlist = Playlist(**kwargs)
+
+        playlist = Playlist(**track)
         for e in track.get("playlist", []):
             playlist.add_entry(e)
         return playlist
