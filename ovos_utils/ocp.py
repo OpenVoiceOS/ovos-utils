@@ -378,7 +378,6 @@ class Playlist(list):
             raise ValueError("track dictionary does not contain 'playlist' entries, it is not a valid Playlist")
 
         playlist = Playlist(**track)
-        print(888, playlist)
         for e in track.get("playlist", []):
             playlist.add_entry(e)
         return playlist
