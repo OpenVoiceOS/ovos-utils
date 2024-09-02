@@ -25,9 +25,12 @@
 **Closed issues:**
 
 - "systemctl restart" not working when using with ovos-phal-plugin-system [\#259](https://github.com/OpenVoiceOS/ovos-utils/issues/259)
+- add some trivial unit test coverage that log config changes are reacted to [\#253](https://github.com/OpenVoiceOS/ovos-utils/issues/253)
+- log.py - New functions are missing test coverage [\#239](https://github.com/OpenVoiceOS/ovos-utils/issues/239)
 
 **Merged pull requests:**
 
+- log module unit test coverage [\#260](https://github.com/OpenVoiceOS/ovos-utils/pull/260) ([NeonDaniel](https://github.com/NeonDaniel))
 - deprecate/signal utils [\#249](https://github.com/OpenVoiceOS/ovos-utils/pull/249) ([JarbasAl](https://github.com/JarbasAl))
 
 ## [V](https://github.com/OpenVoiceOS/ovos-utils/tree/V) (2024-03-10)
