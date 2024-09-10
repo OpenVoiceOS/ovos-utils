@@ -17,14 +17,11 @@ import sys
 from collections import namedtuple
 from dataclasses import dataclass
 from enum import IntEnum
-from signal import signal, SIGKILL, SIGINT, SIGTERM, \
-    SIG_DFL, default_int_handler, SIG_IGN  # signals
 from threading import Event
 from time import sleep, monotonic
 
-
-from ovos_utils.log import LOG
 from ovos_utils.file_utils import get_temp_path
+from ovos_utils.log import LOG
 
 
 @dataclass
@@ -252,6 +249,9 @@ class Signal:
         func:  User supplied function that will act as the new signal handler.
         """
         super(Signal, self).__init__()  # python 3+ 'super().__init__()
+
+        from signal import signal, SIG_DFL, default_int_handler, SIG_IGN
+
         self.__sig_value = sig_value
         self.__user_func = func  # store user passed function
         self.__previous_func = signal(sig_value, self)
@@ -279,6 +279,8 @@ class Signal:
         Class destructor.  Called during garbage collection.
         Resets the signal handler to the previous function.
         """
+
+        from signal import signal
         signal(self.__sig_value, self.__previous_func)
 
 
@@ -290,6 +292,7 @@ class PIDLock:  # python 3+ 'class Lock'
     of the same type is started, this class will 'attempt' to stop the
     previously running process and then change the process ID in the lock file.
     """
+
     @classmethod
     def init(cls):
         # TODO: Path to deprecation
@@ -301,6 +304,7 @@ class PIDLock:  # python 3+ 'class Lock'
                         "'mycroft' basedir")
             base_dir = "mycroft"
         cls.DIRECTORY = cls.DIRECTORY or get_temp_path(base_dir)
+
     #
     # Class constants
     DIRECTORY = None
@@ -329,6 +333,7 @@ class PIDLock:  # python 3+ 'class Lock'
         """
         Trap both SIGINT and SIGTERM to gracefully clean up PID files
         """
+        from signal import SIGINT, SIGTERM
         self.__handlers = {SIGINT: Signal(SIGINT, self.delete),
                            SIGTERM: Signal(SIGTERM, self.delete)}
 
@@ -347,7 +352,8 @@ class PIDLock:  # python 3+ 'class Lock'
         if not os.path.isfile(self.path):
             return
         with open(self.path, 'r') as L:
-            try:
+            try: # TODO - make it work in windows ?
+                from signal import SIGKILL
                 os.kill(int(L.read()), SIGKILL)
             except Exception as e:
                 LOG.error(f"Failed to kill PID {L}: {e}")
@@ -401,4 +407,5 @@ def reset_sigint_handler():
     This fixes KeyboardInterrupt not getting raised when started via
     start-mycroft.sh
     """
+    from signal import signal, SIGINT, default_int_handler
     signal(SIGINT, default_int_handler)

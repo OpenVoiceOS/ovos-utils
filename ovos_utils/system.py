@@ -4,26 +4,8 @@ import re
 import shutil
 import subprocess
 import sys
-import sysconfig
-from enum import Enum
-from os.path import expanduser, exists, join
 
-from ovos_utils.log import LOG
-
-
-# TODO: Deprecate MycroftRootLocations in 0.1.0
-class MycroftRootLocations(str, Enum):
-    PICROFT = "/home/pi/mycroft-core"
-    BIGSCREEN = "/home/mycroft/mycroft-core"
-    OVOS = "/usr/lib/python3.9/site-packages"
-    OLD_MARK1 = "/opt/venvs/mycroft-core/lib/python3.4/site-packages"
-    MARK1 = "/opt/venvs/mycroft-core/lib/python3.7/site-packages"
-    MARK2 = "/opt/mycroft"
-    HOME = expanduser("~/mycroft-core")  # git clones
-
-
-_USER_DEFINED_ROOT = None
-
+from ovos_utils.log import LOG, deprecated
 
 def is_running_from_module(module_name):
     # Stack:
@@ -48,15 +30,17 @@ def is_running_from_module(module_name):
             return True
     return False
 
-
 # system utils
+@deprecated("DEPRECATED: use ovos-PHAL-plugin-system", "0.2.0")
 def ntp_sync():
-    # Force the system clock to synchronize with internet time servers
+    """
+    Force the system clock to synchronize with internet time servers
+    """
     subprocess.call('service ntp stop', shell=True)
     subprocess.call('ntpd -gq', shell=True)
     subprocess.call('service ntp start', shell=True)
 
-
+@deprecated("DEPRECATED: use ovos-PHAL-plugin-system", "0.2.0")
 def system_shutdown(sudo=True):
     """
     Turn the system completely off (with no option to inhibit it)
@@ -68,7 +52,7 @@ def system_shutdown(sudo=True):
     LOG.debug(cmd)
     subprocess.call(cmd, shell=True)
 
-
+@deprecated("DEPRECATED: use ovos-PHAL-plugin-system", "0.2.0")
 def system_reboot(sudo=True):
     """
     Shut down and restart the system
@@ -80,7 +64,7 @@ def system_reboot(sudo=True):
     LOG.debug(cmd)
     subprocess.call(cmd, shell=True)
 
-
+@deprecated("DEPRECATED: use ovos-PHAL-plugin-system", "0.2.0")
 def ssh_enable(sudo=True, user=False):
     """
     Permanently allow SSH access
@@ -89,7 +73,7 @@ def ssh_enable(sudo=True, user=False):
     """
     enable_service("ssh.service", sudo=sudo, user=user)
 
-
+@deprecated("DEPRECATED: use ovos-PHAL-plugin-system", "0.2.0")
 def ssh_disable(sudo=True, user=False):
     """
     Permanently block SSH access from the outside
@@ -98,7 +82,7 @@ def ssh_disable(sudo=True, user=False):
     """
     disable_service("ssh.service", sudo=sudo, user=user)
 
-
+@deprecated("DEPRECATED: use ovos-PHAL-plugin-system", "0.2.0")
 def restart_mycroft_service(sudo=True, user=False):
     """
     Restarts the `mycroft.service` systemd service
@@ -107,6 +91,28 @@ def restart_mycroft_service(sudo=True, user=False):
     """
     restart_service("mycroft.service", sudo=sudo, user=user)
 
+def is_running_from_module(module_name):
+    # Stack:
+    # [0] - _log()
+    # [1] - debug(), info(), warning(), or error()
+    # [2] - caller
+    stack = inspect.stack()
+
+    # Record:
+    # [0] - frame object
+    # [1] - filename
+    # [2] - line number
+    # [3] - function
+    # ...
+    for record in stack[2:]:
+        mod = inspect.getmodule(record[0])
+        name = mod.__name__ if mod else ''
+        # module name in file path of caller
+        # or import name matches module name
+        if f"/{module_name}/" in record[1] or \
+                name.startswith(module_name.replace("-", "_").replace(" ", "_")):
+            return True
+    return False
 
 def restart_service(service_name, sudo=True, user=False):
     """
@@ -177,51 +183,25 @@ def check_service_active(service_name, sudo=False, user=False) -> bool:
     state = subprocess.run(status_command, shell=True).returncode
     return state == 0
 
-
-# platform fingerprinting
-def set_root_path(path):
-    global _USER_DEFINED_ROOT
-    _USER_DEFINED_ROOT = path
-    LOG.info(f"mycroft root set to {path}")
-
-
-def find_root_from_sys_path():
-    """Find mycroft root folder from sys.path, eg. venv site-packages."""
-    for p in [path for path in sys.path if path != '']:
-        if exists(join(p, 'mycroft', 'configuration', 'mycroft.conf')):
-            return p
-    else:
-        return None
-
-
-def find_root_from_sitepackages():
-    """Find root from system or venv's sitepackages."""
-    site = sysconfig.get_paths()['platlib']
-    if exists(join(site, 'mycroft', 'configuration', 'mycroft.conf')):
-        return site
-    else:
-        return None
-
-
-def search_mycroft_core_location():
-    """Check python path (.venv), system packages and finally known mycroft
-    locations."""
-    # downstream wants to override the root location
-    if _USER_DEFINED_ROOT:
-        return _USER_DEFINED_ROOT
-    # if we are in a .venv that should take precedence over everything else
-    if find_root_from_sitepackages():
-        return find_root_from_sitepackages()
-    # if there is a system wide install that should take precedence over
-    # hardcoded locations
-    elif find_root_from_sys_path():
-        return find_root_from_sys_path()
-    # finally look at default locations
-    for p in MycroftRootLocations:
-        if os.path.isdir(p):
-            return p
-    return None
-
+def check_service_installed(service_name, sudo=False, user=False) -> bool:
+    """
+    Checks if a systemd service is installed using systemctl
+    @param service_name: name of service to check
+    @param user: pass --user flag when calling systemctl
+    @param sudo: use sudo when calling systemctl
+    @return: True if the service is installed, else False
+    """
+    if not service_name.endswith('.service'):
+        service_name = f"{service_name}.service"
+    installed_base_command = f"systemctl list-unit-files -t service"
+    if user:
+        status_command = f"{installed_base_command} --user"
+    elif sudo:
+        status_command = f"sudo {installed_base_command}"
+    # Add a grep to the command
+    status_command = f"{status_command} | grep -i {service_name}"
+    state = subprocess.call(status_command, shell=True)
+    return state == 0
 
 def get_desktop_environment():
     # From http://stackoverflow.com/questions/2035657/what-is-my-current-desktop-environment
@@ -306,9 +286,9 @@ def has_screen():
             have_display = b"device_name=" in subprocess.check_output("tvservice -n 2>&1", shell=True)
         except Exception as e:
             pass
-        
+
     # fallback check using matplotlib if available
-    # seems to be foolproof and OS agnostic 
+    # seems to be foolproof and OS agnostic
     # but do not want to drag the dependency
     if not have_display:
         try:
@@ -321,7 +301,6 @@ def has_screen():
         except ImportError:
             pass
     return have_display
-
 
 def module_property(func):
     """
@@ -345,4 +324,3 @@ def module_property(func):
 
     module.__getattr__ = patched_getattr
     return func
-

@@ -8,10 +8,6 @@ class TestSystem(unittest.TestCase):
         self.assertFalse(is_running_from_module("mycroft"))
         self.assertTrue(is_running_from_module("unittest"))
 
-    def test_ntp_sync(self):
-        # TODO
-        pass
-
     @patch("subprocess.Popen")
     def test_system_shutdown(self, popen):
         from ovos_utils.system import system_shutdown
@@ -53,30 +49,6 @@ class TestSystem(unittest.TestCase):
         pass
 
     def test_check_service_active(self):
-        # TODO
-        pass
-
-    def test_set_root_path(self):
-        from ovos_utils.system import set_root_path
-        set_root_path("test")
-        from ovos_utils.system import _USER_DEFINED_ROOT
-        self.assertEqual(_USER_DEFINED_ROOT, "test")
-        set_root_path("mycroft")
-        from ovos_utils.system import _USER_DEFINED_ROOT
-        self.assertEqual(_USER_DEFINED_ROOT, "mycroft")
-        set_root_path(None)
-        from ovos_utils.system import _USER_DEFINED_ROOT
-        self.assertIsNone(_USER_DEFINED_ROOT)
-
-    def test_find_root_from_sys_path(self):
-        # TODO
-        pass
-
-    def test_find_root_from_sitepackages(self):
-        # TODO
-        pass
-
-    def test_search_mycroft_core_location(self):
         # TODO
         pass
 

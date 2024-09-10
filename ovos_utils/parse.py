@@ -1,6 +1,7 @@
-from difflib import SequenceMatcher
 import re
+from difflib import SequenceMatcher
 from enum import IntEnum, auto
+
 from ovos_utils.log import LOG
 
 try:
@@ -18,6 +19,7 @@ class MatchStrategy(IntEnum):
     PARTIAL_TOKEN_RATIO = auto()
     PARTIAL_TOKEN_SORT_RATIO = auto()
     PARTIAL_TOKEN_SET_RATIO = auto()
+    DAMERAU_LEVENSHTEIN_SIMILARITY = auto()
 
 
 def _validate_matching_strategy(strategy):
@@ -36,6 +38,7 @@ def fuzzy_match(x, against, strategy=MatchStrategy.SIMPLE_RATIO):
                down to 0.0 for no match at all.
     """
     strategy = _validate_matching_strategy(strategy)
+    # LOG.debug(f"matching strategy: {strategy}")
     if strategy == MatchStrategy.RATIO:
         score = rapidfuzz.fuzz.ratio(x, against) / 100
     elif strategy == MatchStrategy.PARTIAL_RATIO:
@@ -50,6 +53,8 @@ def fuzzy_match(x, against, strategy=MatchStrategy.SIMPLE_RATIO):
         score = rapidfuzz.fuzz.partial_token_set_ratio(x, against) / 100
     elif strategy == MatchStrategy.PARTIAL_TOKEN_RATIO:
         score = rapidfuzz.fuzz.partial_token_ratio(x, against) / 100
+    elif strategy == MatchStrategy.DAMERAU_LEVENSHTEIN_SIMILARITY:
+        score = rapidfuzz.distance.DamerauLevenshtein.normalized_similarity(x, against)
     else:
         score = SequenceMatcher(None, x, against).ratio()
 
@@ -113,4 +118,3 @@ def remove_parentheses(answer):
     if not answer:
         return None
     return answer
-

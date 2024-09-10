@@ -3,19 +3,47 @@ import csv
 import os
 import re
 import tempfile
+from os import walk
+from os.path import dirname, splitext, join
+from sys import platform
 from threading import RLock
 from typing import Optional, List
-
-from os import walk
-from os.path import dirname
-from os.path import splitext, join
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 from ovos_utils.bracket_expansion import expand_options
 from ovos_utils.log import LOG, log_deprecation
-from ovos_utils.system import search_mycroft_core_location
+
+
+def ensure_directory_exists(directory, domain=None):
+    """ Create a directory and give access rights to all
+
+    Args:
+        domain (str): The IPC domain.  Basically a subdirectory to prevent
+            overlapping signal filenames.
+
+    Returns:
+        str: a path to the directory
+    """
+    if domain:
+        directory = os.path.join(directory, domain)
+
+    # Expand and normalize the path
+    directory = os.path.normpath(directory)
+    directory = os.path.expanduser(directory)
+
+    if not os.path.isdir(directory):
+        try:
+            save = os.umask(0)
+            os.makedirs(directory, 0o777)  # give everyone rights to r/w here
+        except OSError:
+            LOG.warning("Failed to create: " + directory)
+            pass
+        finally:
+            os.umask(save)
+
+    return directory
 
 
 def to_alnum(skill_id: str) -> str:
@@ -59,12 +87,12 @@ def get_temp_path(*args) -> str:
 def get_cache_directory(folder: str) -> str:
     """
     Get a temporary cache directory, preferably in RAM.
-    Note that Windows will not use RAM.
+    Note that only Linux use RAM.
     @param folder: base path to use for cache
     @return: valid cache path
     """
     path = get_temp_path(folder)
-    if os.name != 'nt':
+    if platform == 'linux':
         try:
             from memory_tempfile import MemoryTempfile
             path = join(MemoryTempfile(fallback=True).gettempdir(), folder)

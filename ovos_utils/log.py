@@ -12,12 +12,15 @@
 #
 import functools
 import inspect
+import json
 import logging
 import os
 import sys
 from logging.handlers import RotatingFileHandler
 from os.path import join
-from typing import List
+from pathlib import Path
+from typing import Optional, List, Set
+
 
 class LOG:
     """
@@ -77,21 +80,21 @@ class LOG:
 
     @classmethod
     def init(cls, config=None):
-
+        from ovos_utils.xdg_utils import xdg_state_home
         try:
             from ovos_config.meta import get_xdg_base
-            default_base = get_xdg_base()
+            xdg_base = get_xdg_base()
         except ImportError:
-            default_base = os.environ.get("OVOS_CONFIG_BASE_FOLDER") or \
-                "mycroft"
-        from ovos_utils.xdg_utils import xdg_state_home
+            xdg_base = os.environ.get("OVOS_CONFIG_BASE_FOLDER") or "mycroft"
+
+        xdg_path = os.path.join(xdg_state_home(), xdg_base)
 
         config = config or {}
-        cls.base_path = config.get("path") or \
-            f"{xdg_state_home()}/{default_base}"
+        cls.base_path = config.get("path") or xdg_path
         cls.max_bytes = config.get("max_bytes", 50000000)
         cls.backup_count = config.get("backup_count", 3)
-        cls.level = config.get("level") or LOG.level
+        level = config.get("level") or LOG.level
+        cls.set_level(level)
         cls.diagnostic_mode = config.get("diagnostic", False)
 
     @classmethod
@@ -179,38 +182,73 @@ class LOG:
         cls._get_real_logger().exception(*args, **kwargs)
 
 
-def init_service_logger(service_name):
-    # this is makes all logs from this service be configured to write to service_name.log file
-    # if this is not called in every __main__.py entrypoint logs will be written
-    # to a generic OVOS.log file shared across all services
-    try:
-        from ovos_config.config import read_mycroft_config
-        _cfg = read_mycroft_config()
-    except ImportError:
-        LOG.warning("ovos_config not available. Falling back to defaults")
-        _cfg = dict()
+def _monitor_log_level():
+    _logs_conf = get_logs_config(LOG.name)
+    hax = hash(json.dumps(_logs_conf, sort_keys=True, indent=2))
+    if hax != _monitor_log_level.config_hash:
+        _monitor_log_level.config_hash = hax
+        LOG.init(_logs_conf)
+        LOG.info("updated LOG level")
 
+
+_monitor_log_level.config_hash = None
+
+
+def init_service_logger(service_name: str):
+    """
+    Initialize `LOG` for the specified service
+    @param service_name: Name of service to configure `LOG` for
+    """
+    _logs_conf = get_logs_config(service_name)
+    _monitor_log_level.config_hash = hash(json.dumps(_logs_conf, sort_keys=True,
+                                                     indent=2))
+    LOG.name = service_name
+    LOG.init(_logs_conf)  # set up the LOG instance
+    try:
+        from ovos_config import Configuration
+        Configuration.set_config_watcher(_monitor_log_level)
+    except ImportError:
+        LOG.warning("Can not monitor config LOG level changes")
+
+
+def get_logs_config(service_name: Optional[str] = None,
+                    _cfg: Optional[dict] = None) -> dict:
+    """
+    Get logging configuration for the specified service
+    @param service_name: Name of service to get logging configuration for
+    @param _cfg: Configuration to parse
+    @return: dict logging configuration for the specified service
+    """
+    if _cfg is None:
+        try:
+            from ovos_config import Configuration
+            _cfg = Configuration()
+        except ImportError:
+            LOG.warning("ovos_config not available. Falling back to defaults")
+            _cfg = {}
 
     # First try and get the "logging" section
-    log_config = _cfg.get("logging")
+    logging_conf = _cfg.get("logging")
     # For compatibility we try to get the "logs" from the root level
     # and default to empty which is used in case there is no logging
     # section
     _logs_conf = _cfg.get("logs") or {}
-    if log_config:  # We found a logging section
+    if logging_conf:  # We found a logging section
         # if "logs" is defined in "logging" use that as the default
         # where per-service "logs" are not defined
-        _logs_conf = log_config.get("logs") or _logs_conf
+        _logs_conf = logging_conf.get("logs") or _logs_conf
         # Now get our config by service name
-        _cfg = log_config.get(service_name) or log_config
+        if service_name:
+            _cfg = logging_conf.get(service_name) or logging_conf
+        else:
+            # No service name specified, use `logging` configuration
+            _cfg = logging_conf
         # and if "logs" is redefined in "logging.<service_name>" use that
         _logs_conf = _cfg.get("logs") or _logs_conf
     # Grab the log level from whatever section we found, defaulting to INFO
     _log_level = _cfg.get("log_level", "INFO")
-    # and write it into the "logs" config
     _logs_conf["level"] = _log_level
-    LOG.name = service_name
-    LOG.init(_logs_conf)  # setup the LOG instance
+    return _logs_conf
 
 
 def log_deprecation(log_message: str = "DEPRECATED",
@@ -229,7 +267,6 @@ def log_deprecation(log_message: str = "DEPRECATED",
         determination. i.e. an internal exception handling method should log the
         first call external to that package
     """
-    import inspect
     stack = inspect.stack()[1:]  # [0] is this method
     call_info = "Unknown Origin"
     origin_module = func_module
@@ -265,6 +302,7 @@ def deprecated(log_message: str, deprecation_version: str):
     @param log_message: Deprecation log message
     @param deprecation_version: package version in which deprecation will occur
     """
+
     def wrapped(func):
         @functools.wraps(func)
         def log_wrapper(*args, **kwargs):
@@ -273,6 +311,88 @@ def deprecated(log_message: str, deprecation_version: str):
                             func_module=func.__module__,
                             deprecation_version=deprecation_version)
             return func(*args, **kwargs)
+
         return log_wrapper
 
     return wrapped
+
+
+def get_log_path(service: str, directories: Optional[List[str]] = None) \
+        -> Optional[str]:
+    """
+    Get the path to the log directory for a given service.
+    Default behaviour is to check the configured paths for the service.
+    If a list of directories is provided, check that list for the service log
+
+    Args:
+        service: service name
+        directories: (optional) list of directories to check for service
+
+    Returns:
+        path to log directory for service
+        (returned path may be `None` if `directories` is specified)
+    """
+    if directories:
+        for directory in directories:
+            file = os.path.join(directory, f"{service}.log")
+            if os.path.exists(file):
+                return directory
+        return None
+
+    from ovos_utils.xdg_utils import xdg_state_home
+    try:
+        from ovos_config import Configuration
+        from ovos_config.meta import get_xdg_base
+    except ImportError:
+        xdg_base = os.environ.get("OVOS_CONFIG_BASE_FOLDER", "mycroft")
+        return os.path.join(xdg_state_home(), xdg_base)
+
+    config = get_logs_config(service_name=service)
+    # service specific config or default config location
+    path = config.get("path")
+    # default xdg location
+    if not path:
+        path = os.path.join(xdg_state_home(), get_xdg_base())
+
+    return path
+
+
+def get_log_paths(config: Optional[dict] = None) -> Set[str]:
+    """
+    Get all log paths for all service logs
+    Different services may have different log paths
+
+    Returns:
+        set of paths to log directories
+    """
+    paths = set()
+    if not config:
+        try:
+            from ovos_config import Configuration
+            config = Configuration()
+        except ImportError:
+            LOG.warning("ovos_config not available. Falling back to defaults")
+            config = dict()
+
+    for name, service_config in config.get("logging", {}).items():
+        if not isinstance(service_config, dict) or name == "logs":
+            continue
+        if service_config.get("path"):
+            paths.add(service_config.get("path"))
+    paths.add(get_log_path(""))
+
+    return paths
+
+
+def get_available_logs(directories: Optional[List[str]] = None) -> List[str]:
+    """
+    Get a list of all available log files
+    Args:
+        directories: (optional) list of directories to check for service
+
+    Returns:
+        list of log file basenames (i.e. "audio", "skills")
+    """
+    directories = directories or get_log_paths()
+    return [Path(f).stem for path in directories
+            for f in os.listdir(path) if Path(f).suffix == ".log"]
