@@ -24,6 +24,7 @@
 
 **Merged pull requests:**
 
+- chore:semver\_versioning [\#266](https://github.com/OpenVoiceOS/ovos-utils/pull/266) ([JarbasAl](https://github.com/JarbasAl))
 - chore:semver\_automations [\#265](https://github.com/OpenVoiceOS/ovos-utils/pull/265) ([JarbasAl](https://github.com/JarbasAl))
 - log module unit test coverage [\#260](https://github.com/OpenVoiceOS/ovos-utils/pull/260) ([NeonDaniel](https://github.com/NeonDaniel))
 - deprecate/signal utils [\#249](https://github.com/OpenVoiceOS/ovos-utils/pull/249) ([JarbasAl](https://github.com/JarbasAl))
