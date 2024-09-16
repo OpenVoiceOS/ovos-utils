@@ -24,6 +24,7 @@
 
 **Merged pull requests:**
 
+- feat:standardize\_lang\_tag new utils [\#267](https://github.com/OpenVoiceOS/ovos-utils/pull/267) ([JarbasAl](https://github.com/JarbasAl))
 - chore:semver\_versioning [\#266](https://github.com/OpenVoiceOS/ovos-utils/pull/266) ([JarbasAl](https://github.com/JarbasAl))
 - chore:semver\_automations [\#265](https://github.com/OpenVoiceOS/ovos-utils/pull/265) ([JarbasAl](https://github.com/JarbasAl))
 - log module unit test coverage [\#260](https://github.com/OpenVoiceOS/ovos-utils/pull/260) ([NeonDaniel](https://github.com/NeonDaniel))
