@@ -4,6 +4,17 @@ from os.path import isdir, join
 from ovos_utils.file_utils import resolve_resource_file
 
 
+def standardize_lang_tag(lang_code, macro=True):
+    """https://langcodes-hickford.readthedocs.io/en/sphinx/index.html"""
+    try:
+        from langcodes import standardize_tag as std
+        return std(lang_code, macro=macro)
+    except:
+        if macro:
+            return lang_code.split("-")[0].lower()
+        return lang_code.lower()
+
+
 def get_language_dir(base_path, lang="en-us"):
     """ checks for all language variations and returns best path """
     lang_path = join(base_path, lang)
