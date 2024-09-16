@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/OpenVoiceOS/ovos-utils/tree/HEAD)
+## [0.2.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.2.1a1) (2024-09-16)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0...0.2.1a1)
 
 **Implemented enhancements:**
 
@@ -24,6 +24,7 @@
 
 **Merged pull requests:**
 
+- fix:long description [\#268](https://github.com/OpenVoiceOS/ovos-utils/pull/268) ([JarbasAl](https://github.com/JarbasAl))
 - feat:standardize\_lang\_tag new utils [\#267](https://github.com/OpenVoiceOS/ovos-utils/pull/267) ([JarbasAl](https://github.com/JarbasAl))
 - chore:semver\_versioning [\#266](https://github.com/OpenVoiceOS/ovos-utils/pull/266) ([JarbasAl](https://github.com/JarbasAl))
 - chore:semver\_automations [\#265](https://github.com/OpenVoiceOS/ovos-utils/pull/265) ([JarbasAl](https://github.com/JarbasAl))
