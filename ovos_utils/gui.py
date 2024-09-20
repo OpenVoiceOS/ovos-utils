@@ -1,3 +1,4 @@
+import os
 from os.path import join, isdir
 from typing import List
 
@@ -86,13 +87,12 @@ def get_ui_directories(root_dir: str) -> dict:
     @return: Dict of framework name to UI resource directory
     """
     ui_directories = dict()
-    base_directory = root_dir
-    if isdir(join(base_directory, "gui")):
-        LOG.debug("Skill implements resources in `gui` directory")
-        ui_directories["all"] = join(base_directory, "gui")
-        return ui_directories
-
-    if isdir(join(base_directory, "ui")):
+    if isdir(f"{root_dir}/ui"):
         LOG.debug("legacy UI directory found - Handling `ui` directory as `qt5`")
-        ui_directories["qt5"] = join(base_directory, "ui")
+        ui_directories["qt5"] = f"{root_dir}/ui"
+    elif isdir(f"{root_dir}/gui"):
+        for framework in os.listdir(f"{root_dir}/gui"):
+            if isdir(f"{root_dir}/gui/{framework}"):
+                LOG.debug(f"Skill supports GUI framework: {framework} from folder: {root_dir}/gui/{framework}")
+                ui_directories[framework] = f"{root_dir}/gui/{framework}"
     return ui_directories
