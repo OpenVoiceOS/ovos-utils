@@ -1,6 +1,6 @@
 # OVOS-utils
 
-collection of simple utilities for use across the mycroft ecosystem
+A collection of simple utilities for use across the OpenVoiceOS ecosystem.
 
 ## Install
 
