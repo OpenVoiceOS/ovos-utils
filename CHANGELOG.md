@@ -1,35 +1,12 @@
 # Changelog
 
-## [0.2.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.2.1a1) (2024-09-16)
+## [0.3.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.0a1) (2024-09-24)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/V0.1.0...0.2.1a1)
-
-**Implemented enhancements:**
-
-- feat/ocp\_stream\_utils [\#257](https://github.com/OpenVoiceOS/ovos-utils/pull/257) ([JarbasAl](https://github.com/JarbasAl))
-- new\_util/get\_sound\_duration [\#254](https://github.com/OpenVoiceOS/ovos-utils/pull/254) ([JarbasAl](https://github.com/JarbasAl))
-- Add Damerau-Levenshtein similarity matching [\#248](https://github.com/OpenVoiceOS/ovos-utils/pull/248) ([femelo](https://github.com/femelo))
-- fix/dont\_lie\_about\_being\_a\_uri [\#246](https://github.com/OpenVoiceOS/ovos-utils/pull/246) ([JarbasAl](https://github.com/JarbasAl))
-
-**Fixed bugs:**
-
-- fix/plugin\_stream\_extraction [\#263](https://github.com/OpenVoiceOS/ovos-utils/pull/263) ([JarbasAl](https://github.com/JarbasAl))
-- fix/playlist\_deserialization [\#262](https://github.com/OpenVoiceOS/ovos-utils/pull/262) ([JarbasAl](https://github.com/JarbasAl))
-- fix/detect\_ovos\_gui\_app [\#258](https://github.com/OpenVoiceOS/ovos-utils/pull/258) ([JarbasAl](https://github.com/JarbasAl))
-- fix/ocp\_playlist [\#256](https://github.com/OpenVoiceOS/ovos-utils/pull/256) ([JarbasAl](https://github.com/JarbasAl))
-- fix/sound\_duration [\#255](https://github.com/OpenVoiceOS/ovos-utils/pull/255) ([JarbasAl](https://github.com/JarbasAl))
-- fix/log\_level\_cfg [\#252](https://github.com/OpenVoiceOS/ovos-utils/pull/252) ([JarbasAl](https://github.com/JarbasAl))
-- fix/log\_spam [\#251](https://github.com/OpenVoiceOS/ovos-utils/pull/251) ([JarbasAl](https://github.com/JarbasAl))
-- feat: mac support for ram cache [\#231](https://github.com/OpenVoiceOS/ovos-utils/pull/231) ([mikejgray](https://github.com/mikejgray))
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.2.1...0.3.0a1)
 
 **Merged pull requests:**
 
-- fix:long description [\#268](https://github.com/OpenVoiceOS/ovos-utils/pull/268) ([JarbasAl](https://github.com/JarbasAl))
-- feat:standardize\_lang\_tag new utils [\#267](https://github.com/OpenVoiceOS/ovos-utils/pull/267) ([JarbasAl](https://github.com/JarbasAl))
-- chore:semver\_versioning [\#266](https://github.com/OpenVoiceOS/ovos-utils/pull/266) ([JarbasAl](https://github.com/JarbasAl))
-- chore:semver\_automations [\#265](https://github.com/OpenVoiceOS/ovos-utils/pull/265) ([JarbasAl](https://github.com/JarbasAl))
-- log module unit test coverage [\#260](https://github.com/OpenVoiceOS/ovos-utils/pull/260) ([NeonDaniel](https://github.com/NeonDaniel))
-- deprecate/signal utils [\#249](https://github.com/OpenVoiceOS/ovos-utils/pull/249) ([JarbasAl](https://github.com/JarbasAl))
+- feat:prepare for other gui frameworks [\#270](https://github.com/OpenVoiceOS/ovos-utils/pull/270) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
