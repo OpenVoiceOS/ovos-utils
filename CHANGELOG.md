@@ -1,20 +1,12 @@
 # Changelog
 
-## [0.3.1a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.1a2) (2024-10-15)
+## [0.3.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.2a1) (2024-10-15)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.1a1...0.3.1a2)
-
-**Merged pull requests:**
-
-- support latest pyee [\#276](https://github.com/OpenVoiceOS/ovos-utils/pull/276) ([JarbasAl](https://github.com/JarbasAl))
-
-## [0.3.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.1a1) (2024-10-15)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.0...0.3.1a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.1...0.3.2a1)
 
 **Merged pull requests:**
 
-- port/tests\_from\_core [\#274](https://github.com/OpenVoiceOS/ovos-utils/pull/274) ([JarbasAl](https://github.com/JarbasAl))
+- Update rapidfuzz requirement from ~=3.6 to ~=3.10 in /requirements [\#278](https://github.com/OpenVoiceOS/ovos-utils/pull/278) ([dependabot[bot]](https://github.com/apps/dependabot))
 
 
 
