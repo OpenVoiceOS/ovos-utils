@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.3a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.3a1) (2024-10-15)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.2a1...0.3.3a1)
+
+**Closed issues:**
+
+- network connection test makes invalid assumptions \(hard coded DNS entries\) [\#272](https://github.com/OpenVoiceOS/ovos-utils/issues/272)
+
+**Merged pull requests:**
+
+- fix:deprecate is\_connected [\#273](https://github.com/OpenVoiceOS/ovos-utils/pull/273) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.3.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.2a1) (2024-10-15)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.1...0.3.2a1)
