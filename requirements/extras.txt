@@ -1,4 +1,4 @@
-rapidfuzz~=3.10
+rapidfuzz>=3.6,<4.0
 ovos-plugin-manager>=0.0.25,<1.0.0
 ovos-config>=0.0.12,<1.0.0
 ovos-workshop>=0.0.13,<1.0.0
