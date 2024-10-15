@@ -3,7 +3,7 @@ requests~=2.26
 json_database~=0.7
 kthread~=0.2
 watchdog
-pyee
+pyee>=8.0.0
 combo-lock~=0.2
 rich-click~=1.7
 rich~=13.7

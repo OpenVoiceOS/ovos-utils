@@ -2,7 +2,7 @@ import json
 from copy import deepcopy
 from threading import Event
 
-from pyee import BaseEventEmitter
+from pyee import EventEmitter
 
 from ovos_utils.log import LOG, log_deprecation
 
@@ -20,7 +20,7 @@ class FakeBus:
     def __init__(self, *args, **kwargs):
         self.started_running = False
         self.session_id = "default"
-        self.ee = kwargs.get("emitter") or BaseEventEmitter()
+        self.ee = kwargs.get("emitter") or EventEmitter()
         self.ee.on("error", self.on_error)
         self.on_open()
         try:
