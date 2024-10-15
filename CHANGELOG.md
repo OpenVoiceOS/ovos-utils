@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.3.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.0a1) (2024-09-24)
+## [0.3.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.1a1) (2024-10-15)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.2.1...0.3.0a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.0...0.3.1a1)
 
 **Merged pull requests:**
 
-- feat:prepare for other gui frameworks [\#270](https://github.com/OpenVoiceOS/ovos-utils/pull/270) ([JarbasAl](https://github.com/JarbasAl))
+- port/tests\_from\_core [\#274](https://github.com/OpenVoiceOS/ovos-utils/pull/274) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
