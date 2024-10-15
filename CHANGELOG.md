@@ -1,20 +1,24 @@
 # Changelog
 
-## [0.3.1a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.1a2) (2024-10-15)
+## [0.3.3a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.3a1) (2024-10-15)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.1a1...0.3.1a2)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.2a1...0.3.3a1)
 
-**Merged pull requests:**
+**Closed issues:**
 
-- support latest pyee [\#276](https://github.com/OpenVoiceOS/ovos-utils/pull/276) ([JarbasAl](https://github.com/JarbasAl))
-
-## [0.3.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.1a1) (2024-10-15)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.0...0.3.1a1)
+- network connection test makes invalid assumptions \(hard coded DNS entries\) [\#272](https://github.com/OpenVoiceOS/ovos-utils/issues/272)
 
 **Merged pull requests:**
 
-- port/tests\_from\_core [\#274](https://github.com/OpenVoiceOS/ovos-utils/pull/274) ([JarbasAl](https://github.com/JarbasAl))
+- fix:deprecate is\_connected [\#273](https://github.com/OpenVoiceOS/ovos-utils/pull/273) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.3.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.2a1) (2024-10-15)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.1...0.3.2a1)
+
+**Merged pull requests:**
+
+- Update rapidfuzz requirement from ~=3.6 to ~=3.10 in /requirements [\#278](https://github.com/OpenVoiceOS/ovos-utils/pull/278) ([dependabot[bot]](https://github.com/apps/dependabot))
 
 
 
