@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.1a2) (2024-10-15)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.1a1...0.3.1a2)
+
+**Merged pull requests:**
+
+- support latest pyee [\#276](https://github.com/OpenVoiceOS/ovos-utils/pull/276) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.3.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.1a1) (2024-10-15)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.0...0.3.1a1)
