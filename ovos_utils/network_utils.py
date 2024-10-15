@@ -3,7 +3,7 @@ from typing import Optional
 
 import requests
 
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, deprecated
 
 _DEFAULT_TEST_CONFIG = {
     "ip_url": 'https://api.ipify.org',
@@ -108,11 +108,12 @@ def is_connected_http(host: Optional[str] = None) -> bool:
     return False
 
 
+@deprecated("use is_connected_http or is_connected_dns directly depending on your use case", "2.0.0")
 def is_connected() -> bool:
     """
-    Return True if any connection check (DNS or HTTP) is True
+    alias for is_connected_http()
     """
-    return any((is_connected_dns(), is_connected_http()))
+    return is_connected_http()
 
 
 def check_captive_portal(host: Optional[str] = None,
