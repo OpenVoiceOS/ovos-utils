@@ -1,24 +1,12 @@
 # Changelog
 
-## [0.3.3a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.3a1) (2024-10-15)
+## [0.3.4a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.4a1) (2024-10-16)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.2a1...0.3.3a1)
-
-**Closed issues:**
-
-- network connection test makes invalid assumptions \(hard coded DNS entries\) [\#272](https://github.com/OpenVoiceOS/ovos-utils/issues/272)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.3...0.3.4a1)
 
 **Merged pull requests:**
 
-- fix:deprecate is\_connected [\#273](https://github.com/OpenVoiceOS/ovos-utils/pull/273) ([JarbasAl](https://github.com/JarbasAl))
-
-## [0.3.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.2a1) (2024-10-15)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.1...0.3.2a1)
-
-**Merged pull requests:**
-
-- Update rapidfuzz requirement from ~=3.6 to ~=3.10 in /requirements [\#278](https://github.com/OpenVoiceOS/ovos-utils/pull/278) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix:standardize\_lang [\#281](https://github.com/OpenVoiceOS/ovos-utils/pull/281) ([JarbasAl](https://github.com/JarbasAl))
 
 
 

@@ -1,46 +1,46 @@
 from os import listdir
 from os.path import isdir, join
-
+from langcodes import tag_distance,  standardize_tag as std
 from ovos_utils.file_utils import resolve_resource_file
 
 
 def standardize_lang_tag(lang_code, macro=True):
     """https://langcodes-hickford.readthedocs.io/en/sphinx/index.html"""
     try:
-        from langcodes import standardize_tag as std
         return std(lang_code, macro=macro)
     except:
         if macro:
             return lang_code.split("-")[0].lower()
+        if "-" in lang_code:
+            a, b = lang_code.split("-", 2)
+            return f"{a.lower()}-{b.upper()}"
         return lang_code.lower()
 
 
-def get_language_dir(base_path, lang="en-us"):
+def get_language_dir(base_path, lang="en-US"):
     """ checks for all language variations and returns best path """
-    lang_path = join(base_path, lang)
-    # base_path/en-us
-    if isdir(lang_path):
-        return lang_path
-    if "-" in lang:
-        main = lang.split("-")[0]
-        # base_path/en
-        general_lang_path = join(base_path, main)
-        if isdir(general_lang_path):
-            return general_lang_path
-    else:
-        main = lang
-    # base_path/en-uk, base_path/en-au...
-    if isdir(base_path):
-        candidates = [join(base_path, f)
-                      for f in listdir(base_path) if f.startswith(main)]
-        paths = [p for p in candidates if isdir(p)]
-        # TODO how to choose best local dialect?
-        if len(paths):
-            return paths[0]
-    return join(base_path, lang)
+    lang = standardize_lang_tag(lang)
+
+    candidates = []
+    for f in listdir(base_path):
+        if isdir(f"{base_path}/{f}"):
+            try:
+                score = tag_distance(lang, f)
+            except:  # not a valid language code
+                continue
+                # https://langcodes-hickford.readthedocs.io/en/sphinx/index.html#distance-values
+                # 0 -> These codes represent the same language, possibly after filling in values and normalizing.
+                # 1- 3 -> These codes indicate a minor regional difference.
+                # 4 - 10 -> These codes indicate a significant but unproblematic regional difference.
+            if score < 10:
+                candidates.append((f, score))
+
+    # sort by distance to target lang code
+    candidates = sorted(candidates, key=lambda k: k[1])
+    return candidates[0]
 
 
-def translate_word(name, lang='en-us'):
+def translate_word(name, lang='en-US'):
     """ Helper to get word translations
     Args:
         name (str): Word name. Returned as the default value if not translated
