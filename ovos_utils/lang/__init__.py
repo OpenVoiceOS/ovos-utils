@@ -1,13 +1,16 @@
 from os import listdir
 from os.path import isdir, join
-from langcodes import tag_distance,  standardize_tag as std
+from typing import Optional
+
+from langcodes import tag_distance, standardize_tag as std
+
 from ovos_utils.file_utils import resolve_resource_file
 
 
-def standardize_lang_tag(lang_code, macro=True):
+def standardize_lang_tag(lang_code: str, macro=True) -> str:
     """https://langcodes-hickford.readthedocs.io/en/sphinx/index.html"""
     try:
-        return std(lang_code, macro=macro)
+        return str(std(lang_code, macro=macro))
     except:
         if macro:
             return lang_code.split("-")[0].lower()
@@ -17,7 +20,7 @@ def standardize_lang_tag(lang_code, macro=True):
         return lang_code.lower()
 
 
-def get_language_dir(base_path, lang="en-US"):
+def get_language_dir(base_path: str, lang: str ="en-US") -> Optional[str]:
     """ checks for all language variations and returns best path """
     lang = standardize_lang_tag(lang)
 
@@ -33,11 +36,12 @@ def get_language_dir(base_path, lang="en-US"):
                 # 1- 3 -> These codes indicate a minor regional difference.
                 # 4 - 10 -> These codes indicate a significant but unproblematic regional difference.
             if score < 10:
-                candidates.append((f, score))
-
+                candidates.append((f"{base_path}/{f}", score))
+    if not candidates:
+        return None
     # sort by distance to target lang code
     candidates = sorted(candidates, key=lambda k: k[1])
-    return candidates[0]
+    return candidates[0][0]
 
 
 def translate_word(name, lang='en-US'):
