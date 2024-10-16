@@ -115,9 +115,9 @@ class TestEventSchedulerInterface(unittest.TestCase):
 
         # Schedule a repeating event
         es.schedule_repeating_event(f, None, 10, name='f')
-        self.assertTrue(len(es.bus.ee._events['id:f']) == 1)
+        self.assertTrue(len(es.bus.ee._events.get('id:f', [])) == 1)
 
         es.shutdown()
         # Check that the reference to the function has been removed from the
         # bus emitter
-        self.assertTrue(len(bus._events['id:f']) == 0)
+        self.assertTrue(len(bus._events.get('id:f', [])) == 0)
