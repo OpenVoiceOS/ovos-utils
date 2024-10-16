@@ -1,6 +1,9 @@
 from os import listdir
 from os.path import isdir, join
-from langcodes import tag_distance,  standardize_tag as std
+from typing import Optional
+
+from langcodes import tag_distance, standardize_tag as std
+
 from ovos_utils.file_utils import resolve_resource_file
 
 
@@ -17,7 +20,7 @@ def standardize_lang_tag(lang_code: str, macro=True) -> str:
         return lang_code.lower()
 
 
-def get_language_dir(base_path: str, lang: str ="en-US") -> str:
+def get_language_dir(base_path: str, lang: str ="en-US") -> Optional[str]:
     """ checks for all language variations and returns best path """
     lang = standardize_lang_tag(lang)
 
@@ -33,7 +36,7 @@ def get_language_dir(base_path: str, lang: str ="en-US") -> str:
                 # 1- 3 -> These codes indicate a minor regional difference.
                 # 4 - 10 -> These codes indicate a significant but unproblematic regional difference.
             if score < 10:
-                candidates.append((f, score))
+                candidates.append((f"{base_path}/{f}", score))
     if not candidates:
         return None
     # sort by distance to target lang code
