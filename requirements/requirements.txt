@@ -6,6 +6,6 @@ watchdog
 pyee>=8.0.0
 combo-lock~=0.2
 rich-click~=1.7
-rich~=13.7
+rich~=13.9
 orjson
 langcodes
