@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.3.5a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.5a1) (2024-10-16)
+## [0.3.6a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.6a1) (2024-10-21)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.4...0.3.5a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.5...0.3.6a1)
 
 **Merged pull requests:**
 
-- fix:standardize\_lang [\#283](https://github.com/OpenVoiceOS/ovos-utils/pull/283) ([JarbasAl](https://github.com/JarbasAl))
+- Update ovos-workshop requirement from \<1.0.0,\>=0.0.13 to \>=0.0.13,\<2.0.0 in /requirements [\#289](https://github.com/OpenVoiceOS/ovos-utils/pull/289) ([dependabot[bot]](https://github.com/apps/dependabot))
 
 
 
