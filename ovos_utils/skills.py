@@ -26,7 +26,15 @@ def get_non_properties(obj):
     return set(check_class(obj.__class__))
 
 
-def skills_loaded(bus=None):
+def skills_loaded(bus=None) -> bool:
+    """
+    Await a reply from mycroft.skills.all_loaded to check if all skills are
+    loaded.
+    @param bus: OVOS messagebus client
+    @return: Are all skills loaded? True/False
+    """
+    if bus is None:
+        return False
     reply = wait_for_reply('mycroft.skills.all_loaded',
                            'mycroft.skills.all_loaded.response',
                            bus=bus)
