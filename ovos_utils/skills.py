@@ -1,4 +1,3 @@
-from typing import Union
 from ovos_bus_client.util import wait_for_reply
 
 
@@ -27,12 +26,12 @@ def get_non_properties(obj):
     return set(check_class(obj.__class__))
 
 
-def skills_loaded(bus=None) -> Union[bool, str]:
+def skills_loaded(bus=None) -> bool:
     """
     Await a reply from mycroft.skills.all_loaded to check if all skills are
     loaded.
     @param bus: OVOS messagebus client
-    @return: Status string value if all skills are loaded, False otherwise
+    @return: Are all skills loaded? True/False
     """
     if bus is None:
         return False
