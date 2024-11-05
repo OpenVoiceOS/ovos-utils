@@ -7,7 +7,11 @@ import sys
 
 from ovos_utils.log import LOG, deprecated
 
-def is_running_from_module(module_name):
+def is_running_from_module(module_name: str) -> bool:
+    """
+    Check and see if the code is being run from a specific module
+    @param module_name: name of the module to check for
+    """
     # Stack:
     # [0] - _log()
     # [1] - debug(), info(), warning(), or error()
@@ -91,28 +95,6 @@ def restart_mycroft_service(sudo=True, user=False):
     """
     restart_service("mycroft.service", sudo=sudo, user=user)
 
-def is_running_from_module(module_name):
-    # Stack:
-    # [0] - _log()
-    # [1] - debug(), info(), warning(), or error()
-    # [2] - caller
-    stack = inspect.stack()
-
-    # Record:
-    # [0] - frame object
-    # [1] - filename
-    # [2] - line number
-    # [3] - function
-    # ...
-    for record in stack[2:]:
-        mod = inspect.getmodule(record[0])
-        name = mod.__name__ if mod else ''
-        # module name in file path of caller
-        # or import name matches module name
-        if f"/{module_name}/" in record[1] or \
-                name.startswith(module_name.replace("-", "_").replace(" ", "_")):
-            return True
-    return False
 
 def restart_service(service_name, sudo=True, user=False):
     """
