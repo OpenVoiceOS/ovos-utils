@@ -1,9 +1,11 @@
+import ipaddress
+
 import requests
-from requests.exceptions import RequestException, Timeout
 from timezonefinder import TimezoneFinder
 
 from ovos_utils import timed_lru_cache
 from ovos_utils.network_utils import get_external_ip
+
 
 def get_timezone(lat, lon):
     try:
@@ -11,12 +13,12 @@ def get_timezone(lat, lon):
             raise ValueError("Invalid coordinates")
         tz = TimezoneFinder().timezone_at(lng=float(lon), lat=float(lat))
         if not tz:
-            return {"name": "Unknown", "code": "Unknown"}
+            raise RuntimeError(f"Failed to determine timezone from lat/lon: {lat}, {lon}")
         return {
             "name": tz.replace("/", " "),
             "code": tz
         }
-    except (ValueError, TypeError) as e:
+    except Exception as e:
         raise ValueError(f"Invalid coordinates: {str(e)}")
 
 
@@ -33,17 +35,17 @@ def get_geolocation(location):
     url = "https://nominatim.openstreetmap.org/search"
 
     response = requests.get(url, params={"q": location, "format": "json", "limit": 1},
-                        headers={"User-Agent": "OVOS/1.0"})
+                            headers={"User-Agent": "OVOS/1.0"})
     if response.status_code == 200:
         results = response.json()
         if results:
             data = results[0]
         else:
-            # handle empty results
-            return None
+            raise ValueError(f"Geolocation failed: empty result from {url}")
     else:
         # handle request failure
-        return None
+        raise ValueError(f"Geolocation failed: status code {response.status_code}")
+
     lat = data.get("lat")
     lon = data.get("lon")
 
@@ -51,22 +53,20 @@ def get_geolocation(location):
         return get_reverse_geolocation(lat, lon)
 
     url = "https://nominatim.openstreetmap.org/details.php"
-    if 'osm_id' in data and 'osm_type' in data:
-        details = requests.get(url, params={"osmid": data['osm_id'], "osmtype": data['osm_type'][0].upper(),
-                                            "format": "json"},
-                               headers={"User-Agent": "OVOS/1.0"}).json()
-    else:
-        # handle missing osm_id or osm_type
-        return None
+    details = requests.get(url, params={"osmid": data['osm_id'], "osmtype": data['osm_type'][0].upper(),
+                                        "format": "json"},
+                           headers={"User-Agent": "OVOS/1.0"}).json()
 
     # if no addresstags are present for the location an empty list is sent instead of a dict
     tags = details.get("addresstags") or {}
 
     place_type = details.get("extratags", {}).get("linked_place") or details.get("category") or data.get(
         "type") or data.get("class")
-    name = details.get("localname") or details.get("names", {}).get("name") or details.get("names", {}).get("official_name") or data.get(
+    name = details.get("localname") or details.get("names", {}).get("name") or details.get("names", {}).get(
+        "official_name") or data.get(
         "display_name", "")
-    cc = details.get("country_code") or tags.get("country") or details.get("extratags", {}).get('ISO3166-1:alpha2') or ""
+    cc = details.get("country_code") or tags.get("country") or details.get("extratags", {}).get(
+        'ISO3166-1:alpha2') or ""
     # TODO - lang support, official name is reported in various langs
     location = {
         "address": data["display_name"],
@@ -144,6 +144,14 @@ def get_reverse_geolocation(lat, lon):
     return location
 
 
+def _is_valid_ip(ip):
+    try:
+        ipaddress.ip_address(ip)
+        return True
+    except ValueError:
+        return False
+
+
 @timed_lru_cache(seconds=600)  # cache results for 10 mins
 def get_ip_geolocation(ip):
     """Call the geolocation endpoint.
@@ -154,22 +162,11 @@ def get_ip_geolocation(ip):
     Returns:
         str: JSON structure with lookup results
     """
-import ipaddress
-
-def _is_valid_ip(ip):
-    try:
-        ipaddress.ip_address(ip)
-        return True
-    except ValueError:
-        return False
-
-@timed_lru_cache(seconds=600)  # cache results for 10 mins
-def get_ip_geolocation(ip):
     if not ip or not _is_valid_ip(ip) or ip in ["0.0.0.0", "127.0.0.1"]:
         ip = get_external_ip()
     fields = "status,country,countryCode,region,regionName,city,lat,lon,timezone,query"
     response = requests.get(f"https://ip-api.com/json/{ip}",
-                          params={"fields": fields})
+                            params={"fields": fields})
     response.raise_for_status()
     data = response.json()
     if data.get("status") != "success":
