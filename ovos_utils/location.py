@@ -77,9 +77,17 @@ def get_geolocation(location: str, timeout: int = 5) -> Dict[str, Any]:
         return get_reverse_geolocation(lat, lon)
 
     url = "https://nominatim.openstreetmap.org/details.php"
-    details = requests.get(url, params={"osmid": data['osm_id'], "osmtype": data['osm_type'][0].upper(),
-                                        "format": "json"},
-                           headers={"User-Agent": "OVOS/1.0"}).json()
+    try:
+        response = requests.get(url, params={"osmid": data['osm_id'], "osmtype": data['osm_type'][0].upper(),
+                                             "format": "json"},
+                                headers={"User-Agent": "OVOS/1.0"}, timeout=timeout)
+    except (RequestException, Timeout) as e:
+        raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}")
+    if response.status_code == 200:
+        details = response.json()
+    else:
+        # handle request failure
+        raise ConnectionError(f"Geolocation failed: status code {response.status_code}")
 
     # if no addresstags are present for the location an empty list is sent instead of a dict
     tags = details.get("addresstags") or {}
