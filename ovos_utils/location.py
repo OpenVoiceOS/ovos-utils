@@ -34,8 +34,10 @@ def get_timezone(lat: float, lon: float) -> Dict[str, str]:
             "name": tz.replace("/", " "),
             "code": tz
         }
+    except ValueError as e:
+        raise ValueError(f"Invalid coordinates: {str(e)}") from e
     except Exception as e:
-        raise ValueError(f"Invalid coordinates: {str(e)}")
+        raise RuntimeError(f"Timezone lookup failed: {str(e)}") from e
 
 
 @timed_lru_cache(seconds=600)
