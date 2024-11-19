@@ -1,17 +1,33 @@
 import ipaddress
+from typing import Dict, Any
 
 import requests
+from requests.exceptions import RequestException, Timeout
 from timezonefinder import TimezoneFinder
 
 from ovos_utils import timed_lru_cache
 from ovos_utils.network_utils import get_external_ip
 
 
-def get_timezone(lat, lon):
+def get_timezone(lat: float, lon: float) -> Dict[str, str]:
+    """
+    Determine the timezone based on latitude and longitude.
+
+    Args:
+        lat (float): Latitude in decimal degrees.
+        lon (float): Longitude in decimal degrees.
+
+    Returns:
+        Dict[str, str]: A dictionary containing the timezone name and code.
+
+    Raises:
+        ValueError: If the coordinates are invalid.
+        RuntimeError: If the timezone cannot be determined.
+    """
     try:
-        if not (-90 <= float(lat) <= 90) or not (-180 <= float(lon) <= 180):
+        if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
             raise ValueError("Invalid coordinates")
-        tz = TimezoneFinder().timezone_at(lng=float(lon), lat=float(lat))
+        tz = TimezoneFinder().timezone_at(lng=lon, lat=lat)
         if not tz:
             raise RuntimeError(f"Failed to determine timezone from lat/lon: {lat}, {lon}")
         return {
@@ -22,20 +38,28 @@ def get_timezone(lat, lon):
         raise ValueError(f"Invalid coordinates: {str(e)}")
 
 
-@timed_lru_cache(seconds=600)  # cache results for 10 mins
-def get_geolocation(location):
-    """Call the geolocation endpoint.
+@timed_lru_cache(seconds=600)
+def get_geolocation(location: str, timeout: int = 5) -> Dict[str, Any]:
+    """
+    Perform geolocation lookup for a given location string.
 
     Args:
-        location (str): the location to lookup (e.g. Kansas City Missouri)
+        location (str): The location to lookup (e.g., "Kansas City Missouri").
+        timeout (int): Timeout for the request in seconds (default is 5).
 
     Returns:
-        str: JSON structure with lookup results
+        Dict[str, Any]: JSON structure with lookup results.
+
+    Raises:
+        ConnectionError: If the geolocation service cannot be reached.
+        ValueError: If the service returns empty results.
     """
     url = "https://nominatim.openstreetmap.org/search"
-
-    response = requests.get(url, params={"q": location, "format": "json", "limit": 1},
-                            headers={"User-Agent": "OVOS/1.0"})
+    try:
+        response = requests.get(url, params={"q": location, "format": "json", "limit": 1},
+                                headers={"User-Agent": "OVOS/1.0"}, timeout=timeout)
+    except (RequestException, Timeout) as e:
+        raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}")
     if response.status_code == 200:
         results = response.json()
         if results:
@@ -44,7 +68,7 @@ def get_geolocation(location):
             raise ValueError(f"Geolocation failed: empty result from {url}")
     else:
         # handle request failure
-        raise ValueError(f"Geolocation failed: status code {response.status_code}")
+        raise ConnectionError(f"Geolocation failed: status code {response.status_code}")
 
     lat = data.get("lat")
     lon = data.get("lon")
@@ -94,21 +118,31 @@ def get_geolocation(location):
     return location
 
 
-@timed_lru_cache(seconds=600)  # cache results for 10 mins
-def get_reverse_geolocation(lat, lon):
-    """Call the reverse geolocation endpoint.
+@timed_lru_cache(seconds=600)
+def get_reverse_geolocation(lat: float, lon: float, timeout: int = 5) -> Dict[str, Any]:
+    """
+    Perform reverse geolocation lookup based on latitude and longitude.
 
     Args:
-        lat (float): latitude
-        lon (float): longitude
+        lat (float): Latitude in decimal degrees.
+        lon (float): Longitude in decimal degrees.
+        timeout (int): Timeout for the request in seconds (default is 5).
 
     Returns:
-        str: JSON structure with lookup results
+        Dict[str, Any]: JSON structure with lookup results.
+
+    Raises:
+        ConnectionError: If the reverse geolocation service cannot be reached.
+        ValueError: If the service returns empty results.
     """
 
     url = "https://nominatim.openstreetmap.org/reverse"
-    response = requests.get(url, params={"lat": lat, "lon": lon, "format": "json"},
-                            headers={"User-Agent": "OVOS/1.0"})
+    try:
+        response = requests.get(url, params={"lat": lat, "lon": lon, "format": "json"},
+                                headers={"User-Agent": "OVOS/1.0"}, timeout=timeout)
+    except (RequestException, Timeout) as e:
+        raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}")
+
     if response.status_code == 200:
         details = response.json()
         address = details.get("address")
@@ -116,7 +150,7 @@ def get_reverse_geolocation(lat, lon):
             raise ValueError(f"Reverse Geolocation failed: empty results from {url}")
     else:
         # handle request failure
-        raise ValueError(f"Reverse Geolocation failed: status code {response.status_code}")
+        raise ConnectionError(f"Reverse Geolocation failed: status code {response.status_code}")
 
     address = details.get("address")
     location = {
@@ -154,7 +188,16 @@ def get_reverse_geolocation(lat, lon):
     return location
 
 
-def _is_valid_ip(ip):
+def _is_valid_ip(ip: str) -> bool:
+    """
+    Validate an IP address.
+
+    Args:
+        ip (str): The IP address to validate.
+
+    Returns:
+        bool: True if the IP is valid, False otherwise.
+    """
     try:
         ipaddress.ip_address(ip)
         return True
@@ -162,28 +205,38 @@ def _is_valid_ip(ip):
         return False
 
 
-@timed_lru_cache(seconds=600)  # cache results for 10 mins
-def get_ip_geolocation(ip):
-    """Call the geolocation endpoint.
+@timed_lru_cache(seconds=600)
+def get_ip_geolocation(ip: str, timeout: int = 5) -> Dict[str, Any]:
+    """
+    Perform geolocation lookup based on an IP address.
 
     Args:
-        ip (str): the ip address to lookup
+        ip (str): The IP address to lookup.
+        timeout (int): Timeout for the request in seconds (default is 5).
 
     Returns:
-        str: JSON structure with lookup results
+        Dict[str, Any]: JSON structure with lookup results.
+
+    Raises:
+        ConnectionError: If the IP geolocation service cannot be reached.
+        ValueError: If the service returns invalid or empty results.
     """
     if not ip or not _is_valid_ip(ip) or ip in ["0.0.0.0", "127.0.0.1"]:
         ip = get_external_ip()
     fields = "status,country,countryCode,region,regionName,city,lat,lon,timezone,query"
-    response = requests.get(f"https://ip-api.com/json/{ip}",
-                            params={"fields": fields})
+    try:
+        response = requests.get(f"https://ip-api.com/json/{ip}",
+                                params={"fields": fields}, timeout=timeout)
+    except (RequestException, Timeout) as e:
+        raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}")
+
     if response.status_code == 200:
         data = response.json()
         if data.get("status") != "success":
             raise ValueError(f"IP geolocation failed: {data.get('message', 'Unknown error')}")
     else:
         # handle request failure
-        raise ValueError(f"IP Geolocation failed: status code {response.status_code}")
+        raise ConnectionError(f"IP Geolocation failed: status code {response.status_code}")
 
     region_data = {"code": data["region"],
                    "name": data["regionName"],
