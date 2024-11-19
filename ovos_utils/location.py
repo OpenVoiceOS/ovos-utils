@@ -2,6 +2,7 @@ import requests
 from timezonefinder import TimezoneFinder
 
 from ovos_utils import timed_lru_cache
+from ovos_utils.network_utils import get_external_ip
 
 
 def get_timezone(lat, lon):
@@ -120,3 +121,35 @@ def get_reverse_geolocation(lat, lon):
             lat=details.get("lat") or lat,
             lon=details.get("lon") or lon)
     return location
+
+
+@timed_lru_cache(seconds=600)  # cache results for 10 mins
+def get_ip_geolocation(ip):
+    """Call the geolocation endpoint.
+
+    Args:
+        ip (str): the ip address to lookup
+
+    Returns:
+        str: JSON structure with lookup results
+    """
+    if not ip or ip in ["0.0.0.0", "127.0.0.1"]:
+        ip = get_external_ip()
+    fields = "status,country,countryCode,region,regionName,city,lat,lon,timezone,query"
+    data = requests.get("http://ip-api.com/json/" + ip,
+                        params={"fields": fields}).json()
+    region_data = {"code": data["region"],
+                   "name": data["regionName"],
+                   "country": {
+                       "code": data["countryCode"],
+                       "name": data["country"]}}
+    city_data = {"code": data["city"],
+                 "name": data["city"],
+                 "state": region_data}
+    timezone_data = {"code": data["timezone"],
+                     "name": data["timezone"]}
+    coordinate_data = {"latitude": float(data["lat"]),
+                       "longitude": float(data["lon"])}
+    return {"city": city_data,
+            "coordinate": coordinate_data,
+            "timezone": timezone_data}
