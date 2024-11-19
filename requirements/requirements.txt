@@ -9,3 +9,4 @@ rich-click~=1.7
 rich~=13.7
 orjson
 langcodes
+timezonefinder
