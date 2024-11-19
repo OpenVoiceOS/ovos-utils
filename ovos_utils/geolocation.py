@@ -5,6 +5,8 @@ from requests.exceptions import RequestException, Timeout
 from timezonefinder import TimezoneFinder
 
 from ovos_utils import timed_lru_cache
+from ovos_utils.lang import standardize_lang_tag
+from ovos_utils.log import LOG
 from ovos_utils.network_utils import get_external_ip, is_valid_ip
 
 
@@ -197,13 +199,18 @@ def get_reverse_geolocation(lat: float, lon: float, timeout: int = 5) -> Dict[st
 
 
 @timed_lru_cache(seconds=600)
-def get_ip_geolocation(ip: Optional[str] = None, timeout: int = 5) -> Dict[str, Any]:
+def get_ip_geolocation(ip: Optional[str] = None,
+                       lang: str = "en",
+                       timeout: int = 5) -> Dict[str, Any]:
     """
     Perform geolocation lookup based on an IP address.
 
     Args:
         ip (str): The IP address to lookup.
+        lang (str): Localized city, regionName and country *
         timeout (int): Timeout for the request in seconds (default is 5).
+
+    * supported langs: ["en", "de", "es", "pt", "fr", "ja", "zh", "ru"]
 
     Returns:
         Dict[str, Any]: JSON structure with lookup results.
@@ -216,11 +223,23 @@ def get_ip_geolocation(ip: Optional[str] = None, timeout: int = 5) -> Dict[str, 
         ip = get_external_ip()
     if not is_valid_ip(ip):
         raise ValueError(f"Invalid IP address: {ip}")
+
+    # normalize language to expected values by ip-api.com
+    lang = standardize_lang_tag(lang).split("-")[0]
+    if lang not in ["en", "de", "es", "pt", "fr", "ja", "zh", "ru"]:
+        LOG.warning(f"Language unsupported by ip-api.com ({lang}), defaulting to english")
+        lang = "en"
+    elif lang == "pt":
+        lang = "pt-BR"
+    elif lang == "zh":
+        lang = "zh-CN"
+
     fields = "status,country,countryCode,region,regionName,city,lat,lon,timezone,query"
     try:
         # NOTE: ssl not available
         response = requests.get(f"http://ip-api.com/json/{ip}",
-                                params={"fields": fields}, timeout=timeout)
+                                params={"fields": fields, "lang": lang},
+                                timeout=timeout)
     except (RequestException, Timeout) as e:
         raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}")
 
