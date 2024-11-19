@@ -1,3 +1,4 @@
+import ipaddress
 import socket
 from typing import Optional
 
@@ -14,6 +15,23 @@ _DEFAULT_TEST_CONFIG = {
     "captive_portal_url": "http://nmcheck.gnome.org/check_network_status.txt",
     "captive_portal_text": "NetworkManager is online"
 }
+
+
+def is_valid_ip(ip: str) -> bool:
+    """
+    Validate an IP address.
+
+    Args:
+        ip (str): The IP address to validate.
+
+    Returns:
+        bool: True if the IP is valid, False otherwise.
+    """
+    try:
+        ipaddress.ip_address(ip)
+        return True
+    except ValueError:
+        return False
 
 
 def get_network_tests_config():

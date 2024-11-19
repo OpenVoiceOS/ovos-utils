@@ -1,23 +1,20 @@
 # Changelog
 
-## [0.3.7a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.7a1) (2024-11-04)
+## [0.3.8a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.8a2) (2024-11-19)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.6...0.3.7a1)
-
-**Fixed bugs:**
-
-- Should be 0.1.0; is there a bug in the version automation? [\#244](https://github.com/OpenVoiceOS/ovos-utils/issues/244)
-
-**Closed issues:**
-
-- system.py - Added method should get a docstring and type annotation [\#243](https://github.com/OpenVoiceOS/ovos-utils/issues/243)
-- skills.py - This should get type annotations and a docstring [\#242](https://github.com/OpenVoiceOS/ovos-utils/issues/242)
-- setup.py - This should be updated to an absolute path for automations [\#240](https://github.com/OpenVoiceOS/ovos-utils/issues/240)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.8a1...0.3.8a2)
 
 **Merged pull requests:**
 
-- Update ovos-workshop requirement from \<2.0.0,\>=0.0.13 to \>=0.0.13,\<3.0.0 in /requirements [\#292](https://github.com/OpenVoiceOS/ovos-utils/pull/292) ([dependabot[bot]](https://github.com/apps/dependabot))
-- chore: update docstrings and type hints [\#291](https://github.com/OpenVoiceOS/ovos-utils/pull/291) ([mikejgray](https://github.com/mikejgray))
+- feature: geolocation utils extracted from backend-client [\#296](https://github.com/OpenVoiceOS/ovos-utils/pull/296) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.3.8a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.8a1) (2024-11-11)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.7...0.3.8a1)
+
+**Merged pull requests:**
+
+- Update ovos-bus-client requirement from \<1.0.0,\>=0.0.8 to \>=0.0.8,\<2.0.0 in /requirements [\#294](https://github.com/OpenVoiceOS/ovos-utils/pull/294) ([dependabot[bot]](https://github.com/apps/dependabot))
 
 
 
