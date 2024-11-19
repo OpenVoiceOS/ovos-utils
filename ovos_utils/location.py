@@ -162,7 +162,6 @@ def get_reverse_geolocation(lat: float, lon: float, timeout: int = 5) -> Dict[st
         # handle request failure
         raise ConnectionError(f"Reverse Geolocation failed: status code {response.status_code}")
 
-    address = details.get("address")
     location = {
         "address": details["display_name"],
         "city": {
