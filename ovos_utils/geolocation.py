@@ -42,12 +42,13 @@ def get_timezone(lat: float, lon: float) -> Dict[str, str]:
 
 
 @timed_lru_cache(seconds=600)
-def get_geolocation(location: str, timeout: int = 5) -> Dict[str, Any]:
+def get_geolocation(location: str, lang: str = "en", timeout: int = 5) -> Dict[str, Any]:
     """
     Perform geolocation lookup for a given location string.
 
     Args:
         location (str): The location to lookup (e.g., "Kansas City Missouri").
+        lang (str): Localized city, regionName and country
         timeout (int): Timeout for the request in seconds (default is 5).
 
     Returns:
@@ -60,7 +61,7 @@ def get_geolocation(location: str, timeout: int = 5) -> Dict[str, Any]:
     url = "https://nominatim.openstreetmap.org/search"
     try:
         response = requests.get(url, params={"q": location, "format": "json", "limit": 1},
-                                headers={"User-Agent": "OVOS/1.0"}, timeout=timeout)
+                                headers={"User-Agent": "OVOS/1.0", "Accept-Language": lang}, timeout=timeout)
     except (RequestException, Timeout) as e:
         raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}")
     if response.status_code == 200:
@@ -77,13 +78,13 @@ def get_geolocation(location: str, timeout: int = 5) -> Dict[str, Any]:
     lon = data.get("lon")
 
     if lat and lon:
-        return get_reverse_geolocation(lat, lon)
+        return get_reverse_geolocation(lat, lon, lang)
 
     url = "https://nominatim.openstreetmap.org/details.php"
     try:
         response = requests.get(url, params={"osmid": data['osm_id'], "osmtype": data['osm_type'][0].upper(),
                                              "format": "json"},
-                                headers={"User-Agent": "OVOS/1.0"}, timeout=timeout)
+                                headers={"User-Agent": "OVOS/1.0", "Accept-Language": lang}, timeout=timeout)
     except (RequestException, Timeout) as e:
         raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}")
     if response.status_code == 200:
@@ -130,13 +131,14 @@ def get_geolocation(location: str, timeout: int = 5) -> Dict[str, Any]:
 
 
 @timed_lru_cache(seconds=600)
-def get_reverse_geolocation(lat: float, lon: float, timeout: int = 5) -> Dict[str, Any]:
+def get_reverse_geolocation(lat: float, lon: float, lang: str = "en", timeout: int = 5) -> Dict[str, Any]:
     """
     Perform reverse geolocation lookup based on latitude and longitude.
 
     Args:
         lat (float): Latitude in decimal degrees.
         lon (float): Longitude in decimal degrees.
+        lang (str): Localized city, regionName and country
         timeout (int): Timeout for the request in seconds (default is 5).
 
     Returns:
@@ -150,7 +152,7 @@ def get_reverse_geolocation(lat: float, lon: float, timeout: int = 5) -> Dict[st
     url = "https://nominatim.openstreetmap.org/reverse"
     try:
         response = requests.get(url, params={"lat": lat, "lon": lon, "format": "json"},
-                                headers={"User-Agent": "OVOS/1.0"}, timeout=timeout)
+                                headers={"User-Agent": "OVOS/1.0", "Accept-Language": lang}, timeout=timeout)
     except (RequestException, Timeout) as e:
         raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}")
 
@@ -193,8 +195,8 @@ def get_reverse_geolocation(lat: float, lon: float, timeout: int = 5) -> Dict[st
     }
     if "timezone" not in location:
         location["timezone"] = get_timezone(
-            lat=details.get("lat") or lat,
-            lon=details.get("lon") or lon)
+            lat=float(details.get("lat") or lat),
+            lon=float(details.get("lon") or lon))
     return location
 
 
