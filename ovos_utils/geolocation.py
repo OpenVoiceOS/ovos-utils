@@ -1,4 +1,3 @@
-import ipaddress
 from typing import Dict, Any
 
 import requests
@@ -6,7 +5,7 @@ from requests.exceptions import RequestException, Timeout
 from timezonefinder import TimezoneFinder
 
 from ovos_utils import timed_lru_cache
-from ovos_utils.network_utils import get_external_ip
+from ovos_utils.network_utils import get_external_ip, is_valid_ip
 
 
 def get_timezone(lat: float, lon: float) -> Dict[str, str]:
@@ -197,23 +196,6 @@ def get_reverse_geolocation(lat: float, lon: float, timeout: int = 5) -> Dict[st
     return location
 
 
-def _is_valid_ip(ip: str) -> bool:
-    """
-    Validate an IP address.
-
-    Args:
-        ip (str): The IP address to validate.
-
-    Returns:
-        bool: True if the IP is valid, False otherwise.
-    """
-    try:
-        ipaddress.ip_address(ip)
-        return True
-    except ValueError:
-        return False
-
-
 @timed_lru_cache(seconds=600)
 def get_ip_geolocation(ip: str, timeout: int = 5) -> Dict[str, Any]:
     """
@@ -230,7 +212,7 @@ def get_ip_geolocation(ip: str, timeout: int = 5) -> Dict[str, Any]:
         ConnectionError: If the IP geolocation service cannot be reached.
         ValueError: If the service returns invalid or empty results.
     """
-    if not ip or not _is_valid_ip(ip) or ip in ["0.0.0.0", "127.0.0.1"]:
+    if not ip or not is_valid_ip(ip) or ip in ["0.0.0.0", "127.0.0.1"]:
         ip = get_external_ip()
     fields = "status,country,countryCode,region,regionName,city,lat,lon,timezone,query"
     try:
