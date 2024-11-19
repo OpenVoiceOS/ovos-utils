@@ -218,7 +218,8 @@ def get_ip_geolocation(ip: Optional[str] = None, timeout: int = 5) -> Dict[str, 
         raise ValueError(f"Invalid IP address: {ip}")
     fields = "status,country,countryCode,region,regionName,city,lat,lon,timezone,query"
     try:
-        response = requests.get(f"https://ip-api.com/json/{ip}",
+        # NOTE: ssl not available
+        response = requests.get(f"http://ip-api.com/json/{ip}",
                                 params={"fields": fields}, timeout=timeout)
     except (RequestException, Timeout) as e:
         raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}")
