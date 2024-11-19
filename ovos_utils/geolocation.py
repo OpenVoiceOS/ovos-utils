@@ -10,6 +10,9 @@ from ovos_utils.log import LOG
 from ovos_utils.network_utils import get_external_ip, is_valid_ip
 
 
+_tz_finder: TimezoneFinder = None
+
+
 def get_timezone(lat: float, lon: float) -> Dict[str, str]:
     """
     Determine the timezone based on latitude and longitude.
@@ -25,10 +28,14 @@ def get_timezone(lat: float, lon: float) -> Dict[str, str]:
         ValueError: If the coordinates are invalid.
         RuntimeError: If the timezone cannot be determined.
     """
+    global _tz_finder
+    if _tz_finder is None:
+        # lazy loaded, resource intensive so we only want to do it once
+        _tz_finder = TimezoneFinder()
     try:
         if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
             raise ValueError("Invalid coordinates")
-        tz = TimezoneFinder().timezone_at(lng=lon, lat=lat)
+        tz = _tz_finder.timezone_at(lng=lon, lat=lat)
         if not tz:
             raise RuntimeError(f"Failed to determine timezone from lat/lon: {lat}, {lon}")
         return {
