@@ -105,9 +105,19 @@ def get_reverse_geolocation(lat, lon):
     Returns:
         str: JSON structure with lookup results
     """
+
     url = "https://nominatim.openstreetmap.org/reverse"
-    details = requests.get(url, params={"lat": lat, "lon": lon, "format": "json"},
-                           headers={"User-Agent": "OVOS/1.0"}).json()
+    response = requests.get(url, params={"lat": lat, "lon": lon, "format": "json"},
+                            headers={"User-Agent": "OVOS/1.0"})
+    if response.status_code == 200:
+        details = response.json()
+        address = details.get("address")
+        if not address:
+            raise ValueError(f"Reverse Geolocation failed: empty results from {url}")
+    else:
+        # handle request failure
+        raise ValueError(f"Reverse Geolocation failed: status code {response.status_code}")
+
     address = details.get("address")
     location = {
         "address": details["display_name"],
@@ -167,10 +177,14 @@ def get_ip_geolocation(ip):
     fields = "status,country,countryCode,region,regionName,city,lat,lon,timezone,query"
     response = requests.get(f"https://ip-api.com/json/{ip}",
                             params={"fields": fields})
-    response.raise_for_status()
-    data = response.json()
-    if data.get("status") != "success":
-        raise ValueError(f"IP geolocation failed: {data.get('message', 'Unknown error')}")
+    if response.status_code == 200:
+        data = response.json()
+        if data.get("status") != "success":
+            raise ValueError(f"IP geolocation failed: {data.get('message', 'Unknown error')}")
+    else:
+        # handle request failure
+        raise ValueError(f"IP Geolocation failed: status code {response.status_code}")
+
     region_data = {"code": data["region"],
                    "name": data["regionName"],
                    "country": {
