@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.8a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.8a2) (2024-11-19)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.8a1...0.3.8a2)
+
+**Merged pull requests:**
+
+- feature: geolocation utils extracted from backend-client [\#296](https://github.com/OpenVoiceOS/ovos-utils/pull/296) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.3.8a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.8a1) (2024-11-11)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.7...0.3.8a1)
