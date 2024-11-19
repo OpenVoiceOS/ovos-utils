@@ -70,7 +70,7 @@ def get_geolocation(location: str, lang: str = "en", timeout: int = 5) -> Dict[s
         response = requests.get(url, params={"q": location, "format": "json", "limit": 1},
                                 headers={"User-Agent": "OVOS/1.0", "Accept-Language": lang}, timeout=timeout)
     except (RequestException, Timeout) as e:
-        raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}")
+        raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}") from e
     if response.status_code == 200:
         results = response.json()
         if results:
@@ -93,7 +93,7 @@ def get_geolocation(location: str, lang: str = "en", timeout: int = 5) -> Dict[s
                                              "format": "json"},
                                 headers={"User-Agent": "OVOS/1.0", "Accept-Language": lang}, timeout=timeout)
     except (RequestException, Timeout) as e:
-        raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}")
+        raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}") from e
     if response.status_code == 200:
         details = response.json()
     else:
@@ -161,7 +161,7 @@ def get_reverse_geolocation(lat: float, lon: float, lang: str = "en", timeout: i
         response = requests.get(url, params={"lat": lat, "lon": lon, "format": "json"},
                                 headers={"User-Agent": "OVOS/1.0", "Accept-Language": lang}, timeout=timeout)
     except (RequestException, Timeout) as e:
-        raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}")
+        raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}") from e
 
     if response.status_code == 200:
         details = response.json()
@@ -250,7 +250,7 @@ def get_ip_geolocation(ip: Optional[str] = None,
                                 params={"fields": fields, "lang": lang},
                                 timeout=timeout)
     except (RequestException, Timeout) as e:
-        raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}")
+        raise ConnectionError(f"Failed to connect to geolocation service: {str(e)}") from e
 
     if response.status_code == 200:
         data = response.json()
