@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 import requests
 from requests.exceptions import RequestException, Timeout
@@ -197,7 +197,7 @@ def get_reverse_geolocation(lat: float, lon: float, timeout: int = 5) -> Dict[st
 
 
 @timed_lru_cache(seconds=600)
-def get_ip_geolocation(ip: str, timeout: int = 5) -> Dict[str, Any]:
+def get_ip_geolocation(ip: Optional[str] = None, timeout: int = 5) -> Dict[str, Any]:
     """
     Perform geolocation lookup based on an IP address.
 
@@ -212,8 +212,10 @@ def get_ip_geolocation(ip: str, timeout: int = 5) -> Dict[str, Any]:
         ConnectionError: If the IP geolocation service cannot be reached.
         ValueError: If the service returns invalid or empty results.
     """
-    if not ip or not is_valid_ip(ip) or ip in ["0.0.0.0", "127.0.0.1"]:
+    if not ip or ip in ["0.0.0.0", "127.0.0.1"]:
         ip = get_external_ip()
+    if not is_valid_ip(ip):
+        raise ValueError(f"Invalid IP address: {ip}")
     fields = "status,country,countryCode,region,regionName,city,lat,lon,timezone,query"
     try:
         response = requests.get(f"https://ip-api.com/json/{ip}",
