@@ -1,20 +1,12 @@
 # Changelog
 
-## [0.3.8a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.8a2) (2024-11-19)
+## [0.4.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.4.1a1) (2024-11-20)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.8a1...0.3.8a2)
-
-**Merged pull requests:**
-
-- feature: geolocation utils extracted from backend-client [\#296](https://github.com/OpenVoiceOS/ovos-utils/pull/296) ([JarbasAl](https://github.com/JarbasAl))
-
-## [0.3.8a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.3.8a1) (2024-11-11)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.3.7...0.3.8a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.4.0...0.4.1a1)
 
 **Merged pull requests:**
 
-- Update ovos-bus-client requirement from \<1.0.0,\>=0.0.8 to \>=0.0.8,\<2.0.0 in /requirements [\#294](https://github.com/OpenVoiceOS/ovos-utils/pull/294) ([dependabot[bot]](https://github.com/apps/dependabot))
+- move oauth utils to ovos-utils and deprecate backend-client [\#299](https://github.com/OpenVoiceOS/ovos-utils/pull/299) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
