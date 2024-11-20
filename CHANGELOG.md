@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.4.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.4.1a1) (2024-11-20)
+## [0.5.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.0a1) (2024-11-20)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.4.0...0.4.1a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.4.1...0.5.0a1)
 
 **Merged pull requests:**
 
-- move oauth utils to ovos-utils and deprecate backend-client [\#299](https://github.com/OpenVoiceOS/ovos-utils/pull/299) ([JarbasAl](https://github.com/JarbasAl))
+- feat:oauth utils to ovos-utils and deprecate backend-client [\#301](https://github.com/OpenVoiceOS/ovos-utils/pull/301) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
