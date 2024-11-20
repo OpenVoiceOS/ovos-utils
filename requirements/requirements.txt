@@ -10,3 +10,4 @@ rich~=13.7
 orjson
 langcodes
 timezonefinder
+oauthlib~=3.2
