@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.5.3a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.3a1) (2024-11-21)
+## [0.5.4a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.4a1) (2024-11-21)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.5.2...0.5.3a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.5.3...0.5.4a1)
 
 **Merged pull requests:**
 
-- fix: restore compat again [\#308](https://github.com/OpenVoiceOS/ovos-utils/pull/308) ([JarbasAl](https://github.com/JarbasAl))
+- fix: this time fix compat for realz [\#310](https://github.com/OpenVoiceOS/ovos-utils/pull/310) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
