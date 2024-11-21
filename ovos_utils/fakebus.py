@@ -60,7 +60,7 @@ class FakeBus:
             message = args[0]
         else:
             message = args[1]
-        parsed_message = Message.deserialize(message)
+        parsed_message = FakeMessage.deserialize(message)
         try:  # replicate side effects
             from ovos_bus_client.session import Session, SessionManager
             sess = Session.from_message(parsed_message)
