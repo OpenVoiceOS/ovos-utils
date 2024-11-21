@@ -330,3 +330,10 @@ class FakeMessage(metaclass=_MutableMessage):
 
         return FakeMessage(msg_type, data, context=new_context)
 
+
+class Message(FakeMessage):
+      """just for compat, stuff in the wild importing from here even with deprecation warnings..."""
+      def __new__(cls, *args, **kwargs):
+        log_deprecation("please import from ovos-bus-client directly! this import has been deprecated since version 0.1.0", "1.0.0")
+        return super().__new__(cls)
+  

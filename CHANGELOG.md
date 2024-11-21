@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.5.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.2a1) (2024-11-21)
+## [0.5.3a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.3a1) (2024-11-21)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.5.1...0.5.2a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.5.2...0.5.3a1)
 
 **Merged pull requests:**
 
-- fix: restore backwards compat [\#306](https://github.com/OpenVoiceOS/ovos-utils/pull/306) ([JarbasAl](https://github.com/JarbasAl))
+- fix: restore compat again [\#308](https://github.com/OpenVoiceOS/ovos-utils/pull/308) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
