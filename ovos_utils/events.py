@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from inspect import signature
 from typing import Callable, Optional, Union
 
-from ovos_utils.fakebus import Message, FakeBus, dig_for_message
+from ovos_utils.fakebus import FakeMessage as Message, FakeBus, dig_for_message
 from ovos_utils.file_utils import to_alnum
 from ovos_utils.log import LOG
 
