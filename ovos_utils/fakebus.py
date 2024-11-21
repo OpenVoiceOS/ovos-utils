@@ -173,12 +173,6 @@ class _MutableMessage(type):
                 return True
         except ImportError:
             pass
-        try:
-            from mycroft_bus_client.message import Message as _MycroftMessage
-            if isinstance(instance, _MycroftMessage):
-                return True
-        except ImportError:
-            pass
         return super().__instancecheck__(instance)
 
 
@@ -192,11 +186,6 @@ class FakeMessage(metaclass=_MutableMessage):
             return _M(*args, **kwargs)
         except ImportError:
             pass
-        try:  # some old install that upgraded during migration period
-            from mycroft_bus_client import Message as _M
-            return _M(*args, **kwargs)
-        except ImportError:  # FakeMessage
-            return super().__new__(cls)
 
     def __init__(self, msg_type, data=None, context=None):
         """Used to construct a message object
@@ -339,9 +328,3 @@ class FakeMessage(metaclass=_MutableMessage):
 
         return FakeMessage(msg_type, data, context=new_context)
 
-
-class Message(FakeMessage):
-    def __int__(self, *args, **kwargs):
-        log_deprecation(f"Import from ovos_bus_client.message directly",
-                        "0.1.0")
-        FakeMessage.__init__(self, *args, **kwargs)
