@@ -186,6 +186,8 @@ class FakeMessage(metaclass=_MutableMessage):
             return _M(*args, **kwargs)
         except ImportError:
             pass
+        return super().__new__(cls)
+
 
     def __init__(self, msg_type, data=None, context=None):
         """Used to construct a message object
