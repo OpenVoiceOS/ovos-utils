@@ -2,9 +2,8 @@ import json
 from copy import deepcopy
 from threading import Event
 
-from pyee import EventEmitter
-
 from ovos_utils.log import LOG, log_deprecation
+from pyee import EventEmitter
 
 
 def dig_for_message():
@@ -188,7 +187,6 @@ class FakeMessage(metaclass=_MutableMessage):
             pass
         return super().__new__(cls)
 
-
     def __init__(self, msg_type, data=None, context=None):
         """Used to construct a message object
 
@@ -332,8 +330,9 @@ class FakeMessage(metaclass=_MutableMessage):
 
 
 class Message(FakeMessage):
-      """just for compat, stuff in the wild importing from here even with deprecation warnings..."""
-      def __new__(cls, *args, **kwargs):
-        log_deprecation("please import from ovos-bus-client directly! this import has been deprecated since version 0.1.0", "1.0.0")
-        return super().__new__(cls)
-  
+    """just for compat, stuff in the wild importing from here even with deprecation warnings..."""
+
+    def __new__(cls, *args, **kwargs):
+        log_deprecation(
+            "please import from ovos-bus-client directly! this import has been deprecated since version 0.1.0", "1.0.0")
+        return FakeMessage(*args, **kwargs)
