@@ -10,7 +10,7 @@ except (ImportError, ModuleNotFoundError):
     from pyee.executor import ExecutorEventEmitter
 
 from unittest.mock import MagicMock, patch
-from ovos_utils.messagebus import FakeBus
+from ovos_utils.fakebus import FakeBus
 from ovos_bus_client.util.scheduler import EventScheduler, EventSchedulerInterface
 
 
