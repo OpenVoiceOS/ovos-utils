@@ -116,4 +116,4 @@ class TestEventSchedulerInterface(unittest.TestCase):
         es.shutdown()
         # Check that the reference to the function has been removed from the
         # bus emitter
-        self.assertTrue(len(es.bus._events.get('id:f', [])) == 0)
+        self.assertTrue(len(es.bus.ee._events.get('id:f', [])) == 0)
