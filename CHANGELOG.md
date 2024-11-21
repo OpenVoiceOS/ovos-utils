@@ -1,12 +1,13 @@
 # Changelog
 
-## [0.5.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.0a1) (2024-11-20)
+## [0.5.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.1a1) (2024-11-21)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.4.1...0.5.0a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.5.0...0.5.1a1)
 
 **Merged pull requests:**
 
-- feat:oauth utils to ovos-utils and deprecate backend-client [\#301](https://github.com/OpenVoiceOS/ovos-utils/pull/301) ([JarbasAl](https://github.com/JarbasAl))
+- fix: remove mycroft-bus-client compat [\#304](https://github.com/OpenVoiceOS/ovos-utils/pull/304) ([JarbasAl](https://github.com/JarbasAl))
+- chore: support newer pyee [\#303](https://github.com/OpenVoiceOS/ovos-utils/pull/303) ([mikejgray](https://github.com/mikejgray))
 
 
 
