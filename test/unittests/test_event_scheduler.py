@@ -4,10 +4,8 @@
 
 import unittest
 import time
-from pyee import ExecutorEventEmitter
-
 from unittest.mock import MagicMock, patch
-from ovos_utils.messagebus import FakeBus
+from ovos_utils.fakebus import FakeBus
 from ovos_bus_client.util.scheduler import EventScheduler, EventSchedulerInterface
 
 
@@ -107,8 +105,6 @@ class TestEventSchedulerInterface(unittest.TestCase):
         def f(message):
             print('TEST FUNC')
 
-        bus = ExecutorEventEmitter()
-
         es = EventSchedulerInterface('tester')
         es.set_bus(FakeBus())
         es.set_id('id')
@@ -120,4 +116,4 @@ class TestEventSchedulerInterface(unittest.TestCase):
         es.shutdown()
         # Check that the reference to the function has been removed from the
         # bus emitter
-        self.assertTrue(len(bus._events.get('id:f', [])) == 0)
+        self.assertTrue(len(es.bus.ee._events.get('id:f', [])) == 0)
