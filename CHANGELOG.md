@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.5.4a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.4a1) (2024-11-21)
+## [0.5.5a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.5a1) (2024-11-25)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.5.3...0.5.4a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.5.4...0.5.5a1)
 
 **Merged pull requests:**
 
-- fix: this time fix compat for realz [\#310](https://github.com/OpenVoiceOS/ovos-utils/pull/310) ([JarbasAl](https://github.com/JarbasAl))
+- Update ovos-config requirement from \<1.0.0,\>=0.0.12 to \>=0.0.12,\<2.0.0 in /requirements [\#313](https://github.com/OpenVoiceOS/ovos-utils/pull/313) ([dependabot[bot]](https://github.com/apps/dependabot))
 
 
 
