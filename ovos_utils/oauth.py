@@ -2,7 +2,6 @@ import time
 
 import requests
 from json_database import JsonStorageXDG
-from oauthlib.oauth2 import WebApplicationClient
 from ovos_config.locations import get_xdg_cache_save_path
 
 from ovos_utils.log import LOG
@@ -108,6 +107,7 @@ def refresh_oauth_token(token_id):
     client_secret = app_data["client_secret"]
 
     # Perform refresh
+    from oauthlib.oauth2 import WebApplicationClient
     client = WebApplicationClient(client_id, refresh_token=refresh_token)
     uri, headers, body = client.prepare_refresh_token_request(token_endpoint)
     refresh_result = requests.post(uri, headers=headers, data=body,
