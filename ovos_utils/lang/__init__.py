@@ -2,14 +2,13 @@ from os import listdir
 from os.path import isdir, join
 from typing import Optional
 
-from langcodes import tag_distance, standardize_tag as std
-
 from ovos_utils.file_utils import resolve_resource_file
 
 
 def standardize_lang_tag(lang_code: str, macro=True) -> str:
     """https://langcodes-hickford.readthedocs.io/en/sphinx/index.html"""
     try:
+        from langcodes import standardize_tag as std
         return str(std(lang_code, macro=macro))
     except:
         if macro:
@@ -28,6 +27,7 @@ def get_language_dir(base_path: str, lang: str ="en-US") -> Optional[str]:
     for f in listdir(base_path):
         if isdir(f"{base_path}/{f}"):
             try:
+                from langcodes import tag_distance
                 score = tag_distance(lang, f)
             except:  # not a valid language code
                 continue
