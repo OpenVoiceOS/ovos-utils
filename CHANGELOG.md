@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.5.5a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.5a1) (2024-11-25)
+## [0.5.6a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.6a1) (2024-12-04)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.5.4...0.5.5a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.5.5...0.5.6a1)
 
 **Merged pull requests:**
 
-- Update ovos-config requirement from \<1.0.0,\>=0.0.12 to \>=0.0.12,\<2.0.0 in /requirements [\#313](https://github.com/OpenVoiceOS/ovos-utils/pull/313) ([dependabot[bot]](https://github.com/apps/dependabot))
+- refactor:move\_to\_extras [\#315](https://github.com/OpenVoiceOS/ovos-utils/pull/315) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
