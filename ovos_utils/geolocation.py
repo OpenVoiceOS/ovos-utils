@@ -2,7 +2,6 @@ from typing import Dict, Any, Optional
 
 import requests
 from requests.exceptions import RequestException, Timeout
-from timezonefinder import TimezoneFinder
 
 from ovos_utils import timed_lru_cache
 from ovos_utils.lang import standardize_lang_tag
@@ -10,7 +9,7 @@ from ovos_utils.log import LOG
 from ovos_utils.network_utils import get_external_ip, is_valid_ip
 
 
-_tz_finder: TimezoneFinder = None
+_tz_finder = None
 
 
 def get_timezone(lat: float, lon: float) -> Dict[str, str]:
@@ -30,6 +29,7 @@ def get_timezone(lat: float, lon: float) -> Dict[str, str]:
     """
     global _tz_finder
     if _tz_finder is None:
+        from timezonefinder import TimezoneFinder
         # lazy loaded, resource intensive so we only want to do it once
         _tz_finder = TimezoneFinder()
     try:
