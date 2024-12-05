@@ -1,6 +1,6 @@
 import itertools
 import re
-from typing import List
+from typing import List, Dict
 
 from ovos_utils.log import deprecated
 
@@ -21,18 +21,27 @@ def expand_template(template: str) -> List[str]:
                 parts.append([segment])
         return itertools.product(*parts)
 
+    def fully_expand(texts):
+        """Iteratively expand alternatives until all possibilities are covered."""
+        result = set(texts)
+        while True:
+            expanded = set()
+            for text in result:
+                options = list(expand_alternatives(text))
+                expanded.update(["".join(option).strip() for option in options])
+            if expanded == result:  # No new expansions found
+                break
+            result = expanded
+        return sorted(result)  # Return a sorted list for consistency
+
     # Expand optional items first
     template = expand_optional(template)
 
-    # Expand all combinations of alternatives
-    options = expand_alternatives(template)
-
-    # Join parts into full sentences
-    expanded_sentences = ["".join(option).strip() for option in options]
-    return expanded_sentences
+    # Fully expand all combinations of alternatives
+    return fully_expand([template])
 
 
-def expand_slots(template: str, slots: dict[str, list[str]]) -> list[str]:
+def expand_slots(template: str, slots: Dict[str, List[str]]) -> List[str]:
     """Expand a template by first expanding alternatives and optional components,
     then substituting slot placeholders with their corresponding options.
 
