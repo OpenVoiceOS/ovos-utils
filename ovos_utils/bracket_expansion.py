@@ -1,7 +1,71 @@
+import itertools
 import re
 from typing import List
 
+from ovos_utils.log import deprecated
 
+
+def expand_template(template: str) -> List[str]:
+    def expand_optional(text):
+        """Replace [optional] with two options: one with and one without."""
+        return re.sub(r"\[([^\[\]]+)\]", lambda m: f"({m.group(1)}|)", text)
+
+    def expand_alternatives(text):
+        """Expand (alternative|choices) into a list of choices."""
+        parts = []
+        for segment in re.split(r"(\([^\(\)]+\))", text):
+            if segment.startswith("(") and segment.endswith(")"):
+                options = segment[1:-1].split("|")
+                parts.append(options)
+            else:
+                parts.append([segment])
+        return itertools.product(*parts)
+
+    # Expand optional items first
+    template = expand_optional(template)
+
+    # Expand all combinations of alternatives
+    options = expand_alternatives(template)
+
+    # Join parts into full sentences
+    expanded_sentences = ["".join(option).strip() for option in options]
+    return expanded_sentences
+
+
+def expand_slots(template: str, slots: dict[str, list[str]]) -> list[str]:
+    """Expand a template by first expanding alternatives and optional components,
+    then substituting slot placeholders with their corresponding options.
+
+    Args:
+        template (str): The input string template to expand.
+        slots (dict): A dictionary where keys are slot names and values are lists of possible replacements.
+
+    Returns:
+        list[str]: A list of all expanded combinations.
+    """
+    # Expand alternatives and optional components
+    base_expansions = expand_template(template)
+
+    # Process slots
+    all_sentences = []
+    for sentence in base_expansions:
+        matches = re.findall(r"\{([^\{\}]+)\}", sentence)
+        if matches:
+            # Create all combinations for slots in the sentence
+            slot_options = [slots.get(match, [f"{{{match}}}"]) for match in matches]
+            for combination in itertools.product(*slot_options):
+                filled_sentence = sentence
+                for slot, replacement in zip(matches, combination):
+                    filled_sentence = filled_sentence.replace(f"{{{slot}}}", replacement)
+                all_sentences.append(filled_sentence)
+        else:
+            # No slots to expand
+            all_sentences.append(sentence)
+
+    return all_sentences
+
+
+@deprecated("use 'expand_template' directly instead", "1.0.0")
 def expand_parentheses(sent: List[str]) -> List[str]:
     """
     ['1', '(', '2', '|', '3, ')'] -> [['1', '2'], ['1', '3']]
@@ -22,6 +86,7 @@ def expand_parentheses(sent: List[str]) -> List[str]:
     return SentenceTreeParser(sent).expand_parentheses()
 
 
+@deprecated("use 'expand_template' directly instead", "1.0.0")
 def expand_options(parentheses_line: str) -> list:
     """
     Convert 'test (a|b)' -> ['test a', 'test b']
@@ -38,6 +103,7 @@ def expand_options(parentheses_line: str) -> list:
 class Fragment:
     """(Abstract) empty sentence fragment"""
 
+    @deprecated("use 'expand_template' function directly instead", "1.0.0")
     def __init__(self, tree):
         """
         Construct a sentence tree fragment which is merely a wrapper for
@@ -73,6 +139,11 @@ class Word(Fragment):
     Construct with a string as argument.
     """
 
+    @deprecated("use 'expand_template' function directly instead", "1.0.0")
+    def __init__(self, tree):
+        """DEPRECATED"""
+        super().__init__(tree)
+
     def expand(self):
         """
         Creates one sentence that contains exactly that word.
@@ -88,6 +159,11 @@ class Sentence(Fragment):
     A Sentence made of several concatenations/words.
     Construct with a List<Fragment> as argument.
     """
+
+    @deprecated("use 'expand_template' function directly instead", "1.0.0")
+    def __init__(self, tree):
+        """DEPRECATED"""
+        super().__init__(tree)
 
     def expand(self):
         """
@@ -114,6 +190,11 @@ class Options(Fragment):
     Construct with List<Fragment> as argument.
     """
 
+    @deprecated("use 'expand_template' function directly instead", "1.0.0")
+    def __init__(self, tree):
+        """DEPRECATED"""
+        super().__init__(tree)
+
     def expand(self):
         """
         Returns all of its options as seperated sub-sentences.
@@ -133,6 +214,7 @@ class SentenceTreeParser:
     ['1', '(', '2', '|', '3, ')'] -> [['1', '2'], ['1', '3']]
     """
 
+    @deprecated("use 'expand_template' function directly instead", "1.0.0")
     def __init__(self, tokens):
         self.tokens = tokens
 
