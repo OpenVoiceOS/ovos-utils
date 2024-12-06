@@ -1,3 +1,5 @@
+import json
+import os.path
 import unittest
 
 from ovos_utils.bracket_expansion import expand_template, expand_slots
@@ -36,19 +38,6 @@ class TestTemplateExpansion(unittest.TestCase):
         self.assertEqual(expanded_sentences, expected_sentences)
 
     def test_expand_template(self):
-        # Test for template expansion
-        templates = [
-            "[hello,] (call me|my name is) {name}",
-            "Expand (alternative|choices) into a list of choices.",
-            "sentences have [optional] words ",
-            "alternative words can be (used|written)",
-            "sentence[s] can have (pre|suf)fixes mid word too",
-            "do( the | )thing(s|) (old|with) style and( no | )spaces",
-            "[(this|that) is optional]",
-            "tell me a [{joke_type}] joke",
-            "play {query} [in ({device_name}|{skill_name}|{zone_name})]"
-        ]
-
         expected_outputs = {
             "[hello,] (call me|my name is) {name}": [
                 "call me {name}",
@@ -107,6 +96,16 @@ class TestTemplateExpansion(unittest.TestCase):
                 "play {query} in {zone_name}"
             ]
         }
+
+        for template, expected_sentences in expected_outputs.items():
+            with self.subTest(template=template):
+                expanded_sentences = expand_template(template)
+                self.assertEqual(expanded_sentences, expected_sentences)
+
+    def test_long(self):
+        # problematic examples taken from https://github.com/OpenVoiceOS/ovos-padatious-pipeline-plugin/issues/9
+        with open(os.path.join(os.path.dirname(__file__), "test_de_expansion.json")) as f:
+            expected_outputs = json.load(f)
 
         for template, expected_sentences in expected_outputs.items():
             with self.subTest(template=template):
