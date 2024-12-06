@@ -5,7 +5,7 @@ from os.path import join
 from pathlib import Path
 from typing import Optional
 
-from ovos_utils.bracket_expansion import expand_options
+from ovos_utils.bracket_expansion import expand_template
 from ovos_utils.file_utils import resolve_resource_file
 from ovos_utils.lang import translate_word
 from ovos_utils.log import LOG, log_deprecation
@@ -92,7 +92,7 @@ class MustacheDialogRenderer:
             line = template_functions[index % len(template_functions)]
         # Replace {key} in line with matching values from context
         line = line.format(**context)
-        line = random.choice(expand_options(line))
+        line = random.choice(expand_template(line))
 
         # Here's where we keep track of what we've said recently. Remember,
         # this is by line in the .dialog file, not by exact phrase
