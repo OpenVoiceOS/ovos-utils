@@ -12,7 +12,7 @@ from typing import Optional, List
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-from ovos_utils.bracket_expansion import expand_options
+from ovos_utils.bracket_expansion import expand_template
 from ovos_utils.log import LOG, log_deprecation
 
 
@@ -241,7 +241,7 @@ def read_vocab_file(path: str) -> List[List[str]]:
         for line in voc_file.readlines():
             if line.startswith('#') or line.strip() == '':
                 continue
-            vocab.append(expand_options(line.lower()))
+            vocab.append(expand_template(line.lower()))
     return vocab
 
 
