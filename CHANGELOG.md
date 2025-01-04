@@ -1,16 +1,12 @@
 # Changelog
 
-## [0.6.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.6.0a1) (2024-12-06)
+## [0.6.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.6.1a1) (2025-01-04)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.5.6...0.6.0a1)
-
-**Implemented enhancements:**
-
-- feat: support \[optional\] syntax [\#312](https://github.com/OpenVoiceOS/ovos-utils/issues/312)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.6.0...0.6.1a1)
 
 **Merged pull requests:**
 
-- feat: extend dialog/intent templates [\#317](https://github.com/OpenVoiceOS/ovos-utils/pull/317) ([JarbasAl](https://github.com/JarbasAl))
+- chore: add warnings [\#321](https://github.com/OpenVoiceOS/ovos-utils/pull/321) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
