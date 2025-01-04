@@ -2,8 +2,14 @@ import os
 import os.path
 import tempfile
 import time
-
+import warnings
 from ovos_utils.log import LOG, log_deprecation, deprecated
+
+warnings.warn(
+    "ovos_utils.signal module has been deprecated without replacement`",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 @deprecated("ovos_utils.signal module has been deprecated!", "0.2.0")

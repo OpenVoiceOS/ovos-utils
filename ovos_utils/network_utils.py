@@ -3,7 +3,7 @@ import socket
 from typing import Optional
 
 import requests
-
+import warnings
 from ovos_utils.log import LOG, deprecated
 
 _DEFAULT_TEST_CONFIG = {
@@ -131,6 +131,11 @@ def is_connected() -> bool:
     """
     alias for is_connected_http()
     """
+    warnings.warn(
+        "use is_connected_http or is_connected_dns",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return is_connected_http()
 
 

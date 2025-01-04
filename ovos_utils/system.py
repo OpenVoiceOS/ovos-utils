@@ -4,7 +4,7 @@ import re
 import shutil
 import subprocess
 import sys
-
+import warnings
 from ovos_utils.log import LOG, deprecated
 
 def is_running_from_module(module_name: str) -> bool:
@@ -40,6 +40,11 @@ def ntp_sync():
     """
     Force the system clock to synchronize with internet time servers
     """
+    warnings.warn(
+        "handled by ovos-PHAL-plugin-system",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     subprocess.call('service ntp stop', shell=True)
     subprocess.call('ntpd -gq', shell=True)
     subprocess.call('service ntp start', shell=True)
@@ -50,6 +55,11 @@ def system_shutdown(sudo=True):
     Turn the system completely off (with no option to inhibit it)
     @param sudo: use sudo when calling systemctl
     """
+    warnings.warn(
+        "handled by ovos-PHAL-plugin-system",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     cmd = 'systemctl poweroff -i'
     if sudo:
         cmd = f'sudo {cmd}'
@@ -62,6 +72,11 @@ def system_reboot(sudo=True):
     Shut down and restart the system
     @param sudo: use sudo when calling systemctl
     """
+    warnings.warn(
+        "handled by ovos-PHAL-plugin-system",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     cmd = 'systemctl reboot -i'
     if sudo:
         cmd = f'sudo {cmd}'
@@ -75,6 +90,11 @@ def ssh_enable(sudo=True, user=False):
     @param sudo: use sudo when calling systemctl
     @param user: pass --user flag when calling systemctl
     """
+    warnings.warn(
+        "handled by ovos-PHAL-plugin-system",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     enable_service("ssh.service", sudo=sudo, user=user)
 
 @deprecated("DEPRECATED: use ovos-PHAL-plugin-system", "0.2.0")
@@ -84,6 +104,11 @@ def ssh_disable(sudo=True, user=False):
     @param sudo: use sudo when calling systemctl
     @param user: pass --user flag when calling systemctl
     """
+    warnings.warn(
+        "handled by ovos-PHAL-plugin-system",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     disable_service("ssh.service", sudo=sudo, user=user)
 
 @deprecated("DEPRECATED: use ovos-PHAL-plugin-system", "0.2.0")
@@ -93,6 +118,11 @@ def restart_mycroft_service(sudo=True, user=False):
     @param sudo: use sudo when calling systemctl
     @param user: pass --user flag when calling systemctl
     """
+    warnings.warn(
+        "handled by ovos-PHAL-plugin-system",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     restart_service("mycroft.service", sudo=sudo, user=user)
 
 

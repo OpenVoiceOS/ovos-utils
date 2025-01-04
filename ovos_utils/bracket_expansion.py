@@ -1,7 +1,7 @@
 import itertools
 import re
 from typing import List, Dict
-
+import warnings
 from ovos_utils.log import deprecated
 
 
@@ -92,6 +92,11 @@ def expand_parentheses(sent: List[str]) -> List[str]:
     Returns:
         list<list<str>>: Multiple possible sentences from original
     """
+    warnings.warn(
+        "use 'expand_template'",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return SentenceTreeParser(sent).expand_parentheses()
 
 
@@ -104,6 +109,11 @@ def expand_options(parentheses_line: str) -> list:
     Returns:
         List of expanded possibilities
     """
+    warnings.warn(
+        "use 'expand_template'",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     # 'a(this|that)b' -> [['a', 'this', 'b'], ['a', 'that', 'b']]
     options = expand_parentheses(re.split(r'([(|)])', parentheses_line))
     return [re.sub(r'\s+', ' ', ' '.join(i)).strip() for i in options]
@@ -121,6 +131,11 @@ class Fragment:
             tree (?): Base tree for the sentence fragment, type depends on
                         subclass, refer to those subclasses
         """
+        warnings.warn(
+            "use 'expand_template'",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self._tree = tree
 
     def tree(self):
@@ -151,6 +166,11 @@ class Word(Fragment):
     @deprecated("use 'expand_template' function directly instead", "1.0.0")
     def __init__(self, tree):
         """DEPRECATED"""
+        warnings.warn(
+            "use 'expand_template'",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         super().__init__(tree)
 
     def expand(self):
@@ -172,6 +192,11 @@ class Sentence(Fragment):
     @deprecated("use 'expand_template' function directly instead", "1.0.0")
     def __init__(self, tree):
         """DEPRECATED"""
+        warnings.warn(
+            "use 'expand_template'",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         super().__init__(tree)
 
     def expand(self):
@@ -202,6 +227,11 @@ class Options(Fragment):
     @deprecated("use 'expand_template' function directly instead", "1.0.0")
     def __init__(self, tree):
         """DEPRECATED"""
+        warnings.warn(
+            "use 'expand_template'",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         super().__init__(tree)
 
     def expand(self):
@@ -225,6 +255,11 @@ class SentenceTreeParser:
 
     @deprecated("use 'expand_template' function directly instead", "1.0.0")
     def __init__(self, tokens):
+        warnings.warn(
+            "use 'expand_template'",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self.tokens = tokens
 
     def _parse(self):
