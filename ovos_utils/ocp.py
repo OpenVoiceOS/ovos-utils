@@ -3,7 +3,7 @@ import mimetypes
 from dataclasses import dataclass
 from enum import IntEnum
 from typing import Optional, Tuple, List, Union
-
+import warnings
 import orjson
 
 from ovos_utils.log import LOG, deprecated
@@ -133,6 +133,11 @@ class MediaType(IntEnum):
 @deprecated("import ovos_utils.available_extractors from ovos_plugin_manager.ocp instead", "0.1.0")
 def available_extractors():
     # TODO - delete me, still imported in ovos-bus-client, but never made it into a non-alpha
+    warnings.warn(
+        "import from ovos_plugin_manager.ocp instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     try:
         from ovos_plugin_manager.ocp import available_extractors as _ax
     except ImportError:

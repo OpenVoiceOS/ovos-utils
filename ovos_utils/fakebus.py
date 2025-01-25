@@ -1,7 +1,7 @@
 import json
 from copy import deepcopy
 from threading import Event
-
+import warnings
 from ovos_utils.log import LOG, log_deprecation
 from pyee import EventEmitter
 
@@ -333,6 +333,11 @@ class Message(FakeMessage):
     """just for compat, stuff in the wild importing from here even with deprecation warnings..."""
 
     def __new__(cls, *args, **kwargs):
+        warnings.warn(
+            "import from ovos-bus-client directly",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         log_deprecation(
             "please import from ovos-bus-client directly! this import has been deprecated since version 0.1.0", "1.0.0")
         return FakeMessage(*args, **kwargs)

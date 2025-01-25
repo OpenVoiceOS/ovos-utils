@@ -15,7 +15,7 @@ import re
 from functools import lru_cache, wraps
 from threading import Thread, Event
 from time import monotonic_ns, sleep
-
+import warnings
 import kthread
 
 from ovos_utils.log import LOG
@@ -152,6 +152,11 @@ def get_handler_name(*args, **kwargs):
     from ovos_utils.log import log_deprecation
     log_deprecation("Import from `ovos_utils.events`", "0.1.0")
     from ovos_utils.events import get_handler_name
+    warnings.warn(
+        "Import from `ovos_utils.events`",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return get_handler_name(*args, **kwargs)
 
 
