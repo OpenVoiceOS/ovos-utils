@@ -69,13 +69,13 @@ class LOG:
     formatter = logging.Formatter(fmt, datefmt)
     max_bytes = 50000000
     backup_count = 3
-    name = os.getenv("OVOS_DEFAULT_LOG_NAME") or 'OVOS'
+    name = os.getenv("OVOS_DEFAULT_LOG_NAME") or "OVOS"
     level = os.getenv("OVOS_DEFAULT_LOG_LEVEL") or "INFO"
     diagnostic_mode = False
     _loggers = {}
 
     @classmethod
-    def __init__(cls, name='OVOS'):
+    def __init__(cls, name=name):
         cls.name = name
 
     @classmethod
@@ -253,9 +253,9 @@ def get_logs_config(service_name: Optional[str] = None,
 
 def log_deprecation(log_message: str = "DEPRECATED",
                     deprecation_version: str = "Unknown",
-                    func_name: str = None,
-                    func_module: str = None,
-                    excluded_package_refs: List[str] = None):
+                    func_name: str = "",
+                    func_module: str = "",
+                    excluded_package_refs: List[str] = [""]):
     """
     Log a deprecation warning with information for the call outside the module
     that is generating the warning
@@ -393,6 +393,6 @@ def get_available_logs(directories: Optional[List[str]] = None) -> List[str]:
     Returns:
         list of log file basenames (i.e. "audio", "skills")
     """
-    directories = directories or get_log_paths()
+    directories = directories or list(get_log_paths())
     return [Path(f).stem for path in directories
             for f in os.listdir(path) if Path(f).suffix == ".log"]
