@@ -1,6 +1,8 @@
+import signal
 from functools import wraps
 from threading import Thread, Event
 from typing import Callable, Optional, Any
+
 import kthread
 
 from ovos_utils.log import LOG
@@ -22,6 +24,7 @@ def threaded_timeout(timeout: int = 5) -> Callable:
         def long_running_task():
             pass
     """
+
     def deco(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -51,7 +54,8 @@ def threaded_timeout(timeout: int = 5) -> Callable:
     return deco
 
 
-def create_killable_daemon(target: Callable, args: tuple = (), kwargs: Optional[dict] = None, autostart: bool = True) -> kthread.KThread:
+def create_killable_daemon(target: Callable, args: tuple = (), kwargs: Optional[dict] = None,
+                           autostart: bool = True) -> kthread.KThread:
     """
     Helper to create and start a killable daemon thread.
 
@@ -108,7 +112,16 @@ def wait_for_exit_signal() -> None:
     Example:
         wait_for_exit_signal()  # The program will block here until KeyboardInterrupt is received.
     """
+    exit_event = Event()
+
+    def signal_handler(signum, frame):
+        LOG.debug("Exiting on signal %s", signal.Signals(signum).name)
+        exit_event.set()
+
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+
     try:
-        Event().wait()
+        exit_event.wait()
     except KeyboardInterrupt:
-        LOG.debug(f"Exiting on KeyboardInterrupt")
+        LOG.debug("Exiting on KeyboardInterrupt")
