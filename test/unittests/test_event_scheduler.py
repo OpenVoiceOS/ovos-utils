@@ -2,11 +2,13 @@
     Test cases regarding the event scheduler.
 """
 
-import unittest
 import time
+import unittest
 from unittest.mock import MagicMock, patch
+
+from ovos_bus_client.util.scheduler import EventScheduler
+from ovos_utils.events import EventSchedulerInterface
 from ovos_utils.fakebus import FakeBus
-from ovos_bus_client.util.scheduler import EventScheduler, EventSchedulerInterface
 
 
 class TestEventScheduler(unittest.TestCase):
