@@ -1,20 +1,12 @@
 # Changelog
 
-## [0.6.1a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.6.1a2) (2025-01-04)
+## [0.7.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.7.0a1) (2025-02-02)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.6.1a1...0.6.1a2)
-
-**Merged pull requests:**
-
-- Update json-database requirement from ~=0.7 to ~=0.10 in /requirements [\#320](https://github.com/OpenVoiceOS/ovos-utils/pull/320) ([dependabot[bot]](https://github.com/apps/dependabot))
-
-## [0.6.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.6.1a1) (2025-01-04)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.6.0...0.6.1a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.6.1...0.7.0a1)
 
 **Merged pull requests:**
 
-- chore: add warnings [\#321](https://github.com/OpenVoiceOS/ovos-utils/pull/321) ([JarbasAl](https://github.com/JarbasAl))
+- feat:shared\_utils [\#324](https://github.com/OpenVoiceOS/ovos-utils/pull/324) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
