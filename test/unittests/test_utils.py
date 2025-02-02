@@ -62,7 +62,7 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(wait_thread.wait(1), 0)
 
     def test_get_handler_name(self):
-        from ovos_utils import get_handler_name
+        from ovos_utils.events import get_handler_name
 
         def some_function():
             return
