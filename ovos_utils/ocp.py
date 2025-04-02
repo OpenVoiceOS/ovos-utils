@@ -477,7 +477,7 @@ class Playlist(list):
         Sort the Playlist by `match_confidence` with high confidence first
         """
         self.sort(
-            key=lambda k: k.match_confidence if isinstance(k, (MediaEntry, Playlist))
+            key=lambda k: k.match_confidence if isinstance(k, (MediaEntry, PluginStream, Playlist))
             else k.get("match_confidence", 0), reverse=True)
 
     def add_entry(self, entry: Union[MediaEntry, PluginStream], index: int = -1) -> None:
