@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.7.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.7.0a1) (2025-02-02)
+## [0.7.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.7.1a1) (2025-04-02)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.6.1...0.7.0a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.7.0...0.7.1a1)
 
 **Merged pull requests:**
 
-- feat:shared\_utils [\#324](https://github.com/OpenVoiceOS/ovos-utils/pull/324) ([JarbasAl](https://github.com/JarbasAl))
+- fix: PluginStream in playlistss [\#327](https://github.com/OpenVoiceOS/ovos-utils/pull/327) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
