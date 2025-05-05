@@ -61,7 +61,7 @@ def fuzzy_match(x, against, strategy=MatchStrategy.SIMPLE_RATIO):
     return score
 
 
-def match_one(query, choices, match_func=None, strategy=MatchStrategy.SIMPLE_RATIO):
+def match_one(query, choices, match_func=None, strategy=MatchStrategy.SIMPLE_RATIO, ignore_case=False):
     """
         Find best match from a list or dictionary given an input
 
@@ -71,10 +71,10 @@ def match_one(query, choices, match_func=None, strategy=MatchStrategy.SIMPLE_RAT
 
         Returns: tuple with best match, score
     """
-    return match_all(query, choices, match_func, strategy)[0]
+    return match_all(query, choices, match_func, strategy, ignore_case)[0]
 
 
-def match_all(query, choices, match_func=None, strategy=MatchStrategy.SIMPLE_RATIO):
+def match_all(query, choices, match_func=None, strategy=MatchStrategy.SIMPLE_RATIO, ignore_case=False):
     """
         match scores from a list or dictionary given an input
 
@@ -94,10 +94,10 @@ def match_all(query, choices, match_func=None, strategy=MatchStrategy.SIMPLE_RAT
         raise ValueError('a list or dict of choices must be provided')
     matches = []
     for c in _choices:
-        if isinstance(choices, dict):
-            matches.append((choices[c], match_func(query, c, strategy)))
-        else:
-            matches.append((c, match_func(query, c, strategy)))
+        score = match_func(query.lower() if ignore_case else query, 
+                       c.lower() if ignore_case else c, 
+                       strategy)
+        matches.append((choices[c] if isinstance(choices, dict) else c, score))
 
     # TODO solve ties
 
