@@ -32,10 +32,16 @@ def _validate_matching_strategy(strategy):
 
 
 def fuzzy_match(x, against, strategy=MatchStrategy.SIMPLE_RATIO):
-    """Perform a 'fuzzy' comparison between two strings.
+    """
+    Calculates a fuzzy similarity score between two strings using the specified strategy.
+    
+    Args:
+        x: The first string to compare.
+        against: The second string to compare.
+        strategy: The matching strategy to use (default is SIMPLE_RATIO).
+    
     Returns:
-        float: match percentage -- 1.0 for perfect match,
-               down to 0.0 for no match at all.
+        A float between 0.0 and 1.0 indicating the similarity, where 1.0 is a perfect match.
     """
     strategy = _validate_matching_strategy(strategy)
     # LOG.debug(f"matching strategy: {strategy}")
@@ -61,28 +67,36 @@ def fuzzy_match(x, against, strategy=MatchStrategy.SIMPLE_RATIO):
     return score
 
 
-def match_one(query, choices, match_func=None, strategy=MatchStrategy.SIMPLE_RATIO):
+def match_one(query, choices, match_func=None, strategy=MatchStrategy.SIMPLE_RATIO, ignore_case=False):
     """
-        Find best match from a list or dictionary given an input
-
-        Arguments:
-            query:   string to test
-            choices: list or dictionary of choices
-
-        Returns: tuple with best match, score
+    Finds the best matching entry for a query from a list or dictionary of choices.
+    
+    Args:
+        query: The string to match against the choices.
+        choices: A list or dictionary of possible matches.
+        match_func: Optional custom function for computing match scores.
+        strategy: Matching strategy to use.
+        ignore_case: If True, performs case-insensitive matching.
+    
+    Returns:
+        A tuple containing the best match and its score.
     """
-    return match_all(query, choices, match_func, strategy)[0]
+    return match_all(query, choices, match_func, strategy, ignore_case)[0]
 
 
-def match_all(query, choices, match_func=None, strategy=MatchStrategy.SIMPLE_RATIO):
+def match_all(query, choices, match_func=None, strategy=MatchStrategy.SIMPLE_RATIO, ignore_case=False):
     """
-        match scores from a list or dictionary given an input
-
-        Arguments:
-            query:   string to test
-            choices: list or dictionary of choices
-
-        Returns: list of tuples (match, score)
+    Computes fuzzy match scores for a query against all choices in a list or dictionary.
+    
+    Args:
+        query: The string to match against the choices.
+        choices: A list or dictionary of possible matches. If a dictionary, matches are performed against the keys, but the returned matches are the corresponding values.
+        match_func: Optional custom function to compute match scores. Defaults to `fuzzy_match`.
+        strategy: The matching strategy to use.
+        ignore_case: If True, performs case-insensitive matching.
+    
+    Returns:
+        A list of tuples (match, score), sorted by descending score.
     """
     strategy = _validate_matching_strategy(strategy)
     match_func = match_func or fuzzy_match
@@ -94,10 +108,10 @@ def match_all(query, choices, match_func=None, strategy=MatchStrategy.SIMPLE_RAT
         raise ValueError('a list or dict of choices must be provided')
     matches = []
     for c in _choices:
-        if isinstance(choices, dict):
-            matches.append((choices[c], match_func(query, c, strategy)))
-        else:
-            matches.append((c, match_func(query, c, strategy)))
+        score = match_func(query.lower() if ignore_case else query, 
+                       c.lower() if ignore_case else c, 
+                       strategy)
+        matches.append((choices[c] if isinstance(choices, dict) else c, score))
 
     # TODO solve ties
 
