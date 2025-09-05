@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import IntEnum
 from typing import Optional, Tuple, List, Union
 import warnings
-import orjson
+from ovos_utils import json_dumps, json_loads
 
 from ovos_utils.log import LOG, deprecated
 
@@ -228,8 +228,8 @@ class MediaEntry:
         """
         Return a dict representation of this MediaEntry
         """
-        # orjson handles dataclasses directly
-        return orjson.loads(orjson.dumps(self).decode("utf-8"))
+        # json_dumps handles dataclasses directly
+        return json_loads(json_dumps(self))
 
     @staticmethod
     def from_dict(track: dict) -> 'MediaEntry':
@@ -326,8 +326,8 @@ class PluginStream:
         """
         Return a dict representation of this MediaEntry
         """
-        # orjson handles dataclasses directly
-        return orjson.loads(orjson.dumps(self).decode("utf-8"))
+        # json_dumps handles dataclasses directly
+        return json_loads(json_dumps(self))
 
     @staticmethod
     def from_dict(track: dict) -> 'PluginStream':
