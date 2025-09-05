@@ -49,7 +49,7 @@ def json_dumps(payload: Any) -> str:
         # handle dataclasses
         if dataclasses.is_dataclass(payload):
             payload = dataclasses.asdict(payload)
-        return json.dumps(payload)
+        return json.dumps(payload, ensure_ascii=False)
     else:
         # orjson.dumps has native dataclass support and returns bytes
         return orjson.dumps(payload).decode("utf-8")
