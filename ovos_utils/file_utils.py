@@ -9,9 +9,6 @@ from sys import platform
 from threading import RLock
 from typing import Optional, List
 
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
-
 from ovos_utils.bracket_expansion import expand_template
 from ovos_utils.log import LOG, log_deprecation
 
@@ -371,6 +368,9 @@ class FileWatcher:
         @param recursive: If true, recursively include directory contents
         @param ignore_creation: If true, ignore file creation events
         """
+        # here in case watchdog module is not available
+        # just let the import fail with clear trace
+        from watchdog.observers import Observer
         self.observer = Observer()
         self.handlers = []
         for file_path in files:
@@ -390,40 +390,50 @@ class FileWatcher:
         self.observer.unschedule_all()
         self.observer.stop()
 
+try:
+    # NOTE: technically a dependency, but often not used outside OVOS itself
+    # conflicts have been detected with NVDA when using ovos-plugin-manager
+    # this allows standalone usage of ovos-utils outside OVOS but
+    # ensures a ImportError happens if using FileWatcher class
+    from watchdog.events import FileSystemEventHandler
 
-class FileEventHandler(FileSystemEventHandler):
-    def __init__(self, file_path: str, callback: callable,
-                 ignore_creation: bool = False):
-        """
-        Create a handler for file change events
-        @param file_path: file_path being watched Unused(?)
-        @param callback: function to call on file change with modified file path
-        @param ignore_creation: if True, only track file modification events
-        """
-        super().__init__()
-        self._callback = callback
-        self._file_path = file_path
-        if ignore_creation:
-            self._events = ('modified')
-        else:
-            self._events = ('created', 'modified')
-        self._changed_files = []
-        self._lock = RLock()
+    class FileEventHandler(FileSystemEventHandler):
+        def __init__(self, file_path: str, callback: callable,
+                     ignore_creation: bool = False):
+            """
+            Create a handler for file change events
+            @param file_path: file_path being watched Unused(?)
+            @param callback: function to call on file change with modified file path
+            @param ignore_creation: if True, only track file modification events
+            """
+            super().__init__()
+            self._callback = callback
+            self._file_path = file_path
+            if ignore_creation:
+                self._events = ('modified')
+            else:
+                self._events = ('created', 'modified')
+            self._changed_files = []
+            self._lock = RLock()
 
-    def on_any_event(self, event):
-        if event.is_directory:
-            return
-        with self._lock:
-            if event.event_type == "closed":
-                if event.src_path in self._changed_files:
-                    self._changed_files.remove(event.src_path)
-                    # fire event, it is now safe
-                    try:
-                        self._callback(event.src_path)
-                    except:
-                        LOG.exception("An error occurred handling file "
-                                      "change event callback")
+        def on_any_event(self, event):
+            if event.is_directory:
+                return
+            with self._lock:
+                if event.event_type == "closed":
+                    if event.src_path in self._changed_files:
+                        self._changed_files.remove(event.src_path)
+                        # fire event, it is now safe
+                        try:
+                            self._callback(event.src_path)
+                        except:
+                            LOG.exception("An error occurred handling file "
+                                          "change event callback")
 
-            elif event.event_type in self._events:
-                if event.src_path not in self._changed_files:
-                    self._changed_files.append(event.src_path)
+                elif event.event_type in self._events:
+                    if event.src_path not in self._changed_files:
+                        self._changed_files.append(event.src_path)
+
+except ImportError:
+    LOG.error("Failed to import watchdog module. FileWatcher will not be available. "
+              "Are you using ovos-utils inside an application containing a file named 'watchdog.py'?")
