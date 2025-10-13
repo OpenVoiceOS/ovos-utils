@@ -16,7 +16,6 @@ import json
 import logging
 import os
 import sys
-from logging.handlers import RotatingFileHandler
 from os.path import join
 from pathlib import Path
 from typing import Optional, List, Set
@@ -110,13 +109,21 @@ class LOG:
             logger.addHandler(stdout_handler)
         # log to file
         if cls.base_path != "stdout":
-            os.makedirs(cls.base_path, exist_ok=True)
-            path = join(cls.base_path,
-                        cls.name.lower().strip() + ".log")
-            handler = RotatingFileHandler(path, maxBytes=cls.max_bytes,
-                                          backupCount=cls.backup_count)
-            handler.setFormatter(cls.formatter)
-            logger.addHandler(handler)
+            try:
+                # HACK: noticed in NVDA, the bundled python appears to be a
+                # stripped down version with missing stdlib components
+                # `logging.handlers` confirmed to be missing under that setup
+                from logging.handlers import RotatingFileHandler
+                os.makedirs(cls.base_path, exist_ok=True)
+                path = join(cls.base_path,
+                            cls.name.lower().strip() + ".log")
+                handler = RotatingFileHandler(path, maxBytes=cls.max_bytes,
+                                              backupCount=cls.backup_count)
+                handler.setFormatter(cls.formatter)
+                logger.addHandler(handler)
+            except ImportError:
+                LOG.exception("Unable to import 'logging.handlers.RotatingFileHandler'. You seem to be running in a stripped down python version.")
+
         logger.setLevel(cls.level)
         cls._loggers[name] = logger
         return logger
