@@ -122,7 +122,7 @@ class LOG:
                 handler.setFormatter(cls.formatter)
                 logger.addHandler(handler)
             except ImportError:
-                LOG.exception("Unable to import 'logging.handlers.RotatingFileHandler'. You seem to be running in a stripped down python version.")
+                logger.exception("Unable to import 'logging.handlers.RotatingFileHandler'. You seem to be running in a stripped down python version.")
 
         logger.setLevel(cls.level)
         cls._loggers[name] = logger
