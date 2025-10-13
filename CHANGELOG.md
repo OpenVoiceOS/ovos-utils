@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.4a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.4a1) (2025-10-13)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.3a1...0.8.4a1)
+
+**Merged pull requests:**
+
+- fix: handle issues in NVDA python stdlib [\#341](https://github.com/OpenVoiceOS/ovos-utils/pull/341) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.8.3a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.3a1) (2025-10-13)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.2a1...0.8.3a1)
