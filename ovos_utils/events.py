@@ -1,11 +1,13 @@
 import time
+import warnings
 from datetime import datetime, timedelta
 from inspect import signature
 from typing import Callable, Optional, Union
 
 from ovos_utils.fakebus import FakeMessage as Message, FakeBus, dig_for_message
 from ovos_utils.file_utils import to_alnum
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, deprecated
+from ovos_utils.time import now_local, get_config_tz
 
 
 def unmunge_message(message, skill_id: str):
@@ -206,7 +208,13 @@ class EventContainer:
 class EventSchedulerInterface:
     """Interface for accessing the event scheduler over the message bus."""
 
+    @deprecated("EventSchedulerInterface moved to ovos_bus_client. 'from ovos_bus_client.apis.events import EventSchedulerInterface'", "1.0.0")
     def __init__(self, bus=None, skill_id=None):
+        warnings.warn(
+            "EventSchedulerInterface moved to ovos_bus_client. 'from ovos_bus_client.apis.events import EventSchedulerInterface'",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self.skill_id = skill_id or self.__class__.__name__.lower()
         self.bus = bus
         self.events = EventContainer(bus)
@@ -266,9 +274,14 @@ class EventSchedulerInterface:
             if when < 0:
                 raise ValueError(f"Expected datetime or positive int/float. "
                                  f"got: {when}")
-            when = datetime.now() + timedelta(seconds=when)
+            when = now_local() + timedelta(seconds=when)
         if not isinstance(when, datetime):
             raise TypeError(f"Expected datetime, int, or float but got: {when}")
+        if when.tzinfo is None:
+            # ensure correct timezone before conversion to unix timestamp
+            # naive datetime objects method relies on the platform C mktime() function to perform the conversion
+            # and may not match mycroft.conf
+            when = when.replace(tzinfo=get_config_tz())
         if not name:
             name = self.skill_id + handler.__name__
         unique_name = self._create_unique_name(name)
@@ -292,7 +305,7 @@ class EventSchedulerInterface:
         context = context or message.context
         context["skill_id"] = self.skill_id
         self.bus.emit(Message('mycroft.scheduler.schedule_event',
-                                                    data=event_data, context=context))
+                              data=event_data, context=context))
 
     def schedule_event(self, handler: Callable[..., None],
                        when: Union[datetime, int, float],
@@ -335,7 +348,7 @@ class EventSchedulerInterface:
             # If only interval is given set to trigger in [interval] seconds
             # from now.
             if not when:
-                when = datetime.now() + timedelta(seconds=interval)
+                when = now_local() + timedelta(seconds=interval)
             self._schedule_event(handler, when, data, name, interval, context)
         else:
             LOG.debug('The event is already scheduled, cancel previous '
