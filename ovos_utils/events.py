@@ -367,7 +367,7 @@ class EventSchedulerInterface:
             'data': data or {}
         }
         message = self._get_source_message()
-        self.bus.emit(message.forward('mycroft.schedule.update_event', data))
+        self.bus.emit(message.forward('mycroft.scheduler.update_event', data))
 
     def cancel_scheduled_event(self, name: str):
         """
