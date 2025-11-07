@@ -27,7 +27,7 @@ def now_utc() -> datetime:
     Returns:
         (datetime): The current time in Universal Time, aka GMT
     """
-    return datetime.utcnow().replace(tzinfo=gettz("UTC"))
+    return datetime.now(tz=gettz("UTC"))
 
 
 def now_local(tz: datetime.tzinfo = None) -> datetime:
