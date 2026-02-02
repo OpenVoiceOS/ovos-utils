@@ -46,7 +46,10 @@ class FakeBus:
             except ImportError:  # don't care
                 message.context["session"] = {"session_id": self.session_id}
         self.ee.emit("message", message.serialize())
-        self.ee.emit(message.msg_type, message)
+        try:
+            self.ee.emit(message.msg_type, message)
+        except Exception as e:
+            LOG.exception(f"Error in event handler for '{message.msg_type}': {e}")
         self.on_message(message.serialize())
 
     def on_message(self, *args):
