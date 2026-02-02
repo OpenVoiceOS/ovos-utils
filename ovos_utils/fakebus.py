@@ -37,6 +37,14 @@ class FakeBus:
         self.ee.once(msg_type, handler)
 
     def emit(self, message):
+        """
+        Ensure the message carries a session in its context, emit it to listeners, and invoke local message handling.
+        
+        If the message context lacks a "session", attempt to obtain and serialize a Session for this bus's session_id; if the session API is unavailable, insert a minimal session dict with the session_id. Emit the serialized message on the "message" channel, then emit the original message on its specific message type; exceptions raised by type-specific handlers are logged and do not interrupt processing. Finally, pass the serialized message to on_message for local processing.
+        
+        Parameters:
+            message: An object with `context`, `msg_type`, and `serialize()` / `serialize` semantics (e.g., FakeMessage).
+        """
         if "session" not in message.context:
             try:  # replicate side effects
                 from ovos_bus_client.session import Session, SessionManager
@@ -54,9 +62,15 @@ class FakeBus:
 
     def on_message(self, *args):
         """
-        Handle an incoming websocket message
-        @param args:
-            message (str): serialized Message
+        Process an incoming serialized message and update the session state if available.
+        
+        Deserializes the provided serialized message string into a FakeMessage and, if the optional ovos_bus_client.session package is present,
+        creates a Session from the message and updates the SessionManager when the session's session_id is not "default". If the session
+        package is unavailable, the function silently skips session synchronization.
+        
+        Parameters:
+            *args: Tuple where the serialized message is expected to be the first element when a single argument is passed,
+                   or the second element when multiple arguments are passed (the serialized message string).
         """
         if len(args) == 1:
             message = args[0]
