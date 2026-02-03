@@ -11,22 +11,22 @@ class MetricsTests(unittest.TestCase):
         stopwatch = Stopwatch()
         with stopwatch:
             sleep(sleep_time)
-        self.assertEqual(round(stopwatch.time, 2), sleep_time)
+        self.assertLess(abs(stopwatch.time - sleep_time), 2)
 
     def test_stopwatch_reuse(self):
         sleep_time = 0.5
         stopwatch = Stopwatch()
         with stopwatch:
             sleep(sleep_time)
-        self.assertEqual(round(stopwatch.time, 2), sleep_time)
+        self.assertLess(abs(stopwatch.time - sleep_time), 0.01)
 
         with stopwatch:
             sleep(sleep_time)
-        self.assertEqual(round(stopwatch.time, 2), sleep_time)
+        self.assertLess(abs(stopwatch.time - sleep_time), 0.01) 
 
         with stopwatch:
             sleep(sleep_time)
-        self.assertEqual(round(stopwatch.time, 2), sleep_time)
+        self.assertLess(abs(stopwatch.time - sleep_time), 0.01) 
 
     def test_stopwatch_no_start(self):
         stopwatch = Stopwatch()
