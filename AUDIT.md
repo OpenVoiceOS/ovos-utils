@@ -124,6 +124,11 @@ The `uv` branch of the uninstall command does not include the `-y` (non-interact
 causing `Popen` to hang waiting for user confirmation in a non-interactive shell.
 Match the pip fallback by adding `"-y"` to the `pip_args` list.
 
+### `pyproject.toml` — Missing `python-dateutil` dependency
+`ovos_utils/time.py` imports from `dateutil.tz`, but `python-dateutil` was not listed in the
+main `dependencies` section of `pyproject.toml`. This causes `ModuleNotFoundError` in
+environments where `ovos-config` (which carries it) is not installed.
+
 ### `ovos_utils/lang/__init__.py:17` — `split("-", 2)` with two-variable unpack fails on 3-part BCP-47 tags
 ```python
 a, b = lang_code.split("-", 2)

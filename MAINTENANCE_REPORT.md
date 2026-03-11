@@ -13,6 +13,9 @@
 - **`test/unittests/test_bracket_extra.py`** — Moved `Word` instance creation outside `catch_warnings` to prevent false positives in deprecation tests.
 - **`test/unittests/test_device_input.py`** — Updated patch targets to `ovos_utils.device_input.find_executable` to correctly stub module-local imports.
 - **`test/unittests/test_smtp_utils.py`** — Replaced broad `try/except` with explicit `sys.modules` mock for `ovos_config` to ensure test failures are surfaced.
+- **`pyproject.toml`** — Added `python-dateutil` to core dependencies as it is required by `ovos_utils/time.py`.
+- **`.github/workflows/build-tests.yml`** — Changed `install_extras` to `extras` to match `pyproject.toml` and ensure test dependencies are available.
+- **`.github/workflows/python-support.yml`** — Removed redundant and deprecated workflow to resolve name collisions in CI.
 
 ### Rationale
 Fixed critical build-time attribute error and addressed multiple security/correctness findings from CodeRabbit audit.
