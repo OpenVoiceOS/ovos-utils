@@ -33,7 +33,7 @@ if "distutils" not in sys.modules:
 class TestInputDeviceHelper(unittest.TestCase):
     """Tests for InputDeviceHelper class."""
 
-    @patch("distutils.spawn.find_executable", return_value=None)
+    @patch("ovos_utils.device_input.find_executable", return_value=None)
     def test_init_no_executables(self, mock_find: MagicMock) -> None:
         """InputDeviceHelper should initialise with empty device lists."""
         from ovos_utils.device_input import InputDeviceHelper
@@ -41,7 +41,7 @@ class TestInputDeviceHelper(unittest.TestCase):
         self.assertEqual(helper.libinput_devices_list, [])
         self.assertEqual(helper.xinput_devices_list, [])
 
-    @patch("distutils.spawn.find_executable")
+    @patch("ovos_utils.device_input.find_executable")
     @patch("subprocess.check_output")
     def test_build_libinput_devices_list(self, mock_output: MagicMock,
                                           mock_find: MagicMock) -> None:
@@ -61,7 +61,7 @@ class TestInputDeviceHelper(unittest.TestCase):
         self.assertEqual(dev["Device"], "My Keyboard")
         self.assertIn("keyboard", dev["Capabilities"])
 
-    @patch("distutils.spawn.find_executable")
+    @patch("ovos_utils.device_input.find_executable")
     @patch("subprocess.check_output")
     def test_build_libinput_multiple_capabilities(self, mock_output: MagicMock,
                                                    mock_find: MagicMock) -> None:
@@ -80,7 +80,7 @@ class TestInputDeviceHelper(unittest.TestCase):
         self.assertIsInstance(caps, list)
         self.assertGreater(len(caps), 1)
 
-    @patch("distutils.spawn.find_executable")
+    @patch("ovos_utils.device_input.find_executable")
     @patch("subprocess.check_output", side_effect=Exception("libinput failed"))
     def test_get_libinput_devices_exception(self, mock_output: MagicMock,
                                               mock_find: MagicMock) -> None:
@@ -91,7 +91,7 @@ class TestInputDeviceHelper(unittest.TestCase):
         result = helper._get_libinput_devices_list()
         self.assertEqual(result, [])
 
-    @patch("distutils.spawn.find_executable", return_value=None)
+    @patch("ovos_utils.device_input.find_executable", return_value=None)
     def test_get_libinput_devices_no_executable(self, mock_find: MagicMock) -> None:
         """_get_libinput_devices_list should return empty list when libinput not found."""
         from ovos_utils.device_input import InputDeviceHelper
@@ -99,7 +99,7 @@ class TestInputDeviceHelper(unittest.TestCase):
         result = helper._get_libinput_devices_list()
         self.assertEqual(result, [])
 
-    @patch("distutils.spawn.find_executable")
+    @patch("ovos_utils.device_input.find_executable")
     @patch("subprocess.check_output")
     def test_build_xinput_devices_list(self, mock_output: MagicMock,
                                         mock_find: MagicMock) -> None:
@@ -115,7 +115,7 @@ class TestInputDeviceHelper(unittest.TestCase):
         helper._build_xinput_devices_list()
         self.assertGreater(len(helper.xinput_devices_list), 0)
 
-    @patch("distutils.spawn.find_executable")
+    @patch("ovos_utils.device_input.find_executable")
     @patch("subprocess.check_output", side_effect=Exception("xinput failed"))
     def test_get_xinput_devices_exception(self, mock_output: MagicMock,
                                            mock_find: MagicMock) -> None:
@@ -134,7 +134,7 @@ class TestInputDeviceHelper(unittest.TestCase):
         result = helper._get_xinput_devices_list()
         self.assertEqual(result, [])
 
-    @mock.patch("distutils.spawn.find_executable")
+    @mock.patch("ovos_utils.device_input.find_executable")
     def test_can_use_touch_mouse(self, find_exec: MagicMock) -> None:
         """can_use_touch_mouse should detect touch/mouse/tablet/pointer/gesture."""
         from ovos_utils.device_input import InputDeviceHelper
@@ -162,7 +162,7 @@ class TestInputDeviceHelper(unittest.TestCase):
         dev_input.xinput_devices_list.pop()
         self.assertFalse(dev_input.can_use_touch_mouse())
 
-    @mock.patch("distutils.spawn.find_executable")
+    @mock.patch("ovos_utils.device_input.find_executable")
     def test_can_use_keyboard(self, find_exec: MagicMock) -> None:
         """can_use_keyboard should detect keyboard devices."""
         from ovos_utils.device_input import InputDeviceHelper
@@ -190,7 +190,7 @@ class TestInputDeviceHelper(unittest.TestCase):
         dev_input.xinput_devices_list.pop()
         self.assertFalse(dev_input.can_use_keyboard())
 
-    @patch("distutils.spawn.find_executable", return_value=None)
+    @patch("ovos_utils.device_input.find_executable", return_value=None)
     @patch("ovos_utils.device_input.is_gui_installed", return_value=True)
     def test_can_use_touch_mouse_no_executable_gui_installed(
             self, mock_gui: MagicMock, mock_find: MagicMock) -> None:
@@ -210,7 +210,7 @@ class TestInputDeviceHelper(unittest.TestCase):
         result = helper.can_use_touch_mouse()
         self.assertFalse(result)
 
-    @patch("distutils.spawn.find_executable")
+    @patch("ovos_utils.device_input.find_executable")
     def test_get_input_device_list(self, mock_find: MagicMock) -> None:
         """get_input_device_list should combine libinput and xinput device lists."""
         from ovos_utils.device_input import InputDeviceHelper

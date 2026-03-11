@@ -1,4 +1,0 @@
-recursive-include ovos_utils/ *
-recursive-include requirements/ *
-include CHANGELOG.md
-include LICENSE

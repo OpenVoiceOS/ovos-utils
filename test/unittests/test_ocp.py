@@ -492,9 +492,9 @@ class TestPlaylistAddEntryAtPosition(unittest.TestCase):
         # Insert a new entry at index 0 (before current position)
         e4 = MediaEntry(uri="http://a.com/4.mp3", title="T4")
         pl.add_entry(e4, index=0)
-        # Position was incremented to 3 by add_entry, then validated to 0 by _validate_position
-        # The key thing is the code path (line 514) was exercised
-        self.assertIsInstance(pl.position, int)
+        # Position was incremented to 3 by add_entry
+        self.assertEqual(pl.position, 3)
+        self.assertEqual(pl.current_track, e3)
 
 
 class TestPlaylistRemoveEntryByIndex(unittest.TestCase):

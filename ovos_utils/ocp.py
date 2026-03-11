@@ -8,6 +8,23 @@ from ovos_utils import json_dumps, json_loads
 
 from ovos_utils.log import LOG, deprecated
 
+__all__ = [
+    "OCP_ID",
+    "MatchConfidence",
+    "TrackState",
+    "MediaState",
+    "PlayerState",
+    "LoopState",
+    "PlaybackType",
+    "PlaybackMode",
+    "MediaType",
+    "MediaEntry",
+    "PluginStream",
+    "Playlist",
+    "available_extractors",
+    "dict2entry"
+]
+
 OCP_ID = "ovos.common_play"
 
 
@@ -510,10 +527,9 @@ class Playlist(list):
         if index == -1:
             index = len(self)
 
-        if index < self.position:
-            self.set_position(self.position + 1)
-
         self.insert(index, entry)
+        if index <= self.position:
+            self.set_position(self.position + 1)
 
     def remove_entry(self, entry: Union[int, dict, MediaEntry, PluginStream]) -> None:
         """

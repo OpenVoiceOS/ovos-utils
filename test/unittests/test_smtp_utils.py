@@ -75,9 +75,8 @@ class TestSendEmail(unittest.TestCase):
 
     @patch("ovos_utils.smtp_utils.send_smtp")
     def test_send_email_uses_config(self, mock_send_smtp: MagicMock) -> None:
-        """send_email should extract smtp settings from config and call send_smtp."""
+        """send_email should read from config when parameters are missing."""
         from ovos_utils.smtp_utils import send_email
-
         fake_config = {
             "email": {
                 "smtp": {
@@ -90,20 +89,25 @@ class TestSendEmail(unittest.TestCase):
             }
         }
 
-        with patch("ovos_utils.smtp_utils.LOG"):
-            try:
-                with patch("ovos_config.config.read_mycroft_config",
-                           return_value=fake_config):
-                    send_email("Hello", "Body", recipient="recv@test.com")
-            except Exception:
-                # If ovos_config is not importable, skip this sub-test
-                pass
+        config_mock = MagicMock()
+        config_mock.read_mycroft_config.return_value = fake_config
 
-        # If send_smtp was called verify the args
-        if mock_send_smtp.called:
-            args, kwargs = mock_send_smtp.call_args
-            self.assertEqual(args[0], "user@test.com")  # user
-            self.assertEqual(args[2], "user@test.com")  # sender
+        with patch("ovos_utils.smtp_utils.LOG"), \
+             patch.dict("sys.modules", {"ovos_config": MagicMock(), "ovos_config.config": config_mock}):
+            send_email("Hello", "Body", recipient="recv@test.com")
+
+        # verify the args
+        mock_send_smtp.assert_called_once_with(
+            "user@test.com",
+            "pass123",
+            "user@test.com",
+            "recv@test.com",
+            "Hello",
+            "Body",
+            "mail.test.com",
+            587,
+        )
+
 
 
 if __name__ == "__main__":

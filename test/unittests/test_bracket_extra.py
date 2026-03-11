@@ -157,20 +157,22 @@ class TestDeprecatedClasses(unittest.TestCase):
             self.assertEqual(result, [[]])
 
     def test_sentence_emits_warning(self):
+        from ovos_utils.bracket_expansion import Sentence, Word
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            w_obj = Word("hello")
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            from ovos_utils.bracket_expansion import Sentence, Word
-            w_obj = Word("hello")
-            from ovos_utils.bracket_expansion import Sentence
             Sentence([w_obj])
             self.assertTrue(any(issubclass(warning.category, DeprecationWarning) for warning in w))
 
     def test_options_emits_warning(self):
+        from ovos_utils.bracket_expansion import Options, Word
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            w_obj = Word("hello")
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            from ovos_utils.bracket_expansion import Options, Word
-            w_obj = Word("hello")
-            from ovos_utils.bracket_expansion import Options
             Options([w_obj])
             self.assertTrue(any(issubclass(warning.category, DeprecationWarning) for warning in w))
 

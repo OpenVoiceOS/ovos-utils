@@ -189,13 +189,10 @@ class TestGetDialog(unittest.TestCase):
         from ovos_utils.dialog import get_dialog
         with patch("ovos_utils.dialog.resolve_resource_file", return_value=None):
             with patch("ovos_utils.dialog.log_deprecation"):
-                with patch("builtins.__import__",
-                           side_effect=ImportError("no ovos_config")):
+                with patch.dict("sys.modules", {"ovos_config": None}):
                     # ImportError path — falls back gracefully
-                    try:
-                        result = get_dialog("test", lang=None)
-                    except Exception:
-                        pass  # acceptable — the path is exercised
+                    result = get_dialog("test", lang=None)
+        self.assertEqual(result, "test")
 
 
 class TestJoinList(unittest.TestCase):

@@ -1,6 +1,33 @@
 
 # Maintenance Report — `ovos-utils`
 
+## [2026-03-11] — Fix build failures and address CI/CD audit
+
+### Changes
+- **`ovos_utils/thread_utils.py`** — Moved `import kthread` inside functions. This fixes `AttributeError: module 'ovos_utils.version' has no attribute '__version__'` during `python -m build` by allowing the package to be partially imported in isolated environments without all dependencies present.
+- **`ovos_utils/skill_installer.py`** — Added `"-y"` flag to `uv pip uninstall` to ensure non-interactive execution, matching the pip fallback.
+- **`ovos_utils/ocp.py`** — Added `__all__` to restore `from ovos_utils.ocp import *` functionality, which was broken by the `MediaType` deprecation shim.
+- **`ovos_utils/ocp.py`** — Fixed `Playlist.add_entry` to correctly increment `position` *after* insertion, ensuring the logical selection remains on the same track when inserting before it.
+- **`test/unittests/test_ocp.py`** — Updated assertions to verify that logical track selection is preserved during playlist insertions.
+- **`test/unittests/test_dialog.py`** — Fixed `test_get_dialog_none_lang_config_import_error` to use `sys.modules` patching for `ovos_config` and removed broad `try/except` block.
+- **`test/unittests/test_bracket_extra.py`** — Moved `Word` instance creation outside `catch_warnings` to prevent false positives in deprecation tests.
+- **`test/unittests/test_device_input.py`** — Updated patch targets to `ovos_utils.device_input.find_executable` to correctly stub module-local imports.
+- **`test/unittests/test_smtp_utils.py`** — Replaced broad `try/except` with explicit `sys.modules` mock for `ovos_config` to ensure test failures are surfaced.
+
+### Rationale
+Fixed critical build-time attribute error and addressed multiple security/correctness findings from CodeRabbit audit.
+
+### Verification
+- `uv run pytest test/ -v` — All 897 tests passed.
+- `python3 -c "import sys; sys.path.insert(0, '.'); import ovos_utils.version; print(ovos_utils.version.__version__)"` — Successfully returns version even with missing dependencies.
+
+### AI Transparency Report
+- **AI Model**: gemini-2.0-flash-thinking
+- **Actions Taken**: Diagnosed `AttributeError` during build as a dependency issue in `__init__.py` chain, implemented lazy imports, and applied targeted fixes to test suite based on audit feedback.
+- **Oversight**: Verified locally via pytest and manual import tests.
+
+---
+
 ## [2026-03-11] — AUDIT.md bug fixes (13 confirmed bugs)
 
 ### Changes

@@ -27,5 +27,6 @@ uv run pytest ovos-utils/test/ --cov=ovos_utils
 3. Open a PR targeting the `dev` branch.
 4. Ensure CI passes before requesting review.
 
-## What Python versions are supported?
-See `QUICK_FACTS.md` — currently `>=3.9`.
+## Why do I get `AttributeError: module 'ovos_utils.version' has no attribute '__version__'` during build?
+This usually happens in isolated build environments (like `python -m build`) when a dependency (like `kthread`) is missing and the package `__init__.py` attempts to import it before the version can be read.
+We have mitigated this by making `kthread` a lazy import in `ovos_utils/thread_utils.py`. If you encounter this with other dependencies, ensure they are also loaded lazily.

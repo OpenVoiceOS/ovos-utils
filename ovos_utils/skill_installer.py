@@ -314,7 +314,7 @@ class ServiceInstaller:
             return False
 
         if self.UV is not None:
-            pip_args = [self.UV, "pip", "uninstall"]
+            pip_args = [self.UV, "pip", "uninstall", "-y"]
         else:
             pip_args = [sys.executable, "-m", "pip", "uninstall", "-y"]
 

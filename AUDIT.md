@@ -112,9 +112,17 @@ When `print_logs=True` the `Popen` is created without `stderr=PIPE`, so `proc.st
 The `if stderr:` guard prevents a crash but the error message passed to `RuntimeError` is `None`,
 giving useless diagnostics.
 
-### `ovos_utils/skill_installer.py:336-338` — `proc.stderr.read()` called unconditionally when `print_logs=True` in `pip_uninstall`
-Unlike `pip_install`, `pip_uninstall` does **not** guard against `proc.stderr` being `None`. When
-`print_logs=True`, this raises `AttributeError: 'NoneType' object has no attribute 'read'`.
+### `ovos_utils/version.py` — `AttributeError: module 'ovos_utils.version' has no attribute '__version__'` during build
+In isolated build environments (like `python -m build`), `setuptools` tries to read the version
+via `attr: ovos_utils.version.__version__`. Because `ovos_utils/__init__.py` imports `thread_utils`,
+which in turn has a top-level `import kthread`, the build fails if `kthread` is not already
+present in the host environment (even if it's listed in `dependencies`). This prevents the
+package from being built or audited in clean environments. `kthread` should be a lazy import.
+
+### `ovos_utils/skill_installer.py:316-319` — `uv pip uninstall` missing `-y` flag
+The `uv` branch of the uninstall command does not include the `-y` (non-interactive) flag,
+causing `Popen` to hang waiting for user confirmation in a non-interactive shell.
+Match the pip fallback by adding `"-y"` to the `pip_args` list.
 
 ### `ovos_utils/lang/__init__.py:17` — `split("-", 2)` with two-variable unpack fails on 3-part BCP-47 tags
 ```python
