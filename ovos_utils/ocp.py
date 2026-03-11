@@ -117,15 +117,6 @@ class PlaybackMode(IntEnum):
 
 
 class MediaType(IntEnum):
-    """OCP media type enumeration.
-
-    .. deprecated::
-        Import ``MediaType`` from ``ovos_media_classifier.intents`` instead.
-        This copy in ``ovos_utils.ocp`` will be removed in a future version.
-        Integer values are identical for all shared types; the authoritative
-        definition in ``ovos_media_classifier`` also adds ``TV_SHOW = 25``
-        (episodic TV series, distinct from ``TV = 9`` which is live IPTV).
-    """
     GENERIC = 0  # nothing else matches
     AUDIO = 1  # things like ambient noises
     MUSIC = 2
@@ -150,8 +141,6 @@ class MediaType(IntEnum):
     CARTOON = 21
     ANIME = 22
     ASMR = 23
-    MUSIC_VIDEO = 24  # official music video for a song
-    TV_SHOW = 25  # episodic TV series (Breaking Bad, Naruto, …) — distinct from TV (live IPTV)
 
     ADULT = 69  # for content filtering
     HENTAI = 70  # for content filtering
@@ -639,45 +628,6 @@ def dict2entry(track: dict) -> Union[PluginStream, MediaEntry, Playlist]:
     elif track.get("uri"):
         return MediaEntry.from_dict(track)
     raise ValueError("track dictionary is not a valid MediaEntry, Playlist or PluginStream")
-
-
-# ---------------------------------------------------------------------------
-# Deprecation shim for MediaType
-#
-# The authoritative MediaType definition has moved to
-# ovos_media_classifier.intents.  ovos_utils.ocp keeps this copy for backward
-# compatibility but redirects importers via a DeprecationWarning.
-#
-# Mechanism: we remove MediaType from the module's __dict__ (all internal
-# uses above have already been evaluated and their defaults/annotations
-# bound), then expose it via a module-level property on a custom __class__.
-# This means `from ovos_utils.ocp import MediaType` fires the warning while
-# preserving full functionality — the returned object is the exact same class.
-# ---------------------------------------------------------------------------
-import sys as _sys
-
-_MediaType = MediaType  # keep internal reference before deleting the name
-del MediaType           # remove from module namespace so the property fires
-
-
-class _DeprecatingModule(_sys.modules[__name__].__class__):
-    """Module subclass that issues DeprecationWarning when MediaType is accessed."""
-
-    @property
-    def MediaType(self):  # noqa: N802
-        warnings.warn(
-            "ovos_utils.ocp.MediaType is deprecated and will be removed in a future "
-            "version.  Import MediaType from ovos_media_classifier.intents instead.\n"
-            "  from ovos_media_classifier.intents import MediaType\n"
-            "The authoritative definition there adds TV_SHOW=25 (episodic TV series) "
-            "and maintains identical integer values for all other types.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return _MediaType
-
-
-_sys.modules[__name__].__class__ = _DeprecatingModule
 
 
 if __name__ == "__main__":
