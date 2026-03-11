@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.8.5a4](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a4) (2026-03-11)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.6a2...0.8.5a4)
+
+**Merged pull requests:**
+
+- chore: Add comprehensive test suites and documentation [\#362](https://github.com/OpenVoiceOS/ovos-utils/pull/362) ([JarbasAl](https://github.com/JarbasAl))
+- fix: make the stopwatch test less strict [\#360](https://github.com/OpenVoiceOS/ovos-utils/pull/360) ([PureTryOut](https://github.com/PureTryOut))
+
 ## [0.8.6a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.6a2) (2026-02-02)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.6a1...0.8.6a2)
