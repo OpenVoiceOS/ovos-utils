@@ -516,8 +516,9 @@ class Playlist(list):
         if index == -1:
             index = len(self)
 
+        had_current_track = len(self) > 0
         self.insert(index, entry)
-        if index <= self.position:
+        if had_current_track and index <= self.position:
             self.set_position(self.position + 1)
 
     def remove_entry(self, entry: Union[int, dict, MediaEntry, PluginStream]) -> None:

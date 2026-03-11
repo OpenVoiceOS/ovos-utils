@@ -39,7 +39,7 @@ Fixed critical build-time attribute error and addressed multiple security/correc
 
 ---
 
-## [2026-03-11] — AUDIT.md bug fixes (13 confirmed bugs)
+## [2026-03-11] — AUDIT.md bug fixes (20 confirmed fixes across 10 files)
 
 ### Changes
 - **`oauth.py:143`** — Added `None` guard before accessing `token_data["expires_at"]`; fixes `TypeError` when token is absent.

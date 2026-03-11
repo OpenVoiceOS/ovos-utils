@@ -184,6 +184,11 @@ class OVOSLogParser:
                     if timestamp:
                         last_timestamp = timestamp
                     yield log
+            # Flush any traceback that ends at EOF without a trailing blank line
+            if trace:
+                traceback = Traceback.from_list(trace)
+                traceback.timestamp = last_timestamp
+                yield traceback
 
 
 console = Console()

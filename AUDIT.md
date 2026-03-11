@@ -63,16 +63,8 @@ Same pattern as above.
 If any `Kernel`, `Group`, or `Capabilities` line is missing for a device, the lengths will
 mismatch, and `input_device_kernel_path[i]` will raise an `IndexError`.
 
-### `ovos_utils/geolocation.py:87` — Falsy check incorrectly rejects latitude/longitude of `0`
-```python
-if lat and lon:
-    return get_reverse_geolocation(lat, lon, lang)
-```
-`lat` and `lon` are strings from the JSON response. The string `"0"` or `"0.0"` is falsy for
-coordinates on the prime meridian or equator. Should be:
-```python
-if lat is not None and lon is not None:
-```
+### ~~`ovos_utils/geolocation.py:87`~~ — ✅ RESOLVED — Falsy check incorrectly rejects latitude/longitude of `0`
+Fixed in this PR: `if lat and lon:` replaced with `if lat is not None and lon is not None:`.
 
 ### `ovos_utils/security.py:45` — RSA key size of 1024 bits is cryptographically weak
 `k.generate_key(crypto.TYPE_RSA, 1024)` — 1024-bit RSA has been considered broken since 2012
@@ -124,16 +116,11 @@ The `uv` branch of the uninstall command does not include the `-y` (non-interact
 causing `Popen` to hang waiting for user confirmation in a non-interactive shell.
 Match the pip fallback by adding `"-y"` to the `pip_args` list.
 
-### `pyproject.toml` — Missing `python-dateutil` dependency
-`ovos_utils/time.py` imports from `dateutil.tz`, but `python-dateutil` was not listed in the
-main `dependencies` section of `pyproject.toml`. This causes `ModuleNotFoundError` in
-environments where `ovos-config` (which carries it) is not installed.
+### ~~`pyproject.toml`~~ — ✅ RESOLVED — Missing `python-dateutil` dependency
+Fixed in this PR: `python-dateutil` added to `dependencies` in `pyproject.toml`.
 
-### `ovos_utils/log.py:405` — `FileNotFoundError` in `get_available_logs`
-`get_available_logs` calls `os.listdir` on paths from `get_log_paths()` without checking if
-they exist. This causes a crash at module load time in `ovos_utils/log_parser.py` (where it
-is used as a default value for a click option) in environments without standard log folders
-(like GitHub Actions runners).
+### ~~`ovos_utils/log.py:405`~~ — ✅ RESOLVED — `FileNotFoundError` in `get_available_logs`
+Fixed in this PR: `get_available_logs` now guards `os.listdir` with an existence check.
 
 ### `ovos_utils/lang/__init__.py:17` — `split("-", 2)` with two-variable unpack fails on 3-part BCP-47 tags
 ```python

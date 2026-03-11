@@ -34,8 +34,8 @@ class TestCreateSelfSignedCertMocked(unittest.TestCase):
         mock_crypto.X509.return_value = mock_cert
         mock_crypto.FILETYPE_PEM = 1
 
-        mock_crypto.dump_certificate.return_value = "CERT_DATA"
-        mock_crypto.dump_privatekey.return_value = "KEY_DATA"
+        mock_crypto.dump_certificate.return_value = b"CERT_DATA"
+        mock_crypto.dump_privatekey.return_value = b"KEY_DATA"
 
         return mock_crypto
 
