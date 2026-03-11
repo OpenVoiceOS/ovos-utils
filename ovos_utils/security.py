@@ -61,10 +61,10 @@ def create_self_signed_cert(cert_dir, name="jarbas"):
         cert.sign(k, 'sha1')
         if not exists(cert_dir):
             makedirs(cert_dir)
-        open(cert_path, "wt").write(
-            crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
-        open(join(cert_dir, KEY_FILE), "wt").write(
-            crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
+        with open(cert_path, "wt") as f:
+            f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+        with open(join(cert_dir, KEY_FILE), "wt") as f:
+            f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
 
     return cert_path, key_path
 

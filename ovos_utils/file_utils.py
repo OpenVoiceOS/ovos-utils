@@ -413,7 +413,7 @@ try:
                 self._events = ('modified')
             else:
                 self._events = ('created', 'modified')
-            self._changed_files = []
+            self._changed_files = set()
             self._lock = RLock()
 
         def on_any_event(self, event):
@@ -422,17 +422,17 @@ try:
             with self._lock:
                 if event.event_type == "closed":
                     if event.src_path in self._changed_files:
-                        self._changed_files.remove(event.src_path)
+                        self._changed_files.discard(event.src_path)
                         # fire event, it is now safe
                         try:
                             self._callback(event.src_path)
-                        except:
+                        except Exception:
                             LOG.exception("An error occurred handling file "
                                           "change event callback")
 
                 elif event.event_type in self._events:
                     if event.src_path not in self._changed_files:
-                        self._changed_files.append(event.src_path)
+                        self._changed_files.add(event.src_path)
 
 except ImportError:
     LOG.error("Failed to import watchdog module. FileWatcher will not be available. "

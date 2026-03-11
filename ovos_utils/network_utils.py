@@ -91,8 +91,8 @@ def is_connected_dns(host: Optional[str] = None, port: int = 53,
 
     if host is None:
         cfg = get_network_tests_config()
-        return is_connected_dns(cfg.get("dns_primary" or _DEFAULT_TEST_CONFIG['dns_primary'])) or \
-            is_connected_dns(cfg.get("dns_secondary" or _DEFAULT_TEST_CONFIG['dns_secondary']))
+        return is_connected_dns(cfg.get("dns_primary") or _DEFAULT_TEST_CONFIG['dns_primary']) or \
+            is_connected_dns(cfg.get("dns_secondary") or _DEFAULT_TEST_CONFIG['dns_secondary'])
 
     try:
         # connect to the host -- tells us if the host is actually reachable
@@ -121,7 +121,7 @@ def is_connected_http(host: Optional[str] = None) -> bool:
     try:
         status = requests.head(host).status_code
         return True
-    except:
+    except Exception:
         pass
     return False
 

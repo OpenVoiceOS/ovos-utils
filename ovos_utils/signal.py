@@ -3,6 +3,8 @@ import os.path
 import tempfile
 import time
 import warnings
+from typing import Dict, Optional
+
 from ovos_utils.log import LOG, log_deprecation, deprecated
 
 warnings.warn(
@@ -13,7 +15,7 @@ warnings.warn(
 
 
 @deprecated("ovos_utils.signal module has been deprecated!", "0.2.0")
-def get_ipc_directory(domain=None, config=None):
+def get_ipc_directory(domain: Optional[str] = None, config: Optional[Dict] = None) -> str:
     """Get the directory used for Inter Process Communication
 
     Files in this folder can be accessed by different processes on the
@@ -43,7 +45,7 @@ def get_ipc_directory(domain=None, config=None):
 
 
 @deprecated("use 'from ovos_utils.file_utils import ensure_directory_exists' instead", "0.2.0")
-def ensure_directory_exists(directory, domain=None):
+def ensure_directory_exists(directory: str, domain: Optional[str] = None) -> str:
     """ Create a directory and give access rights to all
 
     Args:
@@ -58,7 +60,7 @@ def ensure_directory_exists(directory, domain=None):
 
 
 @deprecated("ovos_utils.signal module has been deprecated!", "0.2.0")
-def create_file(filename):
+def create_file(filename: str) -> None:
     """ Create the file filename and create any directories needed
 
         Args:
@@ -73,7 +75,7 @@ def create_file(filename):
 
 
 @deprecated("ovos_utils.signal module has been deprecated!", "0.2.0")
-def create_signal(signal_name, config=None):
+def create_signal(signal_name: str, config: Optional[Dict] = None) -> bool:
     """Create a named signal
 
     Args:
@@ -91,7 +93,7 @@ def create_signal(signal_name, config=None):
 
 
 @deprecated("ovos_utils.signal module has been deprecated!", "0.2.0")
-def check_for_signal(signal_name, sec_lifetime=0, config=None):
+def check_for_signal(signal_name: str, sec_lifetime: int = 0, config: Optional[Dict] = None) -> bool:
     """See if a named signal exists
 
     Args:

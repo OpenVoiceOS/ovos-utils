@@ -30,7 +30,7 @@ def xml2dict(xml_string):
         e = ET.XML(xml_string)
         d = etree2dict(e)
         return d
-    except:
+    except Exception:
         return {}
 
 
