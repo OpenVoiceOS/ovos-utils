@@ -129,6 +129,12 @@ Match the pip fallback by adding `"-y"` to the `pip_args` list.
 main `dependencies` section of `pyproject.toml`. This causes `ModuleNotFoundError` in
 environments where `ovos-config` (which carries it) is not installed.
 
+### `ovos_utils/log.py:405` — `FileNotFoundError` in `get_available_logs`
+`get_available_logs` calls `os.listdir` on paths from `get_log_paths()` without checking if
+they exist. This causes a crash at module load time in `ovos_utils/log_parser.py` (where it
+is used as a default value for a click option) in environments without standard log folders
+(like GitHub Actions runners).
+
 ### `ovos_utils/lang/__init__.py:17` — `split("-", 2)` with two-variable unpack fails on 3-part BCP-47 tags
 ```python
 a, b = lang_code.split("-", 2)

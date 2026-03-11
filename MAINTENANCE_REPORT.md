@@ -16,6 +16,7 @@
 - **`pyproject.toml`** — Added `python-dateutil` to core dependencies as it is required by `ovos_utils/time.py`.
 - **`.github/workflows/build-tests.yml`** — Changed `install_extras` to `extras` to match `pyproject.toml` and ensure test dependencies are available.
 - **`.github/workflows/python-support.yml`** — Removed redundant and deprecated workflow to resolve name collisions in CI.
+- **`ovos_utils/log.py`** — Added `os.path.isdir` check in `get_available_logs` to prevent `FileNotFoundError` when log directories are missing (critical for environments like CI).
 
 ### Rationale
 Fixed critical build-time attribute error and addressed multiple security/correctness findings from CodeRabbit audit.
