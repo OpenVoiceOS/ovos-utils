@@ -1,7 +1,9 @@
+from typing import Any, Set
+
 from ovos_bus_client.util import wait_for_reply
 
 
-def get_non_properties(obj):
+def get_non_properties(obj: Any) -> Set[str]:
     """Get attributes that are not properties from object.
 
     Will return members of object class along with bases down to MycroftSkill.

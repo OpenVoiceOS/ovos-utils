@@ -1,9 +1,10 @@
 import signal
 from functools import wraps
 from threading import Thread, Event
-from typing import Callable, Optional, Any
+from typing import Callable, Optional, Any, TYPE_CHECKING
 
-import kthread
+if TYPE_CHECKING:
+    import kthread
 
 from ovos_utils.log import LOG
 
@@ -55,7 +56,7 @@ def threaded_timeout(timeout: int = 5) -> Callable:
 
 
 def create_killable_daemon(target: Callable, args: tuple = (), kwargs: Optional[dict] = None,
-                           autostart: bool = True) -> kthread.KThread:
+                           autostart: bool = True) -> "kthread.KThread":
     """
     Helper to create and start a killable daemon thread.
 
@@ -71,6 +72,7 @@ def create_killable_daemon(target: Callable, args: tuple = (), kwargs: Optional[
     Example:
         create_killable_daemon(target=my_function, args=(arg1, arg2))
     """
+    import kthread
     t = kthread.KThread(target=target, args=args, kwargs=kwargs)
     t.daemon = True
     if autostart:

@@ -10,11 +10,11 @@ def standardize_lang_tag(lang_code: str, macro=True) -> str:
     try:
         from langcodes import standardize_tag as std
         return str(std(lang_code, macro=macro))
-    except:
+    except Exception:
         if macro:
             return lang_code.split("-")[0].lower()
         if "-" in lang_code:
-            a, b = lang_code.split("-", 2)
+            a, b = lang_code.split("-", 1)
             return f"{a.lower()}-{b.upper()}"
         return lang_code.lower()
 
@@ -29,7 +29,7 @@ def get_language_dir(base_path: str, lang: str ="en-US") -> Optional[str]:
             try:
                 from langcodes import tag_distance
                 score = tag_distance(lang, f)
-            except:  # not a valid language code
+            except Exception:  # not a valid language code
                 continue
                 # https://langcodes-hickford.readthedocs.io/en/sphinx/index.html#distance-values
                 # 0 -> These codes represent the same language, possibly after filling in values and normalizing.

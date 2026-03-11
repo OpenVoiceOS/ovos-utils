@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ovos-utils"
+dynamic = ["version"]
+description = "collection of simple utilities for use across the openvoiceos ecosystem"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [{name = "jarbasAI", email = "jarbas@openvoiceos.com"}]
+requires-python = ">=3.9"
+dependencies = [
+    "pexpect~=4.9",
+    "requests~=2.26",
+    "json_database~=0.10",
+    "kthread~=0.2",
+    "watchdog",
+    "pyee>=8.0.0",
+    "combo-lock~=0.2",
+    "rich-click~=1.7",
+    "rich~=13.7",
+    "python-dateutil",
+]
+
+[project.urls]
+Homepage = "https://github.com/OpenVoiceOS/ovos_utils"
+Repository = "https://github.com/OpenVoiceOS/ovos_utils"
+
+[project.optional-dependencies]
+extras = [
+    "rapidfuzz>=3.6,<4.0",
+    "ovos-plugin-manager>=0.0.25",
+    "ovos-config>=0.0.12",
+    "ovos-workshop>=0.0.13",
+    "ovos_bus_client>=0.0.8",
+    "langcodes",
+    "timezonefinder",
+    "oauthlib~=3.2",
+    "orjson",
+    "packaging",
+]
+
+[project.scripts]
+ovos-logs = "ovos_utils.log_parser:ovos_logs"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["ovos_utils*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "ovos_utils.version.__version__"}

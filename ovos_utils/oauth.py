@@ -117,7 +117,7 @@ def refresh_oauth_token(token_id):
         new_token_data = refresh_result.json()
         # Make sure 'expires_at' entry exists in token
         if 'expires_at' not in new_token_data:
-            new_token_data['expires_at'] = time.time() + token_data['expires_in']
+            new_token_data['expires_at'] = time.time() + new_token_data['expires_in']
         # Store token
         with OAuthTokenDatabase() as db:
             token_data.update(new_token_data)
@@ -141,9 +141,9 @@ def get_oauth_token(token_id, auto_refresh=True):
         expired = False
         with OAuthTokenDatabase() as db:
             token_data = db.get(token_id)
-        if "expires_at" not in token_data:
+        if token_data is None or "expires_at" not in token_data:
             expired = True
-        elif token_data["expires_at"] >= time.time():
+        elif token_data["expires_at"] <= time.time():
             expired = True
         if expired:
             return refresh_oauth_token(token_id)

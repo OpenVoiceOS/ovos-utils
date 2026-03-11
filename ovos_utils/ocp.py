@@ -8,6 +8,23 @@ from ovos_utils import json_dumps, json_loads
 
 from ovos_utils.log import LOG, deprecated
 
+__all__ = [
+    "OCP_ID",
+    "MatchConfidence",
+    "TrackState",
+    "MediaState",
+    "PlayerState",
+    "LoopState",
+    "PlaybackType",
+    "PlaybackMode",
+    "MediaType",
+    "MediaEntry",
+    "PluginStream",
+    "Playlist",
+    "available_extractors",
+    "dict2entry"
+]
+
 OCP_ID = "ovos.common_play"
 
 
@@ -105,7 +122,7 @@ class MediaType(IntEnum):
     MUSIC = 2
     VIDEO = 3  # eg, youtube videos
     AUDIOBOOK = 4
-    GAME = 5  # because it shares the verb "play", mostly for disambguation
+    GAME = 5  # because it shares the verb "play", mostly for disambiguation
     PODCAST = 6
     RADIO = 7  # live radio
     NEWS = 8  # news reports
@@ -499,10 +516,10 @@ class Playlist(list):
         if index == -1:
             index = len(self)
 
-        if index < self.position:
-            self.set_position(self.position + 1)
-
+        had_current_track = len(self) > 0
         self.insert(index, entry)
+        if had_current_track and index <= self.position:
+            self.set_position(self.position + 1)
 
     def remove_entry(self, entry: Union[int, dict, MediaEntry, PluginStream]) -> None:
         """

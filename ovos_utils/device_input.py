@@ -71,7 +71,7 @@ class InputDeviceHelper:
         if find_executable("libinput"):
             try:
                 self._build_linput_devices_list()
-            except:
+            except Exception:
                 self.libinput_devices_list.clear()
                 LOG.exception("Failed to query libinput for devices")
         return self.libinput_devices_list
@@ -101,7 +101,7 @@ class InputDeviceHelper:
         if find_executable("xinput"):
             try:
                 self._build_xinput_devices_list()
-            except:
+            except Exception:
                 self.xinput_devices_list.clear()
                 LOG.exception("Failed to query xinput for devices")
         return self.xinput_devices_list
