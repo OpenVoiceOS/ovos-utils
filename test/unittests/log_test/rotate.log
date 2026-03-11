@@ -1,1 +1,1 @@
-2026-03-11 02:43:56.422 - rotate - ovos_utils.system:ssh_enable - WARNING - Deprecation version=0.2.0. Caller=test_system:165. DEPRECATED: use ovos-PHAL-plugin-system
+2026-03-11 03:59:43.949 - rotate - ovos_utils.system:ssh_enable - WARNING - Deprecation version=0.2.0. Caller=test_system:165. DEPRECATED: use ovos-PHAL-plugin-system

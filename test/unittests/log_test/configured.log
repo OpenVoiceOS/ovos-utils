@@ -1,6 +1,6 @@
-2026-03-11 02:43:54.105 - configured - ovos_utils.network_utils:get_external_ip:78 - ERROR - Got resp=503: 
-2026-03-11 02:43:54.109 - configured - ovos_utils.network_utils:get_external_ip:80 - ERROR - Unable to get external IP Address: network error
-2026-03-11 02:43:54.117 - configured - ovos_utils.network_utils:check_captive_portal:162 - ERROR - Error checking for captive portal
+2026-03-11 03:59:41.612 - configured - ovos_utils.network_utils:get_external_ip:78 - ERROR - Got resp=503: 
+2026-03-11 03:59:41.616 - configured - ovos_utils.network_utils:get_external_ip:80 - ERROR - Unable to get external IP Address: network error
+2026-03-11 03:59:41.622 - configured - ovos_utils.network_utils:check_captive_portal:162 - ERROR - Error checking for captive portal
 Traceback (most recent call last):
   File "/home/miro/PycharmProjects/OpenVoiceOS Workspace/ovos-utils/ovos_utils/network_utils.py", line 156, in check_captive_portal
     html_doc = requests.get(host).text
@@ -14,175 +14,175 @@ Traceback (most recent call last):
   File "/home/miro/.local/share/uv/python/cpython-3.13.12-linux-x86_64-gnu/lib/python3.13/unittest/mock.py", line 1228, in _execute_mock_call
     raise effect
 Exception: timeout
-2026-03-11 02:43:54.142 - configured - ovos_utils.ocp:from_dict:265 - ERROR - track dictionary does not contain 'uri', it is not a valid MediaEntry
-2026-03-11 02:43:54.143 - configured - ovos_utils.ocp:from_dict:267 - WARNING - DEPRECATED: use dict2entry() for Playlists and PluginStreams, MediaEntry.from_dict is only for regular media, will start throwing ValueError in 0.1.0
-2026-03-11 02:43:54.149 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.153 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.154 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.155 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.156 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.158 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.160 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.161 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.162 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.163 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.164 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.165 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.167 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.168 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.170 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.170 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.171 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.174 - configured - ovos_utils.ocp:available_extractors:176 - ERROR - please install/update ovos_plugin_manager
-2026-03-11 02:43:54.177 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.178 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.179 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.180 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.181 - configured - ovos_utils.ocp:goto_track:596 - DEBUG - New playlist position: 1
-2026-03-11 02:43:54.182 - configured - ovos_utils.ocp:goto_track:596 - DEBUG - New playlist position: 0
-2026-03-11 02:43:54.182 - configured - ovos_utils.ocp:goto_track:596 - DEBUG - New playlist position: 0
-2026-03-11 02:43:54.183 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.184 - configured - ovos_utils.ocp:goto_track:598 - ERROR - requested track not in the playlist: MediaEntry(uri='http://missing.com/x.mp3', title='', artist='', match_confidence=0, skill_id='ovos.common_play', playback=<PlaybackType.UNDEFINED: 100>, status=<TrackState.DISAMBIGUATION: 1>, media_type=<MediaType.GENERIC: 0>, length=0, image='', skill_icon='', javascript='')
-2026-03-11 02:43:54.185 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.186 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.188 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.196 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.197 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.198 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.198 - configured - ovos_utils.ocp:goto_track:596 - DEBUG - New playlist position: 2
-2026-03-11 02:43:54.199 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.200 - configured - ovos_utils.ocp:goto_track:596 - DEBUG - New playlist position: 1
-2026-03-11 02:43:54.201 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.201 - configured - ovos_utils.ocp:goto_track:598 - ERROR - requested track not in the playlist: MediaEntry(uri='nonexistent', title='nonexistent', artist='', match_confidence=0, skill_id='ovos.common_play', playback=<PlaybackType.UNDEFINED: 100>, status=<TrackState.DISAMBIGUATION: 1>, media_type=<MediaType.GENERIC: 0>, length=0, image='', skill_icon='', javascript='')
-2026-03-11 02:43:54.202 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.204 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.204 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.205 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.206 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.207 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.207 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (3! Going to start of playlist
-2026-03-11 02:43:54.208 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.209 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.210 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (-1! Going to start of playlist
-2026-03-11 02:43:54.210 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.211 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.212 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (-1! Going to start of playlist
-2026-03-11 02:43:54.213 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.213 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (100! Going to start of playlist
-2026-03-11 02:43:54.214 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.215 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.216 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.216 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.217 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.218 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.219 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.220 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.221 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.222 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.223 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.225 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.226 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.227 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.228 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.230 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.238 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.239 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.241 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.244 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (0! Going to start of playlist
-2026-03-11 02:43:54.244 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (-1! Going to start of playlist
-2026-03-11 02:43:54.245 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.246 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.246 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.247 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 02:43:54.248 - configured - ovos_utils.ocp:_validate_position:617 - ERROR - Playlist pointer is in an invalid position (10! Going to start of playlist
-2026-03-11 02:43:54.250 - configured - ovos_utils.parse:_validate_matching_strategy:27 - ERROR - rapidfuzz is not installed, falling back to SequenceMatcher for all match strategies
-2026-03-11 02:43:54.250 - configured - ovos_utils.parse:_validate_matching_strategy:29 - WARNING - pip install rapidfuzz
-2026-03-11 02:43:54.276 - configured - ovos_utils.security:decrypt:93 - ERROR - run pip install pycryptodomex
-2026-03-11 02:43:54.278 - configured - ovos_utils.security:decrypt:103 - ERROR - decryption failed, invalid key?
-2026-03-11 02:43:54.281 - configured - ovos_utils.security:encrypt:80 - ERROR - run pip install pycryptodomex
-2026-03-11 02:43:54.283 - configured - ovos_utils.security:create_self_signed_cert:34 - ERROR - run pip install pyopenssl
-2026-03-11 02:43:54.310 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:54.311 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'my_service'
-2026-03-11 02:43:54.312 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:54.313 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.314 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.315 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:54.316 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:54.317 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:54.318 - configured - ovos_utils.skill_installer:handle_install_python:370 - ERROR - pip disabled in mycroft.conf
-2026-03-11 02:43:54.319 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.320 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.321 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.322 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.323 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.324 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.325 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.326 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:54.327 - configured - ovos_utils.skill_installer:handle_uninstall_python:406 - ERROR - pip disabled in mycroft.conf
-2026-03-11 02:43:54.328 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.329 - configured - ovos_utils.skill_installer:pip_install:210 - ERROR - no package list provided to install
-2026-03-11 02:43:54.330 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.331 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.332 - configured - ovos_utils.skill_installer:pip_install:236 - INFO - [ovos_test] (pip) Installing my-pkg
-2026-03-11 02:43:54.333 - configured - ovos_utils.skill_installer:pip_install:238 - DEBUG - /usr/bin/uv pip install -c http://example.com/c.txt my-pkg
-2026-03-11 02:43:54.334 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.335 - configured - ovos_utils.skill_installer:pip_install:236 - INFO - [ovos_test] (pip) Installing my-pkg
-2026-03-11 02:43:54.335 - configured - ovos_utils.skill_installer:pip_install:238 - DEBUG - /home/miro/PycharmProjects/OpenVoiceOS Workspace/ovos-utils/.venv/bin/python3 -m pip install -c http://example.com/c.txt my-pkg
-2026-03-11 02:43:54.336 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.338 - configured - ovos_utils.skill_installer:pip_install:236 - INFO - [ovos_test] (pip) Installing bad-pkg
-2026-03-11 02:43:54.338 - configured - ovos_utils.skill_installer:pip_install:238 - DEBUG - /home/miro/.local/bin/uv pip install -c https://raw.githubusercontent.com/OpenVoiceOS/ovos-releases/refs/heads/main/constraints-stable.txt bad-pkg
-2026-03-11 02:43:54.339 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.340 - configured - ovos_utils.skill_installer:pip_install:236 - INFO - [ovos_test] (pip) Installing pkg
-2026-03-11 02:43:54.340 - configured - ovos_utils.skill_installer:pip_install:238 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt pkg
-2026-03-11 02:43:54.342 - configured - ovos_utils.skill_installer:validate_constraints:185 - ERROR - Couldn't find the constraints file
-2026-03-11 02:43:54.343 - configured - ovos_utils.skill_installer:validate_constraints:171 - DEBUG - Constraints url: http://example.com/c.txt
-2026-03-11 02:43:54.344 - configured - ovos_utils.skill_installer:validate_constraints:171 - DEBUG - Constraints url: http://example.com/missing.txt
-2026-03-11 02:43:54.345 - configured - ovos_utils.skill_installer:validate_constraints:175 - ERROR - Remote constraints file not accessible: 404
-2026-03-11 02:43:54.346 - configured - ovos_utils.skill_installer:validate_constraints:171 - DEBUG - Constraints url: http://example.com/c.txt
-2026-03-11 02:43:54.346 - configured - ovos_utils.skill_installer:validate_constraints:181 - ERROR - Error accessing remote constraints: timeout
-2026-03-11 02:43:54.347 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.348 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.349 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:54.350 - configured - ovos_utils.skill_installer:pip_install:236 - INFO - [svc] (pip) Installing pkg
-2026-03-11 02:43:54.350 - configured - ovos_utils.skill_installer:pip_install:238 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt pkg
-2026-03-11 02:43:54.351 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:54.352 - configured - ovos_utils.skill_installer:pip_install:236 - INFO - [svc] (pip) Installing pkg
-2026-03-11 02:43:54.353 - configured - ovos_utils.skill_installer:pip_install:238 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt --break-system-packages pkg
-2026-03-11 02:43:54.354 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:54.355 - configured - ovos_utils.skill_installer:pip_install:236 - INFO - [svc] (pip) Installing pkg
-2026-03-11 02:43:54.355 - configured - ovos_utils.skill_installer:pip_install:238 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt --pre pkg
-2026-03-11 02:43:54.357 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:54.357 - configured - ovos_utils.skill_installer:pip_install:236 - INFO - [svc] (pip) Installing pkg
-2026-03-11 02:43:54.358 - configured - ovos_utils.skill_installer:pip_install:238 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt pkg
-2026-03-11 02:43:54.359 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:54.360 - configured - ovos_utils.skill_installer:pip_install:236 - INFO - [svc] (pip) Installing pkg
-2026-03-11 02:43:54.360 - configured - ovos_utils.skill_installer:pip_install:238 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt pkg
-2026-03-11 02:43:54.361 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.362 - configured - ovos_utils.skill_installer:pip_uninstall:274 - ERROR - no package list provided to uninstall
-2026-03-11 02:43:54.363 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.364 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 02:43:54.879 - configured - ovos_utils.skill_installer:pip_uninstall:312 - ERROR - tried to uninstall a protected package: ['ovos-core']
-2026-03-11 02:43:54.880 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:55.062 - configured - ovos_utils.skill_installer:pip_uninstall:326 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 02:43:55.063 - configured - ovos_utils.skill_installer:pip_uninstall:330 - DEBUG - /usr/bin/uv pip uninstall -y custom-pkg
-2026-03-11 02:43:55.065 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:55.531 - configured - ovos_utils.skill_installer:pip_uninstall:326 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 02:43:55.532 - configured - ovos_utils.skill_installer:pip_uninstall:330 - DEBUG - /home/miro/PycharmProjects/OpenVoiceOS Workspace/ovos-utils/.venv/bin/python3 -m pip uninstall -y custom-pkg
-2026-03-11 02:43:55.533 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:55.860 - configured - ovos_utils.skill_installer:pip_uninstall:326 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 02:43:55.860 - configured - ovos_utils.skill_installer:pip_uninstall:330 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y custom-pkg
-2026-03-11 02:43:55.889 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:55.890 - configured - ovos_utils.skill_installer:pip_uninstall:326 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 02:43:55.890 - configured - ovos_utils.skill_installer:pip_uninstall:330 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y custom-pkg
-2026-03-11 02:43:55.892 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:55.893 - configured - ovos_utils.skill_installer:pip_uninstall:326 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 02:43:55.893 - configured - ovos_utils.skill_installer:pip_uninstall:330 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y custom-pkg
-2026-03-11 02:43:55.895 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:56.013 - configured - ovos_utils.skill_installer:pip_uninstall:326 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 02:43:56.014 - configured - ovos_utils.skill_installer:pip_uninstall:330 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y --break-system-packages custom-pkg
-2026-03-11 02:43:56.015 - configured - ovos_utils.skill_installer:__init__:126 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 02:43:56.344 - configured - ovos_utils.skill_installer:pip_uninstall:326 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 02:43:56.346 - configured - ovos_utils.skill_installer:pip_uninstall:330 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y custom-pkg
-2026-03-11 02:43:56.411 - configured - ovos_utils.system:system_reboot:83 - DEBUG - sudo systemctl reboot -i
-2026-03-11 02:43:56.413 - configured - ovos_utils.system:system_shutdown:66 - DEBUG - sudo systemctl poweroff -i
-2026-03-11 02:43:56.415 - configured - ovos_utils.system:system_shutdown:66 - DEBUG - systemctl poweroff -i
+2026-03-11 03:59:41.651 - configured - ovos_utils.ocp:from_dict:254 - ERROR - track dictionary does not contain 'uri', it is not a valid MediaEntry
+2026-03-11 03:59:41.651 - configured - ovos_utils.ocp:from_dict:256 - WARNING - DEPRECATED: use dict2entry() for Playlists and PluginStreams, MediaEntry.from_dict is only for regular media, will start throwing ValueError in 0.1.0
+2026-03-11 03:59:41.657 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.659 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.660 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.661 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.662 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.663 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.664 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.665 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.666 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.667 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.668 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.669 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.669 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.670 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.671 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.672 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.673 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.675 - configured - ovos_utils.ocp:available_extractors:165 - ERROR - please install/update ovos_plugin_manager
+2026-03-11 03:59:41.679 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.681 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.682 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.683 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.683 - configured - ovos_utils.ocp:goto_track:585 - DEBUG - New playlist position: 1
+2026-03-11 03:59:41.684 - configured - ovos_utils.ocp:goto_track:585 - DEBUG - New playlist position: 0
+2026-03-11 03:59:41.685 - configured - ovos_utils.ocp:goto_track:585 - DEBUG - New playlist position: 0
+2026-03-11 03:59:41.686 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.686 - configured - ovos_utils.ocp:goto_track:587 - ERROR - requested track not in the playlist: MediaEntry(uri='http://missing.com/x.mp3', title='', artist='', match_confidence=0, skill_id='ovos.common_play', playback=<PlaybackType.UNDEFINED: 100>, status=<TrackState.DISAMBIGUATION: 1>, media_type=<MediaType.GENERIC: 0>, length=0, image='', skill_icon='', javascript='')
+2026-03-11 03:59:41.687 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.689 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.691 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.700 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.701 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.701 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.702 - configured - ovos_utils.ocp:goto_track:585 - DEBUG - New playlist position: 2
+2026-03-11 03:59:41.703 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.703 - configured - ovos_utils.ocp:goto_track:585 - DEBUG - New playlist position: 1
+2026-03-11 03:59:41.704 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.705 - configured - ovos_utils.ocp:goto_track:587 - ERROR - requested track not in the playlist: MediaEntry(uri='nonexistent', title='nonexistent', artist='', match_confidence=0, skill_id='ovos.common_play', playback=<PlaybackType.UNDEFINED: 100>, status=<TrackState.DISAMBIGUATION: 1>, media_type=<MediaType.GENERIC: 0>, length=0, image='', skill_icon='', javascript='')
+2026-03-11 03:59:41.705 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.706 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.708 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.708 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.709 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.710 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.711 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (3! Going to start of playlist
+2026-03-11 03:59:41.712 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.712 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.713 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (-1! Going to start of playlist
+2026-03-11 03:59:41.714 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.715 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.715 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (-1! Going to start of playlist
+2026-03-11 03:59:41.716 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.717 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (100! Going to start of playlist
+2026-03-11 03:59:41.718 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.718 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.719 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.720 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.721 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.722 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.722 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.723 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.724 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.725 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.726 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.728 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.729 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.731 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.731 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.733 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.742 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.744 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.747 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.750 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (0! Going to start of playlist
+2026-03-11 03:59:41.750 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (-1! Going to start of playlist
+2026-03-11 03:59:41.751 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.752 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.752 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.753 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
+2026-03-11 03:59:41.754 - configured - ovos_utils.ocp:_validate_position:606 - ERROR - Playlist pointer is in an invalid position (10! Going to start of playlist
+2026-03-11 03:59:41.756 - configured - ovos_utils.parse:_validate_matching_strategy:27 - ERROR - rapidfuzz is not installed, falling back to SequenceMatcher for all match strategies
+2026-03-11 03:59:41.756 - configured - ovos_utils.parse:_validate_matching_strategy:29 - WARNING - pip install rapidfuzz
+2026-03-11 03:59:41.782 - configured - ovos_utils.security:decrypt:93 - ERROR - run pip install pycryptodomex
+2026-03-11 03:59:41.783 - configured - ovos_utils.security:decrypt:103 - ERROR - decryption failed, invalid key?
+2026-03-11 03:59:41.786 - configured - ovos_utils.security:encrypt:80 - ERROR - run pip install pycryptodomex
+2026-03-11 03:59:41.788 - configured - ovos_utils.security:create_self_signed_cert:34 - ERROR - run pip install pyopenssl
+2026-03-11 03:59:41.792 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:41.794 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'my_service'
+2026-03-11 03:59:41.795 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:41.803 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.804 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.804 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:41.805 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:41.806 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:41.807 - configured - ovos_utils.skill_installer:handle_install_python:391 - ERROR - pip disabled in mycroft.conf
+2026-03-11 03:59:41.808 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.809 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.810 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.812 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.813 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.814 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.815 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.816 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:41.817 - configured - ovos_utils.skill_installer:handle_uninstall_python:427 - ERROR - pip disabled in mycroft.conf
+2026-03-11 03:59:41.818 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.818 - configured - ovos_utils.skill_installer:pip_install:230 - ERROR - no package list provided to install
+2026-03-11 03:59:41.819 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.820 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.821 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [ovos_test] (pip) Installing my-pkg
+2026-03-11 03:59:41.822 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /usr/bin/uv pip install -c http://example.com/c.txt my-pkg
+2026-03-11 03:59:41.823 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.824 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [ovos_test] (pip) Installing my-pkg
+2026-03-11 03:59:41.824 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/PycharmProjects/OpenVoiceOS Workspace/ovos-utils/.venv/bin/python3 -m pip install -c http://example.com/c.txt my-pkg
+2026-03-11 03:59:41.825 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.826 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [ovos_test] (pip) Installing bad-pkg
+2026-03-11 03:59:41.827 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c https://raw.githubusercontent.com/OpenVoiceOS/ovos-releases/refs/heads/main/constraints-stable.txt bad-pkg
+2026-03-11 03:59:41.830 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.831 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [ovos_test] (pip) Installing pkg
+2026-03-11 03:59:41.831 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt pkg
+2026-03-11 03:59:41.833 - configured - ovos_utils.skill_installer:validate_constraints:205 - ERROR - Couldn't find the constraints file
+2026-03-11 03:59:41.834 - configured - ovos_utils.skill_installer:validate_constraints:191 - DEBUG - Constraints url: http://example.com/c.txt
+2026-03-11 03:59:41.858 - configured - ovos_utils.skill_installer:validate_constraints:191 - DEBUG - Constraints url: http://example.com/missing.txt
+2026-03-11 03:59:41.859 - configured - ovos_utils.skill_installer:validate_constraints:195 - ERROR - Remote constraints file not accessible: 404
+2026-03-11 03:59:41.860 - configured - ovos_utils.skill_installer:validate_constraints:191 - DEBUG - Constraints url: http://example.com/c.txt
+2026-03-11 03:59:41.861 - configured - ovos_utils.skill_installer:validate_constraints:201 - ERROR - Error accessing remote constraints: timeout
+2026-03-11 03:59:41.862 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.863 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.864 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:41.864 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
+2026-03-11 03:59:41.865 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt pkg
+2026-03-11 03:59:41.866 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:41.867 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
+2026-03-11 03:59:41.867 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt --break-system-packages pkg
+2026-03-11 03:59:41.868 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:41.869 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
+2026-03-11 03:59:41.869 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt --pre pkg
+2026-03-11 03:59:41.870 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:41.871 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
+2026-03-11 03:59:41.871 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt pkg
+2026-03-11 03:59:41.872 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:41.873 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
+2026-03-11 03:59:41.874 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt pkg
+2026-03-11 03:59:41.875 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.876 - configured - ovos_utils.skill_installer:pip_uninstall:295 - ERROR - no package list provided to uninstall
+2026-03-11 03:59:41.876 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:41.877 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-03-11 03:59:42.124 - configured - ovos_utils.skill_installer:pip_uninstall:330 - ERROR - tried to uninstall a protected package: ['ovos-core']
+2026-03-11 03:59:42.127 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:42.605 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
+2026-03-11 03:59:42.606 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /usr/bin/uv pip uninstall -y custom-pkg
+2026-03-11 03:59:42.609 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:42.842 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
+2026-03-11 03:59:42.842 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/PycharmProjects/OpenVoiceOS Workspace/ovos-utils/.venv/bin/python3 -m pip uninstall -y custom-pkg
+2026-03-11 03:59:42.845 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:43.196 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
+2026-03-11 03:59:43.198 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y custom-pkg
+2026-03-11 03:59:43.201 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:43.203 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
+2026-03-11 03:59:43.204 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y custom-pkg
+2026-03-11 03:59:43.206 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:43.207 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
+2026-03-11 03:59:43.208 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y custom-pkg
+2026-03-11 03:59:43.209 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:43.655 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
+2026-03-11 03:59:43.657 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y --break-system-packages custom-pkg
+2026-03-11 03:59:43.659 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-03-11 03:59:43.868 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
+2026-03-11 03:59:43.869 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y custom-pkg
+2026-03-11 03:59:43.938 - configured - ovos_utils.system:system_reboot:83 - DEBUG - sudo systemctl reboot -i
+2026-03-11 03:59:43.939 - configured - ovos_utils.system:system_shutdown:66 - DEBUG - sudo systemctl poweroff -i
+2026-03-11 03:59:43.941 - configured - ovos_utils.system:system_shutdown:66 - DEBUG - systemctl poweroff -i

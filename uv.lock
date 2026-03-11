@@ -994,6 +994,7 @@ dependencies = [
     { name = "kthread" },
     { name = "pexpect" },
     { name = "pyee" },
+    { name = "python-dateutil" },
     { name = "requests" },
     { name = "rich" },
     { name = "rich-click" },
@@ -1010,6 +1011,7 @@ extras = [
     { name = "ovos-config" },
     { name = "ovos-plugin-manager" },
     { name = "ovos-workshop" },
+    { name = "packaging" },
     { name = "rapidfuzz", version = "3.13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "rapidfuzz", version = "3.14.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "timezonefinder", version = "8.2.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
@@ -1028,8 +1030,10 @@ requires-dist = [
     { name = "ovos-config", marker = "extra == 'extras'", specifier = ">=0.0.12" },
     { name = "ovos-plugin-manager", marker = "extra == 'extras'", specifier = ">=0.0.25" },
     { name = "ovos-workshop", marker = "extra == 'extras'", specifier = ">=0.0.13" },
+    { name = "packaging", marker = "extra == 'extras'" },
     { name = "pexpect", specifier = "~=4.9" },
     { name = "pyee", specifier = ">=8.0.0" },
+    { name = "python-dateutil" },
     { name = "rapidfuzz", marker = "extra == 'extras'", specifier = ">=3.6,<4.0" },
     { name = "requests", specifier = "~=2.26" },
     { name = "rich", specifier = "~=13.7" },
@@ -1057,6 +1061,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/81/97/c7963731c4bac4f80cd1725a751d089ce0692467f7bc497b9faee3bed1ef/ovos_workshop-8.0.0.tar.gz", hash = "sha256:eb8d56da2097b144f06b2da47f06f5e52907871f4cb9399d1c49d05961015da4", size = 90293, upload-time = "2025-11-09T17:11:26.776Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/bb/77/f464fb3a63e989a968b718a04c18617fc6c6f117d217e89412c5143f94c6/ovos_workshop-8.0.0-py3-none-any.whl", hash = "sha256:09ce566ffe20288771cd433a8d46ec803e38be3dc867590babe3ee1cbaad9db3", size = 105312, upload-time = "2025-11-09T17:11:25.044Z" },
+]
+
+[[package]]
+name = "packaging"
+version = "26.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/65/ee/299d360cdc32edc7d2cf530f3accf79c4fca01e96ffc950d8a52213bd8e4/packaging-26.0.tar.gz", hash = "sha256:00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4", size = 143416, upload-time = "2026-01-21T20:50:39.064Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b7/b9/c538f279a4e237a006a2c98387d081e9eb060d203d8ed34467cc0f0b9b53/packaging-26.0-py3-none-any.whl", hash = "sha256:b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529", size = 74366, upload-time = "2026-01-21T20:50:37.788Z" },
 ]
 
 [[package]]

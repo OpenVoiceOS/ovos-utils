@@ -68,10 +68,9 @@ class TestSendEmail(unittest.TestCase):
         with patch("ovos_utils.smtp_utils.LOG"):
             with patch.dict("sys.modules", {"ovos_config": None,
                                              "ovos_config.config": None}):
-                # Empty config — no email section
-                with patch("builtins.__import__", side_effect=ImportError):
-                    with self.assertRaises(KeyError):
-                        send_email("subj", "body")
+                # ImportError path — returns empty dict, which should trigger KeyError
+                with self.assertRaises(KeyError):
+                    send_email("subj", "body")
 
     @patch("ovos_utils.smtp_utils.send_smtp")
     def test_send_email_uses_config(self, mock_send_smtp: MagicMock) -> None:

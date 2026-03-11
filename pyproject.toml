@@ -38,6 +38,7 @@ extras = [
     "timezonefinder",
     "oauthlib~=3.2",
     "orjson",
+    "packaging",
 ]
 
 [project.scripts]

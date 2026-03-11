@@ -20,8 +20,10 @@ import unittest
 from unittest import mock
 from unittest.mock import Mock, MagicMock, patch
 
-# distutils was removed in Python 3.12+; provide a minimal stub
-if "distutils" not in sys.modules:
+# distutils was removed in Python 3.12+; provide a minimal stub if missing
+try:
+    import distutils.spawn
+except ImportError:
     distutils_stub = types.ModuleType("distutils")
     spawn_stub = types.ModuleType("distutils.spawn")
     spawn_stub.find_executable = lambda x: None

@@ -11,6 +11,10 @@
 # limitations under the License.
 #
 import unittest
+import warnings
+
+# Suppress DeprecationWarning during test collection
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="ovos_utils.ocp")
 
 from ovos_utils.ocp import (
     MediaEntry,

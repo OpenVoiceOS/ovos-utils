@@ -17,6 +17,13 @@
 - **`.github/workflows/build-tests.yml`** — Changed `install_extras` to `extras` to match `pyproject.toml` and ensure test dependencies are available.
 - **`.github/workflows/python-support.yml`** — Removed redundant and deprecated workflow to resolve name collisions in CI.
 - **`ovos_utils/log.py`** — Added `os.path.isdir` check in `get_available_logs` to prevent `FileNotFoundError` when log directories are missing (critical for environments like CI).
+- **`ovos_utils/skill_installer.py`** — Implemented robust package name extraction and normalization using `packaging` library; improved error messaging for failed pip operations when `print_logs=True`.
+- **`ovos_utils/thread_utils.py`** — Aligned `create_killable_daemon` return type annotation with docstring and used `TYPE_CHECKING` for `kthread`.
+- **`pyproject.toml`** — Added `packaging` to `extras` dependencies.
+- **`test/unittests/test_dialog.py`** — Improved `TestMustacheDialogRenderer` with failure mode coverage and deterministic selection testing; tightened `join_list` assertions and verified language fallback in `get_dialog`.
+- **`test/unittests/test_ocp.py`** — Suppressed `DeprecationWarning` from `ovos_utils.ocp` during test collection.
+- **`test/unittests/test_smtp_utils.py`** — Refactored `test_send_email_raises_when_no_config` to avoid patching `builtins.__import__`.
+- **`test/unittests/test_device_input.py`** — Refined `distutils` stubbing logic to be less intrusive.
 
 ### Rationale
 Fixed critical build-time attribute error and addressed multiple security/correctness findings from CodeRabbit audit.

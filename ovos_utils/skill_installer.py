@@ -61,6 +61,13 @@ from ovos_bus_client import Message
 from ovos_config.config import Configuration
 from ovos_utils.log import LOG
 
+try:
+    from packaging.requirements import Requirement
+    from packaging.utils import canonicalize_name
+except ImportError:
+    Requirement = None
+    canonicalize_name = None
+
 
 class InstallError(str, enum.Enum):
     """Error codes returned in ``ovos.pip.install.failed`` messages."""
@@ -96,6 +103,19 @@ class ServiceInstaller:
     )
     PIP_LOCK: NamedLock = NamedLock("ovos_pip.lock")
     UV: Optional[str] = shutil.which("uv")  # prefer uv when available
+
+    @staticmethod
+    def _get_canonical_name(pkg: str) -> str:
+        """Robustly extract and canonicalize package name from a requirement."""
+        if Requirement and canonicalize_name:
+            try:
+                return str(canonicalize_name(Requirement(pkg).name))
+            except Exception:
+                pass
+        # Fallback for when packaging is not installed or parsing fails
+        return pkg.split("~")[0].split("<")[0].split(">")[0].split("=")[0] \
+            .split("[")[0].split("!")[0].split(";")[0].strip() \
+            .replace("_", "-").lower()
 
     def __init__(
         self,
@@ -242,9 +262,10 @@ class ServiceInstaller:
                     else Popen(pip_command, stdout=PIPE, stderr=PIPE)
                 )
                 if proc.wait() != 0:
-                    stderr = proc.stderr
-                    if stderr:
-                        stderr = stderr.read().decode()
+                    if proc.stderr:
+                        stderr = proc.stderr.read().decode()
+                    else:
+                        stderr = f"pip install failed for {package} (exit code {proc.returncode})"
                     self.play_error_sound()
                     raise RuntimeError(stderr)
 
@@ -300,15 +321,12 @@ class ServiceInstaller:
             ]
 
         cpkgs = [
-            p.split("~")[0]
-            .split("<")[0]
-            .split(">")[0]
-            .split("=")[0]
-            .replace("_", "-")
+            self._get_canonical_name(p)
             for p in cpkgs
+            if p.strip() and not p.strip().startswith("#")
         ]
 
-        if any(p in cpkgs for p in packages):
+        if any(self._get_canonical_name(p) in cpkgs for p in packages):
             LOG.error(f"tried to uninstall a protected package: {packages}")
             self.play_error_sound()
             return False
@@ -334,7 +352,10 @@ class ServiceInstaller:
                     else Popen(pip_command, stdout=PIPE, stderr=PIPE)
                 )
                 if proc.wait() != 0:
-                    stderr = proc.stderr.read().decode() if proc.stderr else ""
+                    if proc.stderr:
+                        stderr = proc.stderr.read().decode()
+                    else:
+                        stderr = f"pip uninstall failed for {package} (exit code {proc.returncode})"
                     self.play_error_sound()
                     raise RuntimeError(stderr)
 
