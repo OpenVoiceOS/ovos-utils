@@ -358,3 +358,242 @@ class TestEventSchedulerInterface(unittest.TestCase):
 
         self.interface.cancel_all_repeating_events = real_cancel_repeating
         self.interface.events.clear = real_clear
+
+
+class TestCreateWrapper(unittest.TestCase):
+    """Tests for create_wrapper covering lines 71-92."""
+
+    def test_create_wrapper_calls_handler_no_args(self) -> None:
+        """create_wrapper should call a zero-argument handler."""
+        from ovos_utils.events import create_wrapper
+        from ovos_utils.fakebus import FakeMessage
+        calls = []
+
+        def handler():
+            calls.append(True)
+
+        wrapped = create_wrapper(handler, "skill_id", None, None, None)
+        wrapped(FakeMessage("test"))
+        self.assertEqual(len(calls), 1)
+
+    def test_create_wrapper_calls_handler_with_message(self) -> None:
+        """create_wrapper should pass message to a handler that accepts one."""
+        from ovos_utils.events import create_wrapper
+        from ovos_utils.fakebus import FakeMessage
+        received = []
+
+        def handler(msg):
+            received.append(msg)
+
+        msg = FakeMessage("test.msg")
+        wrapped = create_wrapper(handler, "skill_id", None, None, None)
+        wrapped(msg)
+        self.assertEqual(len(received), 1)
+
+    def test_create_wrapper_calls_on_start(self) -> None:
+        """create_wrapper should call on_start before calling handler."""
+        from ovos_utils.events import create_wrapper
+        from ovos_utils.fakebus import FakeMessage
+        order = []
+
+        def on_start(msg):
+            order.append("start")
+
+        def handler(msg):
+            order.append("handler")
+
+        wrapped = create_wrapper(handler, "skill_id", on_start, None, None)
+        wrapped(FakeMessage("test"))
+        self.assertEqual(order, ["start", "handler"])
+
+    def test_create_wrapper_calls_on_end(self) -> None:
+        """create_wrapper should call on_end in finally block."""
+        from ovos_utils.events import create_wrapper
+        from ovos_utils.fakebus import FakeMessage
+        ended = []
+
+        def on_end(msg):
+            ended.append(True)
+
+        def handler(msg):
+            pass
+
+        wrapped = create_wrapper(handler, "skill_id", None, on_end, None)
+        wrapped(FakeMessage("test"))
+        self.assertTrue(ended)
+
+    def test_create_wrapper_calls_on_error_one_arg(self) -> None:
+        """create_wrapper should call on_error(e) for single-arg error callback."""
+        from ovos_utils.events import create_wrapper
+        from ovos_utils.fakebus import FakeMessage
+        errors = []
+
+        def handler(msg):
+            raise RuntimeError("boom")
+
+        def on_error(e):
+            errors.append(e)
+
+        wrapped = create_wrapper(handler, "skill_id", None, None, on_error)
+        wrapped(FakeMessage("test"))
+        self.assertEqual(len(errors), 1)
+        self.assertIsInstance(errors[0], RuntimeError)
+
+    def test_create_wrapper_calls_on_error_two_args(self) -> None:
+        """create_wrapper should call on_error(e, msg) for two-arg error callback."""
+        from ovos_utils.events import create_wrapper
+        from ovos_utils.fakebus import FakeMessage
+        errors = []
+
+        def handler(msg):
+            raise ValueError("bad")
+
+        def on_error(e, msg):
+            errors.append((e, msg))
+
+        wrapped = create_wrapper(handler, "skill_id", None, None, on_error)
+        wrapped(FakeMessage("test"))
+        self.assertEqual(len(errors), 1)
+        self.assertIsInstance(errors[0][0], ValueError)
+
+    def test_create_wrapper_on_end_called_even_on_error(self) -> None:
+        """create_wrapper on_end should be called even when handler raises."""
+        from ovos_utils.events import create_wrapper
+        from ovos_utils.fakebus import FakeMessage
+        ended = []
+
+        def handler(msg):
+            raise Exception("error")
+
+        def on_end(msg):
+            ended.append(True)
+
+        wrapped = create_wrapper(handler, "skill_id", None, on_end, None)
+        wrapped(FakeMessage("test"))
+        self.assertTrue(ended)
+
+
+class TestEventContainerOnce(unittest.TestCase):
+    """Tests for EventContainer once-handler path (lines 154-155)."""
+
+    def test_once_handler_invokes_and_removes(self) -> None:
+        """once_wrapper should invoke the handler and remove the event."""
+        from ovos_utils.events import EventContainer
+        from ovos_utils.fakebus import FakeBus, FakeMessage
+        bus = FakeBus()
+        container = EventContainer(bus)
+        called = []
+
+        def handler(msg):
+            called.append(msg)
+
+        container.add("once.event", handler, once=True)
+        bus.emit(FakeMessage("once.event"))
+        self.assertEqual(len(called), 1)
+        # After once fires, the event should be removed
+        self.assertEqual(container.events, [])
+
+    def test_remove_error_logged(self) -> None:
+        """EventContainer.remove should handle ValueError gracefully."""
+        from ovos_utils.events import EventContainer
+        from ovos_utils.fakebus import FakeBus
+
+        # Subclass list to override remove so it always raises ValueError
+        class BrokenList(list):
+            def remove(self, item):
+                raise ValueError("forced")
+
+        bus = FakeBus()
+        container = EventContainer(bus)
+        broken = BrokenList()
+        broken.append(("bad.event", lambda m: None))
+        container.events = broken
+        # Should not raise despite the ValueError
+        result = container.remove("bad.event")
+        self.assertTrue(result)
+
+
+class TestEventSchedulerInterfaceExtended(unittest.TestCase):
+    """Additional tests for EventSchedulerInterface uncovered methods."""
+
+    from ovos_utils.events import EventSchedulerInterface
+    bus = None
+
+    def setUp(self) -> None:
+        """Set up a fresh bus and interface for each test."""
+        import warnings
+        from ovos_utils.fakebus import FakeBus
+        from ovos_utils.events import EventSchedulerInterface
+        self.bus = FakeBus()
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            self.interface = EventSchedulerInterface(bus=self.bus,
+                                                     skill_id="test_ext")
+
+    def test_schedule_event_with_naive_datetime(self) -> None:
+        """_schedule_event should attach timezone to naive datetime objects."""
+        import datetime
+        from unittest.mock import Mock
+        cb = Mock()
+        cb.__name__ = "naive_test"
+        naive_dt = datetime.datetime.now()
+        # Should not raise
+        scheduled_msgs = []
+        self.bus.on("mycroft.scheduler.schedule_event",
+                    lambda m: scheduled_msgs.append(m))
+        self.interface._schedule_event(cb, naive_dt, None, "naive_test")
+        self.assertEqual(len(scheduled_msgs), 1)
+
+    def test_update_scheduled_event(self) -> None:
+        """update_scheduled_event should emit mycroft.scheduler.update_event."""
+        emitted = []
+        self.bus.on("mycroft.scheduler.update_event",
+                    lambda m: emitted.append(m))
+        self.interface.update_scheduled_event("my_event", {"key": "value"})
+        self.assertEqual(len(emitted), 1)
+        self.assertIn("event", emitted[0].data)
+
+    def test_cancel_scheduled_event_removes_repeat(self) -> None:
+        """cancel_scheduled_event should remove event from scheduled_repeats."""
+        self.interface.scheduled_repeats.append("repeat_event")
+        self.interface.events.remove = lambda name: True
+        emitted = []
+        self.bus.on("mycroft.scheduler.remove_event",
+                    lambda m: emitted.append(m))
+        self.interface.cancel_scheduled_event("repeat_event")
+        self.assertNotIn("repeat_event", self.interface.scheduled_repeats)
+
+    def test_get_scheduled_event_status_raises_on_timeout(self) -> None:
+        """get_scheduled_event_status should raise Exception on no response."""
+        with self.assertRaises(Exception) as ctx:
+            self.interface.get_scheduled_event_status("nonexistent_event")
+        self.assertIn("Timeout", str(ctx.exception))
+
+    def test_get_scheduled_event_status_returns_time_left(self) -> None:
+        """get_scheduled_event_status should return time left when status received."""
+        import time
+        from unittest.mock import patch, MagicMock as MM
+        future_timestamp = int(time.time()) + 3600
+        # Build a mock with .data attribute shaped like [[timestamp, ...], ...]
+        mock_status = MM()
+        mock_status.data = [[future_timestamp, None]]
+
+        with patch.object(self.bus, "wait_for_response",
+                          return_value=mock_status):
+            result = self.interface.get_scheduled_event_status("my_event")
+        self.assertGreater(result, 0)
+
+    def test_cancel_all_repeating_events(self) -> None:
+        """cancel_all_repeating_events should cancel all scheduled repeats."""
+        self.interface.scheduled_repeats = ["e1", "e2"]
+        cancelled = []
+
+        def mock_cancel(name: str) -> None:
+            cancelled.append(name)
+            if name in self.interface.scheduled_repeats:
+                self.interface.scheduled_repeats.remove(name)
+
+        self.interface.cancel_scheduled_event = mock_cancel
+        self.interface.cancel_all_repeating_events()
+        self.assertIn("e1", cancelled)
+        self.assertIn("e2", cancelled)
