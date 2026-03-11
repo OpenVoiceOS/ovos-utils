@@ -401,5 +401,5 @@ def get_available_logs(directories: Optional[List[str]] = None) -> List[str]:
         list of log file basenames (i.e. "audio", "skills")
     """
     directories = directories or get_log_paths()
-    return [Path(f).stem for path in directories
+    return [Path(f).stem for path in directories if os.path.isdir(path)
             for f in os.listdir(path) if Path(f).suffix == ".log"]

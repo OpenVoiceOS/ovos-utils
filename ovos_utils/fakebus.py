@@ -24,7 +24,7 @@ class FakeBus:
         self.on_open()
         try:
             self.session_id = kwargs["session"].session_id
-        except:
+        except Exception:
             pass  # don't care
 
         self.on("ovos.session.update_default",
@@ -46,7 +46,10 @@ class FakeBus:
             except ImportError:  # don't care
                 message.context["session"] = {"session_id": self.session_id}
         self.ee.emit("message", message.serialize())
-        self.ee.emit(message.msg_type, message)
+        try:
+            self.ee.emit(message.msg_type, message)
+        except Exception as e:
+            LOG.exception(f"Error in event handler for '{message.msg_type}': {e}")
         self.on_message(message.serialize())
 
     def on_message(self, *args):
@@ -134,7 +137,7 @@ class FakeBus:
     def remove(self, msg_type, handler):
         try:
             self.ee.remove_listener(msg_type, handler)
-        except:
+        except Exception:
             pass
 
     def remove_all_listeners(self, event_name):
@@ -202,7 +205,7 @@ class FakeMessage(metaclass=_MutableMessage):
             return other.msg_type == self.msg_type and \
                 other.data == self.data and \
                 other.context == self.context
-        except:
+        except Exception:
             return False
 
     def serialize(self):

@@ -1,28 +1,54 @@
 # Changelog
 
-## [0.8.4a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.4a1) (2025-10-13)
+## [0.8.5a4](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a4) (2026-03-11)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.3a1...0.8.4a1)
-
-**Merged pull requests:**
-
-- fix: handle issues in NVDA python stdlib [\#341](https://github.com/OpenVoiceOS/ovos-utils/pull/341) ([JarbasAl](https://github.com/JarbasAl))
-
-## [0.8.3a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.3a1) (2025-10-13)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.2a1...0.8.3a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.6a2...0.8.5a4)
 
 **Merged pull requests:**
 
-- fix: fail safe when used in applications with conflicting watchdog  [\#338](https://github.com/OpenVoiceOS/ovos-utils/pull/338) ([JarbasAl](https://github.com/JarbasAl))
+- chore: Add comprehensive test suites and documentation [\#362](https://github.com/OpenVoiceOS/ovos-utils/pull/362) ([JarbasAl](https://github.com/JarbasAl))
+- fix: make the stopwatch test less strict [\#360](https://github.com/OpenVoiceOS/ovos-utils/pull/360) ([PureTryOut](https://github.com/PureTryOut))
 
-## [0.8.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.2a1) (2025-09-05)
+## [0.8.6a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.6a2) (2026-02-02)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.1...0.8.2a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.6a1...0.8.6a2)
 
 **Merged pull requests:**
 
-- fix: make orjson optional [\#335](https://github.com/OpenVoiceOS/ovos-utils/pull/335) ([JarbasAl](https://github.com/JarbasAl))
+- chore\(deps\): update actions/setup-python action to v6 [\#353](https://github.com/OpenVoiceOS/ovos-utils/pull/353) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update actions/checkout action to v6 [\#352](https://github.com/OpenVoiceOS/ovos-utils/pull/352) ([renovate[bot]](https://github.com/apps/renovate))
+
+## [0.8.6a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.6a1) (2026-02-02)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.5a3...0.8.6a1)
+
+**Merged pull requests:**
+
+- fix: prevent handler errors from aborting FakeBus emit [\#358](https://github.com/OpenVoiceOS/ovos-utils/pull/358) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.8.5a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a3) (2025-12-19)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.5a2...0.8.5a3)
+
+**Merged pull requests:**
+
+- chore\(deps\): update dependency python to 3.14 [\#348](https://github.com/OpenVoiceOS/ovos-utils/pull/348) ([renovate[bot]](https://github.com/apps/renovate))
+
+## [0.8.5a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a2) (2025-12-18)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.5a1...0.8.5a2)
+
+**Merged pull requests:**
+
+- chore: Configure Renovate [\#347](https://github.com/OpenVoiceOS/ovos-utils/pull/347) ([renovate[bot]](https://github.com/apps/renovate))
+
+## [0.8.5a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a1) (2025-11-07)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.4...0.8.5a1)
+
+**Merged pull requests:**
+
+- fix: use timezone-aware datetime functions and update scheduler event names [\#343](https://github.com/OpenVoiceOS/ovos-utils/pull/343) ([JarbasAl](https://github.com/JarbasAl))
 
 
 

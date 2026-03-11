@@ -84,7 +84,7 @@ def get_geolocation(location: str, lang: str = "en", timeout: int = 5) -> Dict[s
     lat = data.get("lat")
     lon = data.get("lon")
 
-    if lat and lon:
+    if lat is not None and lon is not None:
         return get_reverse_geolocation(lat, lon, lang)
 
     url = "https://nominatim.openstreetmap.org/details.php"

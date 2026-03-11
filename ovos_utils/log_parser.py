@@ -141,9 +141,9 @@ class OVOSLogParser:
     LOG_PATTERN = r'(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{1,6}) - (?P<source>.+?) - (?P<location>.+?) - (?P<level>\w+) - (?P<message>.*)'
 
     @classmethod
-    def parse(self, log_line, last_timestamp=None) -> LogLine:
-        log_line.rstrip("\n")
-        match = re.match(self.LOG_PATTERN, log_line)
+    def parse(cls, log_line, last_timestamp=None) -> LogLine:
+        log_line = log_line.rstrip("\n")
+        match = re.match(cls.LOG_PATTERN, log_line)
         data = {}
         if match:
             data = match.groupdict()
@@ -155,7 +155,7 @@ class OVOSLogParser:
         return LogLine(**data)
     
     @classmethod
-    def parse_file(self, source) -> Generator[Union[LogLine, Traceback], None, None]:
+    def parse_file(cls, source) -> Generator[Union[LogLine, Traceback], None, None]:
         if not os.path.exists(source):
             raise FileNotFoundError(f"File {source} does not exist")
 
@@ -177,13 +177,18 @@ class OVOSLogParser:
                 elif trace:
                     trace.append(line)
                 else:
-                    log = self.parse(line, last_timestamp)
-                    if log.message == "\n":
+                    log = cls.parse(line, last_timestamp)
+                    if not log.message.strip():
                         continue
                     timestamp = log.timestamp
                     if timestamp:
                         last_timestamp = timestamp
                     yield log
+            # Flush any traceback that ends at EOF without a trailing blank line
+            if trace:
+                traceback = Traceback.from_list(trace)
+                traceback.timestamp = last_timestamp
+                yield traceback
 
 
 console = Console()
@@ -383,9 +388,9 @@ def slice(start, until, logs, paths, file):
     if file is not None:
         # test if file is writable
         try:
-            with open(file, 'w') as f:
+            with open(file, 'a') as f:
                 pass
-        except:
+        except Exception:
             return console.print(f"File [{file}] is not writable. Aborted")
         else:
             console.print(f"Log slice saved to [bold]{file}[/bold]")
@@ -521,9 +526,9 @@ def list(error, warning, exception, debug, start, until, logs, paths, file):
     if file is not None:
         # test if file is writable
         try:
-            with open(file, 'w') as f:
+            with open(file, 'a') as f:
                 pass
-        except:
+        except Exception:
             return console.print(f"File [{file}] is not writable. Aborted")
         else:
             console.print(f"Log list saved to [bold]{file}[/bold]")
