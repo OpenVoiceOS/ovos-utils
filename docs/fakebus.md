@@ -52,6 +52,65 @@ bus.emit(FakeMessage("recognizer_loop:utterance", {"utterances": ["hello"]}))
 | `close()` | Calls `on_close()` |
 | `create_client()` | Returns `self` |
 
+For asyncio-native code, see [`AsyncFakeBus`](#asyncfakebus) below.
+
+---
+
+## `AsyncFakeBus`
+
+`AsyncFakeBus` — `ovos_utils/fakebus.py:351`
+
+In-process stand-in for `AsyncMessageBusClient` (from `ovos-bus-client`). Use this when your code is asyncio-native and needs a drop-in fake bus without a WebSocket connection. The API surface mirrors the real async client: coroutine methods keep you inside the event loop, while handler registration stays synchronous to match `pyee` and the real client's contract.
+
+```python
+import asyncio
+from ovos_utils.fakebus import AsyncFakeBus, FakeMessage
+
+async def main():
+    bus = AsyncFakeBus()
+
+    received = []
+
+    def on_ping(message):
+        received.append(message)
+
+    bus.on("test:ping", on_ping)
+
+    await bus.emit(FakeMessage("test:ping", {"n": 1}))
+    print(received)  # [FakeMessage("test:ping", ...)]
+
+    await bus.close()
+
+asyncio.run(main())
+```
+
+### Coroutine vs sync split
+
+| Sync (handler registration) | Async (I/O surface) |
+|---|---|
+| `on(msg_type, handler)` | `connect(*args, **kwargs)` |
+| `once(msg_type, handler)` | `close()` |
+| `remove(msg_type, handler)` | `emit(message)` |
+| `remove_all_listeners(event_name)` | `wait_for_message(message_type, timeout)` |
+| | `wait_for_response(message, reply_type, timeout)` |
+
+### Key Methods
+
+| Method | Description | Source |
+|---|---|---|
+| `connect()` | No-op; sets `connected_event` and `started_running = True` | `fakebus.py:409` |
+| `close()` | Clears `connected_event`, calls `on_close()` | `fakebus.py:418` |
+| `emit(message)` | Injects session, dispatches to `pyee` emitter | `fakebus.py:426` |
+| `wait_for_message(message_type, timeout)` | Awaits a single message of that type | `fakebus.py:489` |
+| `wait_for_response(message, reply_type, timeout)` | Emits a message and awaits the reply | `fakebus.py:513` |
+| `create_client()` | Returns `self` (backwards-compat shim) | `fakebus.py:543` |
+| `run_forever()` | Sets `started_running = True` (backwards-compat shim) | `fakebus.py:546` |
+| `run_in_thread()` | Calls `run_forever()` (backwards-compat shim) | `fakebus.py:549` |
+
+### Session Handling
+
+Session injection side effects are identical to `FakeBus`: `emit()` populates `message.context["session"]` from `SessionManager`, and `on_message()` feeds incoming messages back through `Session.from_message()` / `SessionManager.update()`. Both imports are lazy so the class works without `ovos-bus-client` installed.
+
 ---
 
 ## `FakeMessage`

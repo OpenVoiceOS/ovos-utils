@@ -11,7 +11,7 @@ Shared utility library used by all OVOS components. Provides logging, process li
 |---|---|
 | `ovos_utils.log` | `LOG` — OVOS-wide logging class with optional file rotation |
 | `ovos_utils.process_utils` | `ProcessStatus`, `RuntimeRequirements`, `PIDLock`, `MonotonicEvent` |
-| `ovos_utils.fakebus` | `FakeBus`, `FakeMessage` — in-process bus for testing without a live WebSocket |
+| `ovos_utils.fakebus` | `FakeBus`, `AsyncFakeBus`, `FakeMessage` — in-process bus for testing without a live WebSocket |
 | `ovos_utils.events` | `EventContainer`, `EventSchedulerInterface`, handler wrappers |
 | `ovos_utils.file_utils` | Resource resolution, vocab loading, `FileWatcher` |
 | `ovos_utils.network_utils` | `get_ip()`, `is_connected_dns()`, `is_connected_http()`, `check_captive_portal()` |
@@ -60,6 +60,6 @@ pip install ovos-utils
 
 - [Logging](log.md) — `LOG`, `init_service_logger()`, `log_deprecation()`, `deprecated` decorator
 - [Process Utilities](process-utils.md) — `ProcessStatus`, `RuntimeRequirements`, `PIDLock`, `MonotonicEvent`
-- [FakeBus](fakebus.md) — `FakeBus`, `FakeMessage` — in-process message bus for testing
+- [FakeBus](fakebus.md) — `FakeBus`, `AsyncFakeBus`, `FakeMessage` — in-process message bus for testing
 - [Events](events.md) — `EventContainer`, `EventSchedulerInterface`, handler wrappers
 - [Utilities](utilities.md) — file, network, sound, threading, XDG helpers
