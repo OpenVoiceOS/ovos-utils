@@ -9,7 +9,7 @@ from sys import platform
 from threading import RLock
 from typing import Optional, List
 
-from ovos_utils.bracket_expansion import expand_template
+from ovos_spec_tools import expand
 from ovos_utils.log import LOG, log_deprecation
 
 
@@ -238,7 +238,7 @@ def read_vocab_file(path: str) -> List[List[str]]:
         for line in voc_file.readlines():
             if line.startswith('#') or line.strip() == '':
                 continue
-            vocab.append(expand_template(line.lower()))
+            vocab.append(sorted(expand(line.lower())))
     return vocab
 
 
