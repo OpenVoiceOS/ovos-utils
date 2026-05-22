@@ -13,18 +13,20 @@ from ovos_utils.version import VERSION_MAJOR
 def standardize_lang_tag(lang_code: str, macro=True) -> str:
     """Normalize a BCP-47 language tag.
 
+    With ``macro=True`` the region is dropped, returning the bare primary
+    language subtag (``en-US`` -> ``en``).
+
     .. deprecated::
         Use :func:`ovos_spec_tools.standardize_lang` — the conformant OVOS
-        language-tag normalizer, and what this now delegates to. The ``macro``
-        parameter is accepted for backward compatibility but no longer affects
-        the result.
+        language-tag normalizer, and what this now delegates to.
     """
     # stacklevel=3: warn() -> this body -> @deprecated wrapper -> caller
     warnings.warn("standardize_lang_tag is deprecated; use 'standardize_lang' "
                   "from 'ovos_spec_tools' instead",
                   DeprecationWarning, stacklevel=3)
     from ovos_spec_tools import standardize_lang
-    return standardize_lang(lang_code)
+    tag = standardize_lang(lang_code)
+    return tag.split("-")[0] if macro else tag
 
 
 @deprecated("use 'closest_lang' from 'ovos_spec_tools' "
