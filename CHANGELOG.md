@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.10.0a1) (2026-05-22)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.9.0a1...0.10.0a1)
+
+**Merged pull requests:**
+
+- feat: migrate ovos-utils onto ovos-spec-tools [\#373](https://github.com/OpenVoiceOS/ovos-utils/pull/373) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.9.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.9.0a1) (2026-05-18)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.5...0.9.0a1)
