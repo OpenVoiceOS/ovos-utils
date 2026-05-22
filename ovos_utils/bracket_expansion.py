@@ -6,39 +6,21 @@ from ovos_utils.log import deprecated
 
 
 def expand_template(template: str) -> List[str]:
-    def expand_optional(text):
-        """Replace [optional] with two options: one with and one without."""
-        return re.sub(r"\[([^\[\]]+)\]", lambda m: f"({m.group(1)}|)", text)
+    """Expand a sentence template to its sample set.
 
-    def expand_alternatives(text):
-        """Expand (alternative|choices) into a list of choices."""
-        parts = []
-        for segment in re.split(r"(\([^\(\)]+\))", text):
-            if segment.startswith("(") and segment.endswith(")"):
-                options = segment[1:-1].split("|")
-                parts.append(options)
-            else:
-                parts.append([segment])
-        return itertools.product(*parts)
+    Resolves ``(a|b)`` alternatives and ``[optional]`` segments; named
+    ``{slot}`` placeholders are carried through unchanged. The samples are
+    returned sorted.
 
-    def fully_expand(texts):
-        """Iteratively expand alternatives until all possibilities are covered."""
-        result = set(texts)
-        while True:
-            expanded = set()
-            for text in result:
-                options = list(expand_alternatives(text))
-                expanded.update(["".join(option).strip() for option in options])
-            if expanded == result:  # No new expansions found
-                break
-            result = expanded
-        return sorted(result)  # Return a sorted list for consistency
-
-    # Expand optional items first
-    template = expand_optional(template)
-
-    # Fully expand all combinations of alternatives
-    return fully_expand([template])
+    Delegates to the OVOS-INTENT-1 reference expander,
+    :func:`ovos_spec_tools.expand` — the single conformant implementation;
+    new code should import ``expand`` from ``ovos_spec_tools`` directly. A
+    template the specification rejects as malformed (a single-branch group,
+    an empty sample, a slot-only template, …) raises
+    :class:`ovos_spec_tools.MalformedTemplate`.
+    """
+    from ovos_spec_tools import expand as _spec_expand
+    return sorted(_spec_expand(template))
 
 
 def expand_slots(template: str, slots: Dict[str, List[str]]) -> List[str]:
