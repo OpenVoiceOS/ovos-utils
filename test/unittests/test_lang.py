@@ -25,9 +25,8 @@ class TestStandardizeLangTag(unittest.TestCase):
     """Tests for standardize_lang_tag."""
 
     def test_macro_strips_region(self) -> None:
-        """standardize_lang_tag(macro=True) should return bare language code."""
+        """standardize_lang_tag(macro=True) should return the bare language."""
         from ovos_utils.lang import standardize_lang_tag
-        # When langcodes not available, falls back to split on '-'
         with patch.dict("sys.modules", {"langcodes": None}):
             result = standardize_lang_tag("en-US", macro=True)
         self.assertEqual(result, "en")

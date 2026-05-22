@@ -1,47 +1,58 @@
+import warnings
 from os import listdir
 from os.path import isdir, join
 from typing import Optional
 
 from ovos_utils.file_utils import resolve_resource_file
+from ovos_utils.log import deprecated
+from ovos_utils.version import VERSION_MAJOR
 
 
+@deprecated("use 'standardize_lang' from 'ovos_spec_tools' instead",
+            f"{VERSION_MAJOR + 1}.0.0")
 def standardize_lang_tag(lang_code: str, macro=True) -> str:
-    """https://langcodes-hickford.readthedocs.io/en/sphinx/index.html"""
+    """Normalize a BCP-47 language tag.
+
+    With ``macro=True`` the region is dropped, returning the bare primary
+    language subtag (``en-US`` -> ``en``).
+
+    .. deprecated::
+        Use :func:`ovos_spec_tools.standardize_lang` — the conformant OVOS
+        language-tag normalizer, and what this now delegates to.
+    """
+    # stacklevel=3: warn() -> this body -> @deprecated wrapper -> caller
+    warnings.warn("standardize_lang_tag is deprecated; use 'standardize_lang' "
+                  "from 'ovos_spec_tools' instead",
+                  DeprecationWarning, stacklevel=3)
+    from ovos_spec_tools import standardize_lang
+    tag = standardize_lang(lang_code)
+    return tag.split("-")[0] if macro else tag
+
+
+@deprecated("use 'closest_lang' from 'ovos_spec_tools' "
+            "(or 'ovos_spec_tools.LocaleResources')",
+            f"{VERSION_MAJOR + 1}.0.0")
+def get_language_dir(base_path: str, lang: str = "en-US") -> Optional[str]:
+    """Return the best-matching ``<lang>/`` directory under ``base_path``.
+
+    .. deprecated::
+        Use :func:`ovos_spec_tools.closest_lang` to resolve a language tag
+        against the available ones, or :class:`ovos_spec_tools.LocaleResources`
+        which resolves locale directories itself.
+    """
+    # stacklevel=3: warn() -> this body -> @deprecated wrapper -> caller
+    warnings.warn("get_language_dir is deprecated; use 'closest_lang' from "
+                  "'ovos_spec_tools' (or 'ovos_spec_tools.LocaleResources')",
+                  DeprecationWarning, stacklevel=3)
+    from ovos_spec_tools import closest_lang
     try:
-        from langcodes import standardize_tag as std
-        return str(std(lang_code, macro=macro))
-    except Exception:
-        if macro:
-            return lang_code.split("-")[0].lower()
-        if "-" in lang_code:
-            a, b = lang_code.split("-", 1)
-            return f"{a.lower()}-{b.upper()}"
-        return lang_code.lower()
-
-
-def get_language_dir(base_path: str, lang: str ="en-US") -> Optional[str]:
-    """ checks for all language variations and returns best path """
-    lang = standardize_lang_tag(lang)
-
-    candidates = []
-    for f in listdir(base_path):
-        if isdir(f"{base_path}/{f}"):
-            try:
-                from langcodes import tag_distance
-                score = tag_distance(lang, f)
-            except Exception:  # not a valid language code
-                continue
-                # https://langcodes-hickford.readthedocs.io/en/sphinx/index.html#distance-values
-                # 0 -> These codes represent the same language, possibly after filling in values and normalizing.
-                # 1- 3 -> These codes indicate a minor regional difference.
-                # 4 - 10 -> These codes indicate a significant but unproblematic regional difference.
-            if score < 10:
-                candidates.append((f"{base_path}/{f}", score))
-    if not candidates:
+        names = [f for f in listdir(base_path) if isdir(join(base_path, f))]
+    except (FileNotFoundError, NotADirectoryError):
         return None
-    # sort by distance to target lang code
-    candidates = sorted(candidates, key=lambda k: k[1])
-    return candidates[0][0]
+    # closest_lang accepts a tag distance below 10 — the same threshold this
+    # used previously (OVOS-INTENT-2 §2.2).
+    match = closest_lang(lang, names)
+    return join(base_path, match) if match is not None else None
 
 
 def translate_word(name, lang='en-US'):
