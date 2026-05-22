@@ -8,18 +8,23 @@ from ovos_utils.log import deprecated
 from ovos_utils.version import VERSION_MAJOR
 
 
+@deprecated("use 'standardize_lang' from 'ovos_spec_tools' instead",
+            f"{VERSION_MAJOR + 1}.0.0")
 def standardize_lang_tag(lang_code: str, macro=True) -> str:
-    """https://langcodes-hickford.readthedocs.io/en/sphinx/index.html"""
-    try:
-        from langcodes import standardize_tag as std
-        return str(std(lang_code, macro=macro))
-    except Exception:
-        if macro:
-            return lang_code.split("-")[0].lower()
-        if "-" in lang_code:
-            a, b = lang_code.split("-", 1)
-            return f"{a.lower()}-{b.upper()}"
-        return lang_code.lower()
+    """Normalize a BCP-47 language tag.
+
+    .. deprecated::
+        Use :func:`ovos_spec_tools.standardize_lang` — the conformant OVOS
+        language-tag normalizer, and what this now delegates to. The ``macro``
+        parameter is accepted for backward compatibility but no longer affects
+        the result.
+    """
+    # stacklevel=3: warn() -> this body -> @deprecated wrapper -> caller
+    warnings.warn("standardize_lang_tag is deprecated; use 'standardize_lang' "
+                  "from 'ovos_spec_tools' instead",
+                  DeprecationWarning, stacklevel=3)
+    from ovos_spec_tools import standardize_lang
+    return standardize_lang(lang_code)
 
 
 @deprecated("use 'closest_lang' from 'ovos_spec_tools' "

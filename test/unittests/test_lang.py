@@ -24,13 +24,15 @@ from unittest.mock import patch
 class TestStandardizeLangTag(unittest.TestCase):
     """Tests for standardize_lang_tag."""
 
-    def test_macro_strips_region(self) -> None:
-        """standardize_lang_tag(macro=True) should return bare language code."""
+    def test_macro_no_longer_strips_region(self) -> None:
+        """`macro` is kept for backward compatibility but no longer changes the
+        result — standardize_lang_tag delegates to ovos_spec_tools.standardize_lang,
+        which keeps the region (the old macro region-stripping was inconsistent
+        with the langcodes path and is treated as a bug)."""
         from ovos_utils.lang import standardize_lang_tag
-        # When langcodes not available, falls back to split on '-'
         with patch.dict("sys.modules", {"langcodes": None}):
             result = standardize_lang_tag("en-US", macro=True)
-        self.assertEqual(result, "en")
+        self.assertEqual(result, "en-US")
 
     def test_non_macro_preserves_region(self) -> None:
         """standardize_lang_tag(macro=False) should keep the region part."""
