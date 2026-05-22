@@ -10,11 +10,12 @@ from ovos_utils.version import VERSION_MAJOR
 
 @deprecated("use 'standardize_lang' from 'ovos_spec_tools' instead",
             f"{VERSION_MAJOR + 1}.0.0")
-def standardize_lang_tag(lang_code: str, macro=True) -> str:
+def standardize_lang_tag(lang_code: str, macro=False) -> str:
     """Normalize a BCP-47 language tag.
 
-    With ``macro=True`` the region is dropped, returning the bare primary
-    language subtag (``en-US`` -> ``en``).
+    By default the region is kept (``en-US`` -> ``en-US``). With
+    ``macro=True`` the region is dropped, returning the bare primary language
+    subtag (``en-US`` -> ``en``).
 
     .. deprecated::
         Use :func:`ovos_spec_tools.standardize_lang` — the conformant OVOS

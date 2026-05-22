@@ -31,6 +31,15 @@ class TestStandardizeLangTag(unittest.TestCase):
             result = standardize_lang_tag("en-US", macro=True)
         self.assertEqual(result, "en")
 
+    def test_default_keeps_region(self) -> None:
+        """The default (macro=False) keeps the region — get_message_lang and
+        Session.lang call standardize_lang_tag(x) and rely on it being
+        region-ful."""
+        from ovos_utils.lang import standardize_lang_tag
+        with patch.dict("sys.modules", {"langcodes": None}):
+            result = standardize_lang_tag("de-de")
+        self.assertEqual(result, "de-DE")
+
     def test_non_macro_preserves_region(self) -> None:
         """standardize_lang_tag(macro=False) should keep the region part."""
         from ovos_utils.lang import standardize_lang_tag
