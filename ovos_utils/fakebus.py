@@ -1,7 +1,5 @@
 import asyncio
-import json
 import warnings
-from copy import deepcopy
 from threading import Event
 
 from ovos_utils.log import LOG, log_deprecation
@@ -167,184 +165,60 @@ class FakeBus:
         self.on_close()
 
 
-class _MutableMessage(type):
-    """ To override isinstance checks we need to use a metaclass """
+# The reference Message envelope lives in ovos-spec-tools (OVOS-MSG-1).
+# ovos-utils re-exports it under the historical ``FakeMessage`` name and
+# attaches the one legacy convenience method downstream still uses —
+# ``publish`` — to the class at import time. ``as_dict`` is now on the
+# spec-tools class itself; the ``data['destination']`` promotion the
+# old ``reply`` did was always a bug (data is the payload, context owns
+# routing) and is gone.
+#
+# The old ``_MutableMessage`` metaclass / dynamic ``__new__`` indirection
+# (which tried to return an ``ovos_bus_client.Message`` at runtime if
+# bus-client was installed) is no longer needed: spec-tools is a hard
+# dependency, the canonical class is always present, and
+# ``ovos-bus-client.Message`` is the **same** class (bus-client attaches
+# ``publish`` to it too — both attachments are idempotent).
+from typing import Any, Dict, Optional
 
-    def __instancecheck__(self, instance):
-        try:
-            from ovos_bus_client.message import Message as _MycroftMessage
-            if isinstance(instance, _MycroftMessage):
-                return True
-        except ImportError:
-            pass
-        return super().__instancecheck__(instance)
+from ovos_spec_tools.message import Message as FakeMessage
 
 
-# fake Message object to allow usage without ovos-bus-client installed
-class FakeMessage(metaclass=_MutableMessage):
-    """ fake Message object to allow usage with FakeBus without ovos-bus-client installed"""
+def _publish(self, msg_type: str, data: Dict[str, Any],
+             context: Optional[Dict[str, Any]] = None) -> FakeMessage:
+    """Relay under a new topic without the §5.2 swap; drop ``target``."""
+    context = context or {}
+    new_context = dict(self.context)
+    new_context.update(context)
+    new_context.pop("target", None)
+    return self.__class__(msg_type, data, new_context)
 
-    def __new__(cls, *args, **kwargs):
-        try:  # most common case
-            from ovos_bus_client import Message as _M
-            return _M(*args, **kwargs)
-        except ImportError:
-            pass
-        return super().__new__(cls)
 
-    def __init__(self, msg_type, data=None, context=None):
-        """Used to construct a message object
-
-        Message objects will be used to send information back and forth
-        between processes of mycroft service, voice, skill and cli
-        """
-        self.msg_type = msg_type
-        self.data = data or {}
-        self.context = context or {}
-
-    def __eq__(self, other):
-        try:
-            return other.msg_type == self.msg_type and \
-                other.data == self.data and \
-                other.context == self.context
-        except Exception:
-            return False
-
-    def serialize(self):
-        """This returns a string of the message info.
-
-        This makes it easy to send over a websocket. This uses
-        json dumps to generate the string with type, data and context
-
-        Returns:
-            str: a json string representation of the message.
-        """
-        return json.dumps({'type': self.msg_type,
-                           'data': self.data,
-                           'context': self.context})
-
-    @staticmethod
-    def deserialize(value):
-        """This takes a string and constructs a message object.
-
-        This makes it easy to take strings from the websocket and create
-        a message object.  This uses json loads to get the info and generate
-        the message object.
-
-        Args:
-            value(str): This is the json string received from the websocket
-
-        Returns:
-            FakeMessage: message object constructed from the json string passed
-            int the function.
-            value(str): This is the string received from the websocket
-        """
-        obj = json.loads(value)
-        return FakeMessage(obj.get('type') or '',
-                           obj.get('data') or {},
-                           obj.get('context') or {})
-
-    def forward(self, msg_type, data=None):
-        """ Keep context and forward message
-
-        This will take the same parameters as a message object but use
-        the current message object as a reference.  It will copy the context
-        from the existing message object.
-
-        Args:
-            msg_type (str): type of message
-            data (dict): data for message
-
-        Returns:
-            FakeMessage: Message object to be used on the reply to the message
-        """
-        data = data or {}
-        return FakeMessage(msg_type, data, context=self.context)
-
-    def reply(self, msg_type, data=None, context=None):
-        """Construct a reply message for a given message
-
-        This will take the same parameters as a message object but use
-        the current message object as a reference.  It will copy the context
-        from the existing message object and add any context passed in to
-        the function.  Check for a destination passed in to the function from
-        the data object and add that to the context as a destination.  If the
-        context has a source then that will be swapped with the destination
-        in the context.  The new message will then have data passed in plus the
-        new context generated.
-
-        Args:
-            msg_type (str): type of message
-            data (dict): data for message
-            context: intended context for new message
-
-        Returns:
-            FakeMessage: Message object to be used on the reply to the message
-        """
-        data = deepcopy(data) or {}
-        context = context or {}
-
-        new_context = deepcopy(self.context)
-        for key in context:
-            new_context[key] = context[key]
-        if 'destination' in data:
-            new_context['destination'] = data['destination']
-        if 'source' in new_context and 'destination' in new_context:
-            s = new_context['destination']
-            new_context['destination'] = new_context['source']
-            new_context['source'] = s
-        return FakeMessage(msg_type, data, context=new_context)
-
-    def response(self, data=None, context=None):
-        """Construct a response message for the message
-
-        Constructs a reply with the data and appends the expected
-        ".response" to the message
-
-        Args:
-            data (dict): message data
-            context (dict): message context
-        Returns
-            (Message) message with the type modified to match default response
-        """
-        return self.reply(self.msg_type + '.response', data, context)
-
-    def publish(self, msg_type, data, context=None):
-        """
-        Copy the original context and add passed in context.  Delete
-        any target in the new context. Return a new message object with
-        passed in data and new context.  Type remains unchanged.
-
-        Args:
-            msg_type (str): type of message
-            data (dict): date to send with message
-            context: context added to existing context
-
-        Returns:
-            FakeMessage: Message object to publish
-        """
-        context = context or {}
-        new_context = self.context.copy()
-        for key in context:
-            new_context[key] = context[key]
-
-        if 'target' in new_context:
-            del new_context['target']
-
-        return FakeMessage(msg_type, data, context=new_context)
+# Attach publish() to the spec-tools Message so the method appears on
+# every Message instance regardless of which package the caller imported
+# the class from. Idempotent with ovos-bus-client's identical attachment.
+FakeMessage.publish = _publish
 
 
 class Message(FakeMessage):
-    """just for compat, stuff in the wild importing from here even with deprecation warnings..."""
+    """Deprecated alias for the OVOS-MSG-1 ``Message`` envelope.
+
+    ``from ovos_utils.fakebus import Message`` is in the wild and stays
+    importable through one more release. New code should import the
+    envelope where it lives — :class:`ovos_spec_tools.Message` (or
+    :class:`ovos_bus_client.Message`, which is a subclass).
+    """
 
     def __new__(cls, *args, **kwargs):
         warnings.warn(
-            "import from ovos-bus-client directly",
+            "ovos_utils.fakebus.Message is deprecated; import "
+            "ovos_spec_tools.Message (or ovos_bus_client.Message)",
             DeprecationWarning,
             stacklevel=2,
         )
         log_deprecation(
-            "please import from ovos-bus-client directly! this import has been deprecated since version 0.1.0", "1.0.0")
+            "please import Message from ovos_spec_tools / "
+            "ovos_bus_client directly", "1.0.0")
         return FakeMessage(*args, **kwargs)
 
 
