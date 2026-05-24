@@ -13,5 +13,5 @@ jobs:
       python_version: '3.11'
       coverage_source: 'ovos_utils'
       test_path: 'test/unittests'
-      install_extras: 'extras'
+      install_extras: '.[extras]'
       min_coverage: 0
