@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.11.0a1) (2026-05-25)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.10.0a1...0.11.0a1)
+
+**Merged pull requests:**
+
+- feat: fakebus Message subclasses ovos\_spec\_tools.Message — no API break [\#375](https://github.com/OpenVoiceOS/ovos-utils/pull/375) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.10.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.10.0a1) (2026-05-22)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.9.0a1...0.10.0a1)
