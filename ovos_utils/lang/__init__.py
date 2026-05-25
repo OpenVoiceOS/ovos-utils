@@ -13,20 +13,33 @@ from ovos_utils.version import VERSION_MAJOR
 def standardize_lang_tag(lang_code: str, macro=True) -> str:
     """Normalize a BCP-47 language tag.
 
-    With ``macro=True`` the region is dropped, returning the bare primary
-    language subtag (``en-US`` -> ``en``).
+    ``macro`` controls **macrolanguage substitution** per
+    :func:`langcodes.standardize_tag` — it swaps a sublanguage for its
+    macrolanguage (``cmn`` -> ``zh``, ``nb`` -> ``no``). It does **not**
+    strip the region: ``"en-US"`` round-trips through both ``macro=True``
+    and ``macro=False`` unchanged.
 
     .. deprecated::
         Use :func:`ovos_spec_tools.standardize_lang` — the conformant OVOS
-        language-tag normalizer, and what this now delegates to.
+        language-tag normalizer. ``standardize_lang`` always returns the
+        region-preserving form (it does not take a ``macro`` argument);
+        if you need macrolanguage substitution, call
+        :func:`langcodes.standardize_tag` directly.
     """
     # stacklevel=3: warn() -> this body -> @deprecated wrapper -> caller
     warnings.warn("standardize_lang_tag is deprecated; use 'standardize_lang' "
                   "from 'ovos_spec_tools' instead",
                   DeprecationWarning, stacklevel=3)
-    from ovos_spec_tools import standardize_lang
-    tag = standardize_lang(lang_code)
-    return tag.split("-")[0] if macro else tag
+    try:
+        from langcodes import standardize_tag
+        return str(standardize_tag(lang_code, macro=macro))
+    except ImportError:
+        # langcodes is optional. Without it, fall back to the spec-tools
+        # normalizer (region-preserving). The ``macro`` argument is a
+        # no-op in this branch because macrolanguage tables live in
+        # langcodes itself.
+        from ovos_spec_tools import standardize_lang
+        return standardize_lang(lang_code)
 
 
 @deprecated("use 'closest_lang' from 'ovos_spec_tools' "
