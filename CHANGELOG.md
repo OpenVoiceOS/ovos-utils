@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.11.2a1) (2026-06-20)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.11.1a1...0.11.2a1)
+
+**Merged pull requests:**
+
+- fix: allow json-database 1.x [\#379](https://github.com/OpenVoiceOS/ovos-utils/pull/379) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.11.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.11.1a1) (2026-05-25)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.11.0a1...0.11.1a1)
