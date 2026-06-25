@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.12.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.12.1a1) (2026-06-25)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.12.0a1...0.12.1a1)
+
+**Merged pull requests:**
+
+- fix: raise ovos-spec-tools floor to 0.10.0a1 for NamespaceTranslator [\#383](https://github.com/OpenVoiceOS/ovos-utils/pull/383) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.12.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.12.0a1) (2026-06-25)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.11.2a1...0.12.0a1)
