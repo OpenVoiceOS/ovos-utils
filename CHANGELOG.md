@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.12.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.12.0a1) (2026-06-25)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.11.2a1...0.12.0a1)
+
+**Merged pull requests:**
+
+- feat: FakeBus mirrors the legacy\<-\>ovos.\* namespace migration [\#381](https://github.com/OpenVoiceOS/ovos-utils/pull/381) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.11.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.11.2a1) (2026-06-20)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.11.1a1...0.11.2a1)
