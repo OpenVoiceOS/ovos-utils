@@ -3,6 +3,7 @@ import warnings
 from threading import Event
 
 from ovos_utils.log import LOG, log_deprecation
+from ovos_spec_tools import NamespaceTranslator
 from pyee import EventEmitter
 
 
@@ -21,6 +22,14 @@ class FakeBus:
         self.session_id = "default"
         self.ee = kwargs.get("emitter") or EventEmitter()
         self.ee.on("error", self.on_error)
+        # mirror MessageBusClient's namespace migration so the test/satellite
+        # double bridges legacy<->ovos.* topics identically. Both default on;
+        # override per-instance with modernize=/emit_legacy= kwargs.
+        self._translator = NamespaceTranslator(
+            modernize=kwargs.get("modernize", True),
+            emit_legacy=kwargs.get("emit_legacy", True))
+        self._handler_guards = {}        # handler -> shared mirror-guard
+        self._dedup_registrations = {}   # handler -> [(msg_type, wrapped), ...]
         self.on_open()
         try:
             self.session_id = kwargs["session"].session_id
@@ -31,6 +40,22 @@ class FakeBus:
                 self.on_default_session_update)
 
     def on(self, msg_type, handler):
+        # wrap handlers on migrated topics so a handler subscribed to both the
+        # legacy and ovos.* topic fires once (the mirror is dropped)
+        if self._translator.is_migrated(msg_type):
+            guard = self._handler_guards.get(handler)
+            if guard is None:
+                guard = self._translator.new_mirror_guard()
+                self._handler_guards[handler] = guard
+
+            def wrapped(message=None):
+                if guard(message):
+                    return
+                return handler(message)
+
+            self.ee.on(msg_type, wrapped)
+            self._dedup_registrations.setdefault(handler, []).append((msg_type, wrapped))
+            return
         self.ee.on(msg_type, handler)
 
     def once(self, msg_type, handler):
@@ -50,6 +75,13 @@ class FakeBus:
             self.ee.emit(message.msg_type, message)
         except Exception as e:
             LOG.exception(f"Error in event handler for '{message.msg_type}': {e}")
+        # namespace migration: also dispatch the counterpart topic(s) so a
+        # listener on either namespace receives the event (consumers dedupe)
+        for topic in self._translator.counterpart_topics(message.msg_type):
+            try:
+                self.ee.emit(topic, message.forward(topic, message.data))
+            except Exception as e:
+                LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
         self.on_message(message.serialize())
 
     def on_message(self, *args):
@@ -135,6 +167,18 @@ class FakeBus:
         return msg
 
     def remove(self, msg_type, handler):
+        regs = self._dedup_registrations.get(handler)
+        if regs:
+            for ev, wrapped in [r for r in regs if r[0] == msg_type]:
+                try:
+                    self.ee.remove_listener(ev, wrapped)
+                except Exception:
+                    pass
+                regs.remove((ev, wrapped))
+            if not regs:
+                self._dedup_registrations.pop(handler, None)
+                self._handler_guards.pop(handler, None)
+            return
         try:
             self.ee.remove_listener(msg_type, handler)
         except Exception:
