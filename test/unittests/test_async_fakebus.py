@@ -198,5 +198,70 @@ class TestAsyncFakeBusCompatShims(unittest.TestCase):
         self.assertTrue(bus.started_running)
 
 
+class TestAsyncFakeBusNamespaceMigration(unittest.TestCase):
+    """AsyncFakeBus mirrors FakeBus / MessageBusClient namespace migration."""
+
+    def test_legacy_emit_reaches_spec_listener(self):
+        bus = AsyncFakeBus()  # both flags default on
+        got = []
+        bus.on("ovos.utterance.speak", lambda m: got.append(m.msg_type))
+        _run(bus.emit(FakeMessage("speak", {"utterance": "hi"})))
+        self.assertEqual(got, ["ovos.utterance.speak"])  # modernize bridged it
+
+    def test_spec_emit_reaches_legacy_listener(self):
+        bus = AsyncFakeBus()
+        got = []
+        bus.on("speak", lambda m: got.append(m.msg_type))
+        _run(bus.emit(FakeMessage("ovos.utterance.speak", {"utterance": "hi"})))
+        self.assertEqual(got, ["speak"])  # emit_legacy bridged it
+
+    def test_counterpart_payload_is_translated(self):
+        # a spec listener on the counterpart of a SHAPE-CHANGING legacy topic
+        # receives the payload reshaped into ITS shape.
+        bus = AsyncFakeBus()
+        got = []
+        bus.on("ovos.intent.handler.start", lambda m: got.append(dict(m.data)))
+        _run(bus.emit(FakeMessage("mycroft.skill.handler.start",
+                                  {"handler": "HelloIntent"})))
+        self.assertEqual(got, [{"intent_name": "HelloIntent"}])
+        self.assertNotIn("handler", got[0])
+
+    def test_dual_listener_fires_once(self):
+        bus = AsyncFakeBus()
+        calls = []
+        handler = lambda m: calls.append(m.msg_type)
+        bus.on("speak", handler)
+        bus.on("ovos.utterance.speak", handler)
+        _run(bus.emit(FakeMessage("speak", {"utterance": "hi"})))
+        self.assertEqual(len(calls), 1)  # mirror deduped
+
+    def test_distinct_listeners_each_fire_once(self):
+        bus = AsyncFakeBus()
+        legacy, spec = [], []
+        bus.on("speak", lambda m: legacy.append(1))
+        bus.on("ovos.utterance.speak", lambda m: spec.append(1))
+        _run(bus.emit(FakeMessage("speak", {"utterance": "hi"})))
+        self.assertEqual((len(legacy), len(spec)), (1, 1))
+
+    def test_flags_off_no_bridging(self):
+        bus = AsyncFakeBus(modernize=False, emit_legacy=False)
+        got = []
+        bus.on("ovos.utterance.speak", lambda m: got.append(m.msg_type))
+        _run(bus.emit(FakeMessage("speak", {"utterance": "hi"})))
+        self.assertEqual(got, [])
+
+    def test_remove_cleans_up(self):
+        bus = AsyncFakeBus()
+        calls = []
+        handler = lambda m: calls.append(1)
+        bus.on("speak", handler)
+        bus.on("ovos.utterance.speak", handler)
+        bus.remove("speak", handler)
+        bus.remove("ovos.utterance.speak", handler)
+        self.assertNotIn(handler, bus._handler_guards)
+        _run(bus.emit(FakeMessage("speak", {"utterance": "hi"})))
+        self.assertEqual(calls, [])
+
+
 if __name__ == "__main__":
     unittest.main()
