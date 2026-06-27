@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.0a1) (2026-06-27)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.12.2a1...0.13.0a1)
+
+**Merged pull requests:**
+
+- feat: AsyncFakeBus namespace migration + env/config flag parity [\#387](https://github.com/OpenVoiceOS/ovos-utils/pull/387) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.12.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.12.2a1) (2026-06-27)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.12.1a1...0.12.2a1)
