@@ -1,8 +1,14 @@
 """FakeBus mirrors MessageBusClient's legacy<->ovos.* namespace migration, so
 e2e/satellite tests exercise the real cross-namespace behaviour."""
+import asyncio
 import unittest
+from unittest.mock import patch
 
-from ovos_utils.fakebus import FakeBus, Message
+from ovos_utils.fakebus import AsyncFakeBus, FakeBus, Message
+
+
+def _run(coro):
+    return asyncio.run(coro)
 
 
 class TestFakeBusNamespaceMigration(unittest.TestCase):
@@ -90,6 +96,53 @@ class TestFakeBusNamespaceMigration(unittest.TestCase):
         self.assertNotIn(handler, bus._handler_guards)
         bus.emit(Message("speak", {"utterance": "hi"}))
         self.assertEqual(calls, [])
+
+
+class TestFakeBusFlagResolution(unittest.TestCase):
+    """When the kwarg is omitted, flags resolve via env -> websocket.* config ->
+    default True, matching MessageBusClient._bus_flag. An explicit kwarg wins."""
+
+    def _legacy_mirrored(self, bus):
+        # emit a legacy topic; if emit_legacy bridging is on a spec listener fires
+        got = []
+        bus.on("ovos.utterance.speak", lambda m: got.append(m.msg_type))
+        if isinstance(bus, AsyncFakeBus):
+            _run(bus.emit(Message("speak", {"utterance": "hi"})))
+        else:
+            bus.emit(Message("speak", {"utterance": "hi"}))
+        return got == ["ovos.utterance.speak"]
+
+    def test_default_true_no_env_mirrors(self):
+        with patch.dict("os.environ", {}, clear=False):
+            import os
+            os.environ.pop("OVOS_BUS_MODERNIZE", None)
+            os.environ.pop("OVOS_BUS_EMIT_LEGACY", None)
+            self.assertTrue(self._legacy_mirrored(FakeBus()))
+            self.assertTrue(self._legacy_mirrored(AsyncFakeBus()))
+
+    def test_env_false_disables_mirror(self):
+        with patch.dict("os.environ",
+                        {"OVOS_BUS_MODERNIZE": "false",
+                         "OVOS_BUS_EMIT_LEGACY": "false"}):
+            self.assertFalse(self._legacy_mirrored(FakeBus()))
+            self.assertFalse(self._legacy_mirrored(AsyncFakeBus()))
+
+    def test_explicit_kwarg_beats_env(self):
+        # env says off, but an explicit modernize=True kwarg still mirrors
+        with patch.dict("os.environ",
+                        {"OVOS_BUS_MODERNIZE": "false",
+                         "OVOS_BUS_EMIT_LEGACY": "false"}):
+            self.assertTrue(self._legacy_mirrored(FakeBus(modernize=True)))
+            self.assertTrue(self._legacy_mirrored(AsyncFakeBus(modernize=True)))
+
+    def test_explicit_false_kwarg_beats_unset_env(self):
+        import os
+        with patch.dict("os.environ", {}, clear=False):
+            os.environ.pop("OVOS_BUS_MODERNIZE", None)
+            os.environ.pop("OVOS_BUS_EMIT_LEGACY", None)
+            # default would mirror; explicit modernize=False suppresses it
+            self.assertFalse(self._legacy_mirrored(FakeBus(modernize=False)))
+            self.assertFalse(self._legacy_mirrored(AsyncFakeBus(modernize=False)))
 
 
 if __name__ == "__main__":

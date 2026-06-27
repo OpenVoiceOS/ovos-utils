@@ -1,5 +1,6 @@
 import asyncio
 import warnings
+from os import environ
 from threading import Event
 
 from ovos_utils.log import LOG, log_deprecation
@@ -16,6 +17,46 @@ def dig_for_message():
     return None
 
 
+# sentinel: lets us tell "kwarg not passed" apart from "kwarg passed True/False"
+_UNSET = object()
+
+
+def _bus_flag(env_var, config_key, default=True):
+    """Resolve a boolean bus flag the way ``MessageBusClient._bus_flag`` does.
+
+    Precedence: env var (when set) > ``websocket.<config_key>`` in ovos_config
+    > ``default``. The env var wins when set to a truthy/falsy string; ovos_config
+    is optional, so any failure to read it falls back to ``default``.
+
+    Kept layering-clean: mirrors ``ovos_bus_client.client.client._bus_flag``
+    without importing from bus-client (bus-client depends on utils, not vice-versa).
+    """
+    val = environ.get(env_var)
+    if val is not None:
+        return val.strip().lower() in ("1", "true", "yes", "on")
+    try:
+        from ovos_config import Configuration
+        return bool(Configuration().get("websocket", {}).get(config_key, default))
+    except Exception:
+        return default
+
+
+def _resolve_bus_flags(kwargs):
+    """Build the namespace ``NamespaceTranslator`` for a fake bus instance.
+
+    An explicitly-passed ``modernize``/``emit_legacy`` kwarg wins (back-compat for
+    callers passing ``emit_legacy=True/False``); otherwise the flag is resolved via
+    env var -> ``websocket.*`` config -> default ``True``, matching the real client.
+    """
+    modernize = kwargs.get("modernize", _UNSET)
+    if modernize is _UNSET:
+        modernize = _bus_flag("OVOS_BUS_MODERNIZE", "modernize", default=True)
+    emit_legacy = kwargs.get("emit_legacy", _UNSET)
+    if emit_legacy is _UNSET:
+        emit_legacy = _bus_flag("OVOS_BUS_EMIT_LEGACY", "emit_legacy", default=True)
+    return NamespaceTranslator(modernize=modernize, emit_legacy=emit_legacy)
+
+
 class FakeBus:
     def __init__(self, *args, **kwargs):
         self.started_running = False
@@ -23,11 +64,10 @@ class FakeBus:
         self.ee = kwargs.get("emitter") or EventEmitter()
         self.ee.on("error", self.on_error)
         # mirror MessageBusClient's namespace migration so the test/satellite
-        # double bridges legacy<->ovos.* topics identically. Both default on;
-        # override per-instance with modernize=/emit_legacy= kwargs.
-        self._translator = NamespaceTranslator(
-            modernize=kwargs.get("modernize", True),
-            emit_legacy=kwargs.get("emit_legacy", True))
+        # double bridges legacy<->ovos.* topics identically. Flags resolve the
+        # same way the real client does: explicit modernize=/emit_legacy= kwarg
+        # wins, else env var -> websocket.* config -> default on.
+        self._translator = _resolve_bus_flags(kwargs)
         self._handler_guards = {}        # handler -> shared mirror-guard
         self._dedup_registrations = {}   # handler -> [(msg_type, wrapped), ...]
         self.on_open()
@@ -327,6 +367,10 @@ class AsyncFakeBus:
         self.session_id = "default"
         self.ee = kwargs.get("emitter") or EventEmitter()
         self.ee.on("error", self.on_error)
+        # mirror MessageBusClient's namespace migration (see FakeBus.__init__).
+        self._translator = _resolve_bus_flags(kwargs)
+        self._handler_guards = {}        # handler -> shared mirror-guard
+        self._dedup_registrations = {}   # handler -> [(msg_type, wrapped), ...]
         self.connected_event = asyncio.Event()
         self.connected_event.set()
         self.on_open()
@@ -343,12 +387,41 @@ class AsyncFakeBus:
     # ------------------------------------------------------------------
 
     def on(self, msg_type, handler):
+        # wrap handlers on migrated topics so a handler subscribed to both the
+        # legacy and ovos.* topic fires once (the mirror is dropped) -- same as
+        # FakeBus.on / MessageBusClient.on.
+        if self._translator.is_migrated(msg_type):
+            guard = self._handler_guards.get(handler)
+            if guard is None:
+                guard = self._translator.new_mirror_guard()
+                self._handler_guards[handler] = guard
+
+            def wrapped(message=None):
+                if guard(message):
+                    return
+                return handler(message)
+
+            self.ee.on(msg_type, wrapped)
+            self._dedup_registrations.setdefault(handler, []).append((msg_type, wrapped))
+            return
         self.ee.on(msg_type, handler)
 
     def once(self, msg_type, handler):
         self.ee.once(msg_type, handler)
 
     def remove(self, msg_type, handler):
+        regs = self._dedup_registrations.get(handler)
+        if regs:
+            for ev, wrapped in [r for r in regs if r[0] == msg_type]:
+                try:
+                    self.ee.remove_listener(ev, wrapped)
+                except Exception:
+                    pass
+                regs.remove((ev, wrapped))
+            if not regs:
+                self._dedup_registrations.pop(handler, None)
+                self._handler_guards.pop(handler, None)
+            return
         try:
             self.ee.remove_listener(msg_type, handler)
         except Exception:
@@ -392,6 +465,16 @@ class AsyncFakeBus:
             self.ee.emit(message.msg_type, message)
         except Exception as e:
             LOG.exception(f"Error in event handler for '{message.msg_type}': {e}")
+        # namespace migration: also dispatch the counterpart topic(s) with the
+        # payload reshaped into each counterpart's shape -- same as FakeBus.emit.
+        for topic in self._translator.counterpart_topics(message.msg_type):
+            try:
+                translated = self._translator.translate_payload(
+                    from_topic=message.msg_type, to_topic=topic,
+                    data=message.data)
+                self.ee.emit(topic, message.forward(topic, translated))
+            except Exception as e:
+                LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
         self.on_message(message.serialize())
 
     # ------------------------------------------------------------------
