@@ -14,4 +14,6 @@ jobs:
       coverage_source: 'ovos_utils'
       test_path: 'test/unittests'
       install_extras: '.[extras]'
+      # in-flight cross-dep: spec-tools translate_payload (PR #42) not yet published
+      pre_install_pip: 'git+https://github.com/OpenVoiceOS/ovos-spec-tools@fix/conformance-message'
       min_coverage: 0

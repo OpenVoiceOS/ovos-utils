@@ -76,10 +76,17 @@ class FakeBus:
         except Exception as e:
             LOG.exception(f"Error in event handler for '{message.msg_type}': {e}")
         # namespace migration: also dispatch the counterpart topic(s) so a
-        # listener on either namespace receives the event (consumers dedupe)
+        # listener on either namespace receives the event (consumers dedupe).
+        # the mirrored payload is reshaped into the counterpart topic's shape
+        # (identity for payload-compatible renames, a per-topic transform for
+        # shape-changing ones) so a listener on it receives the payload in *its*
+        # shape -- matching MessageBusClient's bridge.
         for topic in self._translator.counterpart_topics(message.msg_type):
             try:
-                self.ee.emit(topic, message.forward(topic, message.data))
+                translated = self._translator.translate_payload(
+                    from_topic=message.msg_type, to_topic=topic,
+                    data=message.data)
+                self.ee.emit(topic, message.forward(topic, translated))
             except Exception as e:
                 LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
         self.on_message(message.serialize())

@@ -12,4 +12,6 @@ jobs:
     with:
       python_versions: '["3.10", "3.11", "3.12", "3.13", "3.14"]'
       install_extras: 'extras'
+      # in-flight cross-dep: spec-tools translate_payload (PR #42) not yet published
+      pre_install_pip: 'git+https://github.com/OpenVoiceOS/ovos-spec-tools@fix/conformance-message'
       test_path: 'test/unittests'
