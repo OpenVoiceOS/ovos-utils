@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.12.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.12.2a1) (2026-06-27)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.12.1a1...0.12.2a1)
+
+**Merged pull requests:**
+
+- fix: translate mirrored payload onto counterpart topic in FakeBus [\#385](https://github.com/OpenVoiceOS/ovos-utils/pull/385) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.12.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.12.1a1) (2026-06-25)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.12.0a1...0.12.1a1)
