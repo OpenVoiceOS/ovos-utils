@@ -156,7 +156,10 @@ class FakeBus:
             from ovos_bus_client.session import Session, SessionManager
             new_session = message.data["session_data"]
             sess = Session.deserialize(new_session)
-            SessionManager.update(sess, make_default=True)
+            # payload is default_session.serialize() (id == "default"); the
+            # SessionManager singleton syncs default_session by id, so the
+            # deprecated make_default flag is not needed.
+            SessionManager.update(sess)
             LOG.debug("synced default_session")
         except ImportError:
             pass  # don't care
@@ -506,7 +509,10 @@ class AsyncFakeBus:
             from ovos_bus_client.session import Session, SessionManager
             new_session = message.data["session_data"]
             sess = Session.deserialize(new_session)
-            SessionManager.update(sess, make_default=True)
+            # payload is default_session.serialize() (id == "default"); the
+            # SessionManager singleton syncs default_session by id, so the
+            # deprecated make_default flag is not needed.
+            SessionManager.update(sess)
             LOG.debug("synced default_session")
         except ImportError:
             pass  # don't care
