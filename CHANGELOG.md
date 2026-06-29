@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.2a1) (2026-06-29)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.1a1...0.13.2a1)
+
+**Merged pull requests:**
+
+- fix: drop deprecated make\_default from FakeBus default-session sync [\#389](https://github.com/OpenVoiceOS/ovos-utils/pull/389) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.13.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.1a1) (2026-06-29)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.0a1...0.13.1a1)
