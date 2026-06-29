@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.3a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.3a1) (2026-06-29)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.2a1...0.13.3a1)
+
+**Merged pull requests:**
+
+- fix: FakeBus folds the default session like any other \(drop owner-only\) [\#393](https://github.com/OpenVoiceOS/ovos-utils/pull/393) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.13.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.2a1) (2026-06-29)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.1a1...0.13.2a1)
