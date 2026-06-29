@@ -217,14 +217,14 @@ class TestAsyncFakeBusNamespaceMigration(unittest.TestCase):
 
     def test_counterpart_payload_is_translated(self):
         # a spec listener on the counterpart of a SHAPE-CHANGING legacy topic
-        # receives the payload reshaped into ITS shape.
+        # receives the payload reshaped into ITS shape. detach_intent ->
+        # ovos.intent.deregister splits "skill:intent" into skill_id/intent_name.
         bus = AsyncFakeBus()
         got = []
-        bus.on("ovos.intent.handler.start", lambda m: got.append(dict(m.data)))
-        _run(bus.emit(FakeMessage("mycroft.skill.handler.start",
-                                  {"handler": "HelloIntent"})))
-        self.assertEqual(got, [{"intent_name": "HelloIntent"}])
-        self.assertNotIn("handler", got[0])
+        bus.on("ovos.intent.deregister", lambda m: got.append(dict(m.data)))
+        _run(bus.emit(FakeMessage("detach_intent",
+                                  {"intent_name": "skill.foo:HelloIntent"})))
+        self.assertEqual(got, [{"skill_id": "skill.foo", "intent_name": "HelloIntent"}])
 
     def test_dual_listener_fires_once(self):
         bus = AsyncFakeBus()

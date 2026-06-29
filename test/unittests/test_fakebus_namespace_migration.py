@@ -60,23 +60,24 @@ class TestFakeBusNamespaceMigration(unittest.TestCase):
     def test_shape_changing_payload_reshaped_for_spec_listener(self):
         # a spec listener on the counterpart of a SHAPE-CHANGING legacy topic
         # receives the payload in ITS shape, not a verbatim legacy copy.
+        # detach_intent -> ovos.intent.deregister splits the compound
+        # "skill:intent" name into skill_id + intent_name.
         bus = FakeBus()
         got = []
-        bus.on("ovos.intent.handler.start", lambda m: got.append(dict(m.data)))
-        bus.emit(Message("mycroft.skill.handler.start", {"handler": "HelloIntent"}))
+        bus.on("ovos.intent.deregister", lambda m: got.append(dict(m.data)))
+        bus.emit(Message("detach_intent", {"intent_name": "skill.foo:HelloIntent"}))
         self.assertEqual(len(got), 1)
-        # reshaped to the spec shape ({"intent_name": ...}), NOT {"handler": ...}
-        self.assertEqual(got[0], {"intent_name": "HelloIntent"})
-        self.assertNotIn("handler", got[0])
+        self.assertEqual(got[0], {"skill_id": "skill.foo", "intent_name": "HelloIntent"})
 
     def test_shape_changing_payload_reshaped_for_legacy_listener(self):
         bus = FakeBus()
         got = []
-        bus.on("mycroft.skill.handler.start", lambda m: got.append(dict(m.data)))
-        bus.emit(Message("ovos.intent.handler.start",
+        bus.on("detach_intent", lambda m: got.append(dict(m.data)))
+        bus.emit(Message("ovos.intent.deregister",
                          {"skill_id": "skill.foo", "intent_name": "HelloIntent"}))
         self.assertEqual(len(got), 1)
-        self.assertEqual(got[0].get("handler"), "HelloIntent")  # legacy shape
+        # rejoined to the legacy compound shape
+        self.assertEqual(got[0].get("intent_name"), "skill.foo:HelloIntent")
 
     def test_payload_compatible_rename_delivered_equivalent(self):
         bus = FakeBus()
