@@ -145,9 +145,10 @@ class FakeBus:
         try:  # replicate side effects
             from ovos_bus_client.session import Session, SessionManager
             sess = Session.from_message(parsed_message)
-            if sess.session_id != "default":
-                # 'default' can only be updated by core
-                SessionManager.update(sess)
+            # every session — including the default id — folds onto the singleton
+            # (value-passing; nothing is owner-only, matching the spec-tools
+            # SessionManager and the real MessageBusClient)
+            SessionManager.update(sess)
         except ImportError:
             pass  # don't care
 
@@ -498,9 +499,10 @@ class AsyncFakeBus:
         try:  # replicate side effects
             from ovos_bus_client.session import Session, SessionManager
             sess = Session.from_message(parsed_message)
-            if sess.session_id != "default":
-                # 'default' can only be updated by core
-                SessionManager.update(sess)
+            # every session — including the default id — folds onto the singleton
+            # (value-passing; nothing is owner-only, matching the spec-tools
+            # SessionManager and the real MessageBusClient)
+            SessionManager.update(sess)
         except ImportError:
             pass  # don't care
 
