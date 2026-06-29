@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.1a1) (2026-06-29)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.0a1...0.13.1a1)
+
+**Merged pull requests:**
+
+- fix: target a real shape-changing pair in namespace-migration tests [\#390](https://github.com/OpenVoiceOS/ovos-utils/pull/390) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.13.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.0a1) (2026-06-27)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.12.2a1...0.13.0a1)
