@@ -145,10 +145,14 @@ class FakeBus:
         try:  # replicate side effects
             from ovos_bus_client.session import Session, SessionManager
             sess = Session.from_message(parsed_message)
-            # every session — including the default id — folds onto the singleton
-            # (value-passing; nothing is owner-only, matching the spec-tools
-            # SessionManager and the real MessageBusClient)
-            SessionManager.update(sess)
+            if sess.session_id != "default":
+                # 'default' can only be updated by core — matching the real
+                # MessageBusClient.on_message, which never folds the default
+                # session on receive (only the explicit ovos.session.update_default
+                # broadcast updates it). Folding a stale token-less default
+                # snapshot back over the singleton would wipe in-place
+                # add_context mutations (e.g. intent-layer gating tokens).
+                SessionManager.update(sess)
         except ImportError:
             pass  # don't care
 
@@ -499,10 +503,14 @@ class AsyncFakeBus:
         try:  # replicate side effects
             from ovos_bus_client.session import Session, SessionManager
             sess = Session.from_message(parsed_message)
-            # every session — including the default id — folds onto the singleton
-            # (value-passing; nothing is owner-only, matching the spec-tools
-            # SessionManager and the real MessageBusClient)
-            SessionManager.update(sess)
+            if sess.session_id != "default":
+                # 'default' can only be updated by core — matching the real
+                # MessageBusClient.on_message, which never folds the default
+                # session on receive (only the explicit ovos.session.update_default
+                # broadcast updates it). Folding a stale token-less default
+                # snapshot back over the singleton would wipe in-place
+                # add_context mutations (e.g. intent-layer gating tokens).
+                SessionManager.update(sess)
         except ImportError:
             pass  # don't care
 
