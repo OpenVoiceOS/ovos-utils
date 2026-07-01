@@ -110,6 +110,17 @@ class FakeBus:
                 message.context["session"] = sess.serialize()
             except ImportError:  # don't care
                 message.context["session"] = {"session_id": self.session_id}
+        # Fold the incoming message's session onto the SessionManager singleton
+        # BEFORE running handlers, matching the real MessageBusClient.on_message
+        # order (receive -> fold -> dispatch to handlers). Folding AFTER handlers
+        # would wipe any in-place / synced session mutation the handlers made
+        # (handle_session_sync merging intent_context, handle_add_context injecting
+        # context frames, ...), because the message's session snapshot was
+        # stamped at emit-time, before those mutations landed — a spec-violating
+        # self-broadcast-back wipe. The single-process harness has no separate
+        # receiver, so it must not re-fold its own emit once the handlers have
+        # run.
+        self.on_message(message.serialize())
         self.ee.emit("message", message.serialize())
         try:
             self.ee.emit(message.msg_type, message)
@@ -129,7 +140,6 @@ class FakeBus:
                 self.ee.emit(topic, message.forward(topic, translated))
             except Exception as e:
                 LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
-        self.on_message(message.serialize())
 
     def on_message(self, *args):
         """
@@ -464,6 +474,10 @@ class AsyncFakeBus:
                 message.context["session"] = sess.serialize()
             except ImportError:  # don't care
                 message.context["session"] = {"session_id": self.session_id}
+        # Fold BEFORE handlers — see FakeBus.emit for the rationale (a post-
+        # handler self-broadcast-back fold wipes the handlers' in-place / synced
+        # session mutations with the stale emit-time snapshot).
+        self.on_message(message.serialize())
         self.ee.emit("message", message.serialize())
         try:
             self.ee.emit(message.msg_type, message)
@@ -479,7 +493,6 @@ class AsyncFakeBus:
                 self.ee.emit(topic, message.forward(topic, translated))
             except Exception as e:
                 LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
-        self.on_message(message.serialize())
 
     # ------------------------------------------------------------------
     # Sync helpers used internally — same as FakeBus
