@@ -258,6 +258,11 @@ def get_logs_config(service_name: Optional[str] = None,
     return _logs_conf
 
 
+# Tracks (message, caller) pairs already logged so each unique deprecation
+# is only reported once instead of spamming the logs on every call
+_logged_deprecations = set()
+
+
 def log_deprecation(log_message: str = "DEPRECATED",
                     deprecation_version: str = "Unknown",
                     func_name: str = None,
@@ -297,6 +302,11 @@ def log_deprecation(log_message: str = "DEPRECATED",
         if not name.startswith(origin_module):
             call_info = f"{name}:{call.lineno}"
             break
+    # Only log each unique deprecation (message + caller) once
+    dedupe_key = (log_message, log_name, call_info)
+    if dedupe_key in _logged_deprecations:
+        return
+    _logged_deprecations.add(dedupe_key)
     # Explicitly format log to print origin log reference
     LOG.create_logger(log_name).warning(
         f"Deprecation version={deprecation_version}. Caller={call_info}. "
