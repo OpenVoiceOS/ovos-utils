@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.6a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.6a1) (2026-07-23)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.5a1...0.13.6a1)
+
+**Merged pull requests:**
+
+- fix: ovos-logs CLI leaves stray file in cwd [\#400](https://github.com/OpenVoiceOS/ovos-utils/pull/400) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.13.5a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.5a1) (2026-07-16)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.4a1...0.13.5a1)
