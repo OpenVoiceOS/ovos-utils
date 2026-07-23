@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.7a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.7a1) (2026-07-23)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.6a1...0.13.7a1)
+
+**Merged pull requests:**
+
+- fix: replace removed distutils.spawn with shutil.which \(Python 3.12+\) [\#402](https://github.com/OpenVoiceOS/ovos-utils/pull/402) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.13.6a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.6a1) (2026-07-23)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.5a1...0.13.6a1)
