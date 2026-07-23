@@ -11,7 +11,7 @@ from rich.console import Console
 from rich.style import Style
 from rich.table import Table
 import pydoc
-from combo_lock import ComboLock
+from combo_lock import NamedLock
 
 try:
     from ovos_config import Configuration
@@ -25,7 +25,7 @@ from ovos_utils.log import get_log_path, get_log_paths, get_available_logs
 
 
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
-LOGLOCK = ComboLock("ovos_logs_console_script")
+LOGLOCK = NamedLock("ovos_logs_console_script")
 
 
 @dataclass
