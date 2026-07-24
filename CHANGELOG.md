@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.8a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.8a1) (2026-07-24)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.7a2...0.13.8a1)
+
+**Merged pull requests:**
+
+- fix: FileEventHandler must only fire for the file it watches [\#406](https://github.com/OpenVoiceOS/ovos-utils/pull/406) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.13.7a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.7a2) (2026-07-24)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.7a1...0.13.7a2)
