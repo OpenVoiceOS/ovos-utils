@@ -376,9 +376,13 @@ class FileWatcher:
         for file_path in files:
             if os.path.isfile(file_path):
                 watch_dir = dirname(file_path)
+                # a specific file was requested, only fire for that file
+                watched_file = file_path
             else:
                 watch_dir = file_path
-            self.observer.schedule(FileEventHandler(file_path, callback,
+                # a directory was requested, fire for any file inside it
+                watched_file = None
+            self.observer.schedule(FileEventHandler(watched_file, callback,
                                                     ignore_creation),
                                    watch_dir, recursive=recursive)
         self.observer.start()
@@ -398,17 +402,20 @@ try:
     from watchdog.events import FileSystemEventHandler
 
     class FileEventHandler(FileSystemEventHandler):
-        def __init__(self, file_path: str, callback: callable,
+        def __init__(self, file_path: Optional[str], callback: callable,
                      ignore_creation: bool = False):
             """
             Create a handler for file change events
-            @param file_path: file_path being watched Unused(?)
+            @param file_path: if set, the single file being watched; events
+                for any other file in the watched directory are ignored.
+                If None, this handler is watching a directory and events
+                for any file inside it are reported.
             @param callback: function to call on file change with modified file path
             @param ignore_creation: if True, only track file modification events
             """
             super().__init__()
             self._callback = callback
-            self._file_path = file_path
+            self._file_path = os.path.realpath(file_path) if file_path else None
             if ignore_creation:
                 self._events = ('modified')
             else:
@@ -416,8 +423,22 @@ try:
             self._changed_files = set()
             self._lock = RLock()
 
+        def _is_watched(self, src_path) -> bool:
+            """
+            Check if a reported event path refers to the file this handler
+            was asked to watch. Always True in directory-watch mode.
+            @param src_path: `event.src_path`, str or bytes depending on platform
+            """
+            if self._file_path is None:
+                return True
+            if isinstance(src_path, bytes):
+                src_path = src_path.decode()
+            return os.path.realpath(src_path) == self._file_path
+
         def on_any_event(self, event):
             if event.is_directory:
+                return
+            if not self._is_watched(event.src_path):
                 return
             with self._lock:
                 if event.event_type == "closed":
