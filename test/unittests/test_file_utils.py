@@ -169,6 +169,46 @@ class TestFileUtils(unittest.TestCase):
         handler.on_any_event(FileClosedEvent(test_file))
         callback.assert_called_once()
 
+        # Test events for a different file in the same directory are ignored
+        # when watching a specific file (the FileWatcher watches the
+        # containing directory, so watchdog reports every file inside it)
+        other_file = join(dirname(__file__), "other.watch")
+        callback.reset_mock()
+        handler = FileEventHandler(test_file, callback, True)
+        handler.on_any_event(FileModifiedEvent(other_file))
+        handler.on_any_event(FileClosedEvent(other_file))
+        callback.assert_not_called()
+        # but the watched file itself still fires
+        handler.on_any_event(FileModifiedEvent(test_file))
+        handler.on_any_event(FileClosedEvent(test_file))
+        callback.assert_called_once()
+
+        # Test directory-watch mode (file_path=None) reports every file
+        callback.reset_mock()
+        handler = FileEventHandler(None, callback, True)
+        handler.on_any_event(FileModifiedEvent(test_file))
+        handler.on_any_event(FileClosedEvent(test_file))
+        callback.assert_called_once_with(test_file)
+        callback.reset_mock()
+        handler.on_any_event(FileModifiedEvent(other_file))
+        handler.on_any_event(FileClosedEvent(other_file))
+        callback.assert_called_once_with(other_file)
+
+        # Test two handlers watching different files in the same directory
+        # each fire only for their own file, not for each other's
+        callback_a = Mock()
+        callback_b = Mock()
+        handler_a = FileEventHandler(test_file, callback_a, True)
+        handler_b = FileEventHandler(other_file, callback_b, True)
+        # both handlers watch the same directory, so watchdog delivers
+        # every event to both of them
+        for handler in (handler_a, handler_b):
+            for ev_file in (test_file, other_file):
+                handler.on_any_event(FileModifiedEvent(ev_file))
+                handler.on_any_event(FileClosedEvent(ev_file))
+        callback_a.assert_called_once_with(test_file)
+        callback_b.assert_called_once_with(other_file)
+
         # Test include creation callbacks
         callback.reset_mock()
         handler = FileEventHandler(test_file, callback, False)
