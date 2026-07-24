@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.7a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.7a2) (2026-07-24)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.7a1...0.13.7a2)
+
+**Merged pull requests:**
+
+- refactor: deprecate create\_self\_signed\_cert [\#404](https://github.com/OpenVoiceOS/ovos-utils/pull/404) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.13.7a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.7a1) (2026-07-23)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.6a1...0.13.7a1)
