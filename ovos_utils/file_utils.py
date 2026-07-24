@@ -374,14 +374,21 @@ class FileWatcher:
         self.observer = Observer()
         self.handlers = []
         for file_path in files:
-            if os.path.isfile(file_path):
-                watch_dir = dirname(file_path)
-                # a specific file was requested, only fire for that file
-                watched_file = file_path
-            else:
+            if os.path.isdir(file_path):
                 watch_dir = file_path
                 # a directory was requested, fire for any file inside it
                 watched_file = None
+            else:
+                # a specific file was requested, only fire for that file.
+                # the file may not exist yet (eg. a config that hasn't been
+                # written), watchdog just needs its (existing) parent dir
+                watch_dir = dirname(file_path) or "."
+                watched_file = file_path
+                if not os.path.isdir(watch_dir):
+                    LOG.warning(f"Can't watch '{file_path}', "
+                                f"parent directory '{watch_dir}' "
+                                f"does not exist")
+                    continue
             self.observer.schedule(FileEventHandler(watched_file, callback,
                                                     ignore_creation),
                                    watch_dir, recursive=recursive)
