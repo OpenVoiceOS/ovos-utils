@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.9a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.9a1) (2026-07-24)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.8a1...0.13.9a1)
+
+**Merged pull requests:**
+
+- fix: watch files that do not exist yet [\#408](https://github.com/OpenVoiceOS/ovos-utils/pull/408) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.13.8a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.8a1) (2026-07-24)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.7a2...0.13.8a1)
