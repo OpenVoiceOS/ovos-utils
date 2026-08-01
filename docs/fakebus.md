@@ -155,3 +155,6 @@ msg = FakeMessage("skill:action", {"key": "value"}, {"session_id": "abc"})
 ## `dig_for_message()`
 
 Tries to import and call `ovos_bus_client.message.dig_for_message`. Returns `None` if `ovos-bus-client` is not installed.
+
+---
+[← Process Utilities](process-utils.md) · [Home](index.md) · [Events →](events.md)
