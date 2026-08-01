@@ -4,7 +4,6 @@ from os import environ
 from threading import Event
 
 from ovos_utils.log import LOG, log_deprecation
-from ovos_spec_tools import NamespaceTranslator
 from pyee import EventEmitter
 
 
@@ -17,16 +16,11 @@ def dig_for_message():
     return None
 
 
-# sentinel: lets us tell "kwarg not passed" apart from "kwarg passed True/False"
-_UNSET = object()
-
-
-def _bus_flag(env_var, config_key, default=True):
+def _bus_flag(env_var, config_key, default=False):
     """Resolve a boolean bus flag the way ``MessageBusClient._bus_flag`` does.
 
     Precedence: env var (when set) > ``websocket.<config_key>`` in ovos_config
-    > ``default``. The env var wins when set to a truthy/falsy string; ovos_config
-    is optional, so any failure to read it falls back to ``default``.
+    > ``default``.
 
     Kept layering-clean: mirrors ``ovos_bus_client.client.client._bus_flag``
     without importing from bus-client (bus-client depends on utils, not vice-versa).
@@ -41,128 +35,64 @@ def _bus_flag(env_var, config_key, default=True):
         return default
 
 
-def _resolve_bus_flags(kwargs):
-    """Build the namespace ``NamespaceTranslator`` for a fake bus instance.
-
-    An explicitly-passed ``modernize``/``emit_legacy`` kwarg wins (back-compat for
-    callers passing ``emit_legacy=True/False``); otherwise the flag is resolved via
-    env var -> ``websocket.*`` config -> default ``True``, matching the real client.
-    """
-    modernize = kwargs.get("modernize", _UNSET)
-    if modernize is _UNSET:
-        modernize = _bus_flag("OVOS_BUS_MODERNIZE", "modernize", default=True)
-    emit_legacy = kwargs.get("emit_legacy", _UNSET)
-    if emit_legacy is _UNSET:
-        emit_legacy = _bus_flag("OVOS_BUS_EMIT_LEGACY", "emit_legacy", default=True)
-    return NamespaceTranslator(modernize=modernize, emit_legacy=emit_legacy)
-
-
-# --- legacy intent-topic compat (non-normative migration tooling) ----------
+# --- the legacy wire bridge is GONE -----------------------------------------
 #
-# Old ovos-workshop releases built the per-intent dispatch topic from the
-# padatious resource FILENAME, so the ``.intent`` extension leaked onto the
-# wire: a skill with ``food.order.intent`` listened on
-# ``<skill_id>:food.order.intent``. Current workshop is spec-pure and
-# registers the canonical ``<skill_id>:food.order`` (OVOS-MSG-1 §2.1.1).
-#
-# ``ovos_spec_tools.intent_topics`` is the whole compat surface for that gap.
-# It is newer than the spec-tools floor declared here, so the import is
-# guarded: against an older spec-tools the fake bus behaves as before.
-try:
-    from ovos_spec_tools.intent_topics import (IntentAliasRegistry,
-                                               legacy_reemit_targets)
-    _HAS_INTENT_TOPICS = True
-except ImportError:  # spec-tools without OVOS-INTENT-4 compat helpers
-    IntentAliasRegistry = None
-    legacy_reemit_targets = None
-    _HAS_INTENT_TOPICS = False
+# The fake bus used to mirror ``MessageBusClient``'s two migration bridges: the
+# OVOS-MSG-1 namespace bridge (a spec topic also reached listeners on the
+# legacy topic it replaced, and the reverse) and the OVOS-INTENT-4 intent-topic
+# bridge (a canonical ``<skill_id>:<intent>`` dispatch also reached the old
+# ``<skill_id>:<intent>.intent`` spelling). Both were removed from the real
+# client, so both are removed here — a test double that kept them would let a
+# harness pass against behaviour the fleet no longer has.
 
-#: Context flag stamped on a mirrored intent dispatch. A message carrying it is
-#: already a twin, so it is never mirrored again. Same key the real
-#: ``MessageBusClient`` uses.
-INTENT_REEMIT_CONTEXT_KEY = "__legacy_intent_reemit__"
+#: Bus flags that used to steer the bridge.
+_REMOVED_BRIDGE_FLAGS = (
+    ("OVOS_BUS_EMIT_LEGACY", "emit_legacy"),
+    ("OVOS_BUS_MODERNIZE", "modernize"),
+    ("OVOS_BUS_INTENT_REEMIT_BLANKET", "intent_reemit_blanket"),
+)
 
 
-class _LegacyIntentBridge:
-    """Mirror an intent dispatch onto its legacy ``.intent``-suffixed twin.
+def _reject_removed_bridge_flags(kwargs):
+    """Handle a caller that still asks for the removed bridge.
 
-    Shared by :class:`FakeBus` and :class:`AsyncFakeBus` so both test doubles
-    behave like ``ovos_bus_client.MessageBusClient``, which runs the same
-    bridge next to its namespace bridge. A test double that skipped it would
-    hide the compat path from every harness built on it.
+    The two spellings get different treatment on purpose.
 
-    The alias table is owned by the bus instance and filled from its own
-    ``on()`` / ``once()`` calls: a bus mirrors only the intents one of its own
-    handlers asked for by the suffixed name, so no topic nobody listens on is
-    invented.
+    An **env var or config entry** is an operator asking a live deployment to
+    keep the legacy topics on the wire. That belief is now wrong, and silence
+    would hand them a fleet that drops messages, so it raises — the same error
+    the real ``MessageBusClient`` raises.
+
+    A **constructor kwarg** is a test harness, not a deployment. Harnesses
+    across the ecosystem pass ``emit_legacy=True`` unconditionally (ovoscope's
+    ``MiniCroft`` is one), and raising there would break every one of them at
+    construction without telling anybody anything useful. The kwarg is
+    accepted, ignored, and warned about instead.
     """
-
-    def _init_intent_bridge(self, kwargs):
-        self._intent_aliases = IntentAliasRegistry() if _HAS_INTENT_TOPICS else None
-        blanket = kwargs.get("intent_reemit_blanket", _UNSET)
-        if blanket is _UNSET:
-            blanket = _bus_flag("OVOS_BUS_INTENT_REEMIT_BLANKET",
-                                "intent_reemit_blanket", default=False)
-        # blanket mode mirrors EVERY intent dispatch, registered alias or not,
-        # for pure-bus listeners that subscribe without registering. It doubles
-        # intent traffic, so it is off unless asked for.
-        self._intent_reemit_blanket = blanket
-
-    def _record_intent_alias(self, msg_type):
-        """Note that a handler subscribed to ``msg_type``.
-
-        Only per-intent dispatch topics are recorded; the registry ignores
-        everything else. A subscription written with the legacy ``.intent``
-        suffix is what marks the canonical intent as needing the mirror.
-        """
-        if self._intent_aliases is not None:
-            self._intent_aliases.register(msg_type)
-
-    def _forget_intent_alias(self, msg_type):
-        """Drop the alias of ``msg_type`` once nothing listens on it."""
-        if self._intent_aliases is None:
-            return
-        alias = self._intent_aliases.legacy_alias(msg_type)
-        if alias is None:
-            return
-        if not self.ee.listeners(alias):
-            self._intent_aliases.deregister(msg_type)
-
-    def _reemit_legacy_intent(self, message):
-        """Dispatch the suffixed twin of ``message``, if one is called for.
-
-        The twin carries the same data and context plus
-        :data:`INTENT_REEMIT_CONTEXT_KEY`, and fires at most once: it is
-        already the suffixed spelling, which ``legacy_reemit_targets`` never
-        mirrors again.
-        """
-        if self._intent_aliases is None or not self._translator.emit_legacy:
-            return
-        if message.context.get(INTENT_REEMIT_CONTEXT_KEY):
-            return
-        for topic in legacy_reemit_targets(message.msg_type,
-                                           registry=self._intent_aliases,
-                                           blanket=self._intent_reemit_blanket):
-            twin = message.forward(topic, message.data)
-            twin.context[INTENT_REEMIT_CONTEXT_KEY] = True
-            self.ee.emit(topic, twin)
+    for env_var, config_key in _REMOVED_BRIDGE_FLAGS:
+        if _bus_flag(env_var, config_key, default=False):
+            raise RuntimeError(
+                f"'{config_key}' (env {env_var}) is enabled, but the legacy "
+                "wire bridge was removed from the fake bus, matching "
+                "ovos-bus-client. Legacy bus topics are no longer emitted or "
+                "mirrored. Migrate the producers and consumers to the "
+                f"OVOS-MSG-1 spec topics, then unset '{config_key}'.")
+        if kwargs.get(config_key):
+            log_deprecation(
+                f"the '{config_key}' kwarg no longer does anything: the "
+                "legacy wire bridge was removed from the fake bus. Drop it "
+                "from the call.", "1.0.0")
 
 
-class FakeBus(_LegacyIntentBridge):
+class FakeBus:
     def __init__(self, *args, **kwargs):
         self.started_running = False
         self.session_id = "default"
         self.ee = kwargs.get("emitter") or EventEmitter()
         self.ee.on("error", self.on_error)
-        # mirror MessageBusClient's namespace migration so the test/satellite
-        # double bridges legacy<->ovos.* topics identically. Flags resolve the
-        # same way the real client does: explicit modernize=/emit_legacy= kwarg
-        # wins, else env var -> websocket.* config -> default on.
-        self._translator = _resolve_bus_flags(kwargs)
-        self._handler_guards = {}        # handler -> shared mirror-guard
-        self._dedup_registrations = {}   # handler -> [(msg_type, wrapped), ...]
-        # legacy intent-topic bridge, gated by the SAME emit_legacy flag
-        self._init_intent_bridge(kwargs)
+        # the migration window is over: no namespace bridge, no intent-topic
+        # twin, no mirror-guard — matching MessageBusClient.
+        _reject_removed_bridge_flags(kwargs)
         self.on_open()
         try:
             self.session_id = kwargs["session"].session_id
@@ -173,27 +103,9 @@ class FakeBus(_LegacyIntentBridge):
                 self.on_default_session_update)
 
     def on(self, msg_type, handler):
-        self._record_intent_alias(msg_type)
-        # wrap handlers on migrated topics so a handler subscribed to both the
-        # legacy and ovos.* topic fires once (the mirror is dropped)
-        if self._translator.is_migrated(msg_type):
-            guard = self._handler_guards.get(handler)
-            if guard is None:
-                guard = self._translator.new_mirror_guard()
-                self._handler_guards[handler] = guard
-
-            def wrapped(message=None):
-                if guard(message):
-                    return
-                return handler(message)
-
-            self.ee.on(msg_type, wrapped)
-            self._dedup_registrations.setdefault(handler, []).append((msg_type, wrapped))
-            return
         self.ee.on(msg_type, handler)
 
     def once(self, msg_type, handler):
-        self._record_intent_alias(msg_type)
         self.ee.once(msg_type, handler)
 
     def emit(self, message):
@@ -221,23 +133,6 @@ class FakeBus(_LegacyIntentBridge):
             self.ee.emit(message.msg_type, message)
         except Exception as e:
             LOG.exception(f"Error in event handler for '{message.msg_type}': {e}")
-        # namespace migration: also dispatch the counterpart topic(s) so a
-        # listener on either namespace receives the event (consumers dedupe).
-        # the mirrored payload is reshaped into the counterpart topic's shape
-        # (identity for payload-compatible renames, a per-topic transform for
-        # shape-changing ones) so a listener on it receives the payload in *its*
-        # shape -- matching MessageBusClient's bridge.
-        for topic in self._translator.counterpart_topics(message.msg_type):
-            try:
-                translated = self._translator.translate_payload(
-                    from_topic=message.msg_type, to_topic=topic,
-                    data=message.data)
-                self.ee.emit(topic, message.forward(topic, translated))
-            except Exception as e:
-                LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
-        # legacy intent-topic bridge: mirror an intent dispatch onto its
-        # ``.intent``-suffixed twin for handlers written against old workshop.
-        self._reemit_legacy_intent(message)
 
     def on_message(self, *args):
         """
@@ -326,28 +221,13 @@ class FakeBus(_LegacyIntentBridge):
         return msg
 
     def remove(self, msg_type, handler):
-        regs = self._dedup_registrations.get(handler)
-        if regs:
-            for ev, wrapped in [r for r in regs if r[0] == msg_type]:
-                try:
-                    self.ee.remove_listener(ev, wrapped)
-                except Exception:
-                    pass
-                regs.remove((ev, wrapped))
-            if not regs:
-                self._dedup_registrations.pop(handler, None)
-                self._handler_guards.pop(handler, None)
-            self._forget_intent_alias(msg_type)
-            return
         try:
             self.ee.remove_listener(msg_type, handler)
         except Exception:
             pass
-        self._forget_intent_alias(msg_type)
 
     def remove_all_listeners(self, event_name):
         self.ee.remove_all_listeners(event_name)
-        self._forget_intent_alias(event_name)
 
     def create_client(self):
         return self
@@ -458,7 +338,7 @@ class Message(FakeMessage):
         return FakeMessage(*args, **kwargs)
 
 
-class AsyncFakeBus(_LegacyIntentBridge):
+class AsyncFakeBus():
     """In-process stand-in for ``AsyncMessageBusClient``.
 
     Mirrors the same surface as the real async bus client: ``connect`` /
@@ -482,12 +362,8 @@ class AsyncFakeBus(_LegacyIntentBridge):
         self.session_id = "default"
         self.ee = kwargs.get("emitter") or EventEmitter()
         self.ee.on("error", self.on_error)
-        # mirror MessageBusClient's namespace migration (see FakeBus.__init__).
-        self._translator = _resolve_bus_flags(kwargs)
-        self._handler_guards = {}        # handler -> shared mirror-guard
-        self._dedup_registrations = {}   # handler -> [(msg_type, wrapped), ...]
-        # legacy intent-topic bridge, gated by the SAME emit_legacy flag
-        self._init_intent_bridge(kwargs)
+        # no legacy wire bridge (see FakeBus.__init__).
+        _reject_removed_bridge_flags(kwargs)
         self.connected_event = asyncio.Event()
         self.connected_event.set()
         self.on_open()
@@ -504,53 +380,19 @@ class AsyncFakeBus(_LegacyIntentBridge):
     # ------------------------------------------------------------------
 
     def on(self, msg_type, handler):
-        self._record_intent_alias(msg_type)
-        # wrap handlers on migrated topics so a handler subscribed to both the
-        # legacy and ovos.* topic fires once (the mirror is dropped) -- same as
-        # FakeBus.on / MessageBusClient.on.
-        if self._translator.is_migrated(msg_type):
-            guard = self._handler_guards.get(handler)
-            if guard is None:
-                guard = self._translator.new_mirror_guard()
-                self._handler_guards[handler] = guard
-
-            def wrapped(message=None):
-                if guard(message):
-                    return
-                return handler(message)
-
-            self.ee.on(msg_type, wrapped)
-            self._dedup_registrations.setdefault(handler, []).append((msg_type, wrapped))
-            return
         self.ee.on(msg_type, handler)
 
     def once(self, msg_type, handler):
-        self._record_intent_alias(msg_type)
         self.ee.once(msg_type, handler)
 
     def remove(self, msg_type, handler):
-        regs = self._dedup_registrations.get(handler)
-        if regs:
-            for ev, wrapped in [r for r in regs if r[0] == msg_type]:
-                try:
-                    self.ee.remove_listener(ev, wrapped)
-                except Exception:
-                    pass
-                regs.remove((ev, wrapped))
-            if not regs:
-                self._dedup_registrations.pop(handler, None)
-                self._handler_guards.pop(handler, None)
-            self._forget_intent_alias(msg_type)
-            return
         try:
             self.ee.remove_listener(msg_type, handler)
         except Exception:
             pass
-        self._forget_intent_alias(msg_type)
 
     def remove_all_listeners(self, event_name):
         self.ee.remove_all_listeners(event_name)
-        self._forget_intent_alias(event_name)
 
     # ------------------------------------------------------------------
     # Lifecycle (async)
@@ -591,19 +433,6 @@ class AsyncFakeBus(_LegacyIntentBridge):
             self.ee.emit(message.msg_type, message)
         except Exception as e:
             LOG.exception(f"Error in event handler for '{message.msg_type}': {e}")
-        # namespace migration: also dispatch the counterpart topic(s) with the
-        # payload reshaped into each counterpart's shape -- same as FakeBus.emit.
-        for topic in self._translator.counterpart_topics(message.msg_type):
-            try:
-                translated = self._translator.translate_payload(
-                    from_topic=message.msg_type, to_topic=topic,
-                    data=message.data)
-                self.ee.emit(topic, message.forward(topic, translated))
-            except Exception as e:
-                LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
-        # legacy intent-topic bridge: mirror an intent dispatch onto its
-        # ``.intent``-suffixed twin for handlers written against old workshop.
-        self._reemit_legacy_intent(message)
 
     # ------------------------------------------------------------------
     # Sync helpers used internally — same as FakeBus
