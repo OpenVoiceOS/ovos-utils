@@ -39,13 +39,28 @@ class TestCanonicalDispatch(unittest.TestCase):
         self.assertEqual([m.msg_type for m in got], [LEGACY])
         self.assertEqual(got[0].data, {"utterance": "one pizza"})
 
-    def test_twin_is_marked_and_keeps_context(self):
+    def test_twin_keeps_context_but_is_delivered_unmarked(self):
+        # the twin keeps the ordinary context it forwards, but the dedup marker
+        # must NOT reach local handlers: it would ride forward()/reply() onto
+        # any follow-up message a handler emits and suppress its modernization.
         bus = FakeBus()
         got = []
         bus.on(LEGACY, got.append)
         bus.emit(Message(CANONICAL, {"a": 1}, {"source": ["me"]}))
         self.assertEqual(got[0].context["source"], ["me"])
-        self.assertTrue(got[0].context[INTENT_COMPAT_TWIN_KEY])
+        self.assertNotIn(INTENT_COMPAT_TWIN_KEY, got[0].context)
+
+    def test_twin_carries_the_marker_on_the_wire(self):
+        # wire survival: the serialized twin on the "message" firehose keeps the
+        # marker, so a receiver in another process still skips re-modernizing it.
+        import json
+        bus = FakeBus()
+        wire = []
+        bus.on("message", lambda m: wire.append(json.loads(m)))
+        bus.emit(Message(CANONICAL))
+        twins = [f for f in wire if f["type"] == LEGACY]
+        self.assertEqual(len(twins), 1)
+        self.assertTrue(twins[0]["context"][INTENT_COMPAT_TWIN_KEY])
 
     def test_canonical_handler_fires_exactly_once(self):
         bus = FakeBus()
@@ -111,6 +126,57 @@ class TestSuffixedDispatch(unittest.TestCase):
         self.assertEqual(got, [])
 
 
+class TestMarkerDoesNotLeakToDescendants(unittest.TestCase):
+    """The twin marker must not ride forward()/reply() onto later messages.
+
+    Message.forward()/reply() deep-copy the whole context. If a delivered twin
+    kept the marker, a handler that forwards that context to emit an UNRELATED
+    suffixed intent would brand the follow-up a twin, and the bridge would
+    silently drop its canonical spelling.
+    """
+
+    UNRELATED_LEGACY = "other-skill.jarbas:unrelated.intent"
+    UNRELATED_CANON = "other-skill.jarbas:unrelated"
+
+    def test_forward_off_a_twin_does_not_suppress_an_unrelated_intent(self):
+        bus = FakeBus()
+        seen_twin = []
+        bus.on(LEGACY, seen_twin.append)
+        bus.emit(Message(CANONICAL, {"utterance": "one pizza"}))
+        twin_msg = seen_twin[0]
+        self.assertNotIn(INTENT_COMPAT_TWIN_KEY, twin_msg.context)
+        # a handler forwards this frame's context to emit an unrelated intent.
+        got_canon = []
+        bus.on(self.UNRELATED_CANON, got_canon.append)
+        followup = twin_msg.forward(self.UNRELATED_LEGACY, {})
+        self.assertNotIn(INTENT_COMPAT_TWIN_KEY, followup.context)
+        bus.emit(followup)
+        # the unrelated canonical topic IS modernized: the marker did not leak.
+        self.assertEqual([m.msg_type for m in got_canon], [self.UNRELATED_CANON])
+
+    def test_reply_off_a_twin_does_not_suppress_an_unrelated_intent(self):
+        bus = FakeBus()
+        seen_twin = []
+        bus.on(LEGACY, seen_twin.append)
+        bus.emit(Message(CANONICAL))
+        got_canon = []
+        bus.on(self.UNRELATED_CANON, got_canon.append)
+        bus.emit(seen_twin[0].reply(self.UNRELATED_LEGACY, {}))
+        self.assertEqual([m.msg_type for m in got_canon], [self.UNRELATED_CANON])
+
+    def test_marker_survives_on_the_wire_for_a_second_receiver(self):
+        # a marked frame emitted (as if arriving from the wire) is delivered to
+        # its legacy listener but NOT re-modernized: wire survival intact.
+        bus = FakeBus()
+        got_legacy = []
+        got_canon = []
+        bus.on(LEGACY, got_legacy.append)
+        bus.on(CANONICAL, got_canon.append)
+        bus.emit(Message(LEGACY, {}, {INTENT_COMPAT_TWIN_KEY: True}))
+        self.assertEqual(len(got_legacy), 1)
+        self.assertEqual(len(got_canon), 0)
+
+
 class TestNonIntentTopics(unittest.TestCase):
     def test_dotted_topics_are_untouched(self):
         bus = FakeBus()
@@ -136,7 +202,8 @@ class TestAsyncFakeBus(unittest.TestCase):
         bus.on(LEGACY, got.append)
         _run(bus.emit(Message(CANONICAL)))
         self.assertEqual([m.msg_type for m in got], [LEGACY])
-        self.assertTrue(got[0].context[INTENT_COMPAT_TWIN_KEY])
+        # delivered unmarked (no leak onto descendants); marker rides the wire
+        self.assertNotIn(INTENT_COMPAT_TWIN_KEY, got[0].context)
 
     def test_suffixed_dispatch_fires_the_canonical_form(self):
         bus = AsyncFakeBus()

@@ -93,19 +93,35 @@ class _LegacyIntentBridge:
     reaches each handler exactly once. Nothing tracks who listens to what.
     """
 
-    def _bridge_intent_topics(self, message):
-        """Fire the counterpart spelling of an intent dispatch, if any."""
+    def _bridge_intent_topics(self, message, is_twin=False):
+        """Fire the counterpart spelling of an intent dispatch, if any.
+
+        ``is_twin`` is the twin-marker decision made by the caller, which pops
+        :data:`INTENT_COMPAT_TWIN_KEY` off the message context BEFORE local
+        dispatch so it cannot ride onto descendants. The marker is therefore
+        never read from ``context`` here — only ``is_twin`` is trusted.
+        ``Message.forward()``/``reply()`` deep-copy the whole context, so a
+        marked frame that stayed marked would brand every follow-up message a
+        twin and silently suppress its modernization.
+        """
         if not self._translator.emit_legacy:
             return
         if not is_intent_topic(message.msg_type):
             return
         canonical = canonical_intent_topic(message.msg_type)
         if canonical == message.msg_type:
-            twin = message.forward(legacy_intent_topic(message.msg_type),
-                                   message.data)
-            twin.context[INTENT_COMPAT_TWIN_KEY] = True
-            self.ee.emit(twin.msg_type, twin)
-        elif not message.context.get(INTENT_COMPAT_TWIN_KEY):
+            # RULE 1. The twin is an outbound wire frame: it carries the marker
+            # on the wire (a receiver in another process needs it to skip
+            # re-modernizing), so its serialized form goes on the "message"
+            # firehose marked. What reaches LOCAL handlers is an UNMARKED copy,
+            # mirroring the real client, whose local delivery happens on the
+            # receive side after the marker is popped — descendants stay clean.
+            legacy = legacy_intent_topic(message.msg_type)
+            wire_twin = message.forward(legacy, message.data)
+            wire_twin.context[INTENT_COMPAT_TWIN_KEY] = True
+            self.ee.emit("message", wire_twin.serialize())
+            self.ee.emit(legacy, message.forward(legacy, message.data))
+        elif not is_twin:
             self.ee.emit(canonical, message.forward(canonical, message.data))
 
 
@@ -174,6 +190,12 @@ class FakeBus(_LegacyIntentBridge):
         # run.
         self.on_message(message.serialize())
         self.ee.emit("message", message.serialize())
+        # RULE 2 dedup marker: read it, then POP it before any local dispatch.
+        # The "message" firehose above still carries the marked frame (wire
+        # survival), but local topic handlers and their forward()/reply()
+        # descendants must start clean, or an unrelated suffixed intent emitted
+        # from a handler would inherit the marker and never be modernized.
+        is_intent_twin = message.context.pop(INTENT_COMPAT_TWIN_KEY, False)
         try:
             self.ee.emit(message.msg_type, message)
         except Exception as e:
@@ -194,7 +216,7 @@ class FakeBus(_LegacyIntentBridge):
                 LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
         # legacy intent-topic bridge: fire the counterpart spelling of an
         # intent dispatch, for handlers written against old workshop.
-        self._bridge_intent_topics(message)
+        self._bridge_intent_topics(message, is_intent_twin)
 
     def on_message(self, *args):
         """
@@ -534,6 +556,10 @@ class AsyncFakeBus(_LegacyIntentBridge):
         # session mutations with the stale emit-time snapshot).
         self.on_message(message.serialize())
         self.ee.emit("message", message.serialize())
+        # RULE 2 dedup marker: pop it before local dispatch — see FakeBus.emit.
+        # The firehose above keeps the marked frame (wire survival); local
+        # handlers and their forward()/reply() descendants start clean.
+        is_intent_twin = message.context.pop(INTENT_COMPAT_TWIN_KEY, False)
         try:
             self.ee.emit(message.msg_type, message)
         except Exception as e:
@@ -550,7 +576,7 @@ class AsyncFakeBus(_LegacyIntentBridge):
                 LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
         # legacy intent-topic bridge: fire the counterpart spelling of an
         # intent dispatch, for handlers written against old workshop.
-        self._bridge_intent_topics(message)
+        self._bridge_intent_topics(message, is_intent_twin)
 
     # ------------------------------------------------------------------
     # Sync helpers used internally — same as FakeBus
