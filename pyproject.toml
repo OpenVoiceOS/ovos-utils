@@ -21,7 +21,7 @@ dependencies = [
     "rich-click~=1.7",
     "rich~=13.7",
     "python-dateutil",
-    "ovos-spec-tools>=0.16.1a2",
+    "ovos-spec-tools>=1.6.0a1",  # intent_topics helpers for the FakeBus legacy re-emit
 ]
 
 [project.urls]
