@@ -193,6 +193,30 @@ class TestNonIntentTopics(unittest.TestCase):
         self.assertEqual(len(got), 1)
 
 
+class TestBridgeIntentTopicsErrorIsolation(unittest.TestCase):
+    """A raising `_bridge_intent_topics` must not propagate out of emit(),
+    matching the counterpart-topics loop's own try/except + LOG.exception
+    resilience pattern in the same method (CodeRabbit review, #411)."""
+
+    def test_sync_bus_emit_survives_a_raising_bridge(self):
+        bus = FakeBus()
+        bus._bridge_intent_topics = lambda *a, **k: (_ for _ in ()).throw(
+            RuntimeError("boom"))
+        got = []
+        bus.on(CANONICAL, got.append)
+        bus.emit(Message(CANONICAL))  # must not raise
+        self.assertEqual([m.msg_type for m in got], [CANONICAL])
+
+    def test_async_bus_emit_survives_a_raising_bridge(self):
+        bus = AsyncFakeBus()
+        bus._bridge_intent_topics = lambda *a, **k: (_ for _ in ()).throw(
+            RuntimeError("boom"))
+        got = []
+        bus.on(CANONICAL, got.append)
+        _run(bus.emit(Message(CANONICAL)))  # must not raise
+        self.assertEqual([m.msg_type for m in got], [CANONICAL])
+
+
 class TestAsyncFakeBus(unittest.TestCase):
     """The async double runs the same two rules."""
 

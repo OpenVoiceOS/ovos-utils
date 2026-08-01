@@ -216,7 +216,10 @@ class FakeBus(_LegacyIntentBridge):
                 LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
         # legacy intent-topic bridge: fire the counterpart spelling of an
         # intent dispatch, for handlers written against old workshop.
-        self._bridge_intent_topics(message, is_intent_twin)
+        try:
+            self._bridge_intent_topics(message, is_intent_twin)
+        except Exception as e:
+            LOG.exception(f"Error in intent-topic bridge for '{message.msg_type}': {e}")
 
     def on_message(self, *args):
         """
@@ -576,7 +579,10 @@ class AsyncFakeBus(_LegacyIntentBridge):
                 LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
         # legacy intent-topic bridge: fire the counterpart spelling of an
         # intent dispatch, for handlers written against old workshop.
-        self._bridge_intent_topics(message, is_intent_twin)
+        try:
+            self._bridge_intent_topics(message, is_intent_twin)
+        except Exception as e:
+            LOG.exception(f"Error in intent-topic bridge for '{message.msg_type}': {e}")
 
     # ------------------------------------------------------------------
     # Sync helpers used internally — same as FakeBus
