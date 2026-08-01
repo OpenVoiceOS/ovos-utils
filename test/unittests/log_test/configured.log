@@ -1,126 +1,96 @@
-2026-03-11 04:12:11.787 - configured - ovos_utils.network_utils:get_external_ip:78 - ERROR - Got resp=503: 
-2026-03-11 04:12:11.789 - configured - ovos_utils.network_utils:get_external_ip:80 - ERROR - Unable to get external IP Address: network error
-2026-03-11 04:12:11.796 - configured - ovos_utils.network_utils:check_captive_portal:162 - ERROR - Error checking for captive portal
-Traceback (most recent call last):
-  File "/home/miro/PycharmProjects/OpenVoiceOS Workspace/ovos-utils/ovos_utils/network_utils.py", line 156, in check_captive_portal
-    html_doc = requests.get(host).text
-               ~~~~~~~~~~~~^^^^^^
-  File "/home/miro/.local/share/uv/python/cpython-3.13.12-linux-x86_64-gnu/lib/python3.13/unittest/mock.py", line 1169, in __call__
-    return self._mock_call(*args, **kwargs)
-           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
-  File "/home/miro/.local/share/uv/python/cpython-3.13.12-linux-x86_64-gnu/lib/python3.13/unittest/mock.py", line 1173, in _mock_call
-    return self._execute_mock_call(*args, **kwargs)
-           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
-  File "/home/miro/.local/share/uv/python/cpython-3.13.12-linux-x86_64-gnu/lib/python3.13/unittest/mock.py", line 1228, in _execute_mock_call
-    raise effect
-Exception: timeout
-2026-03-11 04:12:11.823 - configured - ovos_utils.ocp:from_dict:254 - ERROR - track dictionary does not contain 'uri', it is not a valid MediaEntry
-2026-03-11 04:12:11.824 - configured - ovos_utils.ocp:from_dict:256 - WARNING - DEPRECATED: use dict2entry() for Playlists and PluginStreams, MediaEntry.from_dict is only for regular media, will start throwing ValueError in 0.1.0
-2026-03-11 04:12:11.837 - configured - ovos_utils.ocp:available_extractors:165 - ERROR - please install/update ovos_plugin_manager
-2026-03-11 04:12:11.841 - configured - ovos_utils.ocp:goto_track:586 - DEBUG - New playlist position: 1
-2026-03-11 04:12:11.842 - configured - ovos_utils.ocp:goto_track:586 - DEBUG - New playlist position: 0
-2026-03-11 04:12:11.842 - configured - ovos_utils.ocp:goto_track:586 - DEBUG - New playlist position: 0
-2026-03-11 04:12:11.843 - configured - ovos_utils.ocp:goto_track:588 - ERROR - requested track not in the playlist: MediaEntry(uri='http://missing.com/x.mp3', title='', artist='', match_confidence=0, skill_id='ovos.common_play', playback=<PlaybackType.UNDEFINED: 100>, status=<TrackState.DISAMBIGUATION: 1>, media_type=<MediaType.GENERIC: 0>, length=0, image='', skill_icon='', javascript='')
-2026-03-11 04:12:11.852 - configured - ovos_utils.ocp:goto_track:586 - DEBUG - New playlist position: 2
-2026-03-11 04:12:11.853 - configured - ovos_utils.ocp:goto_track:586 - DEBUG - New playlist position: 1
-2026-03-11 04:12:11.854 - configured - ovos_utils.ocp:goto_track:588 - ERROR - requested track not in the playlist: MediaEntry(uri='nonexistent', title='nonexistent', artist='', match_confidence=0, skill_id='ovos.common_play', playback=<PlaybackType.UNDEFINED: 100>, status=<TrackState.DISAMBIGUATION: 1>, media_type=<MediaType.GENERIC: 0>, length=0, image='', skill_icon='', javascript='')
-2026-03-11 04:12:11.857 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (3! Going to start of playlist
-2026-03-11 04:12:11.858 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (-1! Going to start of playlist
-2026-03-11 04:12:11.859 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (-1! Going to start of playlist
-2026-03-11 04:12:11.860 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (100! Going to start of playlist
-2026-03-11 04:12:11.877 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (0! Going to start of playlist
-2026-03-11 04:12:11.878 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (-1! Going to start of playlist
-2026-03-11 04:12:11.878 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 04:12:11.879 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 04:12:11.880 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (10! Going to start of playlist
-2026-03-11 04:12:11.882 - configured - ovos_utils.parse:_validate_matching_strategy:27 - ERROR - rapidfuzz is not installed, falling back to SequenceMatcher for all match strategies
-2026-03-11 04:12:11.882 - configured - ovos_utils.parse:_validate_matching_strategy:29 - WARNING - pip install rapidfuzz
-2026-03-11 04:12:11.904 - configured - ovos_utils.security:decrypt:93 - ERROR - run pip install pycryptodomex
-2026-03-11 04:12:11.906 - configured - ovos_utils.security:decrypt:103 - ERROR - decryption failed, invalid key?
-2026-03-11 04:12:11.910 - configured - ovos_utils.security:encrypt:80 - ERROR - run pip install pycryptodomex
-2026-03-11 04:12:11.912 - configured - ovos_utils.security:create_self_signed_cert:34 - ERROR - run pip install pyopenssl
-2026-03-11 04:12:11.917 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.918 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'my_service'
-2026-03-11 04:12:11.918 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.919 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.920 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.921 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.923 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.924 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.924 - configured - ovos_utils.skill_installer:handle_install_python:391 - ERROR - pip disabled in mycroft.conf
-2026-03-11 04:12:11.925 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.926 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.927 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.928 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.929 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.931 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.932 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.932 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.933 - configured - ovos_utils.skill_installer:handle_uninstall_python:427 - ERROR - pip disabled in mycroft.conf
-2026-03-11 04:12:11.934 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.934 - configured - ovos_utils.skill_installer:pip_install:230 - ERROR - no package list provided to install
-2026-03-11 04:12:11.935 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.937 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.938 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [ovos_test] (pip) Installing my-pkg
-2026-03-11 04:12:11.938 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /usr/bin/uv pip install -c http://example.com/c.txt my-pkg
-2026-03-11 04:12:11.939 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.940 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [ovos_test] (pip) Installing my-pkg
-2026-03-11 04:12:11.940 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/PycharmProjects/OpenVoiceOS Workspace/ovos-utils/.venv/bin/python3 -m pip install -c http://example.com/c.txt my-pkg
-2026-03-11 04:12:11.941 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.942 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [ovos_test] (pip) Installing bad-pkg
-2026-03-11 04:12:11.943 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c https://raw.githubusercontent.com/OpenVoiceOS/ovos-releases/refs/heads/main/constraints-stable.txt bad-pkg
-2026-03-11 04:12:11.944 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.945 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [ovos_test] (pip) Installing pkg
-2026-03-11 04:12:11.945 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt pkg
-2026-03-11 04:12:11.947 - configured - ovos_utils.skill_installer:validate_constraints:205 - ERROR - Couldn't find the constraints file
-2026-03-11 04:12:11.948 - configured - ovos_utils.skill_installer:validate_constraints:191 - DEBUG - Constraints url: http://example.com/c.txt
-2026-03-11 04:12:11.949 - configured - ovos_utils.skill_installer:validate_constraints:191 - DEBUG - Constraints url: http://example.com/missing.txt
-2026-03-11 04:12:11.949 - configured - ovos_utils.skill_installer:validate_constraints:195 - ERROR - Remote constraints file not accessible: 404
-2026-03-11 04:12:11.950 - configured - ovos_utils.skill_installer:validate_constraints:191 - DEBUG - Constraints url: http://example.com/c.txt
-2026-03-11 04:12:11.951 - configured - ovos_utils.skill_installer:validate_constraints:201 - ERROR - Error accessing remote constraints: timeout
-2026-03-11 04:12:11.952 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.953 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.954 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.954 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
-2026-03-11 04:12:11.955 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt pkg
-2026-03-11 04:12:11.956 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.956 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
-2026-03-11 04:12:11.957 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt --break-system-packages pkg
-2026-03-11 04:12:11.958 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.959 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
-2026-03-11 04:12:11.959 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt --pre pkg
-2026-03-11 04:12:11.960 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.961 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
-2026-03-11 04:12:11.961 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt pkg
-2026-03-11 04:12:11.962 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.963 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
-2026-03-11 04:12:11.963 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt pkg
-2026-03-11 04:12:11.964 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.965 - configured - ovos_utils.skill_installer:pip_uninstall:295 - ERROR - no package list provided to uninstall
-2026-03-11 04:12:11.966 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.967 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:12.298 - configured - ovos_utils.skill_installer:pip_uninstall:330 - ERROR - tried to uninstall a protected package: ['ovos-core']
-2026-03-11 04:12:12.299 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:12.461 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 04:12:12.462 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /usr/bin/uv pip uninstall -y custom-pkg
-2026-03-11 04:12:12.464 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:12.925 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 04:12:12.926 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/PycharmProjects/OpenVoiceOS Workspace/ovos-utils/.venv/bin/python3 -m pip uninstall -y custom-pkg
-2026-03-11 04:12:12.929 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:13.262 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 04:12:13.263 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y custom-pkg
-2026-03-11 04:12:13.267 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:13.269 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 04:12:13.294 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y custom-pkg
-2026-03-11 04:12:13.296 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:13.296 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 04:12:13.297 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y custom-pkg
-2026-03-11 04:12:13.298 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:13.569 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 04:12:13.570 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y --break-system-packages custom-pkg
-2026-03-11 04:12:13.571 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:13.859 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 04:12:13.859 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y custom-pkg
-2026-03-11 04:12:13.913 - configured - ovos_utils.system:system_reboot:83 - DEBUG - sudo systemctl reboot -i
-2026-03-11 04:12:13.915 - configured - ovos_utils.system:system_shutdown:66 - DEBUG - sudo systemctl poweroff -i
-2026-03-11 04:12:13.916 - configured - ovos_utils.system:system_shutdown:66 - DEBUG - systemctl poweroff -i
+2026-08-01 01:07:01.284 - configured - ovos_utils.system:system_shutdown:66 - DEBUG - systemctl poweroff -i
+2026-08-01 01:07:01.296 - configured - ovos_utils.system:system_shutdown:66 - DEBUG - sudo systemctl poweroff -i
+2026-08-01 01:07:01.308 - configured - ovos_utils.system:system_reboot:83 - DEBUG - sudo systemctl reboot -i
+2026-08-01 01:07:01.423 - configured - ovos_utils.security:decrypt:105 - ERROR - run pip install pycryptodomex
+2026-08-01 01:07:01.434 - configured - ovos_utils.security:encrypt:92 - ERROR - run pip install pycryptodomex
+2026-08-01 01:07:01.444 - configured - ovos_utils.security:decrypt:115 - ERROR - decryption failed, invalid key?
+2026-08-01 01:07:01.463 - configured - ovos_utils.security:create_self_signed_cert:46 - ERROR - run pip install pyopenssl
+2026-08-01 01:07:11.840 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:11.847 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:11.855 - configured - ovos_utils.skill_installer:handle_install_python:391 - ERROR - pip disabled in mycroft.conf
+2026-08-01 01:07:11.862 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:11.871 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:11.878 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:11.885 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:11.892 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:11.900 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:11.908 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:11.918 - configured - ovos_utils.skill_installer:validate_constraints:191 - DEBUG - Constraints url: http://example.com/c.txt
+2026-08-01 01:07:11.925 - configured - ovos_utils.skill_installer:validate_constraints:205 - ERROR - Couldn't find the constraints file
+2026-08-01 01:07:11.931 - configured - ovos_utils.skill_installer:validate_constraints:191 - DEBUG - Constraints url: http://example.com/c.txt
+2026-08-01 01:07:11.936 - configured - ovos_utils.skill_installer:validate_constraints:201 - ERROR - Error accessing remote constraints: timeout
+2026-08-01 01:07:11.943 - configured - ovos_utils.skill_installer:validate_constraints:191 - DEBUG - Constraints url: http://example.com/missing.txt
+2026-08-01 01:07:11.948 - configured - ovos_utils.skill_installer:validate_constraints:195 - ERROR - Remote constraints file not accessible: 404
+2026-08-01 01:07:11.955 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:12.220 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
+2026-08-01 01:07:12.226 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/.venvs/ovos/bin/python -m pip uninstall -y custom-pkg
+2026-08-01 01:07:12.232 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:12.238 - configured - ovos_utils.skill_installer:pip_uninstall:295 - ERROR - no package list provided to uninstall
+2026-08-01 01:07:12.246 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:12.254 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:12.490 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
+2026-08-01 01:07:12.495 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /usr/bin/uv pip uninstall -y --break-system-packages custom-pkg
+2026-08-01 01:07:12.502 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:12.508 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
+2026-08-01 01:07:12.513 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /usr/bin/uv pip uninstall -y custom-pkg
+2026-08-01 01:07:12.520 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:12.591 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
+2026-08-01 01:07:12.596 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /usr/bin/uv pip uninstall -y custom-pkg
+2026-08-01 01:07:12.604 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:12.667 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
+2026-08-01 01:07:12.673 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /usr/bin/uv pip uninstall -y custom-pkg
+2026-08-01 01:07:12.683 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:12.764 - configured - ovos_utils.skill_installer:pip_uninstall:330 - ERROR - tried to uninstall a protected package: ['ovos-core']
+2026-08-01 01:07:12.779 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:12.788 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
+2026-08-01 01:07:12.795 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /usr/bin/uv pip uninstall -y custom-pkg
+2026-08-01 01:07:12.803 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:12.874 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
+2026-08-01 01:07:12.880 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /usr/bin/uv pip uninstall -y custom-pkg
+2026-08-01 01:07:12.889 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:12.896 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [ovos_test] (pip) Installing pkg
+2026-08-01 01:07:12.903 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /usr/bin/uv pip install -c http://x.com/c.txt pkg
+2026-08-01 01:07:12.912 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:12.919 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [ovos_test] (pip) Installing bad-pkg
+2026-08-01 01:07:12.924 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /usr/bin/uv pip install -c https://raw.githubusercontent.com/OpenVoiceOS/ovos-releases/refs/heads/main/constraints-stable.txt bad-pkg
+2026-08-01 01:07:12.934 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:12.943 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:12.950 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [ovos_test] (pip) Installing my-pkg
+2026-08-01 01:07:12.957 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /usr/bin/uv pip install -c http://example.com/c.txt my-pkg
+2026-08-01 01:07:12.966 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:12.973 - configured - ovos_utils.skill_installer:pip_install:230 - ERROR - no package list provided to install
+2026-08-01 01:07:12.984 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:12.990 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [ovos_test] (pip) Installing my-pkg
+2026-08-01 01:07:12.995 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.venvs/ovos/bin/python -m pip install -c http://example.com/c.txt my-pkg
+2026-08-01 01:07:13.005 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:13.024 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:13.036 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:13.043 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
+2026-08-01 01:07:13.049 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /usr/bin/uv pip install -c http://x.com/c.txt pkg
+2026-08-01 01:07:13.056 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:13.065 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:13.074 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:13.078 - configured - ovos_utils.skill_installer:handle_uninstall_python:427 - ERROR - pip disabled in mycroft.conf
+2026-08-01 01:07:13.087 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
+2026-08-01 01:07:13.095 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'my_service'
+2026-08-01 01:07:13.102 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:13.109 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:13.116 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:13.122 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
+2026-08-01 01:07:13.127 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /usr/bin/uv pip install -c http://x.com/c.txt pkg
+2026-08-01 01:07:13.135 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:13.140 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
+2026-08-01 01:07:13.146 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /usr/bin/uv pip install -c http://x.com/c.txt --pre pkg
+2026-08-01 01:07:13.154 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:13.159 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
+2026-08-01 01:07:13.164 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /usr/bin/uv pip install -c http://x.com/c.txt --break-system-packages pkg
+2026-08-01 01:07:13.171 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
+2026-08-01 01:07:13.176 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
+2026-08-01 01:07:13.181 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /usr/bin/uv pip install -c http://x.com/c.txt pkg
+2026-08-01 01:07:13.194 - configured - ovos_utils.events:add:165 - DEBUG - Added event: id:f
+2026-08-01 01:07:13.205 - configured - ovos_utils.events:remove:173 - DEBUG - Removing event id:f
+2026-08-01 01:07:13.347 - configured - ovos_utils.gui:get_ui_directories:90 - DEBUG - Skill supports GUI framework: qt5 from folder: /home/miro/tmp/tmpilwf5jno/gui/qt5
+2026-08-01 01:07:13.352 - configured - ovos_utils.gui:get_ui_directories:90 - DEBUG - Skill supports GUI framework: kivy from folder: /home/miro/tmp/tmpilwf5jno/gui/kivy
+2026-08-01 01:07:13.360 - configured - ovos_utils.gui:get_ui_directories:85 - DEBUG - legacy UI directory found - Handling `ui` directory as `qt5`
+2026-08-01 01:07:13.421 - configured - ovos_utils.parse:_validate_matching_strategy:27 - ERROR - rapidfuzz is not installed, falling back to SequenceMatcher for all match strategies
+2026-08-01 01:07:13.426 - configured - ovos_utils.parse:_validate_matching_strategy:29 - WARNING - pip install rapidfuzz
