@@ -1,126 +1,59 @@
-2026-03-11 04:12:11.787 - configured - ovos_utils.network_utils:get_external_ip:78 - ERROR - Got resp=503: 
-2026-03-11 04:12:11.789 - configured - ovos_utils.network_utils:get_external_ip:80 - ERROR - Unable to get external IP Address: network error
-2026-03-11 04:12:11.796 - configured - ovos_utils.network_utils:check_captive_portal:162 - ERROR - Error checking for captive portal
+2026-08-01 14:14:22.438 - configured - ovos_utils.dialog:load_dialogs - WARNING - Deprecation version=1.0.0. Caller=test_dialog:191. use 'ovos_spec_tools.LocaleResources' to load .dialog resources
+2026-08-01 14:14:22.443 - configured - ovos_utils.dialog:MustacheDialogRenderer.__init__ - WARNING - Deprecation version=1.0.0. Caller=test_dialog:191. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.455 - configured - ovos_utils.dialog:MustacheDialogRenderer.__init__ - WARNING - Deprecation version=1.0.0. Caller=test_dialog:202. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.460 - configured - ovos_utils.dialog:load_dialogs - WARNING - Deprecation version=1.0.0. Caller=test_dialog:203. use 'ovos_spec_tools.LocaleResources' to load .dialog resources
+2026-08-01 14:14:22.468 - configured - ovos_utils.dialog:load_dialogs - WARNING - Deprecation version=1.0.0. Caller=test_dialog:184. use 'ovos_spec_tools.LocaleResources' to load .dialog resources
+2026-08-01 14:14:22.472 - configured - ovos_utils.dialog:MustacheDialogRenderer.__init__ - WARNING - Deprecation version=1.0.0. Caller=test_dialog:184. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.481 - configured - ovos_utils.dialog:load_dialogs - WARNING - Deprecation version=1.0.0. Caller=test_dialog:213. use 'ovos_spec_tools.LocaleResources' to load .dialog resources
+2026-08-01 14:14:22.486 - configured - ovos_utils.dialog:MustacheDialogRenderer.__init__ - WARNING - Deprecation version=1.0.0. Caller=test_dialog:213. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.493 - configured - ovos_utils.dialog:MustacheDialogRenderer.__init__ - WARNING - Deprecation version=1.0.0. Caller=test_dialog:70. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.501 - configured - ovos_utils.dialog:MustacheDialogRenderer.__init__ - WARNING - Deprecation version=1.0.0. Caller=test_dialog:41. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.507 - configured - ovos_utils.dialog:MustacheDialogRenderer.__init__ - WARNING - Deprecation version=1.0.0. Caller=test_dialog:151. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.515 - configured - ovos_utils.dialog:MustacheDialogRenderer.__init__ - WARNING - Deprecation version=1.0.0. Caller=test_dialog:135. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.523 - configured - ovos_utils.dialog:MustacheDialogRenderer.__init__ - WARNING - Deprecation version=1.0.0. Caller=test_dialog:100. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.530 - configured - ovos_utils.dialog:MustacheDialogRenderer.__init__ - WARNING - Deprecation version=1.0.0. Caller=test_dialog:29. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.538 - configured - ovos_utils.dialog:MustacheDialogRenderer.__init__ - WARNING - Deprecation version=1.0.0. Caller=test_dialog:56. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.546 - configured - ovos_utils.dialog:MustacheDialogRenderer.__init__ - WARNING - Deprecation version=1.0.0. Caller=test_dialog:85. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.561 - configured - ovos_utils.dialog:get_dialog - WARNING - Deprecation version=1.0.0. Caller=test_dialog:248. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.574 - configured - ovos_utils.dialog:get_dialog - WARNING - Deprecation version=1.0.0. Caller=test_dialog:224. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.586 - configured - ovos_utils.dialog:get_dialog - WARNING - Deprecation version=1.0.0. Caller=test_dialog:263. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.599 - configured - ovos_utils.dialog:get_dialog - WARNING - Deprecation version=1.0.0. Caller=test_dialog:237. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.604 - configured - ovos_utils.dialog:MustacheDialogRenderer.__init__ - WARNING - Deprecation version=1.0.0. Caller=test_dialog:237. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:22.629 - configured - ovos_utils.messagebus:<module>:5 - WARNING - Deprecation version=1.0.0. Caller=test_messagebus:37. ovos_utils.messagebus has been deprecated since version 0.1.0!! please import from ovos_utils.fakebus or ovos_bus_client directly
+2026-08-01 14:14:22.654 - configured - ovos_utils.messagebus:<module>:5 - WARNING - Deprecation version=1.0.0. Caller=test_messagebus:30. ovos_utils.messagebus has been deprecated since version 0.1.0!! please import from ovos_utils.fakebus or ovos_bus_client directly
+2026-08-01 14:14:22.783 - configured - ovos_utils.ocp:available_extractors - WARNING - Deprecation version=0.1.0. Caller=test_ocp:402. import ovos_utils.available_extractors from ovos_plugin_manager.ocp instead
+2026-08-01 14:14:23.002 - configured - ovos_utils.events:EventSchedulerInterface.__init__ - WARNING - Deprecation version=1.0.0. Caller=test_events:530. EventSchedulerInterface moved to ovos_bus_client. 'from ovos_bus_client.apis.events import EventSchedulerInterface'
+2026-08-01 14:14:26.083 - configured - ovos_utils.events:EventSchedulerInterface.__init__ - WARNING - Deprecation version=1.0.0. Caller=test_events:200. EventSchedulerInterface moved to ovos_bus_client. 'from ovos_bus_client.apis.events import EventSchedulerInterface'
+2026-08-01 14:14:26.138 - configured - ovos_utils.lang:get_language_dir - WARNING - Deprecation version=1.0.0. Caller=test_lang:89. use 'closest_lang' from 'ovos_spec_tools' (or 'ovos_spec_tools.LocaleResources')
+2026-08-01 14:14:26.144 - configured - ovos_utils.lang:get_language_dir - WARNING - Deprecation version=1.0.0. Caller=test_lang:71. use 'closest_lang' from 'ovos_spec_tools' (or 'ovos_spec_tools.LocaleResources')
+2026-08-01 14:14:26.160 - configured - ovos_utils.lang:standardize_lang_tag - WARNING - Deprecation version=1.0.0. Caller=test_lang:59. use 'standardize_lang' from 'ovos_spec_tools' instead
+2026-08-01 14:14:26.164 - configured - ovos_utils.lang:standardize_lang_tag - WARNING - Deprecation version=1.0.0. Caller=test_lang:61. use 'standardize_lang' from 'ovos_spec_tools' instead
+2026-08-01 14:14:26.171 - configured - ovos_utils.lang:standardize_lang_tag - WARNING - Deprecation version=1.0.0. Caller=test_lang:34. use 'standardize_lang' from 'ovos_spec_tools' instead
+2026-08-01 14:14:26.175 - configured - ovos_utils.lang:standardize_lang_tag - WARNING - Deprecation version=1.0.0. Caller=test_lang:35. use 'standardize_lang' from 'ovos_spec_tools' instead
+2026-08-01 14:14:26.181 - configured - ovos_utils.lang:standardize_lang_tag - WARNING - Deprecation version=1.0.0. Caller=test_lang:49. use 'standardize_lang' from 'ovos_spec_tools' instead
+2026-08-01 14:14:26.186 - configured - ovos_utils.lang:standardize_lang_tag - WARNING - Deprecation version=1.0.0. Caller=test_lang:50. use 'standardize_lang' from 'ovos_spec_tools' instead
+2026-08-01 14:14:26.192 - configured - ovos_utils.lang:standardize_lang_tag - WARNING - Deprecation version=1.0.0. Caller=test_lang:42. use 'standardize_lang' from 'ovos_spec_tools' instead
+2026-08-01 14:14:26.241 - configured - ovos_utils.dialog:MustacheDialogRenderer.__init__ - WARNING - Deprecation version=1.0.0. Caller=dialog.test_dialog:27. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:26.260 - configured - ovos_utils.dialog:load_dialogs - WARNING - Deprecation version=1.0.0. Caller=dialog.test_dialog:100. use 'ovos_spec_tools.LocaleResources' to load .dialog resources
+2026-08-01 14:14:26.264 - configured - ovos_utils.dialog:MustacheDialogRenderer.__init__ - WARNING - Deprecation version=1.0.0. Caller=dialog.test_dialog:100. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:26.293 - configured - ovos_utils.dialog:load_dialogs - WARNING - Deprecation version=1.0.0. Caller=dialog.test_dialog:94. use 'ovos_spec_tools.LocaleResources' to load .dialog resources
+2026-08-01 14:14:26.298 - configured - ovos_utils.dialog:MustacheDialogRenderer.__init__ - WARNING - Deprecation version=1.0.0. Caller=dialog.test_dialog:94. use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' ('render' / 'DialogRenderer')
+2026-08-01 14:14:26.560 - configured - ovos_utils.sound:_find_player:66 - ERROR - Can't find player for: test.xyz
+2026-08-01 14:14:26.575 - configured - ovos_utils.sound:play_audio:107 - ERROR - Failed to play: No playback functionality available
+2026-08-01 14:14:26.583 - configured - ovos_utils.sound:play_audio:119 - ERROR - Failed to play: ['broken', 'test.mp3']
+2026-08-01 14:14:26.587 - configured - ovos_utils.sound:play_audio:120 - ERROR - no such file
 Traceback (most recent call last):
-  File "/home/miro/PycharmProjects/OpenVoiceOS Workspace/ovos-utils/ovos_utils/network_utils.py", line 156, in check_captive_portal
-    html_doc = requests.get(host).text
-               ~~~~~~~~~~~~^^^^^^
-  File "/home/miro/.local/share/uv/python/cpython-3.13.12-linux-x86_64-gnu/lib/python3.13/unittest/mock.py", line 1169, in __call__
+  File "/home/miro/tmp/ovos-utils-compat-drop/ovos_utils/sound.py", line 117, in play_audio
+    return subprocess.Popen(play_cmd, env=environment)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miro/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/unittest/mock.py", line 1139, in __call__
     return self._mock_call(*args, **kwargs)
-           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
-  File "/home/miro/.local/share/uv/python/cpython-3.13.12-linux-x86_64-gnu/lib/python3.13/unittest/mock.py", line 1173, in _mock_call
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miro/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
     return self._execute_mock_call(*args, **kwargs)
-           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
-  File "/home/miro/.local/share/uv/python/cpython-3.13.12-linux-x86_64-gnu/lib/python3.13/unittest/mock.py", line 1228, in _execute_mock_call
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miro/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
     raise effect
-Exception: timeout
-2026-03-11 04:12:11.823 - configured - ovos_utils.ocp:from_dict:254 - ERROR - track dictionary does not contain 'uri', it is not a valid MediaEntry
-2026-03-11 04:12:11.824 - configured - ovos_utils.ocp:from_dict:256 - WARNING - DEPRECATED: use dict2entry() for Playlists and PluginStreams, MediaEntry.from_dict is only for regular media, will start throwing ValueError in 0.1.0
-2026-03-11 04:12:11.837 - configured - ovos_utils.ocp:available_extractors:165 - ERROR - please install/update ovos_plugin_manager
-2026-03-11 04:12:11.841 - configured - ovos_utils.ocp:goto_track:586 - DEBUG - New playlist position: 1
-2026-03-11 04:12:11.842 - configured - ovos_utils.ocp:goto_track:586 - DEBUG - New playlist position: 0
-2026-03-11 04:12:11.842 - configured - ovos_utils.ocp:goto_track:586 - DEBUG - New playlist position: 0
-2026-03-11 04:12:11.843 - configured - ovos_utils.ocp:goto_track:588 - ERROR - requested track not in the playlist: MediaEntry(uri='http://missing.com/x.mp3', title='', artist='', match_confidence=0, skill_id='ovos.common_play', playback=<PlaybackType.UNDEFINED: 100>, status=<TrackState.DISAMBIGUATION: 1>, media_type=<MediaType.GENERIC: 0>, length=0, image='', skill_icon='', javascript='')
-2026-03-11 04:12:11.852 - configured - ovos_utils.ocp:goto_track:586 - DEBUG - New playlist position: 2
-2026-03-11 04:12:11.853 - configured - ovos_utils.ocp:goto_track:586 - DEBUG - New playlist position: 1
-2026-03-11 04:12:11.854 - configured - ovos_utils.ocp:goto_track:588 - ERROR - requested track not in the playlist: MediaEntry(uri='nonexistent', title='nonexistent', artist='', match_confidence=0, skill_id='ovos.common_play', playback=<PlaybackType.UNDEFINED: 100>, status=<TrackState.DISAMBIGUATION: 1>, media_type=<MediaType.GENERIC: 0>, length=0, image='', skill_icon='', javascript='')
-2026-03-11 04:12:11.857 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (3! Going to start of playlist
-2026-03-11 04:12:11.858 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (-1! Going to start of playlist
-2026-03-11 04:12:11.859 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (-1! Going to start of playlist
-2026-03-11 04:12:11.860 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (100! Going to start of playlist
-2026-03-11 04:12:11.877 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (0! Going to start of playlist
-2026-03-11 04:12:11.878 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (-1! Going to start of playlist
-2026-03-11 04:12:11.878 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 04:12:11.879 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (1! Going to start of playlist
-2026-03-11 04:12:11.880 - configured - ovos_utils.ocp:_validate_position:607 - ERROR - Playlist pointer is in an invalid position (10! Going to start of playlist
-2026-03-11 04:12:11.882 - configured - ovos_utils.parse:_validate_matching_strategy:27 - ERROR - rapidfuzz is not installed, falling back to SequenceMatcher for all match strategies
-2026-03-11 04:12:11.882 - configured - ovos_utils.parse:_validate_matching_strategy:29 - WARNING - pip install rapidfuzz
-2026-03-11 04:12:11.904 - configured - ovos_utils.security:decrypt:93 - ERROR - run pip install pycryptodomex
-2026-03-11 04:12:11.906 - configured - ovos_utils.security:decrypt:103 - ERROR - decryption failed, invalid key?
-2026-03-11 04:12:11.910 - configured - ovos_utils.security:encrypt:80 - ERROR - run pip install pycryptodomex
-2026-03-11 04:12:11.912 - configured - ovos_utils.security:create_self_signed_cert:34 - ERROR - run pip install pyopenssl
-2026-03-11 04:12:11.917 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.918 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'my_service'
-2026-03-11 04:12:11.918 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.919 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.920 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.921 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.923 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.924 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.924 - configured - ovos_utils.skill_installer:handle_install_python:391 - ERROR - pip disabled in mycroft.conf
-2026-03-11 04:12:11.925 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.926 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.927 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.928 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.929 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.931 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.932 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.932 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.933 - configured - ovos_utils.skill_installer:handle_uninstall_python:427 - ERROR - pip disabled in mycroft.conf
-2026-03-11 04:12:11.934 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.934 - configured - ovos_utils.skill_installer:pip_install:230 - ERROR - no package list provided to install
-2026-03-11 04:12:11.935 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.937 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.938 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [ovos_test] (pip) Installing my-pkg
-2026-03-11 04:12:11.938 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /usr/bin/uv pip install -c http://example.com/c.txt my-pkg
-2026-03-11 04:12:11.939 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.940 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [ovos_test] (pip) Installing my-pkg
-2026-03-11 04:12:11.940 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/PycharmProjects/OpenVoiceOS Workspace/ovos-utils/.venv/bin/python3 -m pip install -c http://example.com/c.txt my-pkg
-2026-03-11 04:12:11.941 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.942 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [ovos_test] (pip) Installing bad-pkg
-2026-03-11 04:12:11.943 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c https://raw.githubusercontent.com/OpenVoiceOS/ovos-releases/refs/heads/main/constraints-stable.txt bad-pkg
-2026-03-11 04:12:11.944 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.945 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [ovos_test] (pip) Installing pkg
-2026-03-11 04:12:11.945 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt pkg
-2026-03-11 04:12:11.947 - configured - ovos_utils.skill_installer:validate_constraints:205 - ERROR - Couldn't find the constraints file
-2026-03-11 04:12:11.948 - configured - ovos_utils.skill_installer:validate_constraints:191 - DEBUG - Constraints url: http://example.com/c.txt
-2026-03-11 04:12:11.949 - configured - ovos_utils.skill_installer:validate_constraints:191 - DEBUG - Constraints url: http://example.com/missing.txt
-2026-03-11 04:12:11.949 - configured - ovos_utils.skill_installer:validate_constraints:195 - ERROR - Remote constraints file not accessible: 404
-2026-03-11 04:12:11.950 - configured - ovos_utils.skill_installer:validate_constraints:191 - DEBUG - Constraints url: http://example.com/c.txt
-2026-03-11 04:12:11.951 - configured - ovos_utils.skill_installer:validate_constraints:201 - ERROR - Error accessing remote constraints: timeout
-2026-03-11 04:12:11.952 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.953 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.954 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.954 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
-2026-03-11 04:12:11.955 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt pkg
-2026-03-11 04:12:11.956 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.956 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
-2026-03-11 04:12:11.957 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt --break-system-packages pkg
-2026-03-11 04:12:11.958 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.959 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
-2026-03-11 04:12:11.959 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt --pre pkg
-2026-03-11 04:12:11.960 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.961 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
-2026-03-11 04:12:11.961 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt pkg
-2026-03-11 04:12:11.962 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:11.963 - configured - ovos_utils.skill_installer:pip_install:256 - INFO - [svc] (pip) Installing pkg
-2026-03-11 04:12:11.963 - configured - ovos_utils.skill_installer:pip_install:258 - DEBUG - /home/miro/.local/bin/uv pip install -c http://x.com/c.txt pkg
-2026-03-11 04:12:11.964 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.965 - configured - ovos_utils.skill_installer:pip_uninstall:295 - ERROR - no package list provided to uninstall
-2026-03-11 04:12:11.966 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:11.967 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'ovos_test'
-2026-03-11 04:12:12.298 - configured - ovos_utils.skill_installer:pip_uninstall:330 - ERROR - tried to uninstall a protected package: ['ovos-core']
-2026-03-11 04:12:12.299 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:12.461 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 04:12:12.462 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /usr/bin/uv pip uninstall -y custom-pkg
-2026-03-11 04:12:12.464 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:12.925 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 04:12:12.926 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/PycharmProjects/OpenVoiceOS Workspace/ovos-utils/.venv/bin/python3 -m pip uninstall -y custom-pkg
-2026-03-11 04:12:12.929 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:13.262 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 04:12:13.263 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y custom-pkg
-2026-03-11 04:12:13.267 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:13.269 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 04:12:13.294 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y custom-pkg
-2026-03-11 04:12:13.296 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:13.296 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 04:12:13.297 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y custom-pkg
-2026-03-11 04:12:13.298 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:13.569 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 04:12:13.570 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y --break-system-packages custom-pkg
-2026-03-11 04:12:13.571 - configured - ovos_utils.skill_installer:__init__:146 - INFO - ServiceInstaller registered for service 'svc'
-2026-03-11 04:12:13.859 - configured - ovos_utils.skill_installer:pip_uninstall:344 - INFO - [svc] (pip) Uninstalling custom-pkg
-2026-03-11 04:12:13.859 - configured - ovos_utils.skill_installer:pip_uninstall:348 - DEBUG - /home/miro/.local/bin/uv pip uninstall -y custom-pkg
-2026-03-11 04:12:13.913 - configured - ovos_utils.system:system_reboot:83 - DEBUG - sudo systemctl reboot -i
-2026-03-11 04:12:13.915 - configured - ovos_utils.system:system_shutdown:66 - DEBUG - sudo systemctl poweroff -i
-2026-03-11 04:12:13.916 - configured - ovos_utils.system:system_shutdown:66 - DEBUG - systemctl poweroff -i
+OSError: no such file
+2026-08-01 14:14:26.598 - configured - ovos_utils.security:create_self_signed_cert - WARNING - Deprecation version=1.0.0. Caller=test_security_extra:68. create_self_signed_cert is unmaintained and generates a 1024-bit RSA / SHA-1 certificate that modern OpenSSL (SECLEVEL=2, the Debian/Ubuntu/Fedora default) refuses to load ('EE_KEY_TOO_SMALL'). Callers should bundle their own self-signed cert generation (RSA >= 2048, SHA-256, with a Subject Alternative Name) instead of relying on this helper.
+2026-08-01 14:14:26.604 - configured - ovos_utils.security:create_self_signed_cert - WARNING - Deprecation version=1.0.0. Caller=test_security_extra:49. create_self_signed_cert is unmaintained and generates a 1024-bit RSA / SHA-1 certificate that modern OpenSSL (SECLEVEL=2, the Debian/Ubuntu/Fedora default) refuses to load ('EE_KEY_TOO_SMALL'). Callers should bundle their own self-signed cert generation (RSA >= 2048, SHA-256, with a Subject Alternative Name) instead of relying on this helper.
