@@ -2,9 +2,13 @@
 
 Old ovos-workshop built the per-intent dispatch topic from the resource
 filename, so ``<skill_id>:food.order.intent`` reached the wire. Current
-workshop registers the canonical ``<skill_id>:food.order``. When emit_legacy
-is on, a bus that has a handler bound to the suffixed spelling also gets the
-dispatch mirrored onto that spelling.
+workshop registers the canonical ``<skill_id>:food.order``. The bridge is two
+stateless rules. The real client splits them over a wire send and a wire
+receive; a fake bus is one process, so both land in ``emit``:
+
+* a CANONICAL dispatch also fires its suffixed twin, marked as a twin;
+* a SUFFIXED dispatch that is not already such a twin also fires its canonical
+  spelling.
 
 Both fake buses must behave like the real client, otherwise every harness
 built on them hides the compat path.
@@ -14,8 +18,7 @@ import unittest
 
 from ovos_spec_tools import Message
 
-from ovos_utils.fakebus import (INTENT_REEMIT_CONTEXT_KEY, AsyncFakeBus,
-                                FakeBus)
+from ovos_utils.fakebus import (INTENT_COMPAT_TWIN_KEY, AsyncFakeBus, FakeBus)
 
 CANONICAL = "skill-food.jarbas:food.order"
 LEGACY = "skill-food.jarbas:food.order.intent"
@@ -25,8 +28,10 @@ def _run(coro):
     return asyncio.run(coro)
 
 
-class TestAliasDrivenReemit(unittest.TestCase):
-    def test_suffixed_subscription_receives_canonical_dispatch(self):
+class TestCanonicalDispatch(unittest.TestCase):
+    """Rule 1: a canonical dispatch also fires the marked suffixed twin."""
+
+    def test_suffixed_handler_receives_the_twin(self):
         bus = FakeBus()
         got = []
         bus.on(LEGACY, got.append)
@@ -34,62 +39,23 @@ class TestAliasDrivenReemit(unittest.TestCase):
         self.assertEqual([m.msg_type for m in got], [LEGACY])
         self.assertEqual(got[0].data, {"utterance": "one pizza"})
 
-    def test_mirror_keeps_data_and_context(self):
+    def test_twin_is_marked_and_keeps_context(self):
         bus = FakeBus()
         got = []
         bus.on(LEGACY, got.append)
         bus.emit(Message(CANONICAL, {"a": 1}, {"source": ["me"]}))
-        self.assertEqual(got[0].data, {"a": 1})
         self.assertEqual(got[0].context["source"], ["me"])
+        self.assertTrue(got[0].context[INTENT_COMPAT_TWIN_KEY])
 
-    def test_mirror_is_marked_in_context(self):
-        bus = FakeBus()
-        got = []
-        bus.on(LEGACY, got.append)
-        bus.emit(Message(CANONICAL))
-        self.assertTrue(got[0].context[INTENT_REEMIT_CONTEXT_KEY])
-
-    def test_no_mirror_without_a_suffixed_subscription(self):
+    def test_canonical_handler_fires_exactly_once(self):
         bus = FakeBus()
         got = []
         bus.on(CANONICAL, got.append)
-        bus.emit(Message(CANONICAL))
-        self.assertEqual([m.msg_type for m in got], [CANONICAL])
-
-    def test_once_subscription_also_registers_the_alias(self):
-        bus = FakeBus()
-        got = []
-        bus.once(LEGACY, got.append)
-        bus.emit(Message(CANONICAL))
-        self.assertEqual([m.msg_type for m in got], [LEGACY])
-
-    def test_non_intent_topics_are_never_mirrored(self):
-        bus = FakeBus()
-        got = []
-        bus.on("ovos.utterance.handled.intent", got.append)
-        bus.emit(Message("ovos.utterance.handled"))
-        self.assertEqual(got, [])
-
-
-class TestExactlyOnce(unittest.TestCase):
-    def test_one_dispatch_yields_one_mirror(self):
-        bus = FakeBus()
-        got = []
-        bus.on(LEGACY, got.append)
+        bus.on(LEGACY, lambda m: None)
         bus.emit(Message(CANONICAL))
         self.assertEqual(len(got), 1)
 
-    def test_two_suffixed_handlers_each_run_once(self):
-        bus = FakeBus()
-        a, b = [], []
-        bus.on(LEGACY, a.append)
-        bus.on(LEGACY, b.append)
-        bus.emit(Message(CANONICAL))
-        self.assertEqual((len(a), len(b)), (1, 1))
-
-    def test_handler_on_both_spellings_gets_both_topics_once_each(self):
-        # the intent bridge does not dedupe across spellings - a handler bound
-        # to both asked for both. Workshop collapses aliases at registration.
+    def test_a_handler_on_both_spellings_hears_both_frames_once_each(self):
         bus = FakeBus()
         got = []
         bus.on(CANONICAL, got.append)
@@ -97,137 +63,89 @@ class TestExactlyOnce(unittest.TestCase):
         bus.emit(Message(CANONICAL))
         self.assertEqual([m.msg_type for m in got], [CANONICAL, LEGACY])
 
-
-class TestLoopPrevention(unittest.TestCase):
-    def test_a_legacy_dispatch_is_not_mirrored_again(self):
-        bus = FakeBus()
-        got = []
-        bus.on(LEGACY, got.append)
-        bus.on(CANONICAL, got.append)
-        bus.emit(Message(LEGACY))
-        self.assertEqual([m.msg_type for m in got], [LEGACY])
-
-    def test_a_marked_message_is_not_mirrored(self):
-        bus = FakeBus()
-        got = []
-        bus.on(LEGACY, got.append)
-        bus.emit(Message(CANONICAL, {}, {INTENT_REEMIT_CONTEXT_KEY: True}))
-        self.assertEqual(got, [])
-
-    def test_reemitting_a_mirror_terminates(self):
-        bus = FakeBus(intent_reemit_blanket=True)
-        got = []
-        bus.on(LEGACY, got.append)
-        bus.emit(Message(CANONICAL))
-        bus.emit(got[0])  # feed the twin back in
-        self.assertEqual(len(got), 2)
-
-
-class TestBlanketMode(unittest.TestCase):
-    def test_blanket_mirrors_without_any_registration(self):
-        bus = FakeBus(intent_reemit_blanket=True)
-        got = []
-        bus.ee.on(LEGACY, got.append)  # subscribe behind the bus's back
-        bus.emit(Message(CANONICAL))
-        self.assertEqual([m.msg_type for m in got], [LEGACY])
-
-    def test_blanket_off_by_default(self):
-        bus = FakeBus()
-        got = []
-        bus.ee.on(LEGACY, got.append)
-        bus.emit(Message(CANONICAL))
-        self.assertEqual(got, [])
-
-    def test_blanket_still_skips_non_intent_topics(self):
-        bus = FakeBus(intent_reemit_blanket=True)
-        got = []
-        bus.ee.on("ovos.utterance.handled.intent", got.append)
-        bus.emit(Message("ovos.utterance.handled"))
-        self.assertEqual(got, [])
-
-
-class TestDisabled(unittest.TestCase):
-    def test_no_mirror_when_emit_legacy_is_off(self):
+    def test_no_twin_when_compat_is_disabled(self):
         bus = FakeBus(emit_legacy=False)
         got = []
         bus.on(LEGACY, got.append)
         bus.emit(Message(CANONICAL))
         self.assertEqual(got, [])
 
-    def test_no_mirror_when_emit_legacy_is_off_even_in_blanket(self):
-        bus = FakeBus(emit_legacy=False, intent_reemit_blanket=True)
-        got = []
-        bus.ee.on(LEGACY, got.append)
-        bus.emit(Message(CANONICAL))
-        self.assertEqual(got, [])
 
-    def test_no_mirror_without_spec_tools_intent_support(self):
+class TestSuffixedDispatch(unittest.TestCase):
+    """Rule 2: an unmarked suffixed dispatch also fires the canonical form."""
+
+    def test_canonical_handler_hears_an_old_style_dispatch(self):
         bus = FakeBus()
-        bus._intent_aliases = None  # older spec-tools: helpers not importable
         got = []
-        bus.ee.on(LEGACY, got.append)
-        bus.emit(Message(CANONICAL))
-        self.assertEqual(got, [])
+        bus.on(CANONICAL, got.append)
+        bus.emit(Message(LEGACY, {"utterance": "one pizza"}))
+        self.assertEqual([m.msg_type for m in got], [CANONICAL])
+        self.assertEqual(got[0].data, {"utterance": "one pizza"})
 
-
-class TestAliasLifecycle(unittest.TestCase):
-    def test_removing_the_last_suffixed_handler_stops_the_mirror(self):
+    def test_suffixed_handler_still_gets_the_original(self):
         bus = FakeBus()
         got = []
         bus.on(LEGACY, got.append)
-        bus.remove(LEGACY, got.append)
-        bus.emit(Message(CANONICAL))
+        bus.emit(Message(LEGACY))
+        self.assertEqual(len(got), 1)
+
+    def test_a_marked_twin_is_not_modernized_again(self):
+        bus = FakeBus()
+        got = []
+        bus.on(CANONICAL, got.append)
+        bus.emit(Message(LEGACY, {}, {INTENT_COMPAT_TWIN_KEY: True}))
         self.assertEqual(got, [])
 
-    def test_remove_all_listeners_stops_the_mirror(self):
+    def test_the_bridge_does_not_cascade(self):
         bus = FakeBus()
         got = []
         bus.on(LEGACY, got.append)
-        bus.remove_all_listeners(LEGACY)
-        bus.emit(Message(CANONICAL))
+        bus.emit(Message(LEGACY))
+        self.assertEqual(len(got), 1)  # not re-twinned off its own canonical
+
+    def test_no_modernization_when_compat_is_disabled(self):
+        bus = FakeBus(emit_legacy=False)
+        got = []
+        bus.on(CANONICAL, got.append)
+        bus.emit(Message(LEGACY))
         self.assertEqual(got, [])
 
-    def test_one_removal_of_two_handlers_keeps_the_mirror(self):
+
+class TestNonIntentTopics(unittest.TestCase):
+    def test_dotted_topics_are_untouched(self):
         bus = FakeBus()
-        a, b = [], []
-        bus.on(LEGACY, a.append)
-        bus.on(LEGACY, b.append)
-        bus.remove(LEGACY, a.append)
-        bus.emit(Message(CANONICAL))
-        self.assertEqual(len(b), 1)
+        got = []
+        bus.on("ovos.utterance.handled", got.append)
+        bus.emit(Message("ovos.utterance.handled"))
+        self.assertEqual(len(got), 1)
+
+    def test_nothing_extra_is_dispatched(self):
+        bus = FakeBus()
+        got = []
+        bus.on("message", got.append)
+        bus.emit(Message("ovos.utterance.handled"))
+        self.assertEqual(len(got), 1)
 
 
-class TestAsyncFakeBusParity(unittest.TestCase):
-    def test_suffixed_subscription_receives_canonical_dispatch(self):
+class TestAsyncFakeBus(unittest.TestCase):
+    """The async double runs the same two rules."""
+
+    def test_canonical_dispatch_fires_the_twin(self):
         bus = AsyncFakeBus()
         got = []
         bus.on(LEGACY, got.append)
-        _run(bus.emit(Message(CANONICAL, {"utterance": "one pizza"})))
+        _run(bus.emit(Message(CANONICAL)))
         self.assertEqual([m.msg_type for m in got], [LEGACY])
-        self.assertEqual(got[0].data, {"utterance": "one pizza"})
+        self.assertTrue(got[0].context[INTENT_COMPAT_TWIN_KEY])
 
-    def test_no_mirror_without_a_suffixed_subscription(self):
+    def test_suffixed_dispatch_fires_the_canonical_form(self):
         bus = AsyncFakeBus()
         got = []
         bus.on(CANONICAL, got.append)
-        _run(bus.emit(Message(CANONICAL)))
+        _run(bus.emit(Message(LEGACY)))
         self.assertEqual([m.msg_type for m in got], [CANONICAL])
 
-    def test_legacy_dispatch_is_not_mirrored_again(self):
-        bus = AsyncFakeBus()
-        got = []
-        bus.on(LEGACY, got.append)
-        _run(bus.emit(Message(LEGACY)))
-        self.assertEqual(len(got), 1)
-
-    def test_blanket_mode(self):
-        bus = AsyncFakeBus(intent_reemit_blanket=True)
-        got = []
-        bus.ee.on(LEGACY, got.append)
-        _run(bus.emit(Message(CANONICAL)))
-        self.assertEqual([m.msg_type for m in got], [LEGACY])
-
-    def test_no_mirror_when_emit_legacy_is_off(self):
+    def test_no_bridge_when_compat_is_disabled(self):
         bus = AsyncFakeBus(emit_legacy=False)
         got = []
         bus.on(LEGACY, got.append)
