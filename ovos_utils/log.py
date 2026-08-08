@@ -131,8 +131,25 @@ class LOG:
     @classmethod
     def set_level(cls, level):
         cls.level = level
-        for l in cls._loggers:
-            cls._loggers[l].setLevel(level)
+        for logger_name in cls._loggers:
+            cls._loggers[logger_name].setLevel(level)
+
+    @classmethod
+    def is_enabled_for(cls, level: int) -> bool:
+        """Return whether a record at ``level`` would be emitted.
+
+        ``LOG.level`` accepts the same integer and named levels as the stdlib
+        logger. Unknown names deliberately fall through as enabled so the
+        existing logger configuration path still raises its normal error.
+        """
+        configured = cls.level
+        if isinstance(configured, int):
+            threshold = configured
+        else:
+            threshold = logging.getLevelName(str(configured).upper())
+            if not isinstance(threshold, int):
+                return True
+        return level >= threshold
 
     @classmethod
     def _get_real_logger(cls):
@@ -174,6 +191,11 @@ class LOG:
 
     @classmethod
     def debug(cls, *args, **kwargs):
+        # Resolving the call-site logger uses inspect.stack(), which is much
+        # more expensive than the disabled DEBUG record itself. Match stdlib
+        # logging's cheap level gate before doing that work.
+        if not cls.is_enabled_for(logging.DEBUG):
+            return
         cls._get_real_logger().debug(*args, **kwargs)
 
     @classmethod
@@ -358,7 +380,6 @@ def get_log_path(service: str, directories: Optional[List[str]] = None) \
 
     from ovos_utils.xdg_utils import xdg_state_home
     try:
-        from ovos_config import Configuration
         from ovos_config.meta import get_xdg_base
     except ImportError:
         xdg_base = os.environ.get("OVOS_CONFIG_BASE_FOLDER", "mycroft")

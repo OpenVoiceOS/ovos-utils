@@ -2,6 +2,7 @@ import os
 import shutil
 import unittest
 import importlib
+import logging
 
 from os.path import join, dirname, isdir, isfile
 from unittest.mock import patch, Mock
@@ -106,6 +107,35 @@ class TestLog(unittest.TestCase):
         self.assertEqual(len(lines), 1)
         self.assertTrue(lines[0].endswith("99\n"))
 
+    def test_disabled_debug_skips_call_site_resolution(self):
+        from ovos_utils.log import LOG
+
+        with patch.object(LOG, "level", "INFO"), \
+                patch.object(LOG, "_get_real_logger") as get_logger:
+            LOG.debug("not emitted")
+        get_logger.assert_not_called()
+
+    def test_enabled_debug_keeps_existing_logger_path(self):
+        from ovos_utils.log import LOG
+
+        logger = Mock()
+        with patch.object(LOG, "level", logging.DEBUG), \
+                patch.object(LOG, "_get_real_logger", return_value=logger):
+            LOG.debug("emitted: %s", "value")
+        logger.debug.assert_called_once_with("emitted: %s", "value")
+
+    def test_is_enabled_for_accepts_named_and_numeric_levels(self):
+        from ovos_utils.log import LOG
+
+        with patch.object(LOG, "level", "DEBUG"):
+            self.assertTrue(LOG.is_enabled_for(logging.DEBUG))
+        with patch.object(LOG, "level", "INFO"):
+            self.assertFalse(LOG.is_enabled_for(logging.DEBUG))
+            self.assertTrue(LOG.is_enabled_for(logging.WARNING))
+        with patch.object(LOG, "level", logging.ERROR):
+            self.assertFalse(LOG.is_enabled_for(logging.WARNING))
+            self.assertTrue(LOG.is_enabled_for(logging.ERROR))
+
     @patch("ovos_utils.log.get_logs_config")
     @patch("ovos_config.Configuration.set_config_watcher")
     def test_init_service_logger(self, set_config_watcher, log_config):
@@ -166,7 +196,7 @@ class TestLog(unittest.TestCase):
         self.assertIn('test_log', log_msg, log_msg)
         self.assertIn('imported deprecation', log_msg, log_msg)
 
-        test_class = Deprecated()
+        Deprecated()
         log_msg = log_warning.call_args[0][0]
         self.assertIn('version=0.2.0', log_msg, log_msg)
         self.assertIn('Class Deprecated', log_msg, log_msg)
