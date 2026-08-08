@@ -136,6 +136,26 @@ class TestLog(unittest.TestCase):
             self.assertFalse(LOG.is_enabled_for(logging.WARNING))
             self.assertTrue(LOG.is_enabled_for(logging.ERROR))
 
+    def test_is_enabled_for_honors_global_disable(self):
+        from ovos_utils.log import LOG
+
+        original_disable = logging.root.manager.disable
+        try:
+            logging.disable(logging.CRITICAL)
+            with patch.object(LOG, "level", "DEBUG"):
+                self.assertFalse(LOG.is_enabled_for(logging.DEBUG))
+        finally:
+            logging.disable(original_disable)
+
+    def test_is_enabled_for_uses_effective_root_level_for_notset(self):
+        from ovos_utils.log import LOG
+
+        with patch.object(LOG, "level", logging.NOTSET), \
+                patch.object(logging.root, "getEffectiveLevel",
+                             return_value=logging.INFO):
+            self.assertFalse(LOG.is_enabled_for(logging.DEBUG))
+            self.assertTrue(LOG.is_enabled_for(logging.WARNING))
+
     @patch("ovos_utils.log.get_logs_config")
     @patch("ovos_config.Configuration.set_config_watcher")
     def test_init_service_logger(self, set_config_watcher, log_config):

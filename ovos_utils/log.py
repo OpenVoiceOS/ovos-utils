@@ -142,6 +142,8 @@ class LOG:
         logger. Unknown names deliberately fall through as enabled so the
         existing logger configuration path still raises its normal error.
         """
+        if logging.root.manager.disable >= level:
+            return False
         configured = cls.level
         if isinstance(configured, int):
             threshold = configured
@@ -149,6 +151,8 @@ class LOG:
             threshold = logging.getLevelName(str(configured).upper())
             if not isinstance(threshold, int):
                 return True
+        if threshold == logging.NOTSET:
+            threshold = logging.root.getEffectiveLevel()
         return level >= threshold
 
     @classmethod
