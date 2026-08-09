@@ -3,10 +3,95 @@
 
 import time
 import unittest
-from ovos_utils.metrics import Stopwatch
+from unittest.mock import patch
+
+from ovos_utils.metrics import LatencyHistogram, Stopwatch
 
 
 class MetricsTests(unittest.TestCase):
+    def test_latency_histogram_snapshot(self):
+        histogram = LatencyHistogram("handler_ms", buckets_ms=(1, 5, 10))
+        histogram.observe_ms(0.5)
+        histogram.observe_ms(5)
+        histogram.observe_ms(12)
+
+        self.assertEqual(
+            histogram.snapshot(),
+            {
+                "name": "handler_ms",
+                "count": 3,
+                "sum_ms": 17.5,
+                "buckets": {
+                    "le_1": 1,
+                    "le_5": 2,
+                    "le_10": 2,
+                    "inf": 3,
+                },
+            },
+        )
+
+    def test_latency_histogram_rejects_malformed_values(self):
+        with self.assertRaises(ValueError):
+            LatencyHistogram("duplicate_ms", buckets_ms=(1, 1))
+        with self.assertRaises(ValueError):
+            LatencyHistogram("negative_ms", buckets_ms=(-1, 1))
+        with self.assertRaises(ValueError):
+            LatencyHistogram("infinite_ms", buckets_ms=(1, float("inf")))
+
+        histogram = LatencyHistogram("handler_ms")
+        with self.assertRaises(TypeError):
+            histogram.observe_ms(True)
+        with self.assertRaises(ValueError):
+            histogram.observe_ms(float("nan"))
+        histogram.observe_ms(-1)
+        self.assertEqual(histogram.snapshot()["sum_ms"], 0)
+
+    @patch("ovos_utils.metrics.time.monotonic")
+    def test_latency_histogram_pauses_and_finishes_once(self, monotonic):
+        monotonic.side_effect = (0.0, 0.1, 1.0, 1.2)
+        histogram = LatencyHistogram("selection_ms", buckets_ms=(250, 500))
+
+        with histogram.measure() as measurement:
+            measurement.pause()
+            measurement.resume()
+        measurement.finish()
+
+        snapshot = histogram.snapshot()
+        self.assertEqual(snapshot["count"], 1)
+        self.assertAlmostEqual(snapshot["sum_ms"], 300)
+        self.assertEqual(
+            snapshot["buckets"],
+            {
+                "le_250": 0,
+                "le_500": 1,
+                "inf": 1,
+            },
+        )
+
+    @patch("ovos_utils.metrics.time.monotonic", side_effect=(2.0, 2.025))
+    def test_latency_histogram_records_exceptional_exit(self, _monotonic):
+        histogram = LatencyHistogram("handler_ms", buckets_ms=(25, 50))
+
+        with self.assertRaisesRegex(RuntimeError, "handler failed"):
+            with histogram.measure():
+                raise RuntimeError("handler failed")
+
+        self.assertEqual(histogram.snapshot()["count"], 1)
+        self.assertAlmostEqual(histogram.snapshot()["sum_ms"], 25)
+
+    @patch("ovos_utils.metrics.time.monotonic", side_effect=(4.0, 4.01))
+    def test_latency_histogram_timed_preserves_metadata(self, _monotonic):
+        histogram = LatencyHistogram("decorated_ms", buckets_ms=(10, 25))
+
+        @histogram.timed
+        def measured(value):
+            """Return the measured value."""
+            return value
+
+        self.assertEqual(measured("ok"), "ok")
+        self.assertEqual(measured.__name__, "measured")
+        self.assertEqual(histogram.snapshot()["count"], 1)
+        self.assertAlmostEqual(histogram.snapshot()["sum_ms"], 10)
 
     def test_stopwatch_simple(self):
         sleep_time = 1.00
@@ -115,7 +200,6 @@ class MetricsTests(unittest.TestCase):
         sw.start()
         time.sleep(0.05)
         sw.stop()
-        old_time = sw.time
         sw.start()
         self.assertIsNone(sw.time)  # reset on start
 
