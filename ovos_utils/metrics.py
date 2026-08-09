@@ -37,26 +37,35 @@ class LatencyMeasurement:
         self._elapsed_ms = 0.0
         self._running = True
         self._finished = False
+        self._lock = Lock()
 
     def pause(self) -> None:
         """Exclude subsequent time until :meth:`resume` is called."""
-        if self._running and not self._finished:
-            self._elapsed_ms += (time.monotonic() - self._started) * 1_000
-            self._running = False
+        with self._lock:
+            if self._running and not self._finished:
+                self._elapsed_ms += (time.monotonic() - self._started) * 1_000
+                self._running = False
 
     def resume(self) -> None:
         """Resume measuring after a pause."""
-        if not self._running and not self._finished:
-            self._started = time.monotonic()
-            self._running = True
+        with self._lock:
+            if not self._running and not self._finished:
+                self._started = time.monotonic()
+                self._running = True
 
     def finish(self) -> None:
         """Record accumulated active time exactly once."""
-        if self._finished:
-            return
-        self.pause()
-        self._finished = True
-        self._histogram.observe_ms(self._elapsed_ms)
+        with self._lock:
+            if self._finished:
+                return
+            if self._running:
+                self._elapsed_ms += (
+                    time.monotonic() - self._started
+                ) * 1_000
+                self._running = False
+            self._finished = True
+            elapsed_ms = self._elapsed_ms
+        self._histogram.observe_ms(elapsed_ms)
 
 
 class LatencyHistogram:
@@ -118,7 +127,7 @@ class LatencyHistogram:
         """Return a detached, JSON-friendly cumulative snapshot."""
         with self._lock:
             buckets = {
-                f"le_{bound:g}": count
+                f"le_{format(bound, '.17g')}": count
                 for bound, count in zip(self._bounds, self._buckets, strict=True)
             }
             buckets["inf"] = self._count

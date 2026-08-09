@@ -3,6 +3,7 @@
 
 import time
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import patch
 
 from ovos_utils.metrics import LatencyHistogram, Stopwatch
@@ -46,6 +47,16 @@ class MetricsTests(unittest.TestCase):
         histogram.observe_ms(-1)
         self.assertEqual(histogram.snapshot()["sum_ms"], 0)
 
+    def test_latency_histogram_preserves_close_bucket_bounds(self):
+        bounds = (1.0000001, 1.0000002)
+        histogram = LatencyHistogram("precise_ms", buckets_ms=bounds)
+        histogram.observe_ms(bounds[0])
+
+        buckets = histogram.snapshot()["buckets"]
+        self.assertEqual(buckets[f"le_{format(bounds[0], '.17g')}"], 1)
+        self.assertEqual(buckets[f"le_{format(bounds[1], '.17g')}"], 1)
+        self.assertEqual(len(buckets), 3)
+
     @patch("ovos_utils.metrics.time.monotonic")
     def test_latency_histogram_pauses_and_finishes_once(self, monotonic):
         monotonic.side_effect = (0.0, 0.1, 1.0, 1.2)
@@ -67,6 +78,18 @@ class MetricsTests(unittest.TestCase):
                 "inf": 1,
             },
         )
+
+    def test_latency_measurement_finish_is_thread_safe(self):
+        histogram = LatencyHistogram("concurrent_ms")
+        context = histogram.measure()
+        measurement = context.__enter__()
+        measurement.pause()
+
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            list(executor.map(lambda _: measurement.finish(), range(32)))
+
+        context.__exit__(None, None, None)
+        self.assertEqual(histogram.snapshot()["count"], 1)
 
     @patch("ovos_utils.metrics.time.monotonic", side_effect=(2.0, 2.025))
     def test_latency_histogram_records_exceptional_exit(self, _monotonic):
