@@ -55,8 +55,9 @@ class TestLog(unittest.TestCase):
         log_file = join(LOG.base_path, f"{LOG.name}.log")
         self.assertFalse(isfile(log_file))
         LOG.info("This won't print")
-        self.assertTrue(isfile(log_file))
+        self.assertFalse(isfile(log_file))
         LOG.warning("This will print")
+        self.assertTrue(isfile(log_file))
         with open(log_file) as f:
             lines = f.readlines()
         self.assertEqual(len(lines), 1)
@@ -107,22 +108,42 @@ class TestLog(unittest.TestCase):
         self.assertEqual(len(lines), 1)
         self.assertTrue(lines[0].endswith("99\n"))
 
-    def test_disabled_debug_skips_call_site_resolution(self):
+    def test_disabled_levels_skip_call_site_resolution(self):
         from ovos_utils.log import LOG
 
-        with patch.object(LOG, "level", "INFO"), \
-                patch.object(LOG, "_get_real_logger") as get_logger:
-            LOG.debug("not emitted")
-        get_logger.assert_not_called()
+        cases = [
+            ("debug", logging.DEBUG, logging.INFO),
+            ("info", logging.INFO, logging.WARNING),
+            ("warning", logging.WARNING, logging.ERROR),
+            ("error", logging.ERROR, logging.CRITICAL),
+            ("exception", logging.ERROR, logging.CRITICAL),
+        ]
+        for method_name, _record_level, configured_level in cases:
+            with self.subTest(method=method_name), \
+                    patch.object(LOG, "level", configured_level), \
+                    patch.object(LOG, "_get_real_logger") as get_logger:
+                getattr(LOG, method_name)("not emitted")
+            get_logger.assert_not_called()
 
-    def test_enabled_debug_keeps_existing_logger_path(self):
+    def test_enabled_levels_keep_existing_logger_path(self):
         from ovos_utils.log import LOG
 
-        logger = Mock()
-        with patch.object(LOG, "level", logging.DEBUG), \
-                patch.object(LOG, "_get_real_logger", return_value=logger):
-            LOG.debug("emitted: %s", "value")
-        logger.debug.assert_called_once_with("emitted: %s", "value")
+        cases = [
+            ("debug", logging.DEBUG),
+            ("info", logging.INFO),
+            ("warning", logging.WARNING),
+            ("error", logging.ERROR),
+            ("exception", logging.ERROR),
+        ]
+        for method_name, configured_level in cases:
+            logger = Mock()
+            with self.subTest(method=method_name), \
+                    patch.object(LOG, "level", configured_level), \
+                    patch.object(LOG, "_get_real_logger",
+                                 return_value=logger):
+                getattr(LOG, method_name)("emitted: %s", "value")
+            getattr(logger, method_name).assert_called_once_with(
+                "emitted: %s", "value")
 
     def test_is_enabled_for_accepts_named_and_numeric_levels(self):
         from ovos_utils.log import LOG

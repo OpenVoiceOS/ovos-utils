@@ -191,27 +191,32 @@ class LOG:
 
     @classmethod
     def info(cls, *args, **kwargs):
+        if not cls.is_enabled_for(logging.INFO):
+            return
         cls._get_real_logger().info(*args, **kwargs)
 
     @classmethod
     def debug(cls, *args, **kwargs):
-        # Resolving the call-site logger uses inspect.stack(), which is much
-        # more expensive than the disabled DEBUG record itself. Match stdlib
-        # logging's cheap level gate before doing that work.
         if not cls.is_enabled_for(logging.DEBUG):
             return
         cls._get_real_logger().debug(*args, **kwargs)
 
     @classmethod
     def warning(cls, *args, **kwargs):
+        if not cls.is_enabled_for(logging.WARNING):
+            return
         cls._get_real_logger().warning(*args, **kwargs)
 
     @classmethod
     def error(cls, *args, **kwargs):
+        if not cls.is_enabled_for(logging.ERROR):
+            return
         cls._get_real_logger().error(*args, **kwargs)
 
     @classmethod
     def exception(cls, *args, **kwargs):
+        if not cls.is_enabled_for(logging.ERROR):
+            return
         cls._get_real_logger().exception(*args, **kwargs)
 
 
