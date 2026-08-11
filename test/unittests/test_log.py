@@ -184,6 +184,39 @@ class TestLog(unittest.TestCase):
         self.assertIn('version=1.0.0', log_msg, log_msg)
         self.assertIn('test deprecation', log_msg, log_msg)
 
+    @patch("ovos_utils.log.LOG.create_logger")
+    def test_log_deprecation_dedupe(self, create_logger):
+        fake_log = Mock()
+        log_warning = fake_log.warning
+        create_logger.return_value = fake_log
+        import ovos_utils.log
+        from ovos_utils.log import log_deprecation, deprecated
+        ovos_utils.log._logged_deprecations.clear()
+
+        # Repeated calls from the same caller only log once
+        for _ in range(10):
+            log_deprecation("repeated deprecation")
+        log_warning.assert_called_once()
+        log_msg = log_warning.call_args[0][0]
+        self.assertIn('repeated deprecation', log_msg, log_msg)
+
+        # A different message still logs
+        log_deprecation("other deprecation")
+        self.assertEqual(log_warning.call_count, 2)
+        log_msg = log_warning.call_args[0][0]
+        self.assertIn('other deprecation', log_msg, log_msg)
+
+        # Deprecated decorator is also deduplicated
+        @deprecated("decorated deprecation", "1.0.0")
+        def _deprecated_function():
+            pass
+
+        for _ in range(10):
+            _deprecated_function()
+        self.assertEqual(log_warning.call_count, 3)
+        log_msg = log_warning.call_args[0][0]
+        self.assertIn('decorated deprecation', log_msg, log_msg)
+
     @patch("ovos_utils.log.get_logs_config")
     @patch("ovos_utils.log.LOG")
     def test_monitor_log_level(self, log, get_config):

@@ -1,54 +1,164 @@
 # Changelog
 
-## [0.8.5a4](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a4) (2026-03-11)
+## [0.13.9a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.9a2) (2026-08-01)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.6a2...0.8.5a4)
-
-**Merged pull requests:**
-
-- chore: Add comprehensive test suites and documentation [\#362](https://github.com/OpenVoiceOS/ovos-utils/pull/362) ([JarbasAl](https://github.com/JarbasAl))
-- fix: make the stopwatch test less strict [\#360](https://github.com/OpenVoiceOS/ovos-utils/pull/360) ([PureTryOut](https://github.com/PureTryOut))
-
-## [0.8.6a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.6a2) (2026-02-02)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.6a1...0.8.6a2)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.9a1...0.13.9a2)
 
 **Merged pull requests:**
 
-- chore\(deps\): update actions/setup-python action to v6 [\#353](https://github.com/OpenVoiceOS/ovos-utils/pull/353) ([renovate[bot]](https://github.com/apps/renovate))
-- chore\(deps\): update actions/checkout action to v6 [\#352](https://github.com/OpenVoiceOS/ovos-utils/pull/352) ([renovate[bot]](https://github.com/apps/renovate))
+- docs: rewrite README in Simplified Technical English [\#413](https://github.com/OpenVoiceOS/ovos-utils/pull/413) ([JarbasAl](https://github.com/JarbasAl))
 
-## [0.8.6a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.6a1) (2026-02-02)
+## [0.13.9a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.9a1) (2026-07-24)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.5a3...0.8.6a1)
-
-**Merged pull requests:**
-
-- fix: prevent handler errors from aborting FakeBus emit [\#358](https://github.com/OpenVoiceOS/ovos-utils/pull/358) ([JarbasAl](https://github.com/JarbasAl))
-
-## [0.8.5a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a3) (2025-12-19)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.5a2...0.8.5a3)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.8a1...0.13.9a1)
 
 **Merged pull requests:**
 
-- chore\(deps\): update dependency python to 3.14 [\#348](https://github.com/OpenVoiceOS/ovos-utils/pull/348) ([renovate[bot]](https://github.com/apps/renovate))
+- fix: watch files that do not exist yet [\#408](https://github.com/OpenVoiceOS/ovos-utils/pull/408) ([JarbasAl](https://github.com/JarbasAl))
 
-## [0.8.5a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a2) (2025-12-18)
+## [0.13.8a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.8a1) (2026-07-24)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.5a1...0.8.5a2)
-
-**Merged pull requests:**
-
-- chore: Configure Renovate [\#347](https://github.com/OpenVoiceOS/ovos-utils/pull/347) ([renovate[bot]](https://github.com/apps/renovate))
-
-## [0.8.5a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a1) (2025-11-07)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.4...0.8.5a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.7a2...0.13.8a1)
 
 **Merged pull requests:**
 
-- fix: use timezone-aware datetime functions and update scheduler event names [\#343](https://github.com/OpenVoiceOS/ovos-utils/pull/343) ([JarbasAl](https://github.com/JarbasAl))
+- fix: FileEventHandler must only fire for the file it watches [\#406](https://github.com/OpenVoiceOS/ovos-utils/pull/406) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.13.7a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.7a2) (2026-07-24)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.7a1...0.13.7a2)
+
+**Merged pull requests:**
+
+- refactor: deprecate create\_self\_signed\_cert [\#404](https://github.com/OpenVoiceOS/ovos-utils/pull/404) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.13.7a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.7a1) (2026-07-23)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.6a1...0.13.7a1)
+
+**Merged pull requests:**
+
+- fix: replace removed distutils.spawn with shutil.which \(Python 3.12+\) [\#402](https://github.com/OpenVoiceOS/ovos-utils/pull/402) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.13.6a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.6a1) (2026-07-23)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.5a1...0.13.6a1)
+
+**Merged pull requests:**
+
+- fix: ovos-logs CLI leaves stray file in cwd [\#400](https://github.com/OpenVoiceOS/ovos-utils/pull/400) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.13.5a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.5a1) (2026-07-16)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.4a1...0.13.5a1)
+
+**Merged pull requests:**
+
+- fix: log each unique deprecation warning only once [\#398](https://github.com/OpenVoiceOS/ovos-utils/pull/398) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.13.4a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.4a1) (2026-07-02)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.3a1...0.13.4a1)
+
+**Merged pull requests:**
+
+- fix: FakeBus folds the message session BEFORE handlers, not after [\#396](https://github.com/OpenVoiceOS/ovos-utils/pull/396) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.13.3a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.3a1) (2026-06-29)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.2a1...0.13.3a1)
+
+**Merged pull requests:**
+
+- fix: FakeBus folds the default session like any other \(drop owner-only\) [\#393](https://github.com/OpenVoiceOS/ovos-utils/pull/393) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.13.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.2a1) (2026-06-29)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.1a1...0.13.2a1)
+
+**Merged pull requests:**
+
+- fix: drop deprecated make\_default from FakeBus default-session sync [\#389](https://github.com/OpenVoiceOS/ovos-utils/pull/389) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.13.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.1a1) (2026-06-29)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.0a1...0.13.1a1)
+
+**Merged pull requests:**
+
+- fix: target a real shape-changing pair in namespace-migration tests [\#390](https://github.com/OpenVoiceOS/ovos-utils/pull/390) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.13.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.0a1) (2026-06-27)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.12.2a1...0.13.0a1)
+
+**Merged pull requests:**
+
+- feat: AsyncFakeBus namespace migration + env/config flag parity [\#387](https://github.com/OpenVoiceOS/ovos-utils/pull/387) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.12.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.12.2a1) (2026-06-27)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.12.1a1...0.12.2a1)
+
+**Merged pull requests:**
+
+- fix: translate mirrored payload onto counterpart topic in FakeBus [\#385](https://github.com/OpenVoiceOS/ovos-utils/pull/385) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.12.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.12.1a1) (2026-06-25)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.12.0a1...0.12.1a1)
+
+**Merged pull requests:**
+
+- fix: raise ovos-spec-tools floor to 0.10.0a1 for NamespaceTranslator [\#383](https://github.com/OpenVoiceOS/ovos-utils/pull/383) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.12.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.12.0a1) (2026-06-25)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.11.2a1...0.12.0a1)
+
+**Merged pull requests:**
+
+- feat: FakeBus mirrors the legacy\<-\>ovos.\* namespace migration [\#381](https://github.com/OpenVoiceOS/ovos-utils/pull/381) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.11.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.11.2a1) (2026-06-20)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.11.1a1...0.11.2a1)
+
+**Merged pull requests:**
+
+- fix: allow json-database 1.x [\#379](https://github.com/OpenVoiceOS/ovos-utils/pull/379) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.11.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.11.1a1) (2026-05-25)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.11.0a1...0.11.1a1)
+
+**Merged pull requests:**
+
+- fix: standardize\_lang\_tag macro=True preserves region \(restore langcodes semantics\) [\#377](https://github.com/OpenVoiceOS/ovos-utils/pull/377) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.11.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.11.0a1) (2026-05-25)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.10.0a1...0.11.0a1)
+
+**Merged pull requests:**
+
+- feat: fakebus Message subclasses ovos\_spec\_tools.Message — no API break [\#375](https://github.com/OpenVoiceOS/ovos-utils/pull/375) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.10.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.10.0a1) (2026-05-22)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.9.0a1...0.10.0a1)
+
+**Merged pull requests:**
+
+- feat: migrate ovos-utils onto ovos-spec-tools [\#373](https://github.com/OpenVoiceOS/ovos-utils/pull/373) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.9.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.9.0a1) (2026-05-18)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.5...0.9.0a1)
+
+**Merged pull requests:**
+
+- feat: AsyncFakeBus alongside FakeBus [\#371](https://github.com/OpenVoiceOS/ovos-utils/pull/371) ([JarbasAl](https://github.com/JarbasAl))
 
 
 

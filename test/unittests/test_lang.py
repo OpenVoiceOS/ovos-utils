@@ -24,38 +24,41 @@ from unittest.mock import patch
 class TestStandardizeLangTag(unittest.TestCase):
     """Tests for standardize_lang_tag."""
 
-    def test_macro_strips_region(self) -> None:
-        """standardize_lang_tag(macro=True) should return bare language code."""
+    def test_macro_preserves_region(self) -> None:
+        """standardize_lang_tag(macro=True) preserves the region.
+
+        ``macro`` is a langcodes concept — it controls *macrolanguage*
+        substitution (``cmn`` -> ``zh``, ``nb`` -> ``no``), not region
+        stripping. ``en-US`` round-trips unchanged."""
         from ovos_utils.lang import standardize_lang_tag
-        # When langcodes not available, falls back to split on '-'
-        with patch.dict("sys.modules", {"langcodes": None}):
-            result = standardize_lang_tag("en-US", macro=True)
-        self.assertEqual(result, "en")
+        self.assertEqual(standardize_lang_tag("en-US", macro=True), "en-US")
+        self.assertEqual(standardize_lang_tag("en-us", macro=True), "en-US")
 
     def test_non_macro_preserves_region(self) -> None:
-        """standardize_lang_tag(macro=False) should keep the region part."""
+        """standardize_lang_tag(macro=False) preserves the region too —
+        the difference between macro=True/False is macrolanguage
+        substitution, not region handling."""
+        from ovos_utils.lang import standardize_lang_tag
+        self.assertEqual(standardize_lang_tag("en-us", macro=False), "en-US")
+
+    def test_macro_substitutes_macrolanguage(self) -> None:
+        """With ``macro=True``, langcodes maps a sublanguage onto its
+        macrolanguage. ``cmn`` (Mandarin) -> ``zh`` (Chinese);
+        ``macro=False`` keeps the original tag."""
+        from ovos_utils.lang import standardize_lang_tag
+        self.assertEqual(standardize_lang_tag("cmn", macro=True), "zh")
+        self.assertEqual(standardize_lang_tag("cmn", macro=False), "cmn")
+
+    def test_fallback_without_langcodes(self) -> None:
+        """With langcodes unavailable, ``standardize_lang_tag`` falls
+        back to spec-tools (also region-preserving). ``macro`` is a
+        no-op in this branch."""
         from ovos_utils.lang import standardize_lang_tag
         with patch.dict("sys.modules", {"langcodes": None}):
-            result = standardize_lang_tag("en-us", macro=False)
-        self.assertEqual(result, "en-US")
-
-    def test_no_region_tag(self) -> None:
-        """standardize_lang_tag with no '-' should return lowercased tag."""
-        from ovos_utils.lang import standardize_lang_tag
-        with patch.dict("sys.modules", {"langcodes": None}):
-            result = standardize_lang_tag("EN", macro=False)
-        self.assertEqual(result, "en")
-
-    def test_with_langcodes_library(self) -> None:
-        """standardize_lang_tag should call langcodes.standardize_tag when available."""
-        mock_langcodes = unittest.mock.MagicMock()
-        mock_langcodes.standardize_tag.return_value = "en"
-
-        with patch.dict("sys.modules", {"langcodes": mock_langcodes}):
-            from ovos_utils.lang import standardize_lang_tag
-            result = standardize_lang_tag("en-US", macro=True)
-        # Result is whatever langcodes returns
-        self.assertIsInstance(result, str)
+            self.assertEqual(
+                standardize_lang_tag("en-us", macro=True), "en-US")
+            self.assertEqual(
+                standardize_lang_tag("EN", macro=False), "en")
 
 
 class TestGetLanguageDir(unittest.TestCase):
