@@ -7,6 +7,7 @@ from threading import Event
 from ovos_utils.log import LOG, log_deprecation
 from ovos_spec_tools import NamespaceTranslator
 from ovos_spec_tools.intent_topics import (canonical_intent_topic,
+                                           intent_topic_counterpart,
                                            is_intent_topic,
                                            legacy_intent_topic)
 from pyee import EventEmitter
@@ -94,6 +95,7 @@ class FakeBus:
         # wins, else env var -> websocket.* config -> default on.
         self._translator = _resolve_bus_flags(kwargs)
         self._handler_guards = {}        # handler -> shared mirror-guard
+        self._intent_pair_guards = {}    # frozenset({topic, counterpart}) -> shared mirror-guard
         self._dedup_registrations = {}   # handler -> [(msg_type, wrapped), ...]
         self.on_open()
         try:
@@ -105,14 +107,11 @@ class FakeBus:
                 self.on_default_session_update)
 
     def on(self, msg_type, handler):
-        # wrap handlers on migrated topics so a handler subscribed to both the
-        # legacy and ovos.* topic fires once (the mirror is dropped)
-        if self._translator.is_migrated(msg_type):
-            guard = self._handler_guards.get(handler)
-            if guard is None:
-                guard = self._translator.new_mirror_guard()
-                self._handler_guards[handler] = guard
-
+        # wrap handlers on migrated/bridged topics so a handler subscribed to
+        # both spellings of a mirrored dispatch fires once (the mirror is
+        # dropped). See _mirror_guard_for for the guard-scope rationale.
+        guard = self._mirror_guard_for(msg_type, handler)
+        if guard is not None:
             def wrapped(message=None):
                 if guard(message):
                     return
@@ -123,10 +122,70 @@ class FakeBus:
             return
         self.ee.on(msg_type, handler)
 
+    def _mirror_guard_for(self, msg_type, handler):
+        """The mirror guard a registration on ``msg_type`` must wrap with.
+
+        Mirrors ``ovos_bus_client.client.client.MessageBusClient._mirror_guard_for``.
+        Two bridges deliver one logical event twice, and each needs a
+        different guard SCOPE:
+
+        - **namespace migration** (legacy <-> ``ovos.*``): the guard is per
+          HANDLER, shared across that handler's registrations, so its legacy
+          ``on()`` and its ``ovos.*`` ``on()`` dedupe against each other.
+        - **intent-topic compat** (canonical <-> ``.intent``-suffixed): the
+          guard is per TOPIC PAIR, shared by every registration on either
+          spelling.
+
+        The intent guard cannot be keyed by handler: ``ovos-workshop``
+        9.3.2a1+ binds the same skill method to both spellings through a
+        FRESH wrapper closure per binding, so the two registrations are two
+        distinct ``handler`` objects and a per-handler guard would hand each
+        its own private state -- the canonical frame runs one closure, the
+        twin runs the other, and the skill handler fires twice for a single
+        dispatch. Keying on the pair collapses them.
+        """
+        counterpart = intent_topic_counterpart(msg_type)
+        if counterpart is not None:
+            pair_key = frozenset({msg_type, counterpart})
+            guard = self._intent_pair_guards.get(pair_key)
+            if guard is None:
+                guard = self._translator.new_mirror_guard()
+                self._intent_pair_guards[pair_key] = guard
+            return guard
+        if self._translator.is_migrated(msg_type):
+            guard = self._handler_guards.get(handler)
+            if guard is None:
+                guard = self._translator.new_mirror_guard()
+                self._handler_guards[handler] = guard
+            return guard
+        return None
+
+    def _release_intent_pair_guard(self, msg_type):
+        """Drop the pair guard once nothing is registered on either spelling.
+
+        Mirrors ``MessageBusClient._release_intent_pair_guard``.
+        """
+        counterpart = intent_topic_counterpart(msg_type)
+        if counterpart is None:
+            return
+        pair_key = frozenset({msg_type, counterpart})
+        for regs in self._dedup_registrations.values():
+            if any(ev in pair_key for ev, _ in regs):
+                return
+        self._intent_pair_guards.pop(pair_key, None)
+
     def once(self, msg_type, handler):
         self.ee.once(msg_type, handler)
 
     def emit(self, message):
+        # RULE 2 dedup marker: read it, then POP it before any local
+        # dispatch. A handler invoked below may call message.forward()/
+        # reply() to emit a descendant frame on an UNRELATED topic; those
+        # deep-copy the whole context, so leaving the marker in place would
+        # brand that unrelated frame a twin and silently suppress its
+        # modernization. Mirrors MessageBusClient.on_message's pop-before-
+        # dispatch ordering.
+        is_intent_twin = message.context.pop(INTENT_COMPAT_TWIN_KEY, False)
         if "session" not in message.context:
             try:  # replicate side effects
                 from ovos_bus_client.session import Session, SessionManager
@@ -165,9 +224,9 @@ class FakeBus:
                 self.ee.emit(topic, message.forward(topic, translated))
             except Exception as e:
                 LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
-        self._bridge_intent_topic(message)
+        self._bridge_intent_topic(message, is_twin=is_intent_twin)
 
-    def _bridge_intent_topic(self, message):
+    def _bridge_intent_topic(self, message, is_twin=False):
         """Legacy <-> canonical intent-topic bridge (RULE 1 + RULE 2).
 
         Mirrors ``ovos_bus_client.client.client.MessageBusClient``'s
@@ -178,17 +237,32 @@ class FakeBus:
         ``FakeBus`` has no separate wire hop, so both rules run inline,
         against local listeners only, off of the one message being emitted.
 
+        ``is_twin`` carries the marker decision made in ``emit()``, which
+        pops :data:`INTENT_COMPAT_TWIN_KEY` off the context BEFORE any
+        dispatch so it cannot leak onto descendant frames a handler derives
+        from this one (``message.forward()``/``reply()`` deep-copy context).
+        The marker is therefore never read from ``message.context`` here --
+        only the popped value is trusted.
+
         RULE 2 first, mirroring the real client's receive order, then
         RULE 1 -- so a listener on the canonical topic sees the canonical
         dispatch before the legacy twin goes out.
-        """
-        is_intent_twin = message.context.pop(INTENT_COMPAT_TWIN_KEY, False)
 
+        Note on the capture firehose (deliberate FakeBus-wide convention,
+        shared with the namespace-migration bridge above): the twin/
+        modernized copy is dispatched straight to ``self.ee`` on its own
+        topic and does NOT re-emit ``"message"``. On the real wire, the
+        twin is a second frame and therefore fires ``on_message`` (and its
+        ``"message"`` firehose) a second time in every receiving process;
+        ``FakeBus`` has no wire hop to put it on, so it keeps the
+        single-process harness's one-emit-one-capture invariant instead of
+        reproducing the wire's two-frame shape.
+        """
         # RULE 2 (receive-side modernize): a suffixed frame WITHOUT the twin
         # marker came from an emitter old enough to only put the legacy
         # spelling on the bus, so nothing canonical was sent alongside it --
         # a canonical-only listener would never hear it without this.
-        if self._translator.modernize and not is_intent_twin \
+        if self._translator.modernize and not is_twin \
                 and is_intent_topic(message.msg_type):
             canonical = canonical_intent_topic(message.msg_type)
             if canonical != message.msg_type:
@@ -203,11 +277,24 @@ class FakeBus:
         # the old suffixed topic still hears it. An already-suffixed
         # dispatch is never twinned (legacy_intent_topic is a no-op on it),
         # so the mirror cannot cascade.
+        #
+        # On the real wire, this twin goes out MARKED (INTENT_COMPAT_TWIN_KEY),
+        # so an out-of-process receiver's own RULE 2 knows to skip
+        # re-modernizing it. FakeBus has no wire hop: RULE 2 above already
+        # made that call inline for THIS dispatch, so the marker's job is
+        # already done, and the twin delivered to local listeners here must
+        # NOT carry it. Carrying it forward would break two things: (a) the
+        # per-topic-pair mirror guard on ``on()`` fingerprints payload+context,
+        # so a marked twin would fingerprint differently from the canonical
+        # dispatch it mirrors and the guard would fail to recognize it as a
+        # duplicate, double-firing a dual-bound handler; and (b) a handler
+        # that forwards this frame's context to emit an unrelated topic would
+        # brand that unrelated frame a twin too (see the marker-leak
+        # regression test), silently suppressing its own modernization.
         if self._translator.emit_legacy and is_intent_topic(message.msg_type):
             topic = legacy_intent_topic(message.msg_type)
             if topic != message.msg_type:
                 twin = _verbatim_copy(message, topic)
-                twin.context[INTENT_COMPAT_TWIN_KEY] = True
                 try:
                     self.ee.emit(topic, twin)
                 except Exception as e:
@@ -312,6 +399,7 @@ class FakeBus:
             if not regs:
                 self._dedup_registrations.pop(handler, None)
                 self._handler_guards.pop(handler, None)
+            self._release_intent_pair_guard(msg_type)
             return
         try:
             self.ee.remove_listener(msg_type, handler)
@@ -457,6 +545,7 @@ class AsyncFakeBus:
         # mirror MessageBusClient's namespace migration (see FakeBus.__init__).
         self._translator = _resolve_bus_flags(kwargs)
         self._handler_guards = {}        # handler -> shared mirror-guard
+        self._intent_pair_guards = {}    # frozenset({topic, counterpart}) -> shared mirror-guard
         self._dedup_registrations = {}   # handler -> [(msg_type, wrapped), ...]
         self.connected_event = asyncio.Event()
         self.connected_event.set()
@@ -474,15 +563,11 @@ class AsyncFakeBus:
     # ------------------------------------------------------------------
 
     def on(self, msg_type, handler):
-        # wrap handlers on migrated topics so a handler subscribed to both the
-        # legacy and ovos.* topic fires once (the mirror is dropped) -- same as
-        # FakeBus.on / MessageBusClient.on.
-        if self._translator.is_migrated(msg_type):
-            guard = self._handler_guards.get(handler)
-            if guard is None:
-                guard = self._translator.new_mirror_guard()
-                self._handler_guards[handler] = guard
-
+        # wrap handlers on migrated/bridged topics so a handler subscribed to
+        # both spellings of a mirrored dispatch fires once (the mirror is
+        # dropped) -- same as FakeBus.on / MessageBusClient.on.
+        guard = self._mirror_guard_for(msg_type, handler)
+        if guard is not None:
             def wrapped(message=None):
                 if guard(message):
                     return
@@ -492,6 +577,10 @@ class AsyncFakeBus:
             self._dedup_registrations.setdefault(handler, []).append((msg_type, wrapped))
             return
         self.ee.on(msg_type, handler)
+
+    # shared with FakeBus -- same guard-scope rules (see FakeBus._mirror_guard_for)
+    _mirror_guard_for = FakeBus._mirror_guard_for
+    _release_intent_pair_guard = FakeBus._release_intent_pair_guard
 
     def once(self, msg_type, handler):
         self.ee.once(msg_type, handler)
@@ -508,6 +597,7 @@ class AsyncFakeBus:
             if not regs:
                 self._dedup_registrations.pop(handler, None)
                 self._handler_guards.pop(handler, None)
+            self._release_intent_pair_guard(msg_type)
             return
         try:
             self.ee.remove_listener(msg_type, handler)
@@ -539,6 +629,10 @@ class AsyncFakeBus:
     # ------------------------------------------------------------------
 
     async def emit(self, message):
+        # RULE 2 dedup marker: pop before any dispatch -- see FakeBus.emit
+        # for the rationale (a handler-derived forward()/reply() must not
+        # inherit this frame's twin marker).
+        is_intent_twin = message.context.pop(INTENT_COMPAT_TWIN_KEY, False)
         if "session" not in message.context:
             try:  # replicate side effects
                 from ovos_bus_client.session import Session, SessionManager
@@ -566,7 +660,7 @@ class AsyncFakeBus:
                 self.ee.emit(topic, message.forward(topic, translated))
             except Exception as e:
                 LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
-        self._bridge_intent_topic(message)
+        self._bridge_intent_topic(message, is_twin=is_intent_twin)
 
     # ------------------------------------------------------------------
     # Sync helpers used internally — same as FakeBus

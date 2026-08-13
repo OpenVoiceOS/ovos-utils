@@ -48,32 +48,80 @@ class TestFakeBusIntentTopicBridge(unittest.TestCase):
         bus.emit(Message(CANONICAL, {"utterance": "hi"}))
         self.assertEqual(got, [LEGACY])
 
-    def test_canonical_emit_twin_marked(self):
+    def test_canonical_emit_twin_not_marked_locally(self):
+        # On the real wire the RULE-1 twin goes out MARKED so an
+        # out-of-process receiver's RULE 2 knows to skip re-modernizing it.
+        # FakeBus has no wire hop: it already made that RULE-2 call inline
+        # for this dispatch, so the twin delivered to LOCAL listeners must
+        # NOT carry the marker -- matching the real client, whose receiving
+        # process pops the marker before any local handler ever sees it
+        # (client.py:351, before local dispatch). Carrying it into the local
+        # twin would also break the per-topic-pair mirror guard's
+        # payload+context fingerprint match (see
+        # test_no_double_fire_dual_listener) and leak onto any descendant
+        # frame a handler derives via forward()/reply().
         bus = FakeBus()
         got = []
         bus.on(LEGACY, lambda m: got.append(m))
         bus.emit(Message(CANONICAL, {"utterance": "hi"}))
         self.assertEqual(len(got), 1)
-        self.assertTrue(got[0].context.get(INTENT_COMPAT_TWIN_KEY))
+        self.assertNotIn(INTENT_COMPAT_TWIN_KEY, got[0].context)
 
     def test_no_double_fire_dual_listener(self):
         # a handler subscribed to BOTH the legacy and canonical topic must
-        # not see the same logical dispatch twice.
+        # not see the same logical dispatch twice -- matching the real
+        # MessageBusClient, whose per-topic-pair mirror guard (shared by
+        # every registration on either spelling) drops the twin as a
+        # re-delivery of the same logical event. ovos-workshop 9.3.2a1+
+        # binds the skill method to both spellings via a FRESH wrapper
+        # closure per registration, so this must hold even though the two
+        # ``bus.on()`` calls below pass the SAME underlying handler object.
         bus = FakeBus()
         calls = []
         handler = lambda m: calls.append(m.msg_type)
         bus.on(LEGACY, handler)
         bus.on(CANONICAL, handler)
         bus.emit(Message(CANONICAL, {"utterance": "hi"}))
-        # canonical fires the handler once directly; the RULE-1 twin is
-        # marked, so a receiver honoring the marker (a real bus-client)
-        # would skip re-modernizing it -- but FakeBus has no separate
-        # receive hop for its own twin, so the legacy registration also
-        # fires once for the twin. Assert no more than the two expected
-        # deliveries (one per distinct registered topic) and no cascade.
-        self.assertEqual(len(calls), 2)
-        self.assertEqual(calls.count(CANONICAL), 1)
-        self.assertEqual(calls.count(LEGACY), 1)
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(calls, [CANONICAL])
+
+    def test_independent_handlers_legacy_only_starves(self):
+        # two INDEPENDENT handlers -- one on the canonical topic, one on the
+        # legacy-only spelling -- share the per-topic-pair guard (it cannot
+        # be scoped to a single handler, see FakeBus._mirror_guard_for), so
+        # a canonical emit arms the guard and the legacy-only handler
+        # starves. This matches real-bus behavior: a process holding both
+        # handlers is unreachable from a single workshop version, so the
+        # starvation is an accepted trade-off, not a defect.
+        bus = FakeBus()
+        canonical_calls = []
+        legacy_calls = []
+        bus.on(CANONICAL, lambda m: canonical_calls.append(m.msg_type))
+        bus.on(LEGACY, lambda m: legacy_calls.append(m.msg_type))
+        bus.emit(Message(CANONICAL, {"utterance": "hi"}))
+        self.assertEqual(canonical_calls, [CANONICAL])
+        self.assertEqual(legacy_calls, [])
+
+    def test_twin_marker_does_not_leak_onto_unrelated_forward(self):
+        # RULE 2 dedup marker regression: a handler on the LEGACY spelling
+        # that forwards its received message's context onto an UNRELATED
+        # suffixed topic must not brand that unrelated frame a twin. The
+        # marker is popped BEFORE dispatch (mirrors
+        # MessageBusClient.on_message's pop-before-dispatch ordering), so it
+        # cannot survive onto a descendant frame created by
+        # Message.forward(), which deep-copies context.
+        bus = FakeBus()
+        seen = []
+        other_legacy = "other.skill:OtherIntent.intent"
+        other_canonical = "other.skill:OtherIntent"
+
+        def legacy_handler(m):
+            bus.emit(m.forward(other_legacy, {}))
+
+        bus.on(LEGACY, legacy_handler)
+        bus.on(other_canonical, lambda m: seen.append("canonical-modernized"))
+        bus.emit(Message(CANONICAL, {"utterance": "hi"}))
+        self.assertEqual(seen, ["canonical-modernized"])
 
     def test_twin_marker_suppresses_rule2_recascade(self):
         # if a caller manually emits a message already carrying the twin
