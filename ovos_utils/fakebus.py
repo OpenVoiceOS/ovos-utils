@@ -1,11 +1,36 @@
 import asyncio
 import warnings
+from copy import deepcopy
 from os import environ
 from threading import Event
 
 from ovos_utils.log import LOG, log_deprecation
 from ovos_spec_tools import NamespaceTranslator
+from ovos_spec_tools.intent_topics import (canonical_intent_topic,
+                                           is_intent_topic,
+                                           legacy_intent_topic)
 from pyee import EventEmitter
+
+
+#: Context flag stamped on a twin intent frame, mirroring
+#: ``ovos_bus_client.client.client.INTENT_COMPAT_TWIN_KEY``. Its presence
+#: means the canonical spelling of this dispatch was already delivered
+#: alongside it, so a receiver that understands the bridge must not
+#: modernize the twin a second time (that would fire the handler twice).
+INTENT_COMPAT_TWIN_KEY = "_intent_compat_twin"
+
+
+def _verbatim_copy(message, topic: str):
+    """Retopic ``message`` onto ``topic``, carrying its context byte-for-byte.
+
+    Mirrors ``ovos_bus_client.client.client._verbatim_copy``. NOT
+    ``Message.forward`` -- ``forward()`` re-stamps the session, which for
+    the default session would replace the carried session with this
+    process's own and desync ``lang`` / ``active_skills`` between the
+    canonical frame and its twin.
+    """
+    return message.__class__(topic, data=deepcopy(message.data),
+                              context=deepcopy(message.context))
 
 
 def dig_for_message():
@@ -140,6 +165,54 @@ class FakeBus:
                 self.ee.emit(topic, message.forward(topic, translated))
             except Exception as e:
                 LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
+        self._bridge_intent_topic(message)
+
+    def _bridge_intent_topic(self, message):
+        """Legacy <-> canonical intent-topic bridge (RULE 1 + RULE 2).
+
+        Mirrors ``ovos_bus_client.client.client.MessageBusClient``'s
+        ``_send_legacy_intent_twin`` (RULE 1, send-side) and
+        ``_modernize_intent_topic`` (RULE 2, receive-side). The real client
+        splits these across the wire (twin goes out on ``emit()``, the
+        modernized copy is dispatched locally in ``on_message()``); a
+        ``FakeBus`` has no separate wire hop, so both rules run inline,
+        against local listeners only, off of the one message being emitted.
+
+        RULE 2 first, mirroring the real client's receive order, then
+        RULE 1 -- so a listener on the canonical topic sees the canonical
+        dispatch before the legacy twin goes out.
+        """
+        is_intent_twin = message.context.pop(INTENT_COMPAT_TWIN_KEY, False)
+
+        # RULE 2 (receive-side modernize): a suffixed frame WITHOUT the twin
+        # marker came from an emitter old enough to only put the legacy
+        # spelling on the bus, so nothing canonical was sent alongside it --
+        # a canonical-only listener would never hear it without this.
+        if self._translator.modernize and not is_intent_twin \
+                and is_intent_topic(message.msg_type):
+            canonical = canonical_intent_topic(message.msg_type)
+            if canonical != message.msg_type:
+                try:
+                    self.ee.emit(canonical, _verbatim_copy(message, canonical))
+                except Exception as e:
+                    LOG.exception(f"Error in intent modernize dispatch for "
+                                   f"'{canonical}': {e}")
+
+        # RULE 1 (send-side twin): every canonical intent dispatch is
+        # twinned onto its legacy spelling so a listener that only knows
+        # the old suffixed topic still hears it. An already-suffixed
+        # dispatch is never twinned (legacy_intent_topic is a no-op on it),
+        # so the mirror cannot cascade.
+        if self._translator.emit_legacy and is_intent_topic(message.msg_type):
+            topic = legacy_intent_topic(message.msg_type)
+            if topic != message.msg_type:
+                twin = _verbatim_copy(message, topic)
+                twin.context[INTENT_COMPAT_TWIN_KEY] = True
+                try:
+                    self.ee.emit(topic, twin)
+                except Exception as e:
+                    LOG.exception(f"Error in intent twin dispatch for "
+                                   f"'{topic}': {e}")
 
     def on_message(self, *args):
         """
@@ -493,10 +566,13 @@ class AsyncFakeBus:
                 self.ee.emit(topic, message.forward(topic, translated))
             except Exception as e:
                 LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
+        self._bridge_intent_topic(message)
 
     # ------------------------------------------------------------------
     # Sync helpers used internally — same as FakeBus
     # ------------------------------------------------------------------
+
+    _bridge_intent_topic = FakeBus._bridge_intent_topic
 
     def on_message(self, *args):
         """Handle an incoming websocket message.
