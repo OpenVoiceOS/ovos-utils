@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.10a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.10a1) (2026-08-13)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.9a2...0.13.10a1)
+
+**Merged pull requests:**
+
+- fix: give FakeBus the intent-topic bridge \(RULE 1/RULE 2 parity with MessageBusClient\) [\#417](https://github.com/OpenVoiceOS/ovos-utils/pull/417) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.13.9a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.9a2) (2026-08-01)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.9a1...0.13.9a2)
