@@ -31,6 +31,8 @@ bus.emit(FakeMessage("recognizer_loop:utterance", {"utterances": ["hello"]}))
 
 See [docs/index.md](docs/index.md) for the full module overview, with links to
 detailed pages on logging, process utilities, `FakeBus`, and event handling.
+See [docs/prerelease-quirks.md](docs/prerelease-quirks.md) for what changed
+since the last stable release.
 
 ## Command line: ovos-logs
 

@@ -63,3 +63,4 @@ pip install ovos-utils
 - [FakeBus](fakebus.md) — `FakeBus`, `AsyncFakeBus`, `FakeMessage` — in-process message bus for testing
 - [Events](events.md) — `EventContainer`, `EventSchedulerInterface`, handler wrappers
 - [Utilities](utilities.md) — file, network, sound, threading, XDG helpers
+- [Prerelease Quirks](prerelease-quirks.md) — behavior changes since the last stable release
