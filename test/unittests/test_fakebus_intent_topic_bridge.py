@@ -200,5 +200,181 @@ class TestFakeBusIntentTopicBridge(unittest.TestCase):
         self.assertEqual(got, [LEGACY])
 
 
+class TestFakeBusIntentRegistrationIdempotency(unittest.TestCase):
+    """Registering the SAME handler twice on the same intent topic used to
+    be idempotent: pyee's EventEmitter keys its listener OrderedDict by the
+    handler object, so an equal bound method collapsed onto one slot instead
+    of firing twice. The intent-topic bridge (see class above) wraps every
+    intent-topic registration in a wrapper closure to dedupe the mirrored
+    canonical/legacy pair -- but minting a FRESH closure on every ``on()``
+    call broke the pre-existing double-registration idempotency, because
+    pyee then saw two distinct wrapper objects for what a caller (or
+    ovos-workshop's own registration.py) intends as one subscription.
+    """
+
+    def test_same_handler_twice_one_topic_fires_once_and_off_removes_fully(self):
+        bus = FakeBus()
+        calls = []
+
+        def handler(message=None):
+            calls.append(1)
+
+        bus.on(CANONICAL, handler)
+        bus.on(CANONICAL, handler)  # duplicate registration, same handler
+        bus.emit(Message(CANONICAL, {}))
+        self.assertEqual(len(calls), 1)
+
+        bus.remove(CANONICAL, handler)
+        calls.clear()
+        bus.emit(Message(CANONICAL, {}))
+        self.assertEqual(calls, [])  # fully removed, no leftover registration
+
+    def test_same_handler_both_spellings_fires_once(self):
+        # the ovos-workshop scenario: one handler bound to both the
+        # canonical and legacy spelling of the same intent -- since both
+        # canonicalize to one logical topic, this must fire exactly once
+        # per dispatch, not twice.
+        bus = FakeBus()
+        calls = []
+
+        def handler(message=None):
+            calls.append(1)
+
+        bus.on(CANONICAL, handler)
+        bus.on(LEGACY, handler)
+        bus.emit(Message(CANONICAL, {}))
+        self.assertEqual(len(calls), 1)
+
+    def test_two_different_handlers_one_topic_both_fire(self):
+        # must not over-dedup: distinct handlers on the same topic are
+        # distinct subscriptions and both must fire.
+        bus = FakeBus()
+        calls_a, calls_b = [], []
+
+        def handler_a(message=None):
+            calls_a.append(1)
+
+        def handler_b(message=None):
+            calls_b.append(1)
+
+        bus.on(CANONICAL, handler_a)
+        bus.on(CANONICAL, handler_b)
+        bus.emit(Message(CANONICAL, {}))
+        self.assertEqual(len(calls_a), 1)
+        self.assertEqual(len(calls_b), 1)
+
+    def test_non_intent_topic_keeps_pyee_semantics(self):
+        # a plain, non-migrated, non-intent topic goes straight to
+        # ``self.ee.on`` with no wrapper at all -- unaffected by this bridge,
+        # and pyee's own dedup-by-equal-handler semantics apply directly.
+        bus = FakeBus()
+        calls = []
+
+        def handler(message=None):
+            calls.append(1)
+
+        bus.on("some.plain.topic", handler)
+        bus.on("some.plain.topic", handler)
+        bus.emit(Message("some.plain.topic", {}))
+        self.assertEqual(len(calls), 1)
+
+    def test_async_fakebus_same_handler_twice_one_topic_fires_once(self):
+        bus = AsyncFakeBus()
+        calls = []
+
+        def handler(message=None):
+            calls.append(1)
+
+        bus.on(CANONICAL, handler)
+        bus.on(CANONICAL, handler)
+        _run(bus.emit(Message(CANONICAL, {})))
+        self.assertEqual(len(calls), 1)
+
+        bus.remove(CANONICAL, handler)
+        calls.clear()
+        _run(bus.emit(Message(CANONICAL, {})))
+        self.assertEqual(calls, [])
+
+    def test_async_fakebus_same_handler_both_spellings_fires_once(self):
+        bus = AsyncFakeBus()
+        calls = []
+
+        def handler(message=None):
+            calls.append(1)
+
+        bus.on(CANONICAL, handler)
+        bus.on(LEGACY, handler)
+        _run(bus.emit(Message(CANONICAL, {})))
+        self.assertEqual(len(calls), 1)
+
+    def test_once_both_spellings_fires_once(self):
+        # once() used to bypass the mirror guard entirely (self.ee.once
+        # called straight through), so a handler bound to both spellings
+        # via once() fired TWICE for one logical dispatch instead of once.
+        bus = FakeBus()
+        calls = []
+
+        def handler(message=None):
+            calls.append(1)
+
+        bus.once(CANONICAL, handler)
+        bus.once(LEGACY, handler)
+        bus.emit(Message(CANONICAL, {}))
+        self.assertEqual(len(calls), 1)
+
+    def test_on_duplicate_registration_legacy_spelling_fires_once(self):
+        # the pre-existing on() dedup fix is exercised elsewhere only on the
+        # CANONICAL spelling; the guard-wrapping it relies on
+        # (_mirror_guard_for) is keyed the same way for the LEGACY spelling,
+        # so a duplicate registration there must collapse to one wrapper too
+        # -- not mint a fresh closure per call and fire twice.
+        bus = FakeBus()
+        calls = []
+
+        def handler(message=None):
+            calls.append(1)
+
+        bus.on(LEGACY, handler)
+        bus.on(LEGACY, handler)  # duplicate registration, same handler
+        bus.emit(Message(LEGACY, {}))
+        self.assertEqual(len(calls), 1)
+
+    def test_once_then_on_same_handler_does_not_stack_a_second_listener(self):
+        # once() never recorded itself in _dedup_registrations, so a later
+        # on() of the same handler minted a BRAND NEW wrapper instead of
+        # finding/reusing the once() registration -- pyee then held two
+        # independent listeners (the bare once() handler plus the fresh
+        # on() wrapper) and a single dispatch fired the handler twice.
+        bus = FakeBus()
+        calls = []
+
+        def handler(message=None):
+            calls.append(1)
+
+        bus.once(CANONICAL, handler)
+        bus.on(CANONICAL, handler)
+        bus.emit(Message(CANONICAL, {}))
+        self.assertEqual(len(calls), 1)
+
+    def test_on_duplicate_registration_migrated_topic_pinned_at_one(self):
+        # recognizer_loop:utterance <-> ovos.utterance.handle is a
+        # namespace-migration pair (is_migrated()), not an intent-topic pair
+        # -- the OTHER branch of _mirror_guard_for. This pins the CHOSEN
+        # behaviour for a duplicate on() registration there at 1 fire: the
+        # guard-wrapping fix governs the is_migrated branch identically to
+        # the intent-pair branch, so a naive re-mint-per-call bug would
+        # double it back to baseline's 2 fires.
+        bus = FakeBus()
+        calls = []
+
+        def handler(message=None):
+            calls.append(1)
+
+        bus.on("recognizer_loop:utterance", handler)
+        bus.on("recognizer_loop:utterance", handler)  # duplicate
+        bus.emit(Message("recognizer_loop:utterance", {"utterances": ["hi"]}))
+        self.assertEqual(len(calls), 1)
+
+
 if __name__ == "__main__":
     unittest.main()

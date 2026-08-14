@@ -112,6 +112,21 @@ class FakeBus:
         # dropped). See _mirror_guard_for for the guard-scope rationale.
         guard = self._mirror_guard_for(msg_type, handler)
         if guard is not None:
+            # Re-registering the SAME (msg_type, handler) pair used to be
+            # harmless: pyee's EventEmitter keys its listener OrderedDict by
+            # the handler object, so an equal bound method collapsed onto
+            # the same slot instead of firing twice. Minting a fresh
+            # ``wrapped`` closure on every call broke that -- pyee saw a new,
+            # distinct object each time and happily fired both. Reuse the
+            # existing wrapper for this exact (msg_type, handler) pair so
+            # re-registering it re-adds the SAME closure pyee already knows,
+            # restoring the original idempotent-registration behaviour.
+            existing = self._dedup_registrations.get(handler, [])
+            for ev, wrapped in existing:
+                if ev == msg_type:
+                    self.ee.on(msg_type, wrapped)
+                    return
+
             def wrapped(message=None):
                 if guard(message):
                     return
@@ -175,7 +190,56 @@ class FakeBus:
         self._intent_pair_guards.pop(pair_key, None)
 
     def once(self, msg_type, handler):
+        # Route once() through the same guard-selection as on() (see
+        # _mirror_guard_for): a handler that hears both spellings of a
+        # mirrored dispatch via once() must still fire exactly once, not
+        # twice. Mirrors MessageBusClient.once.
+        guard = self._mirror_guard_for(msg_type, handler)
+        if guard is not None:
+            existing = self._dedup_registrations.get(handler, [])
+            for ev, wrapped in existing:
+                if ev == msg_type:
+                    # A once() re-registration of a still-pending (msg_type,
+                    # handler) pair reuses the SAME wrapper pyee already
+                    # knows -- same rationale as on()'s reuse branch.
+                    self.ee.once(msg_type, wrapped)
+                    return
+
+            def wrapped(message=None):
+                # pyee's once() already removes this closure from the
+                # emitter the instant it fires (whether or not the guard
+                # below goes on to suppress the call), so drop our own
+                # bookkeeping for it here too -- otherwise a later on()/
+                # once() for this (msg_type, handler) pair would try to
+                # reuse a wrapper pyee no longer holds.
+                self._forget_dedup_entry(handler, msg_type, wrapped)
+                if guard(message):
+                    return
+                return handler(message)
+
+            self.ee.once(msg_type, wrapped)
+            self._dedup_registrations.setdefault(handler, []).append((msg_type, wrapped))
+            return
         self.ee.once(msg_type, handler)
+
+    def _forget_dedup_entry(self, handler, msg_type, wrapped):
+        """Drop one wrapper's bookkeeping after pyee auto-removes it (once()).
+
+        Mirrors the cleanup ``remove()`` does for an explicit teardown, so a
+        fired once() registration leaves no stale entry for a later on()/
+        once() call on the same (msg_type, handler) pair to (mis)reuse.
+        """
+        regs = self._dedup_registrations.get(handler)
+        if not regs:
+            return
+        try:
+            regs.remove((msg_type, wrapped))
+        except ValueError:
+            return
+        if not regs:
+            self._dedup_registrations.pop(handler, None)
+            self._handler_guards.pop(handler, None)
+        self._release_intent_pair_guard(msg_type)
 
     def emit(self, message):
         # RULE 2 dedup marker: read it, then POP it before any local
@@ -588,6 +652,15 @@ class AsyncFakeBus:
         # dropped) -- same as FakeBus.on / MessageBusClient.on.
         guard = self._mirror_guard_for(msg_type, handler)
         if guard is not None:
+            # Reuse the existing wrapper for a repeat (msg_type, handler)
+            # registration instead of minting a new closure -- see the
+            # matching comment in FakeBus.on for why.
+            existing = self._dedup_registrations.get(handler, [])
+            for ev, wrapped in existing:
+                if ev == msg_type:
+                    self.ee.on(msg_type, wrapped)
+                    return
+
             def wrapped(message=None):
                 if guard(message):
                     return
@@ -601,9 +674,8 @@ class AsyncFakeBus:
     # shared with FakeBus -- same guard-scope rules (see FakeBus._mirror_guard_for)
     _mirror_guard_for = FakeBus._mirror_guard_for
     _release_intent_pair_guard = FakeBus._release_intent_pair_guard
-
-    def once(self, msg_type, handler):
-        self.ee.once(msg_type, handler)
+    _forget_dedup_entry = FakeBus._forget_dedup_entry
+    once = FakeBus.once
 
     def remove(self, msg_type, handler):
         regs = self._dedup_registrations.get(handler)
