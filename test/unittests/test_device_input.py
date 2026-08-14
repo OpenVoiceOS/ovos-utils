@@ -17,12 +17,18 @@
 import sys
 import types
 import unittest
+import warnings
 from unittest import mock
 from unittest.mock import Mock, MagicMock, patch
 
-# distutils was removed in Python 3.12+; provide a minimal stub if missing
+# distutils was removed in Python 3.12+; provide a minimal stub if missing.
+# On older interpreters it still exists but is itself deprecated -- that's
+# the stdlib's own noise, not ours to fix here, so it's suppressed locally.
 try:
-    import distutils.spawn
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=DeprecationWarning,
+                                message="The distutils package is deprecated")
+        import distutils.spawn
 except ImportError:
     distutils_stub = types.ModuleType("distutils")
     spawn_stub = types.ModuleType("distutils.spawn")

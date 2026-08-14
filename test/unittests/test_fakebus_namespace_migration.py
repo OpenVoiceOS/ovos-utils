@@ -4,7 +4,16 @@ import asyncio
 import unittest
 from unittest.mock import patch
 
+import pytest
+
 from ovos_utils.fakebus import AsyncFakeBus, FakeBus, Message
+
+# ovos_utils.fakebus.Message is a deprecated shim (use ovos_spec_tools.Message
+# or ovos_bus_client.Message); this module deliberately keeps exercising it
+# for coverage, filtered per-module.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore:ovos_utils.fakebus.Message is deprecated:DeprecationWarning"
+)
 
 
 def _run(coro):

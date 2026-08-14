@@ -20,7 +20,12 @@ import unittest
 import unittest.mock
 from unittest.mock import patch
 
+import pytest
 
+
+@pytest.mark.filterwarnings(
+    "ignore:standardize_lang_tag is deprecated; use 'standardize_lang' from 'ovos_spec_tools' instead:DeprecationWarning"
+)
 class TestStandardizeLangTag(unittest.TestCase):
     """Tests for standardize_lang_tag."""
 
@@ -61,6 +66,9 @@ class TestStandardizeLangTag(unittest.TestCase):
                 standardize_lang_tag("EN", macro=False), "en")
 
 
+@pytest.mark.filterwarnings(
+    "ignore:get_language_dir is deprecated; use 'closest_lang' from 'ovos_spec_tools':DeprecationWarning"
+)
 class TestGetLanguageDir(unittest.TestCase):
     """Tests for get_language_dir."""
 
