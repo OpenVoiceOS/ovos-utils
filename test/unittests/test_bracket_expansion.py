@@ -1,6 +1,14 @@
 import unittest
 
+import pytest
+
 from ovos_utils.bracket_expansion import expand_template, expand_slots
+
+# expand_template is a deprecated shim (use ovos_spec_tools.expand); this
+# module deliberately keeps exercising it for coverage, filtered per-module.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore:expand_template is deprecated; import 'expand' from 'ovos_spec_tools':DeprecationWarning"
+)
 
 
 class TestTemplateExpansion(unittest.TestCase):

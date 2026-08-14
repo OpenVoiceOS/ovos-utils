@@ -6,6 +6,8 @@ import time
 import unittest
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from ovos_bus_client.util.scheduler import EventScheduler
 from ovos_utils.events import EventSchedulerInterface
 from ovos_utils.fakebus import FakeBus
@@ -102,6 +104,7 @@ class TestEventScheduler(unittest.TestCase):
         es.shutdown()
 
 
+@pytest.mark.filterwarnings("ignore:EventSchedulerInterface moved to ovos_bus_client:DeprecationWarning")
 class TestEventSchedulerInterface(unittest.TestCase):
     def test_shutdown(self):
         def f(message):
