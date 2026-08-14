@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.12a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.12a2) (2026-08-14)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.12a1...0.13.12a2)
+
+**Merged pull requests:**
+
+- docs: add prerelease-quirks changelog since 0.8.5 [\#425](https://github.com/OpenVoiceOS/ovos-utils/pull/425) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.13.12a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.12a1) (2026-08-14)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.11a1...0.13.12a1)
