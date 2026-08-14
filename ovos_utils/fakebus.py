@@ -257,6 +257,26 @@ class FakeBus:
         ``FakeBus`` has no wire hop to put it on, so it keeps the
         single-process harness's one-emit-one-capture invariant instead of
         reproducing the wire's two-frame shape.
+
+        Plain-English note on what this can and cannot represent for tests:
+        a ``FakeBus`` models ONE bus connection, with the same per-client
+        intent-pair dedup guard (see :meth:`_mirror_guard_for`) that a real
+        ``MessageBusClient`` uses. So within one ``FakeBus``, if both
+        spellings of an intent topic have subscribers, only the spelling
+        actually emitted (or its canonical modernization) gets delivered --
+        the mirrored twin/modernized frame is deduped away, and a
+        legacy-only listener starves on a canonical emit. That is exactly
+        what would happen sharing a single real client connection too, so
+        it is not a ``FakeBus`` bug.
+        What a ``FakeBus`` cannot represent is multiple bus CONNECTIONS: on
+        a real wire, a separate connection -- e.g. an external observer
+        process -- receives both spellings, because each connection runs
+        its own independent dedup guard. Tests that attach an observer to
+        the same ``FakeBus`` the skill under test uses are simulating that
+        second connection with the first connection's guard, so the
+        observer should subscribe to the canonical topic
+        (``ovos_spec_tools.intent_topics.canonical_intent_topic``) rather
+        than assuming it will see both spellings.
         """
         # RULE 2 (receive-side modernize): a suffixed frame WITHOUT the twin
         # marker came from an emitter old enough to only put the legacy
