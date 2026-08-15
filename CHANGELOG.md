@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.13a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.13a1) (2026-08-15)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.12a2...0.13.13a1)
+
+**Merged pull requests:**
+
+- fix: floor ovos-spec-tools at the release that ships intent\_topics [\#427](https://github.com/OpenVoiceOS/ovos-utils/pull/427) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.13.12a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.12a2) (2026-08-14)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.12a1...0.13.12a2)
