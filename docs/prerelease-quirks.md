@@ -5,6 +5,15 @@ This page tracks user-visible behavior changes since the last stable release,
 list spans `0.9.0a1` through the current HEAD. Newest first. This file resets
 to empty at the next stable release.
 
+## next alpha
+
+- The `ovos-spec-tools` floor moves to `>=1.6.0a2`, the first release whose
+  `intent_topics` module has the shape `ovos_utils.fakebus` imports. The old
+  floor (`>=0.16.1a2`) was satisfied numerically by releases without the
+  module at all, which made ovos-utils unimportable in resolved-but-stale
+  environments — only a real install caught it.
+
+
 ## 0.13.12a1 — closed a leaked DNS-probe socket
 
 `is_connected_dns()` opened a raw socket for its reachability probe and never
