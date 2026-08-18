@@ -131,8 +131,29 @@ class LOG:
     @classmethod
     def set_level(cls, level):
         cls.level = level
-        for l in cls._loggers:
-            cls._loggers[l].setLevel(level)
+        for logger_name in cls._loggers:
+            cls._loggers[logger_name].setLevel(level)
+
+    @classmethod
+    def is_enabled_for(cls, level: int) -> bool:
+        """Return whether a record at ``level`` would be emitted.
+
+        ``LOG.level`` accepts the same integer and named levels as the stdlib
+        logger. Unknown names deliberately fall through as enabled so the
+        existing logger configuration path still raises its normal error.
+        """
+        if logging.root.manager.disable >= level:
+            return False
+        configured = cls.level
+        if isinstance(configured, int):
+            threshold = configured
+        else:
+            threshold = logging.getLevelName(str(configured).upper())
+            if not isinstance(threshold, int):
+                return True
+        if threshold == logging.NOTSET:
+            threshold = logging.root.getEffectiveLevel()
+        return level >= threshold
 
     @classmethod
     def _get_real_logger(cls):
@@ -170,22 +191,32 @@ class LOG:
 
     @classmethod
     def info(cls, *args, **kwargs):
+        if not cls.is_enabled_for(logging.INFO):
+            return
         cls._get_real_logger().info(*args, **kwargs)
 
     @classmethod
     def debug(cls, *args, **kwargs):
+        if not cls.is_enabled_for(logging.DEBUG):
+            return
         cls._get_real_logger().debug(*args, **kwargs)
 
     @classmethod
     def warning(cls, *args, **kwargs):
+        if not cls.is_enabled_for(logging.WARNING):
+            return
         cls._get_real_logger().warning(*args, **kwargs)
 
     @classmethod
     def error(cls, *args, **kwargs):
+        if not cls.is_enabled_for(logging.ERROR):
+            return
         cls._get_real_logger().error(*args, **kwargs)
 
     @classmethod
     def exception(cls, *args, **kwargs):
+        if not cls.is_enabled_for(logging.ERROR):
+            return
         cls._get_real_logger().exception(*args, **kwargs)
 
 
@@ -358,7 +389,6 @@ def get_log_path(service: str, directories: Optional[List[str]] = None) \
 
     from ovos_utils.xdg_utils import xdg_state_home
     try:
-        from ovos_config import Configuration
         from ovos_config.meta import get_xdg_base
     except ImportError:
         xdg_base = os.environ.get("OVOS_CONFIG_BASE_FOLDER", "mycroft")
