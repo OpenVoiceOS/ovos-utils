@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.13.14a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.14a1) (2026-08-31)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.13a1...0.13.14a1)
+
+**Merged pull requests:**
+
+- fix: harden MediaEntry against invalid numeric fields and dict2entry error type [\#429](https://github.com/OpenVoiceOS/ovos-utils/pull/429) ([JarbasAl](https://github.com/JarbasAl))
+- perf: skip disabled log call-site resolution [\#415](https://github.com/OpenVoiceOS/ovos-utils/pull/415) ([goldyfruit](https://github.com/goldyfruit))
+
 ## [0.13.13a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.13a1) (2026-08-15)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.12a2...0.13.13a1)
