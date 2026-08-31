@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.14a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.14a2) (2026-08-31)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.14a1...0.13.14a2)
+
+**Merged pull requests:**
+
+- docs: add AGENTS.md with the conventions for coding agents [\#431](https://github.com/OpenVoiceOS/ovos-utils/pull/431) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.13.14a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.14a1) (2026-08-31)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.13a1...0.13.14a1)
