@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.15a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.15a1) (2026-09-01)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.14a2...0.13.15a1)
+
+**Merged pull requests:**
+
+- fix: log\_deprecation checks its dedup set before walking the stack [\#433](https://github.com/OpenVoiceOS/ovos-utils/pull/433) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.13.14a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.14a2) (2026-08-31)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.14a1...0.13.14a2)
