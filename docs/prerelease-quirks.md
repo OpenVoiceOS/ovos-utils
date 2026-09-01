@@ -7,6 +7,14 @@ to empty at the next stable release.
 
 ## next alpha
 
+- `log_deprecation()` no longer walks the full call stack
+  (`inspect.stack()`) before checking whether a given deprecation warning has
+  already been logged. Repeat calls from an already-seen call site now
+  short-circuit on a cheap per-call-site cache before any stack inspection
+  happens, so the O(n) stack walk is only paid once per unique
+  (message, call site). Logged messages and dedup behavior are unchanged; a
+  caller invoking a deprecated helper in a tight loop, or once per file in a
+  large batch, no longer pays a full stack walk on every repeat.
 - The `ovos-spec-tools` floor moves to `>=1.6.0a2`, the first release whose
   `intent_topics` module has the shape `ovos_utils.fakebus` imports. The old
   floor (`>=0.16.1a2`) was satisfied numerically by releases without the
