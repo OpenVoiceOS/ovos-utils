@@ -293,6 +293,12 @@ def get_logs_config(service_name: Optional[str] = None,
 # is only reported once instead of spamming the logs on every call
 _logged_deprecations = set()
 
+# Cheap, `inspect.stack()`-free pre-check keyed on the immediate caller's code
+# object/line rather than the fully resolved origin. Repeat calls from the
+# same call site short-circuit before paying for the O(n) stack walk needed
+# to resolve `_logged_deprecations`'s (message, origin) key.
+_logged_deprecations_fast = set()
+
 
 def log_deprecation(log_message: str = "DEPRECATED",
                     deprecation_version: str = "Unknown",
@@ -310,6 +316,12 @@ def log_deprecation(log_message: str = "DEPRECATED",
         determination. i.e. an internal exception handling method should log the
         first call external to that package
     """
+    caller = sys._getframe(1)
+    fast_key = (log_message, func_name, func_module, caller.f_code,
+                caller.f_lineno)
+    if fast_key in _logged_deprecations_fast:
+        return
+
     stack = inspect.stack()[1:]  # [0] is this method
     call_info = "Unknown Origin"
     origin_module = func_module
@@ -335,6 +347,7 @@ def log_deprecation(log_message: str = "DEPRECATED",
             break
     # Only log each unique deprecation (message + caller) once
     dedupe_key = (log_message, log_name, call_info)
+    _logged_deprecations_fast.add(fast_key)
     if dedupe_key in _logged_deprecations:
         return
     _logged_deprecations.add(dedupe_key)

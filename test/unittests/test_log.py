@@ -263,6 +263,7 @@ class TestLog(unittest.TestCase):
         import ovos_utils.log
         from ovos_utils.log import log_deprecation, deprecated
         ovos_utils.log._logged_deprecations.clear()
+        ovos_utils.log._logged_deprecations_fast.clear()
 
         # Repeated calls from the same caller only log once
         for _ in range(10):
@@ -287,6 +288,24 @@ class TestLog(unittest.TestCase):
         self.assertEqual(log_warning.call_count, 3)
         log_msg = log_warning.call_args[0][0]
         self.assertIn('decorated deprecation', log_msg, log_msg)
+
+    @patch("ovos_utils.log.LOG.create_logger")
+    def test_log_deprecation_dedupe_skips_stack_walk(self, create_logger):
+        fake_log = Mock()
+        create_logger.return_value = fake_log
+        import ovos_utils.log
+        from ovos_utils.log import log_deprecation
+        ovos_utils.log._logged_deprecations.clear()
+        ovos_utils.log._logged_deprecations_fast.clear()
+
+        with patch("ovos_utils.log.inspect.stack",
+                   wraps=ovos_utils.log.inspect.stack) as stack_mock:
+            for _ in range(3):
+                log_deprecation("perf guard deprecation")
+        # Only the first call (populating the dedup set) may walk the stack;
+        # deduplicated repeats must short-circuit before `inspect.stack()`.
+        self.assertLessEqual(stack_mock.call_count, 1, stack_mock.call_count)
+        fake_log.warning.assert_called_once()
 
     @patch("ovos_utils.log.get_logs_config")
     @patch("ovos_utils.log.LOG")
