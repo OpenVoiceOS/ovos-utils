@@ -288,7 +288,10 @@ class FakeBus:
                 self.ee.emit(topic, message.forward(topic, translated))
             except Exception as e:
                 LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
-        self._bridge_intent_topic(message, is_twin=is_intent_twin)
+        try:
+            self._bridge_intent_topic(message, is_twin=is_intent_twin)
+        except Exception as e:
+            LOG.exception(f"Error in intent-topic bridge for '{message.msg_type}': {e}")
 
     def _bridge_intent_topic(self, message, is_twin=False):
         """Legacy <-> canonical intent-topic bridge (RULE 1 + RULE 2).
@@ -752,7 +755,10 @@ class AsyncFakeBus:
                 self.ee.emit(topic, message.forward(topic, translated))
             except Exception as e:
                 LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
-        self._bridge_intent_topic(message, is_twin=is_intent_twin)
+        try:
+            self._bridge_intent_topic(message, is_twin=is_intent_twin)
+        except Exception as e:
+            LOG.exception(f"Error in intent-topic bridge for '{message.msg_type}': {e}")
 
     # ------------------------------------------------------------------
     # Sync helpers used internally — same as FakeBus
