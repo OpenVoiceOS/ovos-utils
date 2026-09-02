@@ -164,11 +164,3 @@ def xdg_state_home() -> Path:
     """Return a Path corresponding to XDG_STATE_HOME."""
     return _path_from_env("XDG_STATE_HOME", Path.home() / ".local" / "state")
 
-
-# The following variables are deprecated, but remain for backward compatibility.
-XDG_CACHE_HOME = xdg_cache_home()
-XDG_CONFIG_DIRS = xdg_config_dirs()
-XDG_CONFIG_HOME = xdg_config_home()
-XDG_DATA_DIRS = xdg_data_dirs()
-XDG_DATA_HOME = xdg_data_home()
-XDG_RUNTIME_DIR = xdg_runtime_dir()

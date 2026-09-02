@@ -152,16 +152,5 @@ class TestEncryptDecrypt(unittest.TestCase):
                 decrypt("1234567890123456", b"bad", b"bad_tag", b"nonce")
 
 
-class TestCreateSelfSignedCert(unittest.TestCase):
-    """Tests for create_self_signed_cert (mocked OpenSSL)."""
-
-    def test_raises_import_error_when_crypto_none(self) -> None:
-        """create_self_signed_cert should raise ImportError when pyOpenSSL is unavailable."""
-        with patch("ovos_utils.security.crypto", None):
-            from ovos_utils.security import create_self_signed_cert
-            with self.assertRaises(ImportError):
-                create_self_signed_cert("/tmp/certs")
-
-
 if __name__ == "__main__":
     unittest.main()

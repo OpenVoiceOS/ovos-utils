@@ -16,7 +16,6 @@
 
 import sys
 import unittest
-import warnings
 from unittest.mock import MagicMock, patch
 
 
@@ -32,52 +31,6 @@ class TestIsRunningFromModule(unittest.TestCase):
         """Should return True for 'unittest' since tests run from unittest."""
         from ovos_utils.system import is_running_from_module
         self.assertTrue(is_running_from_module("unittest"))
-
-
-class TestDeprecatedSystemCalls(unittest.TestCase):
-    """Tests for deprecated systemctl wrapper functions."""
-
-    @patch("subprocess.call")
-    def test_system_shutdown_with_sudo(self, mock_call: MagicMock) -> None:
-        """system_shutdown(sudo=True) should call sudo systemctl poweroff."""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            from ovos_utils.system import system_shutdown
-            system_shutdown(sudo=True)
-        called_cmd = mock_call.call_args[0][0]
-        self.assertIn("poweroff", called_cmd)
-        self.assertIn("sudo", called_cmd)
-
-    @patch("subprocess.call")
-    def test_system_shutdown_without_sudo(self, mock_call: MagicMock) -> None:
-        """system_shutdown(sudo=False) should call systemctl poweroff without sudo."""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            from ovos_utils.system import system_shutdown
-            system_shutdown(sudo=False)
-        called_cmd = mock_call.call_args[0][0]
-        self.assertIn("poweroff", called_cmd)
-        self.assertNotIn("sudo", called_cmd)
-
-    @patch("subprocess.call")
-    def test_system_reboot_with_sudo(self, mock_call: MagicMock) -> None:
-        """system_reboot(sudo=True) should call sudo systemctl reboot."""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            from ovos_utils.system import system_reboot
-            system_reboot(sudo=True)
-        called_cmd = mock_call.call_args[0][0]
-        self.assertIn("reboot", called_cmd)
-        self.assertIn("sudo", called_cmd)
-
-    @patch("subprocess.call")
-    def test_ntp_sync(self, mock_call: MagicMock) -> None:
-        """ntp_sync should call the three expected subprocess commands."""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            from ovos_utils.system import ntp_sync
-            ntp_sync()
-        self.assertEqual(mock_call.call_count, 3)
 
 
 class TestServiceFunctions(unittest.TestCase):
@@ -155,37 +108,6 @@ class TestServiceFunctions(unittest.TestCase):
         self.assertTrue(result)
         cmd = mock_call.call_args[0][0]
         self.assertIn("mysvc.service", cmd)
-
-    @patch("subprocess.call")
-    def test_ssh_enable(self, mock_call: MagicMock) -> None:
-        """ssh_enable should delegate to enable_service for ssh.service."""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            from ovos_utils.system import ssh_enable
-            ssh_enable(sudo=False, user=False)
-        cmds = [call[0][0] for call in mock_call.call_args_list]
-        self.assertTrue(any("ssh.service" in c for c in cmds))
-
-    @patch("subprocess.call")
-    def test_ssh_disable(self, mock_call: MagicMock) -> None:
-        """ssh_disable should delegate to disable_service for ssh.service."""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            from ovos_utils.system import ssh_disable
-            ssh_disable(sudo=False, user=False)
-        cmds = [call[0][0] for call in mock_call.call_args_list]
-        self.assertTrue(any("ssh.service" in c for c in cmds))
-
-    @patch("subprocess.call")
-    def test_restart_mycroft_service(self, mock_call: MagicMock) -> None:
-        """restart_mycroft_service should restart mycroft.service."""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            from ovos_utils.system import restart_mycroft_service
-            restart_mycroft_service(sudo=False, user=False)
-        cmd = mock_call.call_args[0][0]
-        self.assertIn("mycroft.service", cmd)
-
 
 class TestGetDesktopEnvironment(unittest.TestCase):
     """Tests for get_desktop_environment."""

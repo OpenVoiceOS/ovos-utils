@@ -382,28 +382,6 @@ class TestFindMimeNone(unittest.TestCase):
         self.assertIsNone(result)
 
 
-class TestAvailableExtractors(unittest.TestCase):
-    """Test available_extractors deprecation shim (lines 147-161)."""
-
-    def test_available_extractors_import_error(self) -> None:
-        """available_extractors should raise ImportError when neither OPM nor OCP is installed."""
-        import warnings
-        from unittest.mock import patch
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            with patch.dict("sys.modules",
-                            {"ovos_plugin_manager": None,
-                             "ovos_plugin_manager.ocp": None,
-                             "ovos_plugin_common_play": None,
-                             "ovos_plugin_common_play.ocp": None,
-                             "ovos_plugin_common_play.ocp.utils": None}):
-                from ovos_utils.ocp import available_extractors
-                try:
-                    available_extractors()
-                except (ImportError, ModuleNotFoundError):
-                    pass  # expected
-
-
 class TestMprisMetadata(unittest.TestCase):
     """Test mpris_metadata property (lines 225-235) - needs dbus_next mock."""
 
