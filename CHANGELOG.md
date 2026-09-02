@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.14.0a1) (2026-09-02)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.15a1...0.14.0a1)
+
+**Merged pull requests:**
+
+- feat: FakeBus mirrors the .intent-suffixed twin for aliased intents [\#411](https://github.com/OpenVoiceOS/ovos-utils/pull/411) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.13.15a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.13.15a1) (2026-09-01)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.13.14a2...0.13.15a1)
