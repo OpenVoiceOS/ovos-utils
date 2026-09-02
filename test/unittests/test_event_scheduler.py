@@ -6,10 +6,8 @@ import time
 import unittest
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from ovos_bus_client.util.scheduler import EventScheduler
-from ovos_utils.events import EventSchedulerInterface
 from ovos_utils.fakebus import FakeBus
 
 
@@ -102,23 +100,3 @@ class TestEventScheduler(unittest.TestCase):
         self.assertEqual(emitter.emit.call_args[0][0].msg_type, 'test')
         self.assertEqual(emitter.emit.call_args[0][0].data, {})
         es.shutdown()
-
-
-@pytest.mark.filterwarnings("ignore:EventSchedulerInterface moved to ovos_bus_client:DeprecationWarning")
-class TestEventSchedulerInterface(unittest.TestCase):
-    def test_shutdown(self):
-        def f(message):
-            print('TEST FUNC')
-
-        es = EventSchedulerInterface('tester')
-        es.set_bus(FakeBus())
-        es.set_id('id')
-
-        # Schedule a repeating event
-        es.schedule_repeating_event(f, None, 10, name='f')
-        self.assertTrue(len(es.bus.ee._events.get('id:f', [])) == 1)
-
-        es.shutdown()
-        # Check that the reference to the function has been removed from the
-        # bus emitter
-        self.assertTrue(len(es.bus.ee._events.get('id:f', [])) == 0)

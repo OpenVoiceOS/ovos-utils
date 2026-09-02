@@ -2,14 +2,10 @@ import os
 import platform
 import random
 import string
-from os import makedirs
-from os.path import exists, join
-from socket import gethostname
 
 import pexpect
 
-from ovos_utils.log import LOG, deprecated
-from ovos_utils.version import VERSION_MAJOR
+from ovos_utils.log import LOG
 
 try:
     # pycryptodomex
@@ -20,65 +16,6 @@ except ImportError:
         from Crypto.Cipher import AES
     except:
         AES = None
-try:
-    from OpenSSL import crypto
-except ImportError:
-    crypto = None
-
-
-@deprecated("create_self_signed_cert is unmaintained and generates a "
-            "1024-bit RSA / SHA-1 certificate that modern OpenSSL "
-            "(SECLEVEL=2, the Debian/Ubuntu/Fedora default) refuses to load "
-            "('EE_KEY_TOO_SMALL'). Callers should bundle their own "
-            "self-signed cert generation (RSA >= 2048, SHA-256, with a "
-            "Subject Alternative Name) instead of relying on this helper.",
-            f"{VERSION_MAJOR + 1}.0.0")
-def create_self_signed_cert(cert_dir, name="jarbas"):
-    """
-    If name.crt and name.key don't exist in cert_dir, create a new
-    self-signed cert and key pair and write them into that directory.
-
-    .. deprecated:: unmaintained; generates a 1024-bit RSA / SHA-1
-        certificate that modern OpenSSL rejects at load time. Bundle your
-        own self-signed cert generation instead.
-    """
-    if crypto is None:
-        LOG.error("run pip install pyopenssl")
-        raise ImportError
-    CERT_FILE = name + ".crt"
-    KEY_FILE = name + ".key"
-    cert_path = join(cert_dir, CERT_FILE)
-    key_path = join(cert_dir, KEY_FILE)
-
-    if not exists(join(cert_dir, CERT_FILE)) \
-            or not exists(join(cert_dir, KEY_FILE)):
-        # create a key pair
-        k = crypto.PKey()
-        k.generate_key(crypto.TYPE_RSA, 1024)
-
-        # create a self-signed cert
-        cert = crypto.X509()
-        cert.get_subject().C = "PT"
-        cert.get_subject().ST = "Europe"
-        cert.get_subject().L = "Mountains"
-        cert.get_subject().O = "Jarbas AI"
-        cert.get_subject().OU = "Powered by Mycroft-Core"
-        cert.get_subject().CN = gethostname()
-        cert.set_serial_number(random.randint(0, 2000))
-        cert.gmtime_adj_notBefore(0)
-        cert.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
-        cert.set_issuer(cert.get_subject())
-        cert.set_pubkey(k)
-        # TODO don't use sha1
-        cert.sign(k, 'sha1')
-        if not exists(cert_dir):
-            makedirs(cert_dir)
-        with open(cert_path, "wb") as f:
-            f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
-        with open(join(cert_dir, KEY_FILE), "wb") as f:
-            f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
-
-    return cert_path, key_path
 
 
 def random_key(key_lenght=16):

@@ -43,10 +43,6 @@ class TestHelpers(unittest.TestCase):
         from ovos_utils import create_daemon
         # TODO
 
-    def test_create_loop(self):
-        from ovos_utils import create_loop
-        # TODO
-
     def test_wait_for_exit_signal(self):
         test_file = join(dirname(__file__), "scripts", "wait_for_exit.py")
         wait_thread = Popen([executable, test_file])
@@ -97,6 +93,3 @@ class TestHelpers(unittest.TestCase):
             ["A", "B", "C", "D", "E", "F"]
         )
 
-    def test_datestr2ts(self):
-        # TODO
-        pass

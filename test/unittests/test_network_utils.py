@@ -2,7 +2,6 @@
 import unittest
 from time import sleep
 
-import pytest
 
 
 class TestNetworkUtils(unittest.TestCase):
@@ -34,12 +33,6 @@ class TestNetworkUtils(unittest.TestCase):
     def test_is_connected_http(self):
         from ovos_utils.network_utils import is_connected_http
         self.assertIsInstance(is_connected_http(), bool)
-        # TODO
-
-    @pytest.mark.filterwarnings("ignore:use is_connected_http or is_connected_dns:DeprecationWarning")
-    def test_is_connected(self):
-        from ovos_utils.network_utils import is_connected
-        self.assertIsInstance(is_connected(), bool)
         # TODO
 
     def test_check_captive_portal(self):

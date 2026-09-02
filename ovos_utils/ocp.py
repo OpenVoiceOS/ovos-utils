@@ -3,10 +3,9 @@ import mimetypes
 from dataclasses import dataclass
 from enum import IntEnum
 from typing import Optional, Tuple, List, Union
-import warnings
 from ovos_utils import json_dumps, json_loads
 
-from ovos_utils.log import LOG, deprecated
+from ovos_utils.log import LOG
 
 __all__ = [
     "OCP_ID",
@@ -152,26 +151,6 @@ class MediaType(IntEnum):
     ADULT = 69  # for content filtering
     HENTAI = 70  # for content filtering
     ADULT_AUDIO = 71  # for content filtering
-
-
-@deprecated("import ovos_utils.available_extractors from ovos_plugin_manager.ocp instead", "0.1.0")
-def available_extractors():
-    # TODO - delete me, still imported in ovos-bus-client, but never made it into a non-alpha
-    warnings.warn(
-        "import from ovos_plugin_manager.ocp instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    try:
-        from ovos_plugin_manager.ocp import available_extractors as _ax
-    except ImportError:
-        try:
-            # before move to OPM
-            from ovos_plugin_common_play.ocp.utils import available_extractors as _ax
-        except ImportError:
-            LOG.error("please install/update ovos_plugin_manager")
-            raise
-    return _ax()
 
 
 def find_mime(uri):

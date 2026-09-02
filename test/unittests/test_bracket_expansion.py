@@ -1,14 +1,6 @@
 import unittest
 
-import pytest
-
-from ovos_utils.bracket_expansion import expand_template, expand_slots
-
-# expand_template is a deprecated shim (use ovos_spec_tools.expand); this
-# module deliberately keeps exercising it for coverage, filtered per-module.
-pytestmark = pytest.mark.filterwarnings(
-    "ignore:expand_template is deprecated; import 'expand' from 'ovos_spec_tools':DeprecationWarning"
-)
+from ovos_utils.bracket_expansion import expand_slots
 
 
 class TestTemplateExpansion(unittest.TestCase):
@@ -43,76 +35,7 @@ class TestTemplateExpansion(unittest.TestCase):
                               'change the brightness to high and color to blue']
         self.assertEqual(expanded_sentences, expected_sentences)
 
-    def test_malformed_template_raises(self):
-        # a template whose expansion would yield an empty string is malformed
-        # (OVOS-INTENT-1 §3.6) — it raises rather than producing ''
-        from ovos_spec_tools import MalformedTemplate
-        with self.assertRaises(MalformedTemplate):
-            expand_template("[(this|that) is optional]")
 
-    def test_expand_template(self):
-        # Test for template expansion
-        expected_outputs = {
-            "[hello,] (call me|my name is) {name}": [
-                "call me {name}",
-                "hello, call me {name}",
-                "hello, my name is {name}",
-                "my name is {name}"
-            ],
-            "Expand (alternative|choices) into a list of choices.": [
-                "Expand alternative into a list of choices.",
-                "Expand choices into a list of choices."
-            ],
-            # an emptied [optional] no longer leaves a double space —
-            # OVOS-INTENT-1 §4.1 normalizes whitespace to single spaces
-            "sentences have [optional] words ": [
-                "sentences have optional words",
-                "sentences have words"
-            ],
-            "alternative words can be (used|written)": [
-                "alternative words can be used",
-                "alternative words can be written"
-            ],
-            "sentence[s] can have (pre|suf)fixes mid word too": [
-                "sentence can have prefixes mid word too",
-                "sentence can have suffixes mid word too",
-                "sentences can have prefixes mid word too",
-                "sentences can have suffixes mid word too"
-            ],
-            "do( the | )thing(s|) (old|with) style and( no | )spaces": [
-                "do the thing old style and no spaces",
-                "do the thing old style and spaces",
-                "do the thing with style and no spaces",
-                "do the thing with style and spaces",
-                "do the things old style and no spaces",
-                "do the things old style and spaces",
-                "do the things with style and no spaces",
-                "do the things with style and spaces",
-                "do thing old style and no spaces",
-                "do thing old style and spaces",
-                "do thing with style and no spaces",
-                "do thing with style and spaces",
-                "do things old style and no spaces",
-                "do things old style and spaces",
-                "do things with style and no spaces",
-                "do things with style and spaces"
-            ],
-            "tell me a [{joke_type}] joke": [
-                "tell me a joke",
-                "tell me a {joke_type} joke"
-            ],
-            "play {query} [in ({device_name}|{skill_name}|{zone_name})]": [
-                "play {query}",
-                "play {query} in {device_name}",
-                "play {query} in {skill_name}",
-                "play {query} in {zone_name}"
-            ]
-        }
-
-        for template, expected_sentences in expected_outputs.items():
-            with self.subTest(template=template):
-                expanded_sentences = expand_template(template)
-                self.assertEqual(expanded_sentences, expected_sentences)
 
 
 if __name__ == '__main__':

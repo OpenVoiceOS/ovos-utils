@@ -4,7 +4,7 @@ from copy import deepcopy
 from os import environ
 from threading import Event
 
-from ovos_utils.log import LOG, log_deprecation
+from ovos_utils.log import LOG
 from ovos_spec_tools import NamespaceTranslator
 from ovos_spec_tools.intent_topics import (canonical_intent_topic,
                                            intent_topic_counterpart,
@@ -532,77 +532,12 @@ class FakeBus:
 # dependency, the canonical class is always present, and
 # ``ovos-bus-client.Message`` is the **same** class (bus-client attaches
 # ``publish`` to it too — both attachments are idempotent).
-from typing import Any, Dict, Optional
-
 from ovos_spec_tools.message import Message as FakeMessage
-from ovos_utils.log import deprecated
-from ovos_utils.version import VERSION_MAJOR
 
-
-# OVOS-MSG-1 defines forward / reply / response as the three normative
-# derivations (§5). ``publish`` is a bus-client tradition outside the
-# spec; it survives as an attached method for one more major release so
-# downstream consumers can migrate.
-_PUBLISH_REMOVAL_VERSION = f"{VERSION_MAJOR + 1}.0.0"
-
-
-@deprecated(
-    "Message.publish is deprecated; use Message.forward (relay under a "
-    "new topic, preserves context) or Message.reply (§5.2 swap) — both "
-    "are OVOS-MSG-1 normative",
-    _PUBLISH_REMOVAL_VERSION)
-def _publish(self, msg_type: str, data: Dict[str, Any],
-             context: Optional[Dict[str, Any]] = None) -> FakeMessage:
-    """Relay under a new topic without the §5.2 swap; drop ``target``.
-
-    .. deprecated::
-        Not part of OVOS-MSG-1 (the spec defines ``forward`` /
-        ``reply`` / ``response`` as the only normative derivations).
-        Slated for removal in the next major; use :meth:`forward`
-        when you do not want the routing-key swap, or :meth:`reply`
-        when you do.
-    """
-    import warnings
-    # stacklevel=3: warn() -> body -> @deprecated wrapper -> caller
-    warnings.warn(
-        "Message.publish is deprecated; use Message.forward (no §5.2 "
-        "swap) or Message.reply (with swap) instead — both are "
-        "OVOS-MSG-1 normative derivations. ``publish`` will be removed "
-        f"in ovos-utils {_PUBLISH_REMOVAL_VERSION}.",
-        DeprecationWarning, stacklevel=3)
-    context = context or {}
-    new_context = dict(self.context)
-    new_context.update(context)
-    new_context.pop("target", None)
-    return self.__class__(msg_type, data, new_context)
-
-
-# Attach publish() to the spec-tools Message so the method appears on
-# every Message instance regardless of which package the caller imported
-# the class from. Idempotent with ovos-bus-client's identical attachment.
-FakeMessage.publish = _publish
-
-
-class Message(FakeMessage):
-    """Deprecated alias for the OVOS-MSG-1 ``Message`` envelope.
-
-    ``from ovos_utils.fakebus import Message`` is in the wild and stays
-    importable through one more release. New code should import the
-    envelope where it lives — :class:`ovos_spec_tools.Message` (or
-    :class:`ovos_bus_client.Message`, which is a subclass).
-    """
-
-    def __new__(cls, *args, **kwargs):
-        warnings.warn(
-            "ovos_utils.fakebus.Message is deprecated; import "
-            "ovos_spec_tools.Message (or ovos_bus_client.Message)",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        log_deprecation(
-            "please import Message from ovos_spec_tools / "
-            "ovos_bus_client directly", "1.0.0")
-        return FakeMessage(*args, **kwargs)
+# ``from ovos_utils.fakebus import Message`` is a legacy spelling of the
+# OVOS-MSG-1 envelope; import :class:`ovos_spec_tools.Message` (or
+# :class:`ovos_bus_client.Message`, which is a subclass) directly instead.
+Message = FakeMessage
 
 
 class AsyncFakeBus:

@@ -12,9 +12,7 @@
 #
 import dataclasses
 import unittest
-import warnings
-
-from ovos_utils import json_dumps, json_loads, datestr2ts
+from ovos_utils import json_dumps, json_loads
 
 
 class TestJsonDumps(unittest.TestCase):
@@ -87,27 +85,6 @@ class TestJsonLoads(unittest.TestCase):
     def test_loads_unicode(self) -> None:
         result = json_loads('{"word": "héllo"}')
         self.assertEqual(result["word"], "héllo")
-
-
-class TestDeprecatedHelpers(unittest.TestCase):
-    """Tests for deprecated functions in ovos_utils/__init__.py"""
-
-    def test_datestr2ts_warns(self) -> None:
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            ts = datestr2ts("20230101")
-            self.assertEqual(len(w), 1)
-            self.assertIn("deprecated", str(w[0].message).lower())
-        # 2023-01-01 should return a positive timestamp
-        self.assertGreater(ts, 0)
-
-    def test_datestr2ts_value(self) -> None:
-        with warnings.catch_warnings(record=True):
-            warnings.simplefilter("always")
-            ts = datestr2ts("20000101")
-            import datetime
-            expected = datetime.datetime(2000, 1, 1).timestamp()
-            self.assertAlmostEqual(ts, expected, places=0)
 
 
 if __name__ == "__main__":
