@@ -258,16 +258,15 @@ class FakeBus:
                 message.context["session"] = sess.serialize()
             except ImportError:  # don't care
                 message.context["session"] = {"session_id": self.session_id}
-        # Fold the incoming message's session onto the SessionManager singleton
-        # BEFORE running handlers, matching the real MessageBusClient.on_message
-        # order (receive -> fold -> dispatch to handlers). Folding AFTER handlers
-        # would wipe any in-place / synced session mutation the handlers made
-        # (handle_session_sync merging intent_context, handle_add_context injecting
-        # context frames, ...), because the message's session snapshot was
-        # stamped at emit-time, before those mutations landed — a spec-violating
-        # self-broadcast-back wipe. The single-process harness has no separate
-        # receiver, so it must not re-fold its own emit once the handlers have
-        # run.
+        # on_message runs BEFORE the handlers below, matching the real
+        # MessageBusClient.on_message order (receive -> take-inbound-session
+        # -> dispatch to handlers). It never folds the default session (see
+        # on_message) -- only a named session it observes gets ``update``'d,
+        # and running that after the handlers would wipe any in-place /
+        # synced mutation a handler made this same tick (handle_session_sync
+        # merging intent_context, handle_add_context injecting context
+        # frames, ...), because the message's session snapshot was stamped
+        # at emit-time, before those mutations landed.
         self.on_message(message.serialize())
         self.ee.emit("message", message.serialize())
         try:
@@ -399,15 +398,38 @@ class FakeBus:
         else:
             message = args[1]
         parsed_message = FakeMessage.deserialize(message)
-        try:  # replicate side effects
-            from ovos_bus_client.session import Session, SessionManager
-            sess = Session.from_message(parsed_message)
-            # every session — including the default id — folds onto the singleton
-            # (value-passing; nothing is owner-only, matching the spec-tools
-            # SessionManager and the real MessageBusClient)
-            SessionManager.update(sess)
+        try:
+            # ovos-bus-client is an optional dependency of this extra; only
+            # its ABSENCE is swallowed here. ``resolve_session_id`` /
+            # ``session_carrier`` are guaranteed by the >=2.11.4a1 floor
+            # pin below, so a real bug in the block that follows must not
+            # be misread as "not installed" and silently disable named-
+            # session tracking.
+            from ovos_bus_client.session import (Session, SessionManager,
+                                                 DEFAULT_SESSION_ID,
+                                                 resolve_session_id,
+                                                 session_carrier)
         except ImportError:
-            pass  # don't care
+            pass  # ovos-bus-client not installed -- don't care
+        else:
+            # OVOS-SESSION-2 §5.1's arrival merge is a once-per-utterance
+            # orchestrator-intake fold, not a per-observed-message one (see
+            # core#915 / ovos-bus-client's MessageBusClient._take_inbound_
+            # session). A FakeBus models ONE bus connection for a test, and a
+            # test drives far more default-session traffic through it than
+            # one fold per utterance -- replies, handled-acks, forwarded
+            # frames. Calling ``update`` (a wholesale replace using spec
+            # defaults for omitted fields, not a field-by-field merge) on
+            # every observed default-session message would wipe stored
+            # fields a later message's carrier simply doesn't restate,
+            # violating §2.6 (mutation only at lifecycle boundaries). A test
+            # that wants the orchestrator's own intake semantics calls
+            # ``SessionManager.fold_inbound`` explicitly, the same as core
+            # does at its own intake point.
+            carrier = session_carrier(parsed_message)
+            if resolve_session_id(carrier) != DEFAULT_SESSION_ID:
+                sess = Session.from_message(parsed_message)
+                SessionManager.update(sess)
 
     def on_default_session_update(self, message):
         try:  # replicate side effects
@@ -736,9 +758,10 @@ class AsyncFakeBus:
                 message.context["session"] = sess.serialize()
             except ImportError:  # don't care
                 message.context["session"] = {"session_id": self.session_id}
-        # Fold BEFORE handlers — see FakeBus.emit for the rationale (a post-
-        # handler self-broadcast-back fold wipes the handlers' in-place / synced
-        # session mutations with the stale emit-time snapshot).
+        # on_message runs BEFORE handlers — see FakeBus.emit for the rationale
+        # (running a named-session update after handlers would wipe an
+        # in-place / synced mutation a handler made this same tick with the
+        # stale emit-time snapshot).
         self.on_message(message.serialize())
         self.ee.emit("message", message.serialize())
         try:
@@ -777,15 +800,38 @@ class AsyncFakeBus:
         else:
             message = args[1]
         parsed_message = FakeMessage.deserialize(message)
-        try:  # replicate side effects
-            from ovos_bus_client.session import Session, SessionManager
-            sess = Session.from_message(parsed_message)
-            # every session — including the default id — folds onto the singleton
-            # (value-passing; nothing is owner-only, matching the spec-tools
-            # SessionManager and the real MessageBusClient)
-            SessionManager.update(sess)
+        try:
+            # ovos-bus-client is an optional dependency of this extra; only
+            # its ABSENCE is swallowed here. ``resolve_session_id`` /
+            # ``session_carrier`` are guaranteed by the >=2.11.4a1 floor
+            # pin below, so a real bug in the block that follows must not
+            # be misread as "not installed" and silently disable named-
+            # session tracking.
+            from ovos_bus_client.session import (Session, SessionManager,
+                                                 DEFAULT_SESSION_ID,
+                                                 resolve_session_id,
+                                                 session_carrier)
         except ImportError:
-            pass  # don't care
+            pass  # ovos-bus-client not installed -- don't care
+        else:
+            # OVOS-SESSION-2 §5.1's arrival merge is a once-per-utterance
+            # orchestrator-intake fold, not a per-observed-message one (see
+            # core#915 / ovos-bus-client's MessageBusClient._take_inbound_
+            # session). A FakeBus models ONE bus connection for a test, and a
+            # test drives far more default-session traffic through it than
+            # one fold per utterance -- replies, handled-acks, forwarded
+            # frames. Calling ``update`` (a wholesale replace using spec
+            # defaults for omitted fields, not a field-by-field merge) on
+            # every observed default-session message would wipe stored
+            # fields a later message's carrier simply doesn't restate,
+            # violating §2.6 (mutation only at lifecycle boundaries). A test
+            # that wants the orchestrator's own intake semantics calls
+            # ``SessionManager.fold_inbound`` explicitly, the same as core
+            # does at its own intake point.
+            carrier = session_carrier(parsed_message)
+            if resolve_session_id(carrier) != DEFAULT_SESSION_ID:
+                sess = Session.from_message(parsed_message)
+                SessionManager.update(sess)
 
     def on_default_session_update(self, message):
         try:  # replicate side effects
