@@ -34,7 +34,7 @@ extras = [
     "ovos-plugin-manager>=0.0.25",
     "ovos-config>=0.0.12",
     "ovos-workshop>=0.0.13",
-    "ovos_bus_client>=2.6.2a2",
+    "ovos_bus_client>=2.11.4a1",
     "langcodes",
     "timezonefinder",
     "oauthlib~=3.2",
