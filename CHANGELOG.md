@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.14.1a1) (2026-09-04)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.14.0a2...0.14.1a1)
+
+**Merged pull requests:**
+
+- fix: FakeBus stops folding the default session on every observed message [\#437](https://github.com/OpenVoiceOS/ovos-utils/pull/437) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.14.0a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.14.0a2) (2026-09-03)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.14.0a1...0.14.0a2)
@@ -349,134 +357,65 @@
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.0a1...0.8.0)
 
-**Merged pull requests:**
-
-- Release 0.8.0a1 [\#331](https://github.com/OpenVoiceOS/ovos-utils/pull/331) ([github-actions[bot]](https://github.com/apps/github-actions))
-
 ## [0.8.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.0a1) (2025-05-05)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.7.1...0.8.0a1)
-
-**Merged pull requests:**
-
-- feat: ignore\_case flag in fuzzy\_match utils [\#329](https://github.com/OpenVoiceOS/ovos-utils/pull/329) ([JarbasAl](https://github.com/JarbasAl))
 
 ## [0.7.1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.7.1) (2025-04-02)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.7.1a1...0.7.1)
 
-**Merged pull requests:**
-
-- Release 0.7.1a1 [\#328](https://github.com/OpenVoiceOS/ovos-utils/pull/328) ([github-actions[bot]](https://github.com/apps/github-actions))
-
 ## [0.7.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.7.1a1) (2025-04-02)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.7.0...0.7.1a1)
-
-**Merged pull requests:**
-
-- fix: PluginStream in playlistss [\#327](https://github.com/OpenVoiceOS/ovos-utils/pull/327) ([JarbasAl](https://github.com/JarbasAl))
 
 ## [0.7.0](https://github.com/OpenVoiceOS/ovos-utils/tree/0.7.0) (2025-02-02)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.7.0a1...0.7.0)
 
-**Merged pull requests:**
-
-- Release 0.7.0a1 [\#325](https://github.com/OpenVoiceOS/ovos-utils/pull/325) ([github-actions[bot]](https://github.com/apps/github-actions))
-
 ## [0.7.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.7.0a1) (2025-02-02)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.6.1...0.7.0a1)
-
-**Merged pull requests:**
-
-- feat:shared\_utils [\#324](https://github.com/OpenVoiceOS/ovos-utils/pull/324) ([JarbasAl](https://github.com/JarbasAl))
 
 ## [0.6.1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.6.1) (2025-01-25)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.6.1a2...0.6.1)
 
-**Merged pull requests:**
-
-- Release 0.6.1a2 [\#323](https://github.com/OpenVoiceOS/ovos-utils/pull/323) ([github-actions[bot]](https://github.com/apps/github-actions))
-
 ## [0.6.1a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.6.1a2) (2025-01-04)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.6.1a1...0.6.1a2)
-
-**Merged pull requests:**
-
-- Update json-database requirement from ~=0.7 to ~=0.10 in /requirements [\#320](https://github.com/OpenVoiceOS/ovos-utils/pull/320) ([dependabot[bot]](https://github.com/apps/dependabot))
 
 ## [0.6.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.6.1a1) (2025-01-04)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.6.0...0.6.1a1)
 
-**Merged pull requests:**
-
-- Release 0.6.1a1 [\#322](https://github.com/OpenVoiceOS/ovos-utils/pull/322) ([github-actions[bot]](https://github.com/apps/github-actions))
-- chore: add warnings [\#321](https://github.com/OpenVoiceOS/ovos-utils/pull/321) ([JarbasAl](https://github.com/JarbasAl))
-
 ## [0.6.0](https://github.com/OpenVoiceOS/ovos-utils/tree/0.6.0) (2024-12-06)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.6.0a1...0.6.0)
-
-**Merged pull requests:**
-
-- Release 0.6.0a1 [\#319](https://github.com/OpenVoiceOS/ovos-utils/pull/319) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [0.6.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.6.0a1) (2024-12-06)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.5.6...0.6.0a1)
 
-**Implemented enhancements:**
-
-- feat: support \[optional\] syntax [\#312](https://github.com/OpenVoiceOS/ovos-utils/issues/312)
-
-**Merged pull requests:**
-
-- feat: extend dialog/intent templates [\#317](https://github.com/OpenVoiceOS/ovos-utils/pull/317) ([JarbasAl](https://github.com/JarbasAl))
-
 ## [0.5.6](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.6) (2024-12-04)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.5.6a1...0.5.6)
-
-**Merged pull requests:**
-
-- Release 0.5.6a1 [\#316](https://github.com/OpenVoiceOS/ovos-utils/pull/316) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [0.5.6a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.6a1) (2024-12-04)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.5.5...0.5.6a1)
 
-**Merged pull requests:**
-
-- refactor:move\_to\_extras [\#315](https://github.com/OpenVoiceOS/ovos-utils/pull/315) ([JarbasAl](https://github.com/JarbasAl))
-
 ## [0.5.5](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.5) (2024-11-25)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.5.5a1...0.5.5)
-
-**Merged pull requests:**
-
-- Release 0.5.5a1 [\#314](https://github.com/OpenVoiceOS/ovos-utils/pull/314) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [0.5.5a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.5a1) (2024-11-25)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.5.4...0.5.5a1)
 
-**Merged pull requests:**
-
-- Update ovos-config requirement from \<1.0.0,\>=0.0.12 to \>=0.0.12,\<2.0.0 in /requirements [\#313](https://github.com/OpenVoiceOS/ovos-utils/pull/313) ([dependabot[bot]](https://github.com/apps/dependabot))
-
 ## [0.5.4](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.4) (2024-11-21)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.5.4a1...0.5.4)
-
-**Merged pull requests:**
-
-- Release 0.5.4a1 [\#311](https://github.com/OpenVoiceOS/ovos-utils/pull/311) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [0.5.4a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.5.4a1) (2024-11-21)
 
