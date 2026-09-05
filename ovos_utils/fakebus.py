@@ -34,6 +34,27 @@ def _verbatim_copy(message, topic: str):
                               context=deepcopy(message.context))
 
 
+def _session_rejected_message(parsed_message):
+    """Build the ``ovos.session.rejected`` notice for a dropped message.
+
+    SESSION-1 §2.5 (architecture dev 198a3c9): a malformed session carrier
+    drops the whole message, but the drop is observable -- the bus emits
+    ``SpecMessage.SESSION_REJECTED`` with the dropped message's type and the
+    reason, carrying the dropped message's ``utterance_id`` when present.
+    The rejection itself names no session (there was never a valid one to
+    name), so ``context`` deliberately has no ``session`` key.
+    """
+    from ovos_spec_tools.messages import SpecMessage
+    context = {}
+    utterance_id = parsed_message.context.get("utterance_id")
+    if utterance_id is not None:
+        context["utterance_id"] = utterance_id
+    return FakeMessage(SpecMessage.SESSION_REJECTED,
+                       {"msg_type": parsed_message.msg_type,
+                        "reason": "malformed_carrier"},
+                       context)
+
+
 def dig_for_message():
     try:
         from ovos_bus_client.message import dig_for_message as _dig
@@ -267,7 +288,22 @@ class FakeBus:
         # merging intent_context, handle_add_context injecting context
         # frames, ...), because the message's session snapshot was stamped
         # at emit-time, before those mutations landed.
-        self.on_message(message.serialize())
+        #
+        # A malformed carrier (SESSION-1 §2.5) is a per-message producer
+        # fault: on_message() drops the whole message -- no listener runs --
+        # and emits ``ovos.session.rejected`` itself. Nothing more to do here.
+        if not self.on_message(message.serialize()):
+            return
+        self._deliver(message, is_intent_twin)
+
+    def _deliver(self, message, is_intent_twin=False):
+        """Dispatch ``message`` to local listeners, unconditionally.
+
+        Split out of :meth:`emit` so ``on_message`` can deliver the
+        ``ovos.session.rejected`` notice (SESSION-1 §2.5) straight to
+        listeners without going back through ``emit()``'s default-session
+        stamping -- the rejection carries no session at all.
+        """
         self.ee.emit("message", message.serialize())
         try:
             self.ee.emit(message.msg_type, message)
@@ -392,6 +428,9 @@ class FakeBus:
         Handle an incoming websocket message
         @param args:
             message (str): serialized Message
+        @return: False if the message was dropped (SESSION-1 §2.5 malformed
+            carrier -- the caller must not deliver it to listeners), True
+            otherwise.
         """
         if len(args) == 1:
             message = args[0]
@@ -407,29 +446,42 @@ class FakeBus:
             # session tracking.
             from ovos_bus_client.session import (Session, SessionManager,
                                                  DEFAULT_SESSION_ID,
+                                                 MalformedSession,
                                                  resolve_session_id,
                                                  session_carrier)
         except ImportError:
-            pass  # ovos-bus-client not installed -- don't care
-        else:
-            # OVOS-SESSION-2 §5.1's arrival merge is a once-per-utterance
-            # orchestrator-intake fold, not a per-observed-message one (see
-            # core#915 / ovos-bus-client's MessageBusClient._take_inbound_
-            # session). A FakeBus models ONE bus connection for a test, and a
-            # test drives far more default-session traffic through it than
-            # one fold per utterance -- replies, handled-acks, forwarded
-            # frames. Calling ``update`` (a wholesale replace using spec
-            # defaults for omitted fields, not a field-by-field merge) on
-            # every observed default-session message would wipe stored
-            # fields a later message's carrier simply doesn't restate,
-            # violating §2.6 (mutation only at lifecycle boundaries). A test
-            # that wants the orchestrator's own intake semantics calls
-            # ``SessionManager.fold_inbound`` explicitly, the same as core
-            # does at its own intake point.
+            return True  # ovos-bus-client not installed -- don't care
+        # OVOS-SESSION-2 §5.1's arrival merge is a once-per-utterance
+        # orchestrator-intake fold, not a per-observed-message one (see
+        # core#915 / ovos-bus-client's MessageBusClient._take_inbound_
+        # session). A FakeBus models ONE bus connection for a test, and a
+        # test drives far more default-session traffic through it than
+        # one fold per utterance -- replies, handled-acks, forwarded
+        # frames. Calling ``update`` (a wholesale replace using spec
+        # defaults for omitted fields, not a field-by-field merge) on
+        # every observed default-session message would wipe stored
+        # fields a later message's carrier simply doesn't restate,
+        # violating §2.6 (mutation only at lifecycle boundaries). A test
+        # that wants the orchestrator's own intake semantics calls
+        # ``SessionManager.fold_inbound`` explicitly, the same as core
+        # does at its own intake point.
+        try:
             carrier = session_carrier(parsed_message)
             if resolve_session_id(carrier) != DEFAULT_SESSION_ID:
                 sess = Session.from_message(parsed_message)
                 SessionManager.update(sess)
+        except MalformedSession as e:
+            # OVOS-SESSION-1 §2.5: a non-object session carrier is a
+            # per-message producer fault, not a transport fault -- drop the
+            # WHOLE message (no listener runs) and keep going, same as
+            # MessageBusClient.on_message. A FakeBus has no transport to
+            # tear down, but it still must not silently swallow the
+            # rejection: emit ``ovos.session.rejected`` so a listener can
+            # observe/count the drop, exactly as the real bus does.
+            LOG.warning(f"discarding bus message with malformed session: {e}")
+            self._deliver(_session_rejected_message(parsed_message))
+            return False
+        return True
 
     def on_default_session_update(self, message):
         try:  # replicate side effects
@@ -762,38 +814,28 @@ class AsyncFakeBus:
         # (running a named-session update after handlers would wipe an
         # in-place / synced mutation a handler made this same tick with the
         # stale emit-time snapshot).
-        self.on_message(message.serialize())
-        self.ee.emit("message", message.serialize())
-        try:
-            self.ee.emit(message.msg_type, message)
-        except Exception as e:
-            LOG.exception(f"Error in event handler for '{message.msg_type}': {e}")
-        # namespace migration: also dispatch the counterpart topic(s) with the
-        # payload reshaped into each counterpart's shape -- same as FakeBus.emit.
-        for topic in self._translator.counterpart_topics(message.msg_type):
-            try:
-                translated = self._translator.translate_payload(
-                    from_topic=message.msg_type, to_topic=topic,
-                    data=message.data)
-                self.ee.emit(topic, message.forward(topic, translated))
-            except Exception as e:
-                LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
-        try:
-            self._bridge_intent_topic(message, is_twin=is_intent_twin)
-        except Exception as e:
-            LOG.exception(f"Error in intent-topic bridge for '{message.msg_type}': {e}")
+        #
+        # A malformed carrier (SESSION-1 §2.5) drops the whole message --
+        # see FakeBus.on_message / FakeBus._deliver.
+        if not self.on_message(message.serialize()):
+            return
+        self._deliver(message, is_intent_twin)
 
     # ------------------------------------------------------------------
     # Sync helpers used internally — same as FakeBus
     # ------------------------------------------------------------------
 
     _bridge_intent_topic = FakeBus._bridge_intent_topic
+    _deliver = FakeBus._deliver
 
     def on_message(self, *args):
         """Handle an incoming websocket message.
 
         @param args:
             message (str): serialized Message
+        @return: False if the message was dropped (SESSION-1 §2.5 malformed
+            carrier -- the caller must not deliver it to listeners), True
+            otherwise.
         """
         if len(args) == 1:
             message = args[0]
@@ -809,29 +851,41 @@ class AsyncFakeBus:
             # session tracking.
             from ovos_bus_client.session import (Session, SessionManager,
                                                  DEFAULT_SESSION_ID,
+                                                 MalformedSession,
                                                  resolve_session_id,
                                                  session_carrier)
         except ImportError:
-            pass  # ovos-bus-client not installed -- don't care
-        else:
-            # OVOS-SESSION-2 §5.1's arrival merge is a once-per-utterance
-            # orchestrator-intake fold, not a per-observed-message one (see
-            # core#915 / ovos-bus-client's MessageBusClient._take_inbound_
-            # session). A FakeBus models ONE bus connection for a test, and a
-            # test drives far more default-session traffic through it than
-            # one fold per utterance -- replies, handled-acks, forwarded
-            # frames. Calling ``update`` (a wholesale replace using spec
-            # defaults for omitted fields, not a field-by-field merge) on
-            # every observed default-session message would wipe stored
-            # fields a later message's carrier simply doesn't restate,
-            # violating §2.6 (mutation only at lifecycle boundaries). A test
-            # that wants the orchestrator's own intake semantics calls
-            # ``SessionManager.fold_inbound`` explicitly, the same as core
-            # does at its own intake point.
+            return True  # ovos-bus-client not installed -- don't care
+        # OVOS-SESSION-2 §5.1's arrival merge is a once-per-utterance
+        # orchestrator-intake fold, not a per-observed-message one (see
+        # core#915 / ovos-bus-client's MessageBusClient._take_inbound_
+        # session). A FakeBus models ONE bus connection for a test, and a
+        # test drives far more default-session traffic through it than
+        # one fold per utterance -- replies, handled-acks, forwarded
+        # frames. Calling ``update`` (a wholesale replace using spec
+        # defaults for omitted fields, not a field-by-field merge) on
+        # every observed default-session message would wipe stored
+        # fields a later message's carrier simply doesn't restate,
+        # violating §2.6 (mutation only at lifecycle boundaries). A test
+        # that wants the orchestrator's own intake semantics calls
+        # ``SessionManager.fold_inbound`` explicitly, the same as core
+        # does at its own intake point.
+        try:
             carrier = session_carrier(parsed_message)
             if resolve_session_id(carrier) != DEFAULT_SESSION_ID:
                 sess = Session.from_message(parsed_message)
                 SessionManager.update(sess)
+        except MalformedSession as e:
+            # OVOS-SESSION-1 §2.5: a non-object session carrier is a
+            # per-message producer fault, not a transport fault -- drop the
+            # WHOLE message (no listener runs) and keep going, same as
+            # MessageBusClient.on_message. Emit ``ovos.session.rejected``
+            # so a listener can observe/count the drop, exactly as the
+            # real bus does.
+            LOG.warning(f"discarding bus message with malformed session: {e}")
+            self._deliver(_session_rejected_message(parsed_message))
+            return False
+        return True
 
     def on_default_session_update(self, message):
         try:  # replicate side effects
