@@ -1,6 +1,14 @@
 import unittest
 
+import pytest
+
 from ovos_utils.bracket_expansion import expand_template, expand_slots
+
+# expand_template is a deprecated shim (use ovos_spec_tools.expand); this
+# module deliberately keeps exercising it for coverage, filtered per-module.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore:expand_template is deprecated; import 'expand' from 'ovos_spec_tools':DeprecationWarning"
+)
 
 
 class TestTemplateExpansion(unittest.TestCase):
@@ -35,20 +43,15 @@ class TestTemplateExpansion(unittest.TestCase):
                               'change the brightness to high and color to blue']
         self.assertEqual(expanded_sentences, expected_sentences)
 
+    def test_malformed_template_raises(self):
+        # a template whose expansion would yield an empty string is malformed
+        # (OVOS-INTENT-1 §3.6) — it raises rather than producing ''
+        from ovos_spec_tools import MalformedTemplate
+        with self.assertRaises(MalformedTemplate):
+            expand_template("[(this|that) is optional]")
+
     def test_expand_template(self):
         # Test for template expansion
-        templates = [
-            "[hello,] (call me|my name is) {name}",
-            "Expand (alternative|choices) into a list of choices.",
-            "sentences have [optional] words ",
-            "alternative words can be (used|written)",
-            "sentence[s] can have (pre|suf)fixes mid word too",
-            "do( the | )thing(s|) (old|with) style and( no | )spaces",
-            "[(this|that) is optional]",
-            "tell me a [{joke_type}] joke",
-            "play {query} [in ({device_name}|{skill_name}|{zone_name})]"
-        ]
-
         expected_outputs = {
             "[hello,] (call me|my name is) {name}": [
                 "call me {name}",
@@ -60,9 +63,11 @@ class TestTemplateExpansion(unittest.TestCase):
                 "Expand alternative into a list of choices.",
                 "Expand choices into a list of choices."
             ],
+            # an emptied [optional] no longer leaves a double space —
+            # OVOS-INTENT-1 §4.1 normalizes whitespace to single spaces
             "sentences have [optional] words ": [
-                "sentences have  words",
-                "sentences have optional words"
+                "sentences have optional words",
+                "sentences have words"
             ],
             "alternative words can be (used|written)": [
                 "alternative words can be used",
@@ -92,12 +97,8 @@ class TestTemplateExpansion(unittest.TestCase):
                 "do things with style and no spaces",
                 "do things with style and spaces"
             ],
-            "[(this|that) is optional]": [
-                '',
-                'that is optional',
-                'this is optional'],
             "tell me a [{joke_type}] joke": [
-                "tell me a  joke",
+                "tell me a joke",
                 "tell me a {joke_type} joke"
             ],
             "play {query} [in ({device_name}|{skill_name}|{zone_name})]": [

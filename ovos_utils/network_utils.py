@@ -94,14 +94,16 @@ def is_connected_dns(host: Optional[str] = None, port: int = 53,
         return is_connected_dns(cfg.get("dns_primary") or _DEFAULT_TEST_CONFIG['dns_primary']) or \
             is_connected_dns(cfg.get("dns_secondary") or _DEFAULT_TEST_CONFIG['dns_secondary'])
 
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         # connect to the host -- tells us if the host is actually reachable
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(timeout)
         s.connect((host, port))
         return True
     except OSError:
         pass
+    finally:
+        s.close()
     return False
 
 

@@ -131,8 +131,29 @@ class LOG:
     @classmethod
     def set_level(cls, level):
         cls.level = level
-        for l in cls._loggers:
-            cls._loggers[l].setLevel(level)
+        for logger_name in cls._loggers:
+            cls._loggers[logger_name].setLevel(level)
+
+    @classmethod
+    def is_enabled_for(cls, level: int) -> bool:
+        """Return whether a record at ``level`` would be emitted.
+
+        ``LOG.level`` accepts the same integer and named levels as the stdlib
+        logger. Unknown names deliberately fall through as enabled so the
+        existing logger configuration path still raises its normal error.
+        """
+        if logging.root.manager.disable >= level:
+            return False
+        configured = cls.level
+        if isinstance(configured, int):
+            threshold = configured
+        else:
+            threshold = logging.getLevelName(str(configured).upper())
+            if not isinstance(threshold, int):
+                return True
+        if threshold == logging.NOTSET:
+            threshold = logging.root.getEffectiveLevel()
+        return level >= threshold
 
     @classmethod
     def _get_real_logger(cls):
@@ -170,22 +191,32 @@ class LOG:
 
     @classmethod
     def info(cls, *args, **kwargs):
+        if not cls.is_enabled_for(logging.INFO):
+            return
         cls._get_real_logger().info(*args, **kwargs)
 
     @classmethod
     def debug(cls, *args, **kwargs):
+        if not cls.is_enabled_for(logging.DEBUG):
+            return
         cls._get_real_logger().debug(*args, **kwargs)
 
     @classmethod
     def warning(cls, *args, **kwargs):
+        if not cls.is_enabled_for(logging.WARNING):
+            return
         cls._get_real_logger().warning(*args, **kwargs)
 
     @classmethod
     def error(cls, *args, **kwargs):
+        if not cls.is_enabled_for(logging.ERROR):
+            return
         cls._get_real_logger().error(*args, **kwargs)
 
     @classmethod
     def exception(cls, *args, **kwargs):
+        if not cls.is_enabled_for(logging.ERROR):
+            return
         cls._get_real_logger().exception(*args, **kwargs)
 
 
@@ -258,6 +289,17 @@ def get_logs_config(service_name: Optional[str] = None,
     return _logs_conf
 
 
+# Tracks (message, caller) pairs already logged so each unique deprecation
+# is only reported once instead of spamming the logs on every call
+_logged_deprecations = set()
+
+# Cheap, `inspect.stack()`-free pre-check keyed on the immediate caller's code
+# object/line rather than the fully resolved origin. Repeat calls from the
+# same call site short-circuit before paying for the O(n) stack walk needed
+# to resolve `_logged_deprecations`'s (message, origin) key.
+_logged_deprecations_fast = set()
+
+
 def log_deprecation(log_message: str = "DEPRECATED",
                     deprecation_version: str = "Unknown",
                     func_name: str = None,
@@ -274,6 +316,12 @@ def log_deprecation(log_message: str = "DEPRECATED",
         determination. i.e. an internal exception handling method should log the
         first call external to that package
     """
+    caller = sys._getframe(1)
+    fast_key = (log_message, func_name, func_module, caller.f_code,
+                caller.f_lineno)
+    if fast_key in _logged_deprecations_fast:
+        return
+
     stack = inspect.stack()[1:]  # [0] is this method
     call_info = "Unknown Origin"
     origin_module = func_module
@@ -297,6 +345,12 @@ def log_deprecation(log_message: str = "DEPRECATED",
         if not name.startswith(origin_module):
             call_info = f"{name}:{call.lineno}"
             break
+    # Only log each unique deprecation (message + caller) once
+    dedupe_key = (log_message, log_name, call_info)
+    _logged_deprecations_fast.add(fast_key)
+    if dedupe_key in _logged_deprecations:
+        return
+    _logged_deprecations.add(dedupe_key)
     # Explicitly format log to print origin log reference
     LOG.create_logger(log_name).warning(
         f"Deprecation version={deprecation_version}. Caller={call_info}. "
@@ -348,7 +402,6 @@ def get_log_path(service: str, directories: Optional[List[str]] = None) \
 
     from ovos_utils.xdg_utils import xdg_state_home
     try:
-        from ovos_config import Configuration
         from ovos_config.meta import get_xdg_base
     except ImportError:
         xdg_base = os.environ.get("OVOS_CONFIG_BASE_FOLDER", "mycroft")

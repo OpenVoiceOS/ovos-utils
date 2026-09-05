@@ -412,5 +412,52 @@ class TestGetLastLoadTime(unittest.TestCase):
         self.assertGreater(result, datetime.fromtimestamp(0))
 
 
+class TestOvosLogsCLINoStrayFiles(unittest.TestCase):
+    """Regression test: importing/using the ovos-logs CLI must not create
+    a stray lock file in the current working directory.
+
+    Previously `LOGLOCK = ComboLock("ovos_logs_console_script")` was
+    instantiated at module import time with a bare relative path, which
+    made ComboLock create (and leave behind) an empty file named
+    `ovos_logs_console_script` in whatever directory the process was
+    started from.
+    """
+
+    def test_help_does_not_create_stray_file(self) -> None:
+        import subprocess
+        import sys
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            before = set(os.listdir(tmpdir))
+            subprocess.run(
+                [sys.executable, "-c",
+                 "import sys; sys.argv=['ovos-logs', '--help']; "
+                 "from ovos_utils.log_parser import ovos_logs; "
+                 "ovos_logs()"],
+                cwd=tmpdir,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            after = set(os.listdir(tmpdir))
+        self.assertEqual(before, after,
+                          f"stray files created in cwd: {after - before}")
+
+    def test_importing_log_parser_does_not_create_stray_file(self) -> None:
+        import subprocess
+        import sys
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            before = set(os.listdir(tmpdir))
+            subprocess.run(
+                [sys.executable, "-c", "import ovos_utils.log_parser"],
+                cwd=tmpdir,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            after = set(os.listdir(tmpdir))
+        self.assertEqual(before, after,
+                          f"stray files created in cwd: {after - before}")
+
+
 if __name__ == "__main__":
     unittest.main()
