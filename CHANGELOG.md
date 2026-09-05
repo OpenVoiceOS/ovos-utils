@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.14.2a1) (2026-09-05)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.14.1a1...0.14.2a1)
+
+**Merged pull requests:**
+
+- fix: FakeBus/AsyncFakeBus must not crash on a malformed session carrier [\#441](https://github.com/OpenVoiceOS/ovos-utils/pull/441) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.14.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.14.1a1) (2026-09-04)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.14.0a2...0.14.1a1)
@@ -344,10 +352,6 @@
 ## [0.8.1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.1) (2025-06-08)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.0a2...0.8.1)
-
-**Merged pull requests:**
-
-- Release 0.8.0a2 [\#332](https://github.com/OpenVoiceOS/ovos-utils/pull/332) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [0.8.0a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.0a2) (2025-06-08)
 
