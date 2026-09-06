@@ -4,7 +4,7 @@ from collections.abc import Callable, Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from functools import wraps
 from threading import Lock
-from typing import Any, ParamSpec, TypeVar
+from typing import Any, TypeVar
 
 
 DEFAULT_LATENCY_BUCKETS_MS = (
@@ -24,7 +24,9 @@ DEFAULT_LATENCY_BUCKETS_MS = (
     30_000.0,
 )
 
-P = ParamSpec("P")
+#: The package declares requires-python >=3.9, so this module stays on 3.9
+#: syntax: no typing.ParamSpec (3.10) and no zip(strict=) (3.10). The
+#: decorator is typed on its return value only, which is what callers see.
 R = TypeVar("R")
 
 
@@ -113,11 +115,11 @@ class LatencyHistogram:
         finally:
             measurement.finish()
 
-    def timed(self, function: Callable[P, R]) -> Callable[P, R]:
+    def timed(self, function: Callable[..., R]) -> Callable[..., R]:
         """Decorate a synchronous function with this histogram."""
 
         @wraps(function)
-        def wrapped(*args: P.args, **kwargs: P.kwargs) -> R:
+        def wrapped(*args: Any, **kwargs: Any) -> R:
             with self.measure():
                 return function(*args, **kwargs)
 
@@ -126,9 +128,13 @@ class LatencyHistogram:
     def snapshot(self) -> Mapping[str, Any]:
         """Return a detached, JSON-friendly cumulative snapshot."""
         with self._lock:
+            # zip(strict=) is 3.10+; the invariant it guarded still holds
+            # by construction (_buckets is sized from _bounds), so assert it
+            # rather than silently truncating if that ever changes.
+            assert len(self._bounds) == len(self._buckets)
             buckets = {
                 f"le_{format(bound, '.17g')}": count
-                for bound, count in zip(self._bounds, self._buckets, strict=True)
+                for bound, count in zip(self._bounds, self._buckets)
             }
             buckets["inf"] = self._count
             return {
