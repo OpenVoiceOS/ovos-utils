@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.0a1) (2026-09-08)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.14.2a1...0.15.0a1)
+
+**Merged pull requests:**
+
+- feat: address the pip installer by data.service\_name [\#444](https://github.com/OpenVoiceOS/ovos-utils/pull/444) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.14.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.14.2a1) (2026-09-05)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.14.1a1...0.14.2a1)
@@ -344,10 +352,6 @@
 ## [0.8.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.2a1) (2025-09-05)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.1...0.8.2a1)
-
-**Merged pull requests:**
-
-- fix: make orjson optional [\#335](https://github.com/OpenVoiceOS/ovos-utils/pull/335) ([JarbasAl](https://github.com/JarbasAl))
 
 ## [0.8.1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.1) (2025-06-08)
 
