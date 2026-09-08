@@ -17,8 +17,26 @@ import unittest
 import pathlib
 import json
 
+import pytest
 
 from ovos_utils.dialog import MustacheDialogRenderer, load_dialogs, get_dialog
+
+# ovos_utils.dialog is a deprecated shim; this module deliberately keeps
+# exercising it for coverage, filtered per-module rather than dropped.
+pytestmark = [
+    pytest.mark.filterwarnings(
+        "ignore:MustacheDialogRenderer is deprecated; use the OVOS-INTENT-2:DeprecationWarning"
+    ),
+    pytest.mark.filterwarnings(
+        "ignore:get_dialog is deprecated; use the OVOS-INTENT-2:DeprecationWarning"
+    ),
+    pytest.mark.filterwarnings(
+        "ignore:load_dialogs is deprecated; use 'ovos_spec_tools.LocaleResources':DeprecationWarning"
+    ),
+    pytest.mark.filterwarnings(
+        "ignore:EventSchedulerInterface moved to ovos_bus_client:DeprecationWarning"
+    ),
+]
 
 
 # TODO - move to ovos-workshop
@@ -33,13 +51,15 @@ class DialogTest(unittest.TestCase):
         for file in template_path.iterdir():
             if file.suffix == '.dialog':
                 self.stache.load_template_file(file.name, str(file.absolute()))
-                context = json.load(
-                    file.with_suffix('.context.json').open(
-                        'r', encoding='utf-8'))
+                with file.with_suffix('.context.json').open(
+                        'r', encoding='utf-8') as f:
+                    context = json.load(f)
+                with file.with_suffix('.result').open(
+                        'r', encoding='utf-8') as f:
+                    expected = f.read()
                 self.assertEqual(
                     self.stache.render(file.name, context),
-                    file.with_suffix('.result').open('r',
-                                                     encoding='utf-8').read())
+                    expected)
 
     def test_unknown_dialog(self):
         """ Test for returned file name literals in case of unkown dialog """
@@ -55,13 +75,12 @@ class DialogTest(unittest.TestCase):
         for file in template_path.iterdir():
             if file.suffix == '.dialog':
                 self.stache.load_template_file(file.name, str(file.absolute()))
-                context = json.load(
-                    file.with_suffix('.context.json').open(
-                        'r', encoding='utf-8'))
-                results = [
-                    line.strip() for line in file.with_suffix('.result').open(
-                        'r', encoding='utf-8')
-                ]
+                with file.with_suffix('.context.json').open(
+                        'r', encoding='utf-8') as f:
+                    context = json.load(f)
+                with file.with_suffix('.result').open(
+                        'r', encoding='utf-8') as fh:
+                    results = [line.strip() for line in fh]
                 # Try all lines
                 for index, line in enumerate(results):
                     self.assertEqual(
@@ -82,8 +101,8 @@ class DialogTest(unittest.TestCase):
         for f in template_path.iterdir():
             if f.suffix == '.dialog':
                 self.stache.load_template_file(f.name, str(f.absolute()))
-                results = [line.strip()
-                           for line in f.with_suffix('.result').open('r')]
+                with f.with_suffix('.result').open('r') as fh:
+                    results = [line.strip() for line in fh]
                 # Try all lines
                 for index, line in enumerate(results):
                     self.assertEqual(self.stache.render(f.name, index=index),

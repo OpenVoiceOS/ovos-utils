@@ -13,7 +13,7 @@ requires-python = ">=3.9"
 dependencies = [
     "pexpect~=4.9",
     "requests~=2.26",
-    "json_database~=0.10",
+    "json_database>=0.10,<2.0.0",
     "kthread~=0.2",
     "watchdog",
     "pyee>=8.0.0",
@@ -21,6 +21,7 @@ dependencies = [
     "rich-click~=1.7",
     "rich~=13.7",
     "python-dateutil",
+    "ovos-spec-tools>=1.10.7a2",  # SpecMessage.SESSION_REJECTED (SESSION-1 §2.5)
 ]
 
 [project.urls]
@@ -33,7 +34,7 @@ extras = [
     "ovos-plugin-manager>=0.0.25",
     "ovos-config>=0.0.12",
     "ovos-workshop>=0.0.13",
-    "ovos_bus_client>=0.0.8",
+    "ovos_bus_client>=2.11.4a1",
     "langcodes",
     "timezonefinder",
     "oauthlib~=3.2",

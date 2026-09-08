@@ -1,5 +1,5 @@
 import subprocess
-from distutils.spawn import find_executable
+from shutil import which
 
 from ovos_utils.gui import is_gui_installed
 from ovos_utils.log import LOG
@@ -9,7 +9,7 @@ class InputDeviceHelper:
     def __init__(self) -> None:
         self.libinput_devices_list = []
         self.xinput_devices_list = []
-        if not find_executable("libinput") and not find_executable("xinput"):
+        if not which("libinput") and not which("xinput"):
             LOG.warning("Could not find libinput, input device detection will be inaccurate")
 
     # ToDo: add support for discovering the input device based of a connected
@@ -68,7 +68,7 @@ class InputDeviceHelper:
                  })
 
     def _get_libinput_devices_list(self):
-        if find_executable("libinput"):
+        if which("libinput"):
             try:
                 self._build_linput_devices_list()
             except Exception:
@@ -98,7 +98,7 @@ class InputDeviceHelper:
                 self.xinput_devices_list.append(dev)
 
     def _get_xinput_devices_list(self):
-        if find_executable("xinput"):
+        if which("xinput"):
             try:
                 self._build_xinput_devices_list()
             except Exception:
@@ -113,7 +113,7 @@ class InputDeviceHelper:
         return self.libinput_devices_list + self.xinput_devices_list
 
     def can_use_touch_mouse(self):
-        if not find_executable("libinput") and not find_executable("xinput"):
+        if not which("libinput") and not which("xinput"):
             # if gui installed assume we have a mouse
             # otherwise let's assume we are a server or something...
             return is_gui_installed()

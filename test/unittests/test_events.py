@@ -1,13 +1,22 @@
 import inspect
 import unittest
 import datetime
+import warnings
 
 from os.path import join, dirname
 from threading import Event
 from time import time
 from unittest.mock import Mock
 
+import pytest
+
 from ovos_utils.fakebus import FakeBus, FakeMessage as Message
+
+# EventSchedulerInterface is a deprecated shim (moved to ovos_bus_client);
+# these classes deliberately keep exercising it for coverage.
+_ignore_event_scheduler_moved = pytest.mark.filterwarnings(
+    "ignore:EventSchedulerInterface moved to ovos_bus_client:DeprecationWarning"
+)
 
 
 class TestEvents(unittest.TestCase):
@@ -182,10 +191,20 @@ class TestEvents(unittest.TestCase):
         self.assertEqual(bus.ee.listeners(event_name), [])
 
 
+@_ignore_event_scheduler_moved
 class TestEventSchedulerInterface(unittest.TestCase):
     from ovos_utils.events import EventSchedulerInterface
     bus = FakeBus()
-    interface = EventSchedulerInterface(bus=bus, skill_id="test")
+    # class-body instantiation runs at collection/import time, before the
+    # pytest filterwarnings mark above applies to test items -- silence
+    # the deprecated-shim noise locally instead.
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message="EventSchedulerInterface moved to ovos_bus_client",
+            category=DeprecationWarning,
+        )
+        interface = EventSchedulerInterface(bus=bus, skill_id="test")
 
     def test_00_init(self):
         from ovos_utils.events import EventContainer
@@ -513,6 +532,7 @@ class TestEventContainerOnce(unittest.TestCase):
         self.assertTrue(result)
 
 
+@_ignore_event_scheduler_moved
 class TestEventSchedulerInterfaceExtended(unittest.TestCase):
     """Additional tests for EventSchedulerInterface uncovered methods."""
 
