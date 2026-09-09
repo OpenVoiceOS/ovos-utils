@@ -150,7 +150,7 @@ class OVOSLogParser:
             data['timestamp'] = datetime.strptime(data['timestamp'], TIME_FORMAT)
             return LogLine(**data)
         
-        data["timestamp"] = last_timestamp or ""
+        data["timestamp"] = last_timestamp
         data["message"] = log_line
         return LogLine(**data)
     
@@ -374,7 +374,7 @@ def slice(start, until, logs, paths, file):
             continue
         _templog[service] = []
         for log in OVOSLogParser.parse_file(logfile):
-            if start <= log.timestamp < end:
+            if log.timestamp is not None and start <= log.timestamp < end:
                 if isinstance(log, Traceback):
                     _templog[service].extend(log.to_loglines())
                 else:

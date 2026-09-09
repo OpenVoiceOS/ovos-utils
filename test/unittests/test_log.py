@@ -394,6 +394,17 @@ class TestLog(unittest.TestCase):
         self.assertEqual(get_log_path("test"), self.test_dir)
         get_config.assert_called_once_with(service_name="test")
 
+    def test_get_log_path_broken_symlink(self):
+        from ovos_utils.log import get_log_path
+
+        symlink_path = join(self.test_dir, "broken.log")
+        os.symlink(join(self.test_dir, "does_not_exist.log"), symlink_path)
+        try:
+            self.assertEqual(get_log_path("broken", [self.test_dir]),
+                              self.test_dir)
+        finally:
+            os.unlink(symlink_path)
+
     @patch('ovos_config.Configuration')
     def test_get_log_paths(self, config):
         from ovos_utils.log import get_log_paths
