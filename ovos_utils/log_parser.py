@@ -1,6 +1,8 @@
 import re
 import os
+import time
 from datetime import datetime
+from pathlib import Path
 from traceback import FrameSummary
 from dataclasses import dataclass
 from typing import Any, Tuple, List, Generator, Dict, Union, Optional
@@ -22,6 +24,9 @@ except ImportError:
     date_format = "DMY"
     
 from ovos_utils.log import get_log_path, get_log_paths, get_available_logs
+from ovos_utils.container_logs import (list_container_names,
+                                       start_container_log_bridges,
+                                       stop_container_log_bridges)
 
 
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
@@ -672,3 +677,60 @@ def reduce(size, date, logs, paths):
 
         if reduced:
             console.print(f"{service} log reduced")
+
+
+@ovos_logs.command()
+@click.option("--paths", "-p", type=click.Path(), default=None,
+              help="directory to bridge container logs into "
+                   "[default: a per-run directory under the xdg cache home]")
+@click.option("--container", "-c", "containers", multiple=True, default=None,
+              help="container name to bridge; may be repeated "
+                   "[default: autodetect every ovos/hivemind container]")
+def containers(paths, containers):
+    """\b
+    Bridge Docker/Podman container stdout into the same small set of
+    per-category log files (skills.log, audio.log, voice.log, bus.log,
+    phal.log, gui.log, other.log) a file-based install already produces.
+    \b
+    Every OVOS/HiveMind container is discovered automatically unless one or
+    more `-c` are given. Runs in the foreground until interrupted (Ctrl+C),
+    bridging container stdout the whole time; point any other `ovos-logs`
+    command's `-p` at the printed directory (in another terminal) to read it
+    with the existing tailing/coloring/filtering machinery.
+    \b
+    Does nothing and exits with an error if neither `docker` nor `podman` is
+    on PATH, or if no matching container is running.
+    \b
+    > Examples:
+    > ovos-logs containers                                       # bridge every ovos/hivemind container, autodetected
+    > ovos-logs containers -c ovos_core -c ovos_audio             # bridge only the named containers
+    > ovos-logs containers -p /tmp/ovos-container-logs            # bridge into a chosen directory
+    """
+    from ovos_utils.xdg_utils import xdg_cache_home
+
+    target_dir = Path(paths) if paths else \
+        Path(xdg_cache_home()) / "ovos_container_logs"
+    names = list(containers) if containers else list_container_names()
+    if not names:
+        console = Console()
+        console.print("[red]No docker/podman OVOS/HiveMind containers found[/red]")
+        raise SystemExit(1)
+
+    handles = start_container_log_bridges(names, target_dir)
+    if not handles:
+        console = Console()
+        console.print("[red]Neither docker nor podman is available, or no "
+                      "bridge could be started[/red]")
+        raise SystemExit(1)
+
+    console = Console()
+    console.print(f"Bridging {len(handles)} container(s) into {target_dir}")
+    console.print(f"Point another `ovos-logs` command at it with: -p {target_dir}")
+    console.print("Press Ctrl+C to stop")
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        stop_container_log_bridges(handles)
