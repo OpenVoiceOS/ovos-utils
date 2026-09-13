@@ -214,6 +214,13 @@ class TestOVOSLogParser(unittest.TestCase):
         result = OVOSLogParser.parse("some system message\n", last_timestamp=ts)
         self.assertEqual(result.timestamp, ts)
 
+    def test_parse_invalid_line_without_last_timestamp(self) -> None:
+        """parse should leave timestamp as None, not a string, when there is
+        no last_timestamp to fall back to."""
+        from ovos_utils.log_parser import OVOSLogParser
+        result = OVOSLogParser.parse("some system message\n")
+        self.assertIsNone(result.timestamp)
+
     def test_parse_file_valid(self) -> None:
         """parse_file should yield LogLine objects from a valid log file."""
         from ovos_utils.log_parser import OVOSLogParser, LogLine
@@ -280,6 +287,36 @@ class TestOVOSLogParser(unittest.TestCase):
             results = list(OVOSLogParser.parse_file(fname))
             log_lines = [r for r in results if isinstance(r, LogLine)]
             self.assertEqual(len(log_lines), 2)
+        finally:
+            os.unlink(fname)
+
+    def test_parse_file_leading_line_without_timestamp(self) -> None:
+        """A log line that does not match LOG_PATTERN (e.g. it is missing a
+        field) before any timestamped line is seen must not leave a string
+        in LogLine.timestamp, since callers compare it against datetimes."""
+        from ovos_utils.log_parser import OVOSLogParser
+
+        content = (
+            "2024-07-17 21:59:57.530 - common_query.openvoiceos - INFO - "
+            "First run of common_query.openvoiceos\n"
+            "2024-07-17 22:00:01.123 - skills - core.MSM - DEBUG - loaded skill\n"
+        )
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".log", delete=False) as f:
+            f.write(content)
+            fname = f.name
+
+        try:
+            results = list(OVOSLogParser.parse_file(fname))
+            first, second = results
+            self.assertIsNone(first.timestamp)
+            self.assertIsInstance(second.timestamp, datetime)
+            start = datetime(2024, 1, 1)
+            end = datetime.now()
+            # must not raise: comparing None against datetimes previously
+            # raised TypeError because the fallback timestamp was ""
+            filtered = [log for log in results
+                        if log.timestamp is not None and start <= log.timestamp < end]
+            self.assertEqual(len(filtered), 1)
         finally:
             os.unlink(fname)
 

@@ -396,7 +396,7 @@ def get_log_path(service: str, directories: Optional[List[str]] = None) \
     if directories:
         for directory in directories:
             file = os.path.join(directory, f"{service}.log")
-            if os.path.exists(file):
+            if os.path.lexists(file):
                 return directory
         return None
 
