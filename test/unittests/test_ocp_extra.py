@@ -391,5 +391,146 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(PlaybackMode.AUDIO_ONLY, 10)
 
 
+# ---- MPRIS / numeric hardening tests -----------------------------------------
+
+def _stub_dbus_next():
+    """Install a minimal dbus_next stub that records the Variant signature used."""
+    import sys
+    from unittest.mock import MagicMock
+
+    class Variant:
+        def __init__(self, signature, value):
+            if signature != 'x' and not isinstance(value, (int, float, str, list)):
+                raise TypeError(f"bad value for signature {signature}: {value!r}")
+            self.signature = signature
+            self.value = value
+
+    dbus_stub = MagicMock()
+    dbus_stub.service.Variant = Variant
+    sys.modules["dbus_next"] = dbus_stub
+    sys.modules["dbus_next.service"] = dbus_stub.service
+    return Variant
+
+
+def _unstub_dbus_next():
+    import sys
+    sys.modules.pop("dbus_next", None)
+    sys.modules.pop("dbus_next.service", None)
+
+
+class TestMprisLengthVariant(unittest.TestCase):
+    """mpris:length must use MPRIS2 signature 'x' (int64), never 'd'."""
+
+    def setUp(self):
+        _stub_dbus_next()
+
+    def tearDown(self):
+        _unstub_dbus_next()
+
+    def test_length_uses_int_signature(self):
+        entry = MediaEntry(uri="http://x.com/f.mp3", length=180)
+        meta = entry.mpris_metadata
+        variant = meta["mpris:length"]
+        self.assertEqual(variant.signature, 'x')
+        self.assertIsInstance(variant.value, int)
+        self.assertEqual(variant.value, 180)
+
+    def test_non_numeric_length_is_omitted_not_crashed(self):
+        entry = MediaEntry(uri="http://x.com/f.mp3")
+        entry.length = "not-a-number"  # bypass update() validation directly
+        meta = entry.mpris_metadata  # must not raise
+        self.assertNotIn("mpris:length", meta)
+
+    def test_nan_length_is_omitted(self):
+        entry = MediaEntry(uri="http://x.com/f.mp3")
+        entry.length = float("nan")
+        meta = entry.mpris_metadata
+        self.assertNotIn("mpris:length", meta)
+
+    def test_inf_length_is_omitted(self):
+        entry = MediaEntry(uri="http://x.com/f.mp3")
+        entry.length = float("inf")
+        meta = entry.mpris_metadata
+        self.assertNotIn("mpris:length", meta)
+
+
+class TestMediaEntryUpdateValidation(unittest.TestCase):
+    """update() must reject invalid values for numeric fields, keeping prior value."""
+
+    def test_update_rejects_non_numeric_length(self):
+        entry = MediaEntry(uri="http://x.com/f.mp3", length=100)
+        entry.update({"length": "garbage"})
+        self.assertEqual(entry.length, 100)
+
+    def test_update_rejects_nan_length(self):
+        entry = MediaEntry(uri="http://x.com/f.mp3", length=100)
+        entry.update({"length": float("nan")})
+        self.assertEqual(entry.length, 100)
+
+    def test_update_rejects_inf_length(self):
+        entry = MediaEntry(uri="http://x.com/f.mp3", length=100)
+        entry.update({"length": float("inf")})
+        self.assertEqual(entry.length, 100)
+
+    def test_update_rejects_bool_length(self):
+        # bool is a subclass of int - must not be accepted as a numeric length
+        entry = MediaEntry(uri="http://x.com/f.mp3", length=100)
+        entry.update({"length": True})
+        self.assertEqual(entry.length, 100)
+
+    def test_update_accepts_valid_length(self):
+        entry = MediaEntry(uri="http://x.com/f.mp3", length=100)
+        entry.update({"length": 250})
+        self.assertEqual(entry.length, 250)
+
+    def test_update_rejects_non_numeric_match_confidence(self):
+        entry = MediaEntry(uri="http://x.com/f.mp3", match_confidence=50)
+        entry.update({"match_confidence": "high"})
+        self.assertEqual(entry.match_confidence, 50)
+
+    def test_update_still_applies_non_numeric_fields(self):
+        entry = MediaEntry(uri="http://x.com/f.mp3", length=100, title="Old")
+        entry.update({"length": "garbage", "title": "New"})
+        self.assertEqual(entry.length, 100)
+        self.assertEqual(entry.title, "New")
+
+    def test_playlist_length_survives_poisoned_entry(self):
+        # a non-numeric length must never reach Playlist.length's sum()
+        pl = Playlist()
+        pl.add_entry(MediaEntry(uri="a", length=10))
+        e2 = MediaEntry(uri="b", length=20)
+        e2.update({"length": "poison"})
+        pl.add_entry(e2)
+        self.assertEqual(pl.length, 30)
+
+
+class TestDict2EntryErrorType(unittest.TestCase):
+    """dict2entry must always raise ValueError on garbage input, never AssertionError/AttributeError."""
+
+    def test_none_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            dict2entry(None)
+
+    def test_int_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            dict2entry(5)
+
+    def test_str_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            dict2entry("not-a-dict")
+
+    def test_list_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            dict2entry(["not", "a", "dict"])
+
+    def test_empty_dict_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            dict2entry({})
+
+    def test_dict_without_known_keys_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            dict2entry({"foo": "bar"})
+
+
 if __name__ == "__main__":
     unittest.main()

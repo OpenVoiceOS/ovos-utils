@@ -57,9 +57,27 @@ class TestFakeMessage(unittest.TestCase):
         self.assertEqual(resp.msg_type, "my.request.response")
         self.assertEqual(resp.data["result"], "ok")
 
+    def test_publish_emits_deprecation_warning(self) -> None:
+        """``publish`` is not part of OVOS-MSG-1 and is scheduled for
+        removal — every call must fire a DeprecationWarning."""
+        import warnings
+        msg = self._make_message("pub.type", {}, {"source": "x"})
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            msg.publish("new.type", {"payload": 1})
+        deps = [w for w in caught
+                if issubclass(w.category, DeprecationWarning)
+                and "publish" in str(w.message)]
+        self.assertTrue(deps,
+                        "FakeMessage.publish() did not emit a "
+                        "DeprecationWarning")
+
     def test_publish(self) -> None:
         msg = self._make_message("pub.type", {}, {"target": "skill", "source": "x"})
-        published = msg.publish("new.type", {"payload": 1})
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            published = msg.publish("new.type", {"payload": 1})
         self.assertNotIn("target", published.context)
         self.assertEqual(published.data["payload"], 1)
 
