@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.1a1) (2026-09-13)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.0a1...0.15.1a1)
+
+**Merged pull requests:**
+
+- fix: guard slice\(\) against non-datetime timestamps and broken symlinks [\#443](https://github.com/OpenVoiceOS/ovos-utils/pull/443) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.15.0a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.0a1) (2026-09-08)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.14.2a1...0.15.0a1)
@@ -344,10 +352,6 @@
 ## [0.8.3a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.3a1) (2025-10-13)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.2a1...0.8.3a1)
-
-**Merged pull requests:**
-
-- fix: fail safe when used in applications with conflicting watchdog  [\#338](https://github.com/OpenVoiceOS/ovos-utils/pull/338) ([JarbasAl](https://github.com/JarbasAl))
 
 ## [0.8.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.2a1) (2025-09-05)
 
