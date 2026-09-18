@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.2a1) (2026-09-18)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.1a1...0.15.2a1)
+
+**Merged pull requests:**
+
+- fix: log every deprecation under the OVOS.deprecation child logger \(\#447\) [\#450](https://github.com/OpenVoiceOS/ovos-utils/pull/450) ([openvoiceos-bot](https://github.com/openvoiceos-bot))
+
 ## [0.15.1a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.1a1) (2026-09-13)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.0a1...0.15.1a1)
@@ -344,10 +352,6 @@
 ## [0.8.4a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.4a1) (2025-10-13)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.3a1...0.8.4a1)
-
-**Merged pull requests:**
-
-- fix: handle issues in NVDA python stdlib [\#341](https://github.com/OpenVoiceOS/ovos-utils/pull/341) ([JarbasAl](https://github.com/JarbasAl))
 
 ## [0.8.3a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.3a1) (2025-10-13)
 
