@@ -351,10 +351,39 @@ def log_deprecation(log_message: str = "DEPRECATED",
     if dedupe_key in _logged_deprecations:
         return
     _logged_deprecations.add(dedupe_key)
-    # Explicitly format log to print origin log reference
-    LOG.create_logger(log_name).warning(
-        f"Deprecation version={deprecation_version}. Caller={call_info}. "
-        f"{log_message}")
+    # One fixed child logger for every deprecation (#447). The origin that
+    # used to be the logger name stays in the message, so a deployment can
+    # put a logging.Filter or a level on `<LOG.name>.deprecation` and still
+    # read which call site each record names.
+    origin = log_name[len(LOG.name) + 3:] if log_name != LOG.name else ""
+    deprecation_logger().warning(
+        f"Deprecation version={deprecation_version}. Origin={origin}. "
+        f"Caller={call_info}. {log_message}")
+
+
+def deprecation_logger() -> logging.Logger:
+    """The logger every deprecation warning is written to.
+
+    Named ``<LOG.name>.deprecation`` (``OVOS.deprecation`` by default), a
+    dotted child of the OVOS logger, so a deployment can silence or route
+    deprecations with a standard ``logging.Filter`` or a level on that one
+    name instead of on a per-call-site logger it cannot name in advance
+    (#447). It carries the same stdout and file handlers as every other
+    OVOS logger. Propagation is left on, unlike the per-call-site loggers,
+    so a handler on the root logger receives the record too and a
+    deployment can route deprecations without touching OVOS handlers.
+    ``propagate`` is set once, when the logger is first built: a setting a
+    deployment puts on the logger afterwards is not reverted by a later
+    deprecation.
+    """
+    name = f"{LOG.name}.deprecation"
+    if name in LOG._loggers:
+        # already built: a deployment that set propagate (or a level, or a
+        # filter) on it keeps that setting across every later deprecation
+        return LOG._loggers[name]
+    logger = LOG.create_logger(name)
+    logger.propagate = True
+    return logger
 
 
 def deprecated(log_message: str, deprecation_version: str):
