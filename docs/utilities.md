@@ -201,3 +201,6 @@ cache_dir = xdg_cache_home() / "mycroft"     # ~/.cache/mycroft
 | `xdg_data_dirs()` | `XDG_DATA_DIRS` | `[/usr/local/share, /usr/share]` |
 
 Environment variable values are only used if they are absolute paths; relative paths fall back to the default.
+
+---
+[← Events](events.md) · [Home](index.md)

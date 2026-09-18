@@ -28,6 +28,13 @@ __all__ = [
 OCP_ID = "ovos.common_play"
 
 
+def _is_valid_number(value) -> bool:
+    """A finite, non-boolean int/float."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    return value == value and abs(value) != float("inf")  # rules out NaN/inf
+
+
 class MatchConfidence(IntEnum):
     EXACT = 95
     VERY_HIGH = 90
@@ -202,10 +209,14 @@ class MediaEntry:
         if isinstance(entry, (MediaEntry, PluginStream)):
             entry = entry.as_dict
         entry = entry or {}
+        numeric_fields = ("length", "position", "match_confidence")
         for k, v in entry.items():
             if k not in skipkeys and hasattr(self, k):
                 if newonly and self.__getattribute__(k):
                     # skip, do not replace existing values
+                    continue
+                if k in numeric_fields and not _is_valid_number(v):
+                    LOG.debug(f"ignoring invalid value for '{k}': {v!r}")
                     continue
                 self.__setattr__(k, v)
 
@@ -236,8 +247,8 @@ class MediaEntry:
             meta['xesam:title'] = Variant('s', self.title)
         if self.image:
             meta['mpris:artUrl'] = Variant('s', self.image)
-        if self.length:
-            meta['mpris:length'] = Variant('d', self.length)
+        if _is_valid_number(self.length) and self.length:
+            meta['mpris:length'] = Variant('x', int(self.length))
         return meta
 
     @property
@@ -622,6 +633,8 @@ class Playlist(list):
 
 
 def dict2entry(track: dict) -> Union[PluginStream, MediaEntry, Playlist]:
+    if not isinstance(track, dict):
+        raise ValueError(f"expected a dict, got {type(track).__name__}: {track!r}")
     if track.get("playlist"):
         return Playlist.from_dict(track)
     elif track.get("extractor_id"):
