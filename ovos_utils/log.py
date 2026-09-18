@@ -372,8 +372,16 @@ def deprecation_logger() -> logging.Logger:
     OVOS logger. Propagation is left on, unlike the per-call-site loggers,
     so a handler on the root logger receives the record too and a
     deployment can route deprecations without touching OVOS handlers.
+    ``propagate`` is set once, when the logger is first built: a setting a
+    deployment puts on the logger afterwards is not reverted by a later
+    deprecation.
     """
-    logger = LOG.create_logger(f"{LOG.name}.deprecation")
+    name = f"{LOG.name}.deprecation"
+    if name in LOG._loggers:
+        # already built: a deployment that set propagate (or a level, or a
+        # filter) on it keeps that setting across every later deprecation
+        return LOG._loggers[name]
+    logger = LOG.create_logger(name)
     logger.propagate = True
     return logger
 
