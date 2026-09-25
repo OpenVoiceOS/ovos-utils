@@ -16,6 +16,7 @@
 import unittest
 import pathlib
 import json
+import random
 
 import pytest
 
@@ -120,6 +121,55 @@ class DialogTest(unittest.TestCase):
         self.assertEqual(renderer.render('test'), 'test')
 
 
+    def test_repeat_avoidance_with_slots(self):
+        """A template that carries a slot must still be held back.
+
+        The renderer remembers what it said in order to not repeat a line.
+        It remembers the unrendered template, because a rendered line never
+        equals the template it came from once the template carries a {slot}
+        or an (a|b) group.
+        """
+        cases = {
+            "slot_free": (["Hello there",
+                           "Another possible outcome",
+                           "Oh look at the capabilities"], {}),
+            "slot_carrying": (["Hello there {name}!",
+                               "Another possible outcome, {name}",
+                               "Oh, {name} look at the capabilities"],
+                              {"name": "Sherlock"}),
+            "alternation_only": (["(Hi|Hello) there",
+                                  "(Good|Great) to see you",
+                                  "(Welcome|Greetings) friend"], {}),
+        }
+        for name, (templates, context) in cases.items():
+            with self.subTest(case=name):
+                random.seed(7)
+                renderer = MustacheDialogRenderer()
+                renderer.templates["repeat"] = list(templates)
+                previous = None
+                rendered = set()
+                for _ in range(200):
+                    line = renderer.render("repeat", context)
+                    self.assertNotEqual(
+                        line, previous,
+                        "{} repeated a line back to back".format(name))
+                    previous = line
+                    rendered.add(line)
+                # the filter must hold lines back, not collapse the choice
+                self.assertGreaterEqual(len(rendered), len(templates))
+
+    def test_recent_phrases_holds_templates(self):
+        """What is remembered must be comparable to what is filtered."""
+        renderer = MustacheDialogRenderer()
+        # three lines: with two or fewer, loop_prevention_offset turns the
+        # repeat filter off on purpose and nothing is remembered
+        renderer.templates["repeat"] = ["Hello there {name}!",
+                                        "Goodbye {name}",
+                                        "See you {name}"]
+        renderer.render("repeat", {"name": "Sherlock"})
+        self.assertTrue(renderer.recent_phrases)
+        for phrase in renderer.recent_phrases:
+            self.assertIn(phrase, renderer.templates["repeat"])
 
 
 if __name__ == "__main__":

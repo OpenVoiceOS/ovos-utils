@@ -98,16 +98,19 @@ class MustacheDialogRenderer:
             template_functions = ([t for t in template_functions
                                    if t not in self.recent_phrases] or
                                   template_functions)
-            line = random.choice(template_functions)
+            template = random.choice(template_functions)
         else:
-            line = template_functions[index % len(template_functions)]
+            template = template_functions[index % len(template_functions)]
         # Replace {key} in line with matching values from context
-        line = line.format(**context)
+        line = template.format(**context)
         line = random.choice(sorted(expand(line)))
 
         # Here's where we keep track of what we've said recently. Remember,
-        # this is by line in the .dialog file, not by exact phrase
-        self.recent_phrases.append(line)
+        # this is by line in the .dialog file, not by exact phrase, so the
+        # unrendered template is remembered. A rendered line never equals the
+        # template it came from when the template carries a {slot} or an
+        # (a|b) group, and the filter above would then match nothing.
+        self.recent_phrases.append(template)
         if (len(self.recent_phrases) >
                 min(self.max_recent_phrases, len(self.templates.get(
                     template_name)) - self.loop_prevention_offset)):
