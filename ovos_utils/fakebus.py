@@ -1,9 +1,58 @@
-import json
-from copy import deepcopy
-from threading import Event
+import asyncio
 import warnings
+from copy import deepcopy
+from os import environ
+from threading import Event
+
 from ovos_utils.log import LOG, log_deprecation
+from ovos_spec_tools import NamespaceTranslator
+from ovos_spec_tools.intent_topics import (canonical_intent_topic,
+                                           intent_topic_counterpart,
+                                           is_intent_topic,
+                                           legacy_intent_topic)
 from pyee import EventEmitter
+
+
+#: Context flag stamped on a twin intent frame, mirroring
+#: ``ovos_bus_client.client.client.INTENT_COMPAT_TWIN_KEY``. Its presence
+#: means the canonical spelling of this dispatch was already delivered
+#: alongside it, so a receiver that understands the bridge must not
+#: modernize the twin a second time (that would fire the handler twice).
+INTENT_COMPAT_TWIN_KEY = "_intent_compat_twin"
+
+
+def _verbatim_copy(message, topic: str):
+    """Retopic ``message`` onto ``topic``, carrying its context byte-for-byte.
+
+    Mirrors ``ovos_bus_client.client.client._verbatim_copy``. NOT
+    ``Message.forward`` -- ``forward()`` re-stamps the session, which for
+    the default session would replace the carried session with this
+    process's own and desync ``lang`` / ``active_skills`` between the
+    canonical frame and its twin.
+    """
+    return message.__class__(topic, data=deepcopy(message.data),
+                              context=deepcopy(message.context))
+
+
+def _session_rejected_message(parsed_message):
+    """Build the ``ovos.session.rejected`` notice for a dropped message.
+
+    SESSION-1 §2.5 (architecture dev 198a3c9): a malformed session carrier
+    drops the whole message, but the drop is observable -- the bus emits
+    ``SpecMessage.SESSION_REJECTED`` with the dropped message's type and the
+    reason, carrying the dropped message's ``utterance_id`` when present.
+    The rejection itself names no session (there was never a valid one to
+    name), so ``context`` deliberately has no ``session`` key.
+    """
+    from ovos_spec_tools.messages import SpecMessage
+    context = {}
+    utterance_id = parsed_message.context.get("utterance_id")
+    if utterance_id is not None:
+        context["utterance_id"] = utterance_id
+    return FakeMessage(SpecMessage.SESSION_REJECTED,
+                       {"msg_type": parsed_message.msg_type,
+                        "reason": "malformed_carrier"},
+                       context)
 
 
 def dig_for_message():
@@ -15,12 +64,60 @@ def dig_for_message():
     return None
 
 
+# sentinel: lets us tell "kwarg not passed" apart from "kwarg passed True/False"
+_UNSET = object()
+
+
+def _bus_flag(env_var, config_key, default=True):
+    """Resolve a boolean bus flag the way ``MessageBusClient._bus_flag`` does.
+
+    Precedence: env var (when set) > ``websocket.<config_key>`` in ovos_config
+    > ``default``. The env var wins when set to a truthy/falsy string; ovos_config
+    is optional, so any failure to read it falls back to ``default``.
+
+    Kept layering-clean: mirrors ``ovos_bus_client.client.client._bus_flag``
+    without importing from bus-client (bus-client depends on utils, not vice-versa).
+    """
+    val = environ.get(env_var)
+    if val is not None:
+        return val.strip().lower() in ("1", "true", "yes", "on")
+    try:
+        from ovos_config import Configuration
+        return bool(Configuration().get("websocket", {}).get(config_key, default))
+    except Exception:
+        return default
+
+
+def _resolve_bus_flags(kwargs):
+    """Build the namespace ``NamespaceTranslator`` for a fake bus instance.
+
+    An explicitly-passed ``modernize``/``emit_legacy`` kwarg wins (back-compat for
+    callers passing ``emit_legacy=True/False``); otherwise the flag is resolved via
+    env var -> ``websocket.*`` config -> default ``True``, matching the real client.
+    """
+    modernize = kwargs.get("modernize", _UNSET)
+    if modernize is _UNSET:
+        modernize = _bus_flag("OVOS_BUS_MODERNIZE", "modernize", default=True)
+    emit_legacy = kwargs.get("emit_legacy", _UNSET)
+    if emit_legacy is _UNSET:
+        emit_legacy = _bus_flag("OVOS_BUS_EMIT_LEGACY", "emit_legacy", default=True)
+    return NamespaceTranslator(modernize=modernize, emit_legacy=emit_legacy)
+
+
 class FakeBus:
     def __init__(self, *args, **kwargs):
         self.started_running = False
         self.session_id = "default"
         self.ee = kwargs.get("emitter") or EventEmitter()
         self.ee.on("error", self.on_error)
+        # mirror MessageBusClient's namespace migration so the test/satellite
+        # double bridges legacy<->ovos.* topics identically. Flags resolve the
+        # same way the real client does: explicit modernize=/emit_legacy= kwarg
+        # wins, else env var -> websocket.* config -> default on.
+        self._translator = _resolve_bus_flags(kwargs)
+        self._handler_guards = {}        # handler -> shared mirror-guard
+        self._intent_pair_guards = {}    # frozenset({topic, counterpart}) -> shared mirror-guard
+        self._dedup_registrations = {}   # handler -> [(msg_type, wrapped), ...]
         self.on_open()
         try:
             self.session_id = kwargs["session"].session_id
@@ -31,12 +128,149 @@ class FakeBus:
                 self.on_default_session_update)
 
     def on(self, msg_type, handler):
+        # wrap handlers on migrated/bridged topics so a handler subscribed to
+        # both spellings of a mirrored dispatch fires once (the mirror is
+        # dropped). See _mirror_guard_for for the guard-scope rationale.
+        guard = self._mirror_guard_for(msg_type, handler)
+        if guard is not None:
+            # Re-registering the SAME (msg_type, handler) pair used to be
+            # harmless: pyee's EventEmitter keys its listener OrderedDict by
+            # the handler object, so an equal bound method collapsed onto
+            # the same slot instead of firing twice. Minting a fresh
+            # ``wrapped`` closure on every call broke that -- pyee saw a new,
+            # distinct object each time and happily fired both. Reuse the
+            # existing wrapper for this exact (msg_type, handler) pair so
+            # re-registering it re-adds the SAME closure pyee already knows,
+            # restoring the original idempotent-registration behaviour.
+            existing = self._dedup_registrations.get(handler, [])
+            for ev, wrapped in existing:
+                if ev == msg_type:
+                    self.ee.on(msg_type, wrapped)
+                    return
+
+            def wrapped(message=None):
+                if guard(message):
+                    return
+                return handler(message)
+
+            self.ee.on(msg_type, wrapped)
+            self._dedup_registrations.setdefault(handler, []).append((msg_type, wrapped))
+            return
         self.ee.on(msg_type, handler)
 
+    def _mirror_guard_for(self, msg_type, handler):
+        """The mirror guard a registration on ``msg_type`` must wrap with.
+
+        Mirrors ``ovos_bus_client.client.client.MessageBusClient._mirror_guard_for``.
+        Two bridges deliver one logical event twice, and each needs a
+        different guard SCOPE:
+
+        - **namespace migration** (legacy <-> ``ovos.*``): the guard is per
+          HANDLER, shared across that handler's registrations, so its legacy
+          ``on()`` and its ``ovos.*`` ``on()`` dedupe against each other.
+        - **intent-topic compat** (canonical <-> ``.intent``-suffixed): the
+          guard is per TOPIC PAIR, shared by every registration on either
+          spelling.
+
+        The intent guard cannot be keyed by handler: ``ovos-workshop``
+        9.3.2a1+ binds the same skill method to both spellings through a
+        FRESH wrapper closure per binding, so the two registrations are two
+        distinct ``handler`` objects and a per-handler guard would hand each
+        its own private state -- the canonical frame runs one closure, the
+        twin runs the other, and the skill handler fires twice for a single
+        dispatch. Keying on the pair collapses them.
+        """
+        counterpart = intent_topic_counterpart(msg_type)
+        if counterpart is not None:
+            pair_key = frozenset({msg_type, counterpart})
+            guard = self._intent_pair_guards.get(pair_key)
+            if guard is None:
+                guard = self._translator.new_mirror_guard()
+                self._intent_pair_guards[pair_key] = guard
+            return guard
+        if self._translator.is_migrated(msg_type):
+            guard = self._handler_guards.get(handler)
+            if guard is None:
+                guard = self._translator.new_mirror_guard()
+                self._handler_guards[handler] = guard
+            return guard
+        return None
+
+    def _release_intent_pair_guard(self, msg_type):
+        """Drop the pair guard once nothing is registered on either spelling.
+
+        Mirrors ``MessageBusClient._release_intent_pair_guard``.
+        """
+        counterpart = intent_topic_counterpart(msg_type)
+        if counterpart is None:
+            return
+        pair_key = frozenset({msg_type, counterpart})
+        for regs in self._dedup_registrations.values():
+            if any(ev in pair_key for ev, _ in regs):
+                return
+        self._intent_pair_guards.pop(pair_key, None)
+
     def once(self, msg_type, handler):
+        # Route once() through the same guard-selection as on() (see
+        # _mirror_guard_for): a handler that hears both spellings of a
+        # mirrored dispatch via once() must still fire exactly once, not
+        # twice. Mirrors MessageBusClient.once.
+        guard = self._mirror_guard_for(msg_type, handler)
+        if guard is not None:
+            existing = self._dedup_registrations.get(handler, [])
+            for ev, wrapped in existing:
+                if ev == msg_type:
+                    # A once() re-registration of a still-pending (msg_type,
+                    # handler) pair reuses the SAME wrapper pyee already
+                    # knows -- same rationale as on()'s reuse branch.
+                    self.ee.once(msg_type, wrapped)
+                    return
+
+            def wrapped(message=None):
+                # pyee's once() already removes this closure from the
+                # emitter the instant it fires (whether or not the guard
+                # below goes on to suppress the call), so drop our own
+                # bookkeeping for it here too -- otherwise a later on()/
+                # once() for this (msg_type, handler) pair would try to
+                # reuse a wrapper pyee no longer holds.
+                self._forget_dedup_entry(handler, msg_type, wrapped)
+                if guard(message):
+                    return
+                return handler(message)
+
+            self.ee.once(msg_type, wrapped)
+            self._dedup_registrations.setdefault(handler, []).append((msg_type, wrapped))
+            return
         self.ee.once(msg_type, handler)
 
+    def _forget_dedup_entry(self, handler, msg_type, wrapped):
+        """Drop one wrapper's bookkeeping after pyee auto-removes it (once()).
+
+        Mirrors the cleanup ``remove()`` does for an explicit teardown, so a
+        fired once() registration leaves no stale entry for a later on()/
+        once() call on the same (msg_type, handler) pair to (mis)reuse.
+        """
+        regs = self._dedup_registrations.get(handler)
+        if not regs:
+            return
+        try:
+            regs.remove((msg_type, wrapped))
+        except ValueError:
+            return
+        if not regs:
+            self._dedup_registrations.pop(handler, None)
+            self._handler_guards.pop(handler, None)
+        self._release_intent_pair_guard(msg_type)
+
     def emit(self, message):
+        # RULE 2 dedup marker: read it, then POP it before any local
+        # dispatch. A handler invoked below may call message.forward()/
+        # reply() to emit a descendant frame on an UNRELATED topic; those
+        # deep-copy the whole context, so leaving the marker in place would
+        # brand that unrelated frame a twin and silently suppress its
+        # modernization. Mirrors MessageBusClient.on_message's pop-before-
+        # dispatch ordering.
+        is_intent_twin = message.context.pop(INTENT_COMPAT_TWIN_KEY, False)
         if "session" not in message.context:
             try:  # replicate side effects
                 from ovos_bus_client.session import Session, SessionManager
@@ -45,39 +279,219 @@ class FakeBus:
                 message.context["session"] = sess.serialize()
             except ImportError:  # don't care
                 message.context["session"] = {"session_id": self.session_id}
+        # on_message runs BEFORE the handlers below, matching the real
+        # MessageBusClient.on_message order (receive -> take-inbound-session
+        # -> dispatch to handlers). It never folds the default session (see
+        # on_message) -- only a named session it observes gets ``update``'d,
+        # and running that after the handlers would wipe any in-place /
+        # synced mutation a handler made this same tick (handle_session_sync
+        # merging intent_context, handle_add_context injecting context
+        # frames, ...), because the message's session snapshot was stamped
+        # at emit-time, before those mutations landed.
+        #
+        # A malformed carrier (SESSION-1 §2.5) is a per-message producer
+        # fault: on_message() drops the whole message -- no listener runs --
+        # and emits ``ovos.session.rejected`` itself. Nothing more to do here.
+        if not self.on_message(message.serialize()):
+            return
+        self._deliver(message, is_intent_twin)
+
+    def _deliver(self, message, is_intent_twin=False):
+        """Dispatch ``message`` to local listeners, unconditionally.
+
+        Split out of :meth:`emit` so ``on_message`` can deliver the
+        ``ovos.session.rejected`` notice (SESSION-1 §2.5) straight to
+        listeners without going back through ``emit()``'s default-session
+        stamping -- the rejection carries no session at all.
+        """
         self.ee.emit("message", message.serialize())
         try:
             self.ee.emit(message.msg_type, message)
         except Exception as e:
             LOG.exception(f"Error in event handler for '{message.msg_type}': {e}")
-        self.on_message(message.serialize())
+        # namespace migration: also dispatch the counterpart topic(s) so a
+        # listener on either namespace receives the event (consumers dedupe).
+        # the mirrored payload is reshaped into the counterpart topic's shape
+        # (identity for payload-compatible renames, a per-topic transform for
+        # shape-changing ones) so a listener on it receives the payload in *its*
+        # shape -- matching MessageBusClient's bridge.
+        for topic in self._translator.counterpart_topics(message.msg_type):
+            try:
+                translated = self._translator.translate_payload(
+                    from_topic=message.msg_type, to_topic=topic,
+                    data=message.data)
+                self.ee.emit(topic, message.forward(topic, translated))
+            except Exception as e:
+                LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
+        try:
+            self._bridge_intent_topic(message, is_twin=is_intent_twin)
+        except Exception as e:
+            LOG.exception(f"Error in intent-topic bridge for '{message.msg_type}': {e}")
+
+    def _bridge_intent_topic(self, message, is_twin=False):
+        """Legacy <-> canonical intent-topic bridge (RULE 1 + RULE 2).
+
+        Mirrors ``ovos_bus_client.client.client.MessageBusClient``'s
+        ``_send_legacy_intent_twin`` (RULE 1, send-side) and
+        ``_modernize_intent_topic`` (RULE 2, receive-side). The real client
+        splits these across the wire (twin goes out on ``emit()``, the
+        modernized copy is dispatched locally in ``on_message()``); a
+        ``FakeBus`` has no separate wire hop, so both rules run inline,
+        against local listeners only, off of the one message being emitted.
+
+        ``is_twin`` carries the marker decision made in ``emit()``, which
+        pops :data:`INTENT_COMPAT_TWIN_KEY` off the context BEFORE any
+        dispatch so it cannot leak onto descendant frames a handler derives
+        from this one (``message.forward()``/``reply()`` deep-copy context).
+        The marker is therefore never read from ``message.context`` here --
+        only the popped value is trusted.
+
+        RULE 2 first, mirroring the real client's receive order, then
+        RULE 1 -- so a listener on the canonical topic sees the canonical
+        dispatch before the legacy twin goes out.
+
+        Note on the capture firehose (deliberate FakeBus-wide convention,
+        shared with the namespace-migration bridge above): the twin/
+        modernized copy is dispatched straight to ``self.ee`` on its own
+        topic and does NOT re-emit ``"message"``. On the real wire, the
+        twin is a second frame and therefore fires ``on_message`` (and its
+        ``"message"`` firehose) a second time in every receiving process;
+        ``FakeBus`` has no wire hop to put it on, so it keeps the
+        single-process harness's one-emit-one-capture invariant instead of
+        reproducing the wire's two-frame shape.
+
+        Plain-English note on what this can and cannot represent for tests:
+        a ``FakeBus`` models ONE bus connection, with the same per-client
+        intent-pair dedup guard (see :meth:`_mirror_guard_for`) that a real
+        ``MessageBusClient`` uses. So within one ``FakeBus``, if both
+        spellings of an intent topic have subscribers, only the spelling
+        actually emitted (or its canonical modernization) gets delivered --
+        the mirrored twin/modernized frame is deduped away, and a
+        legacy-only listener starves on a canonical emit. That is exactly
+        what would happen sharing a single real client connection too, so
+        it is not a ``FakeBus`` bug.
+        What a ``FakeBus`` cannot represent is multiple bus CONNECTIONS: on
+        a real wire, a separate connection -- e.g. an external observer
+        process -- receives both spellings, because each connection runs
+        its own independent dedup guard. Tests that attach an observer to
+        the same ``FakeBus`` the skill under test uses are simulating that
+        second connection with the first connection's guard, so the
+        observer should subscribe to the canonical topic
+        (``ovos_spec_tools.intent_topics.canonical_intent_topic``) rather
+        than assuming it will see both spellings.
+        """
+        # RULE 2 (receive-side modernize): a suffixed frame WITHOUT the twin
+        # marker came from an emitter old enough to only put the legacy
+        # spelling on the bus, so nothing canonical was sent alongside it --
+        # a canonical-only listener would never hear it without this.
+        if self._translator.modernize and not is_twin \
+                and is_intent_topic(message.msg_type):
+            canonical = canonical_intent_topic(message.msg_type)
+            if canonical != message.msg_type:
+                try:
+                    self.ee.emit(canonical, _verbatim_copy(message, canonical))
+                except Exception as e:
+                    LOG.exception(f"Error in intent modernize dispatch for "
+                                   f"'{canonical}': {e}")
+
+        # RULE 1 (send-side twin): every canonical intent dispatch is
+        # twinned onto its legacy spelling so a listener that only knows
+        # the old suffixed topic still hears it. An already-suffixed
+        # dispatch is never twinned (legacy_intent_topic is a no-op on it),
+        # so the mirror cannot cascade.
+        #
+        # On the real wire, this twin goes out MARKED (INTENT_COMPAT_TWIN_KEY),
+        # so an out-of-process receiver's own RULE 2 knows to skip
+        # re-modernizing it. FakeBus has no wire hop: RULE 2 above already
+        # made that call inline for THIS dispatch, so the marker's job is
+        # already done, and the twin delivered to local listeners here must
+        # NOT carry it. Carrying it forward would break two things: (a) the
+        # per-topic-pair mirror guard on ``on()`` fingerprints payload+context,
+        # so a marked twin would fingerprint differently from the canonical
+        # dispatch it mirrors and the guard would fail to recognize it as a
+        # duplicate, double-firing a dual-bound handler; and (b) a handler
+        # that forwards this frame's context to emit an unrelated topic would
+        # brand that unrelated frame a twin too (see the marker-leak
+        # regression test), silently suppressing its own modernization.
+        if self._translator.emit_legacy and is_intent_topic(message.msg_type):
+            topic = legacy_intent_topic(message.msg_type)
+            if topic != message.msg_type:
+                twin = _verbatim_copy(message, topic)
+                try:
+                    self.ee.emit(topic, twin)
+                except Exception as e:
+                    LOG.exception(f"Error in intent twin dispatch for "
+                                   f"'{topic}': {e}")
 
     def on_message(self, *args):
         """
         Handle an incoming websocket message
         @param args:
             message (str): serialized Message
+        @return: False if the message was dropped (SESSION-1 §2.5 malformed
+            carrier -- the caller must not deliver it to listeners), True
+            otherwise.
         """
         if len(args) == 1:
             message = args[0]
         else:
             message = args[1]
         parsed_message = FakeMessage.deserialize(message)
-        try:  # replicate side effects
-            from ovos_bus_client.session import Session, SessionManager
-            sess = Session.from_message(parsed_message)
-            if sess.session_id != "default":
-                # 'default' can only be updated by core
-                SessionManager.update(sess)
+        try:
+            # ovos-bus-client is an optional dependency of this extra; only
+            # its ABSENCE is swallowed here. ``resolve_session_id`` /
+            # ``session_carrier`` are guaranteed by the >=2.11.4a1 floor
+            # pin below, so a real bug in the block that follows must not
+            # be misread as "not installed" and silently disable named-
+            # session tracking.
+            from ovos_bus_client.session import (Session, SessionManager,
+                                                 DEFAULT_SESSION_ID,
+                                                 MalformedSession,
+                                                 resolve_session_id,
+                                                 session_carrier)
         except ImportError:
-            pass  # don't care
+            return True  # ovos-bus-client not installed -- don't care
+        # OVOS-SESSION-2 §5.1's arrival merge is a once-per-utterance
+        # orchestrator-intake fold, not a per-observed-message one (see
+        # core#915 / ovos-bus-client's MessageBusClient._take_inbound_
+        # session). A FakeBus models ONE bus connection for a test, and a
+        # test drives far more default-session traffic through it than
+        # one fold per utterance -- replies, handled-acks, forwarded
+        # frames. Calling ``update`` (a wholesale replace using spec
+        # defaults for omitted fields, not a field-by-field merge) on
+        # every observed default-session message would wipe stored
+        # fields a later message's carrier simply doesn't restate,
+        # violating §2.6 (mutation only at lifecycle boundaries). A test
+        # that wants the orchestrator's own intake semantics calls
+        # ``SessionManager.fold_inbound`` explicitly, the same as core
+        # does at its own intake point.
+        try:
+            carrier = session_carrier(parsed_message)
+            if resolve_session_id(carrier) != DEFAULT_SESSION_ID:
+                sess = Session.from_message(parsed_message)
+                SessionManager.update(sess)
+        except MalformedSession as e:
+            # OVOS-SESSION-1 §2.5: a non-object session carrier is a
+            # per-message producer fault, not a transport fault -- drop the
+            # WHOLE message (no listener runs) and keep going, same as
+            # MessageBusClient.on_message. A FakeBus has no transport to
+            # tear down, but it still must not silently swallow the
+            # rejection: emit ``ovos.session.rejected`` so a listener can
+            # observe/count the drop, exactly as the real bus does.
+            LOG.warning(f"discarding bus message with malformed session: {e}")
+            self._deliver(_session_rejected_message(parsed_message))
+            return False
+        return True
 
     def on_default_session_update(self, message):
         try:  # replicate side effects
             from ovos_bus_client.session import Session, SessionManager
             new_session = message.data["session_data"]
             sess = Session.deserialize(new_session)
-            SessionManager.update(sess, make_default=True)
+            # payload is default_session.serialize() (id == "default"); the
+            # SessionManager singleton syncs default_session by id, so the
+            # deprecated make_default flag is not needed.
+            SessionManager.update(sess)
             LOG.debug("synced default_session")
         except ImportError:
             pass  # don't care
@@ -135,6 +549,19 @@ class FakeBus:
         return msg
 
     def remove(self, msg_type, handler):
+        regs = self._dedup_registrations.get(handler)
+        if regs:
+            for ev, wrapped in [r for r in regs if r[0] == msg_type]:
+                try:
+                    self.ee.remove_listener(ev, wrapped)
+                except Exception:
+                    pass
+                regs.remove((ev, wrapped))
+            if not regs:
+                self._dedup_registrations.pop(handler, None)
+                self._handler_guards.pop(handler, None)
+            self._release_intent_pair_guard(msg_type)
+            return
         try:
             self.ee.remove_listener(msg_type, handler)
         except Exception:
@@ -165,182 +592,389 @@ class FakeBus:
         self.on_close()
 
 
-class _MutableMessage(type):
-    """ To override isinstance checks we need to use a metaclass """
+# The reference Message envelope lives in ovos-spec-tools (OVOS-MSG-1).
+# ovos-utils re-exports it under the historical ``FakeMessage`` name and
+# attaches the one legacy convenience method downstream still uses —
+# ``publish`` — to the class at import time. ``as_dict`` is now on the
+# spec-tools class itself; the ``data['destination']`` promotion the
+# old ``reply`` did was always a bug (data is the payload, context owns
+# routing) and is gone.
+#
+# The old ``_MutableMessage`` metaclass / dynamic ``__new__`` indirection
+# (which tried to return an ``ovos_bus_client.Message`` at runtime if
+# bus-client was installed) is no longer needed: spec-tools is a hard
+# dependency, the canonical class is always present, and
+# ``ovos-bus-client.Message`` is the **same** class (bus-client attaches
+# ``publish`` to it too — both attachments are idempotent).
+from typing import Any, Dict, Optional
 
-    def __instancecheck__(self, instance):
-        try:
-            from ovos_bus_client.message import Message as _MycroftMessage
-            if isinstance(instance, _MycroftMessage):
-                return True
-        except ImportError:
-            pass
-        return super().__instancecheck__(instance)
+from ovos_spec_tools.message import Message as FakeMessage
+from ovos_utils.log import deprecated
+from ovos_utils.version import VERSION_MAJOR
 
 
-# fake Message object to allow usage without ovos-bus-client installed
-class FakeMessage(metaclass=_MutableMessage):
-    """ fake Message object to allow usage with FakeBus without ovos-bus-client installed"""
+# OVOS-MSG-1 defines forward / reply / response as the three normative
+# derivations (§5). ``publish`` is a bus-client tradition outside the
+# spec; it survives as an attached method for one more major release so
+# downstream consumers can migrate.
+_PUBLISH_REMOVAL_VERSION = f"{VERSION_MAJOR + 1}.0.0"
 
-    def __new__(cls, *args, **kwargs):
-        try:  # most common case
-            from ovos_bus_client import Message as _M
-            return _M(*args, **kwargs)
-        except ImportError:
-            pass
-        return super().__new__(cls)
 
-    def __init__(self, msg_type, data=None, context=None):
-        """Used to construct a message object
+@deprecated(
+    "Message.publish is deprecated; use Message.forward (relay under a "
+    "new topic, preserves context) or Message.reply (§5.2 swap) — both "
+    "are OVOS-MSG-1 normative",
+    _PUBLISH_REMOVAL_VERSION)
+def _publish(self, msg_type: str, data: Dict[str, Any],
+             context: Optional[Dict[str, Any]] = None) -> FakeMessage:
+    """Relay under a new topic without the §5.2 swap; drop ``target``.
 
-        Message objects will be used to send information back and forth
-        between processes of mycroft service, voice, skill and cli
-        """
-        self.msg_type = msg_type
-        self.data = data or {}
-        self.context = context or {}
+    .. deprecated::
+        Not part of OVOS-MSG-1 (the spec defines ``forward`` /
+        ``reply`` / ``response`` as the only normative derivations).
+        Slated for removal in the next major; use :meth:`forward`
+        when you do not want the routing-key swap, or :meth:`reply`
+        when you do.
+    """
+    import warnings
+    # stacklevel=3: warn() -> body -> @deprecated wrapper -> caller
+    warnings.warn(
+        "Message.publish is deprecated; use Message.forward (no §5.2 "
+        "swap) or Message.reply (with swap) instead — both are "
+        "OVOS-MSG-1 normative derivations. ``publish`` will be removed "
+        f"in ovos-utils {_PUBLISH_REMOVAL_VERSION}.",
+        DeprecationWarning, stacklevel=3)
+    context = context or {}
+    new_context = dict(self.context)
+    new_context.update(context)
+    new_context.pop("target", None)
+    return self.__class__(msg_type, data, new_context)
 
-    def __eq__(self, other):
-        try:
-            return other.msg_type == self.msg_type and \
-                other.data == self.data and \
-                other.context == self.context
-        except Exception:
-            return False
 
-    def serialize(self):
-        """This returns a string of the message info.
-
-        This makes it easy to send over a websocket. This uses
-        json dumps to generate the string with type, data and context
-
-        Returns:
-            str: a json string representation of the message.
-        """
-        return json.dumps({'type': self.msg_type,
-                           'data': self.data,
-                           'context': self.context})
-
-    @staticmethod
-    def deserialize(value):
-        """This takes a string and constructs a message object.
-
-        This makes it easy to take strings from the websocket and create
-        a message object.  This uses json loads to get the info and generate
-        the message object.
-
-        Args:
-            value(str): This is the json string received from the websocket
-
-        Returns:
-            FakeMessage: message object constructed from the json string passed
-            int the function.
-            value(str): This is the string received from the websocket
-        """
-        obj = json.loads(value)
-        return FakeMessage(obj.get('type') or '',
-                           obj.get('data') or {},
-                           obj.get('context') or {})
-
-    def forward(self, msg_type, data=None):
-        """ Keep context and forward message
-
-        This will take the same parameters as a message object but use
-        the current message object as a reference.  It will copy the context
-        from the existing message object.
-
-        Args:
-            msg_type (str): type of message
-            data (dict): data for message
-
-        Returns:
-            FakeMessage: Message object to be used on the reply to the message
-        """
-        data = data or {}
-        return FakeMessage(msg_type, data, context=self.context)
-
-    def reply(self, msg_type, data=None, context=None):
-        """Construct a reply message for a given message
-
-        This will take the same parameters as a message object but use
-        the current message object as a reference.  It will copy the context
-        from the existing message object and add any context passed in to
-        the function.  Check for a destination passed in to the function from
-        the data object and add that to the context as a destination.  If the
-        context has a source then that will be swapped with the destination
-        in the context.  The new message will then have data passed in plus the
-        new context generated.
-
-        Args:
-            msg_type (str): type of message
-            data (dict): data for message
-            context: intended context for new message
-
-        Returns:
-            FakeMessage: Message object to be used on the reply to the message
-        """
-        data = deepcopy(data) or {}
-        context = context or {}
-
-        new_context = deepcopy(self.context)
-        for key in context:
-            new_context[key] = context[key]
-        if 'destination' in data:
-            new_context['destination'] = data['destination']
-        if 'source' in new_context and 'destination' in new_context:
-            s = new_context['destination']
-            new_context['destination'] = new_context['source']
-            new_context['source'] = s
-        return FakeMessage(msg_type, data, context=new_context)
-
-    def response(self, data=None, context=None):
-        """Construct a response message for the message
-
-        Constructs a reply with the data and appends the expected
-        ".response" to the message
-
-        Args:
-            data (dict): message data
-            context (dict): message context
-        Returns
-            (Message) message with the type modified to match default response
-        """
-        return self.reply(self.msg_type + '.response', data, context)
-
-    def publish(self, msg_type, data, context=None):
-        """
-        Copy the original context and add passed in context.  Delete
-        any target in the new context. Return a new message object with
-        passed in data and new context.  Type remains unchanged.
-
-        Args:
-            msg_type (str): type of message
-            data (dict): date to send with message
-            context: context added to existing context
-
-        Returns:
-            FakeMessage: Message object to publish
-        """
-        context = context or {}
-        new_context = self.context.copy()
-        for key in context:
-            new_context[key] = context[key]
-
-        if 'target' in new_context:
-            del new_context['target']
-
-        return FakeMessage(msg_type, data, context=new_context)
+# Attach publish() to the spec-tools Message so the method appears on
+# every Message instance regardless of which package the caller imported
+# the class from. Idempotent with ovos-bus-client's identical attachment.
+FakeMessage.publish = _publish
 
 
 class Message(FakeMessage):
-    """just for compat, stuff in the wild importing from here even with deprecation warnings..."""
+    """Deprecated alias for the OVOS-MSG-1 ``Message`` envelope.
+
+    ``from ovos_utils.fakebus import Message`` is in the wild and stays
+    importable through one more release. New code should import the
+    envelope where it lives — :class:`ovos_spec_tools.Message` (or
+    :class:`ovos_bus_client.Message`, which is a subclass).
+    """
 
     def __new__(cls, *args, **kwargs):
         warnings.warn(
-            "import from ovos-bus-client directly",
+            "ovos_utils.fakebus.Message is deprecated; import "
+            "ovos_spec_tools.Message (or ovos_bus_client.Message)",
             DeprecationWarning,
             stacklevel=2,
         )
         log_deprecation(
-            "please import from ovos-bus-client directly! this import has been deprecated since version 0.1.0", "1.0.0")
+            "please import Message from ovos_spec_tools / "
+            "ovos_bus_client directly", "1.0.0")
         return FakeMessage(*args, **kwargs)
+
+
+class AsyncFakeBus:
+    """In-process stand-in for ``AsyncMessageBusClient``.
+
+    Mirrors the same surface as the real async bus client: ``connect`` /
+    ``close`` / ``emit`` / ``wait_for_message`` / ``wait_for_response`` are
+    coroutines; ``on`` / ``once`` / ``remove`` stay synchronous.
+
+    No WebSocket, no thread, no real I/O — every emit dispatches
+    synchronously through a ``pyee.EventEmitter`` to whatever handlers
+    are registered.
+
+    Useful both in tests (drop-in for ``AsyncMessageBusClient``) and at
+    runtime (anywhere a sync component expects the legacy ``FakeBus`` but
+    the surrounding code is asyncio-native).
+
+    The session-injection side effects match ``FakeBus`` so multi-turn
+    flows behave identically.
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.started_running = False
+        self.session_id = "default"
+        self.ee = kwargs.get("emitter") or EventEmitter()
+        self.ee.on("error", self.on_error)
+        # mirror MessageBusClient's namespace migration (see FakeBus.__init__).
+        self._translator = _resolve_bus_flags(kwargs)
+        self._handler_guards = {}        # handler -> shared mirror-guard
+        self._intent_pair_guards = {}    # frozenset({topic, counterpart}) -> shared mirror-guard
+        self._dedup_registrations = {}   # handler -> [(msg_type, wrapped), ...]
+        self.connected_event = asyncio.Event()
+        self.connected_event.set()
+        self.on_open()
+        try:
+            self.session_id = kwargs["session"].session_id
+        except Exception:
+            pass  # don't care
+
+        self.on("ovos.session.update_default",
+                self.on_default_session_update)
+
+    # ------------------------------------------------------------------
+    # Handler registration (sync — matches AsyncMessageBusClient)
+    # ------------------------------------------------------------------
+
+    def on(self, msg_type, handler):
+        # wrap handlers on migrated/bridged topics so a handler subscribed to
+        # both spellings of a mirrored dispatch fires once (the mirror is
+        # dropped) -- same as FakeBus.on / MessageBusClient.on.
+        guard = self._mirror_guard_for(msg_type, handler)
+        if guard is not None:
+            # Reuse the existing wrapper for a repeat (msg_type, handler)
+            # registration instead of minting a new closure -- see the
+            # matching comment in FakeBus.on for why.
+            existing = self._dedup_registrations.get(handler, [])
+            for ev, wrapped in existing:
+                if ev == msg_type:
+                    self.ee.on(msg_type, wrapped)
+                    return
+
+            def wrapped(message=None):
+                if guard(message):
+                    return
+                return handler(message)
+
+            self.ee.on(msg_type, wrapped)
+            self._dedup_registrations.setdefault(handler, []).append((msg_type, wrapped))
+            return
+        self.ee.on(msg_type, handler)
+
+    # shared with FakeBus -- same guard-scope rules (see FakeBus._mirror_guard_for)
+    _mirror_guard_for = FakeBus._mirror_guard_for
+    _release_intent_pair_guard = FakeBus._release_intent_pair_guard
+    _forget_dedup_entry = FakeBus._forget_dedup_entry
+    once = FakeBus.once
+
+    def remove(self, msg_type, handler):
+        regs = self._dedup_registrations.get(handler)
+        if regs:
+            for ev, wrapped in [r for r in regs if r[0] == msg_type]:
+                try:
+                    self.ee.remove_listener(ev, wrapped)
+                except Exception:
+                    pass
+                regs.remove((ev, wrapped))
+            if not regs:
+                self._dedup_registrations.pop(handler, None)
+                self._handler_guards.pop(handler, None)
+            self._release_intent_pair_guard(msg_type)
+            return
+        try:
+            self.ee.remove_listener(msg_type, handler)
+        except Exception:
+            pass
+
+    def remove_all_listeners(self, event_name):
+        self.ee.remove_all_listeners(event_name)
+
+    # ------------------------------------------------------------------
+    # Lifecycle (async)
+    # ------------------------------------------------------------------
+
+    async def connect(self, *args, **kwargs):
+        """No-op for the fake bus; matches the real client's lifecycle.
+
+        Returns immediately with ``connected_event`` set.
+        """
+        self.started_running = True
+        self.connected_event.set()
+        return self
+
+    async def close(self):
+        self.connected_event.clear()
+        self.on_close()
+
+    # ------------------------------------------------------------------
+    # emit (async) — same dispatch shape as FakeBus.emit
+    # ------------------------------------------------------------------
+
+    async def emit(self, message):
+        # RULE 2 dedup marker: pop before any dispatch -- see FakeBus.emit
+        # for the rationale (a handler-derived forward()/reply() must not
+        # inherit this frame's twin marker).
+        is_intent_twin = message.context.pop(INTENT_COMPAT_TWIN_KEY, False)
+        if "session" not in message.context:
+            try:  # replicate side effects
+                from ovos_bus_client.session import Session, SessionManager
+                sess = SessionManager.sessions.get(self.session_id) or \
+                       Session(self.session_id)
+                message.context["session"] = sess.serialize()
+            except ImportError:  # don't care
+                message.context["session"] = {"session_id": self.session_id}
+        # on_message runs BEFORE handlers — see FakeBus.emit for the rationale
+        # (running a named-session update after handlers would wipe an
+        # in-place / synced mutation a handler made this same tick with the
+        # stale emit-time snapshot).
+        #
+        # A malformed carrier (SESSION-1 §2.5) drops the whole message --
+        # see FakeBus.on_message / FakeBus._deliver.
+        if not self.on_message(message.serialize()):
+            return
+        self._deliver(message, is_intent_twin)
+
+    # ------------------------------------------------------------------
+    # Sync helpers used internally — same as FakeBus
+    # ------------------------------------------------------------------
+
+    _bridge_intent_topic = FakeBus._bridge_intent_topic
+    _deliver = FakeBus._deliver
+
+    def on_message(self, *args):
+        """Handle an incoming websocket message.
+
+        @param args:
+            message (str): serialized Message
+        @return: False if the message was dropped (SESSION-1 §2.5 malformed
+            carrier -- the caller must not deliver it to listeners), True
+            otherwise.
+        """
+        if len(args) == 1:
+            message = args[0]
+        else:
+            message = args[1]
+        parsed_message = FakeMessage.deserialize(message)
+        try:
+            # ovos-bus-client is an optional dependency of this extra; only
+            # its ABSENCE is swallowed here. ``resolve_session_id`` /
+            # ``session_carrier`` are guaranteed by the >=2.11.4a1 floor
+            # pin below, so a real bug in the block that follows must not
+            # be misread as "not installed" and silently disable named-
+            # session tracking.
+            from ovos_bus_client.session import (Session, SessionManager,
+                                                 DEFAULT_SESSION_ID,
+                                                 MalformedSession,
+                                                 resolve_session_id,
+                                                 session_carrier)
+        except ImportError:
+            return True  # ovos-bus-client not installed -- don't care
+        # OVOS-SESSION-2 §5.1's arrival merge is a once-per-utterance
+        # orchestrator-intake fold, not a per-observed-message one (see
+        # core#915 / ovos-bus-client's MessageBusClient._take_inbound_
+        # session). A FakeBus models ONE bus connection for a test, and a
+        # test drives far more default-session traffic through it than
+        # one fold per utterance -- replies, handled-acks, forwarded
+        # frames. Calling ``update`` (a wholesale replace using spec
+        # defaults for omitted fields, not a field-by-field merge) on
+        # every observed default-session message would wipe stored
+        # fields a later message's carrier simply doesn't restate,
+        # violating §2.6 (mutation only at lifecycle boundaries). A test
+        # that wants the orchestrator's own intake semantics calls
+        # ``SessionManager.fold_inbound`` explicitly, the same as core
+        # does at its own intake point.
+        try:
+            carrier = session_carrier(parsed_message)
+            if resolve_session_id(carrier) != DEFAULT_SESSION_ID:
+                sess = Session.from_message(parsed_message)
+                SessionManager.update(sess)
+        except MalformedSession as e:
+            # OVOS-SESSION-1 §2.5: a non-object session carrier is a
+            # per-message producer fault, not a transport fault -- drop the
+            # WHOLE message (no listener runs) and keep going, same as
+            # MessageBusClient.on_message. Emit ``ovos.session.rejected``
+            # so a listener can observe/count the drop, exactly as the
+            # real bus does.
+            LOG.warning(f"discarding bus message with malformed session: {e}")
+            self._deliver(_session_rejected_message(parsed_message))
+            return False
+        return True
+
+    def on_default_session_update(self, message):
+        try:  # replicate side effects
+            from ovos_bus_client.session import Session, SessionManager
+            new_session = message.data["session_data"]
+            sess = Session.deserialize(new_session)
+            # payload is default_session.serialize() (id == "default"); the
+            # SessionManager singleton syncs default_session by id, so the
+            # deprecated make_default flag is not needed.
+            SessionManager.update(sess)
+            LOG.debug("synced default_session")
+        except ImportError:
+            pass  # don't care
+
+    def on_error(self, error):
+        LOG.error(error)
+
+    def on_open(self):
+        pass
+
+    def on_close(self):
+        pass
+
+    # ------------------------------------------------------------------
+    # Waiters (async)
+    # ------------------------------------------------------------------
+
+    async def wait_for_message(self, message_type, timeout=3.0):
+        """Wait for a message of a specific type.
+
+        Arguments:
+            message_type (str): the message type of the expected message
+            timeout: seconds to wait before timeout, defaults to 3
+
+        Returns:
+            The received message or None if the response timed out
+        """
+        evt = asyncio.Event()
+        captured = {"msg": None}
+
+        def _rcv(m):
+            captured["msg"] = m
+            evt.set()
+
+        self.ee.once(message_type, _rcv)
+        try:
+            await asyncio.wait_for(evt.wait(), timeout=timeout)
+        except asyncio.TimeoutError:
+            pass
+        return captured["msg"]
+
+    async def wait_for_response(self, message, reply_type=None, timeout=3.0):
+        """Send a message and wait for a response.
+
+        Arguments:
+            message (Message): message to send
+            reply_type (str): the message type of the expected reply.
+                              Defaults to "<message.msg_type>.response".
+            timeout: seconds to wait before timeout, defaults to 3
+
+        Returns:
+            The received message or None if the response timed out
+        """
+        reply_type = reply_type or message.msg_type + ".response"
+        evt = asyncio.Event()
+        captured = {"msg": None}
+
+        def _rcv(m):
+            captured["msg"] = m
+            evt.set()
+
+        self.ee.once(reply_type, _rcv)
+        await self.emit(message)
+        try:
+            await asyncio.wait_for(evt.wait(), timeout=timeout)
+        except asyncio.TimeoutError:
+            pass
+        return captured["msg"]
+
+    # ------------------------------------------------------------------
+    # Backwards-compat passthroughs so AsyncFakeBus is a drop-in even for
+    # code paths that still call the threading-era helpers.
+    # ------------------------------------------------------------------
+
+    def create_client(self):
+        return self
+
+    def run_forever(self):
+        self.started_running = True
+
+    def run_in_thread(self):
+        self.run_forever()

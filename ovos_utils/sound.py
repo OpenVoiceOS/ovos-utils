@@ -5,7 +5,7 @@ from copy import deepcopy
 from os.path import isfile
 from typing import Optional
 
-from distutils.spawn import find_executable
+from shutil import which
 
 from ovos_utils.log import LOG
 
@@ -39,28 +39,28 @@ def _find_player(uri):
     _, ext = os.path.splitext(uri)
 
     # scan installed executables that can handle playback
-    sox_play = find_executable("play")
+    sox_play = which("play")
     # sox should handle almost every format, but fails in some urls
     if sox_play:
         return sox_play + f" --type {ext} %1"
     # determine best available player
-    ogg123_play = find_executable("ogg123")
+    ogg123_play = which("ogg123")
     if "ogg" in ext and ogg123_play:
         return ogg123_play + " -q %1"
-    pw_play = find_executable("pw-play")
+    pw_play = which("pw-play")
     # pw_play handles both wav and mp3
     if pw_play:
         return pw_play + " %1"
     # wav file
     if 'wav' in ext:
-        pulse_play = find_executable("paplay")
+        pulse_play = which("paplay")
         if pulse_play:
             return pulse_play + " %1"
-        alsa_play = find_executable("aplay")
+        alsa_play = which("aplay")
         if alsa_play:
             return alsa_play + " %1"
     # guess mp3
-    mpg123_play = find_executable("mpg123")
+    mpg123_play = which("mpg123")
     if mpg123_play:
         return mpg123_play + " %1"
     LOG.error("Can't find player for: %s", uri)
@@ -135,14 +135,14 @@ def get_sound_duration(path: str, base_dir: Optional[str] = "") -> float:
             frames = f.getnframes()
             rate = f.getframerate()
         return frames / float(rate)
-    ffprobe = find_executable("ffprobe")
+    ffprobe = which("ffprobe")
     if ffprobe:
         args = (ffprobe, "-show_entries", "format=duration", "-i", path)
         popen = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         popen.wait()
         output = popen.stdout.read().decode("utf-8")
         return float(output.split("duration=")[-1].split("\n")[0])
-    media_info = find_executable("mediainfo")
+    media_info = which("mediainfo")
     if media_info:
         args = (media_info, path)
         popen = subprocess.Popen(args, stdout=subprocess.PIPE)

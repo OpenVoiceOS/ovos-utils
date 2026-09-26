@@ -2,9 +2,18 @@ import os
 import shutil
 import unittest
 import importlib
+import logging
 
 from os.path import join, dirname, isdir, isfile
 from unittest.mock import patch, Mock
+
+
+def _forget_deprecation_logger():
+    """Drop the cached OVOS.deprecation logger so a test that patches
+    ``LOG.create_logger`` sees the build go through the patch: the real
+    ``deprecation_logger`` reuses the cached logger after first creation."""
+    from ovos_utils.log import LOG
+    LOG._loggers.pop(f"{LOG.name}.deprecation", None)
 
 
 class TestLog(unittest.TestCase):
@@ -54,8 +63,9 @@ class TestLog(unittest.TestCase):
         log_file = join(LOG.base_path, f"{LOG.name}.log")
         self.assertFalse(isfile(log_file))
         LOG.info("This won't print")
-        self.assertTrue(isfile(log_file))
+        self.assertFalse(isfile(log_file))
         LOG.warning("This will print")
+        self.assertTrue(isfile(log_file))
         with open(log_file) as f:
             lines = f.readlines()
         self.assertEqual(len(lines), 1)
@@ -106,6 +116,75 @@ class TestLog(unittest.TestCase):
         self.assertEqual(len(lines), 1)
         self.assertTrue(lines[0].endswith("99\n"))
 
+    def test_disabled_levels_skip_call_site_resolution(self):
+        from ovos_utils.log import LOG
+
+        cases = [
+            ("debug", logging.DEBUG, logging.INFO),
+            ("info", logging.INFO, logging.WARNING),
+            ("warning", logging.WARNING, logging.ERROR),
+            ("error", logging.ERROR, logging.CRITICAL),
+            ("exception", logging.ERROR, logging.CRITICAL),
+        ]
+        for method_name, _record_level, configured_level in cases:
+            with self.subTest(method=method_name), \
+                    patch.object(LOG, "level", configured_level), \
+                    patch.object(LOG, "_get_real_logger") as get_logger:
+                getattr(LOG, method_name)("not emitted")
+            get_logger.assert_not_called()
+
+    def test_enabled_levels_keep_existing_logger_path(self):
+        from ovos_utils.log import LOG
+
+        cases = [
+            ("debug", logging.DEBUG),
+            ("info", logging.INFO),
+            ("warning", logging.WARNING),
+            ("error", logging.ERROR),
+            ("exception", logging.ERROR),
+        ]
+        for method_name, configured_level in cases:
+            logger = Mock()
+            with self.subTest(method=method_name), \
+                    patch.object(LOG, "level", configured_level), \
+                    patch.object(LOG, "_get_real_logger",
+                                 return_value=logger):
+                getattr(LOG, method_name)("emitted: %s", "value")
+            getattr(logger, method_name).assert_called_once_with(
+                "emitted: %s", "value")
+
+    def test_is_enabled_for_accepts_named_and_numeric_levels(self):
+        from ovos_utils.log import LOG
+
+        with patch.object(LOG, "level", "DEBUG"):
+            self.assertTrue(LOG.is_enabled_for(logging.DEBUG))
+        with patch.object(LOG, "level", "INFO"):
+            self.assertFalse(LOG.is_enabled_for(logging.DEBUG))
+            self.assertTrue(LOG.is_enabled_for(logging.WARNING))
+        with patch.object(LOG, "level", logging.ERROR):
+            self.assertFalse(LOG.is_enabled_for(logging.WARNING))
+            self.assertTrue(LOG.is_enabled_for(logging.ERROR))
+
+    def test_is_enabled_for_honors_global_disable(self):
+        from ovos_utils.log import LOG
+
+        original_disable = logging.root.manager.disable
+        try:
+            logging.disable(logging.CRITICAL)
+            with patch.object(LOG, "level", "DEBUG"):
+                self.assertFalse(LOG.is_enabled_for(logging.DEBUG))
+        finally:
+            logging.disable(original_disable)
+
+    def test_is_enabled_for_uses_effective_root_level_for_notset(self):
+        from ovos_utils.log import LOG
+
+        with patch.object(LOG, "level", logging.NOTSET), \
+                patch.object(logging.root, "getEffectiveLevel",
+                             return_value=logging.INFO):
+            self.assertFalse(LOG.is_enabled_for(logging.DEBUG))
+            self.assertTrue(LOG.is_enabled_for(logging.WARNING))
+
     @patch("ovos_utils.log.get_logs_config")
     @patch("ovos_config.Configuration.set_config_watcher")
     def test_init_service_logger(self, set_config_watcher, log_config):
@@ -134,6 +213,7 @@ class TestLog(unittest.TestCase):
 
     @patch("ovos_utils.log.LOG.create_logger")
     def test_log_deprecation(self, create_logger):
+        _forget_deprecation_logger()
         fake_log = Mock()
         log_warning = fake_log.warning
         create_logger.return_value = fake_log
@@ -152,6 +232,7 @@ class TestLog(unittest.TestCase):
 
     @patch("ovos_utils.log.LOG.create_logger")
     def test_deprecated_decorator(self, create_logger):
+        _forget_deprecation_logger()
         fake_log = Mock()
         log_warning = fake_log.warning
         create_logger.return_value = fake_log
@@ -166,7 +247,7 @@ class TestLog(unittest.TestCase):
         self.assertIn('test_log', log_msg, log_msg)
         self.assertIn('imported deprecation', log_msg, log_msg)
 
-        test_class = Deprecated()
+        Deprecated()
         log_msg = log_warning.call_args[0][0]
         self.assertIn('version=0.2.0', log_msg, log_msg)
         self.assertIn('Class Deprecated', log_msg, log_msg)
@@ -183,6 +264,60 @@ class TestLog(unittest.TestCase):
         log_msg = log_warning.call_args[0][0]
         self.assertIn('version=1.0.0', log_msg, log_msg)
         self.assertIn('test deprecation', log_msg, log_msg)
+
+    @patch("ovos_utils.log.LOG.create_logger")
+    def test_log_deprecation_dedupe(self, create_logger):
+        _forget_deprecation_logger()
+        fake_log = Mock()
+        log_warning = fake_log.warning
+        create_logger.return_value = fake_log
+        import ovos_utils.log
+        from ovos_utils.log import log_deprecation, deprecated
+        ovos_utils.log._logged_deprecations.clear()
+        ovos_utils.log._logged_deprecations_fast.clear()
+
+        # Repeated calls from the same caller only log once
+        for _ in range(10):
+            log_deprecation("repeated deprecation")
+        log_warning.assert_called_once()
+        log_msg = log_warning.call_args[0][0]
+        self.assertIn('repeated deprecation', log_msg, log_msg)
+
+        # A different message still logs
+        log_deprecation("other deprecation")
+        self.assertEqual(log_warning.call_count, 2)
+        log_msg = log_warning.call_args[0][0]
+        self.assertIn('other deprecation', log_msg, log_msg)
+
+        # Deprecated decorator is also deduplicated
+        @deprecated("decorated deprecation", "1.0.0")
+        def _deprecated_function():
+            pass
+
+        for _ in range(10):
+            _deprecated_function()
+        self.assertEqual(log_warning.call_count, 3)
+        log_msg = log_warning.call_args[0][0]
+        self.assertIn('decorated deprecation', log_msg, log_msg)
+
+    @patch("ovos_utils.log.LOG.create_logger")
+    def test_log_deprecation_dedupe_skips_stack_walk(self, create_logger):
+        _forget_deprecation_logger()
+        fake_log = Mock()
+        create_logger.return_value = fake_log
+        import ovos_utils.log
+        from ovos_utils.log import log_deprecation
+        ovos_utils.log._logged_deprecations.clear()
+        ovos_utils.log._logged_deprecations_fast.clear()
+
+        with patch("ovos_utils.log.inspect.stack",
+                   wraps=ovos_utils.log.inspect.stack) as stack_mock:
+            for _ in range(3):
+                log_deprecation("perf guard deprecation")
+        # Only the first call (populating the dedup set) may walk the stack;
+        # deduplicated repeats must short-circuit before `inspect.stack()`.
+        self.assertLessEqual(stack_mock.call_count, 1, stack_mock.call_count)
+        fake_log.warning.assert_called_once()
 
     @patch("ovos_utils.log.get_logs_config")
     @patch("ovos_utils.log.LOG")
@@ -271,6 +406,17 @@ class TestLog(unittest.TestCase):
         self.assertEqual(get_log_path("test"), self.test_dir)
         get_config.assert_called_once_with(service_name="test")
 
+    def test_get_log_path_broken_symlink(self):
+        from ovos_utils.log import get_log_path
+
+        symlink_path = join(self.test_dir, "broken.log")
+        os.symlink(join(self.test_dir, "does_not_exist.log"), symlink_path)
+        try:
+            self.assertEqual(get_log_path("broken", [self.test_dir]),
+                              self.test_dir)
+        finally:
+            os.unlink(symlink_path)
+
     @patch('ovos_config.Configuration')
     def test_get_log_paths(self, config):
         from ovos_utils.log import get_log_paths
@@ -303,3 +449,74 @@ class TestLog(unittest.TestCase):
         self.assertEqual(get_available_logs([dirname(__file__)]), [])
         get_log_paths.return_value = []
         self.assertEqual(get_available_logs(), [])
+
+
+class TestDeprecationLogger(unittest.TestCase):
+    """#447: every deprecation goes to one fixed child logger a deployment
+    can filter or route, and the message still names the call site."""
+
+    def setUp(self):
+        import ovos_utils.log
+        ovos_utils.log._logged_deprecations.clear()
+        ovos_utils.log._logged_deprecations_fast.clear()
+
+    def _capture(self, name):
+        records = []
+
+        class _Keep(logging.Handler):
+            def emit(self, record):
+                records.append(record)
+
+        handler = _Keep()
+        logger = logging.getLogger(name)
+        logger.addHandler(handler)
+        self.addCleanup(logger.removeHandler, handler)
+        return records
+
+    def test_deprecation_logs_under_the_fixed_child_logger(self):
+        from ovos_utils.log import LOG, log_deprecation
+        records = self._capture(f"{LOG.name}.deprecation")
+        log_deprecation("child logger deprecation", "9.9.9")
+        self.assertEqual(len(records), 1, records)
+        record = records[0]
+        self.assertEqual(record.name, f"{LOG.name}.deprecation")
+        message = record.getMessage()
+        self.assertIn("version=9.9.9", message)
+        self.assertIn("child logger deprecation", message)
+        # the call site that used to be the logger name is in the message
+        self.assertIn("Origin=", message)
+        self.assertIn("test_log", message)
+        self.assertIn("Caller=", message)
+
+    def test_propagate_set_by_a_deployment_survives_later_deprecations(self):
+        from ovos_utils.log import LOG, deprecation_logger, log_deprecation
+        name = f"{LOG.name}.deprecation"
+        # the logger exists before the deployment configures it
+        self.assertTrue(deprecation_logger().propagate)
+        logging.getLogger(name).propagate = False
+        self.addCleanup(setattr, logging.getLogger(name), "propagate", True)
+        log_deprecation("first after the deployment set propagate", "9.9.9")
+        log_deprecation("second after the deployment set propagate", "9.9.9")
+        self.assertFalse(logging.getLogger(name).propagate)
+        self.assertIs(deprecation_logger(), logging.getLogger(name))
+
+    def test_a_filter_on_the_child_logger_drops_the_record(self):
+        from ovos_utils.log import LOG, log_deprecation
+        name = f"{LOG.name}.deprecation"
+        records = self._capture(name)
+
+        class _Drop(logging.Filter):
+            def filter(self, record):
+                return "Deprecation version=" not in record.getMessage()
+
+        # control: without the filter the record reaches the child logger
+        log_deprecation("unfiltered deprecation", "9.9.9")
+        self.assertEqual(len(records), 1, records)
+
+        logger = logging.getLogger(name)
+        drop = _Drop()
+        logger.addFilter(drop)
+        self.addCleanup(logger.removeFilter, drop)
+        log_deprecation("filtered deprecation", "9.9.9")
+        self.assertEqual(len(records), 1, records)
+        self.assertIn("unfiltered", records[0].getMessage())

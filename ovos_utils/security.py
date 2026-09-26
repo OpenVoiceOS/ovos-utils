@@ -8,7 +8,8 @@ from socket import gethostname
 
 import pexpect
 
-from ovos_utils.log import LOG
+from ovos_utils.log import LOG, deprecated
+from ovos_utils.version import VERSION_MAJOR
 
 try:
     # pycryptodomex
@@ -25,10 +26,21 @@ except ImportError:
     crypto = None
 
 
+@deprecated("create_self_signed_cert is unmaintained and generates a "
+            "1024-bit RSA / SHA-1 certificate that modern OpenSSL "
+            "(SECLEVEL=2, the Debian/Ubuntu/Fedora default) refuses to load "
+            "('EE_KEY_TOO_SMALL'). Callers should bundle their own "
+            "self-signed cert generation (RSA >= 2048, SHA-256, with a "
+            "Subject Alternative Name) instead of relying on this helper.",
+            f"{VERSION_MAJOR + 1}.0.0")
 def create_self_signed_cert(cert_dir, name="jarbas"):
     """
     If name.crt and name.key don't exist in cert_dir, create a new
     self-signed cert and key pair and write them into that directory.
+
+    .. deprecated:: unmaintained; generates a 1024-bit RSA / SHA-1
+        certificate that modern OpenSSL rejects at load time. Bundle your
+        own self-signed cert generation instead.
     """
     if crypto is None:
         LOG.error("run pip install pyopenssl")

@@ -26,7 +26,7 @@ from unittest.mock import MagicMock, patch, mock_open
 if "distutils" not in sys.modules:
     distutils_stub = types.ModuleType("distutils")
     spawn_stub = types.ModuleType("distutils.spawn")
-    spawn_stub.find_executable = lambda x: None
+    spawn_stub.which = lambda x: None
     distutils_stub.spawn = spawn_stub
     sys.modules["distutils"] = distutils_stub
     sys.modules["distutils.spawn"] = spawn_stub
@@ -62,7 +62,7 @@ class TestGetPulseEnvironment(unittest.TestCase):
 class TestFindPlayer(unittest.TestCase):
     """Tests for _find_player helper."""
 
-    @patch("ovos_utils.sound.find_executable")
+    @patch("ovos_utils.sound.which")
     def test_sox_play_found(self, mock_find: MagicMock) -> None:
         """Should prefer sox play when available."""
         mock_find.side_effect = lambda x: "/usr/bin/play" if x == "play" else None
@@ -71,7 +71,7 @@ class TestFindPlayer(unittest.TestCase):
         self.assertIsNotNone(result)
         self.assertIn("play", result)
 
-    @patch("ovos_utils.sound.find_executable")
+    @patch("ovos_utils.sound.which")
     def test_ogg_player_preferred_for_ogg(self, mock_find: MagicMock) -> None:
         """Should prefer ogg123 for .ogg files when sox is unavailable."""
         def side_effect(x: str) -> str | None:
@@ -86,7 +86,7 @@ class TestFindPlayer(unittest.TestCase):
         self.assertIsNotNone(result)
         self.assertIn("ogg123", result)
 
-    @patch("ovos_utils.sound.find_executable")
+    @patch("ovos_utils.sound.which")
     def test_pw_play_fallback(self, mock_find: MagicMock) -> None:
         """Should use pw-play when sox is unavailable and file is not ogg."""
         def side_effect(x: str) -> str | None:
@@ -99,7 +99,7 @@ class TestFindPlayer(unittest.TestCase):
         self.assertIsNotNone(result)
         self.assertIn("pw-play", result)
 
-    @patch("ovos_utils.sound.find_executable")
+    @patch("ovos_utils.sound.which")
     def test_paplay_for_wav(self, mock_find: MagicMock) -> None:
         """Should use paplay for .wav when pw-play and sox unavailable."""
         def side_effect(x: str) -> str | None:
@@ -112,7 +112,7 @@ class TestFindPlayer(unittest.TestCase):
         self.assertIsNotNone(result)
         self.assertIn("paplay", result)
 
-    @patch("ovos_utils.sound.find_executable")
+    @patch("ovos_utils.sound.which")
     def test_aplay_for_wav_when_paplay_missing(self, mock_find: MagicMock) -> None:
         """Should fall back to aplay for .wav when paplay is unavailable."""
         def side_effect(x: str) -> str | None:
@@ -125,7 +125,7 @@ class TestFindPlayer(unittest.TestCase):
         self.assertIsNotNone(result)
         self.assertIn("aplay", result)
 
-    @patch("ovos_utils.sound.find_executable")
+    @patch("ovos_utils.sound.which")
     def test_mpg123_for_mp3(self, mock_find: MagicMock) -> None:
         """Should use mpg123 for mp3 when no other player found."""
         def side_effect(x: str) -> str | None:
@@ -138,7 +138,7 @@ class TestFindPlayer(unittest.TestCase):
         self.assertIsNotNone(result)
         self.assertIn("mpg123", result)
 
-    @patch("ovos_utils.sound.find_executable", return_value=None)
+    @patch("ovos_utils.sound.which", return_value=None)
     def test_returns_none_when_no_player(self, _mock_find: MagicMock) -> None:
         """Should return None when no suitable player is found."""
         from ovos_utils.sound import _find_player
@@ -287,7 +287,7 @@ class TestGetSoundDuration(unittest.TestCase):
             duration = get_sound_duration("snd/test.wav", base_dir=base_dir)
             self.assertGreater(duration, 0)
 
-    @patch("ovos_utils.sound.find_executable")
+    @patch("ovos_utils.sound.which")
     @patch("subprocess.Popen")
     def test_ffprobe_fallback(self, mock_popen: MagicMock,
                                mock_find: MagicMock) -> None:
@@ -311,7 +311,7 @@ class TestGetSoundDuration(unittest.TestCase):
         finally:
             os.unlink(fname)
 
-    @patch("ovos_utils.sound.find_executable")
+    @patch("ovos_utils.sound.which")
     @patch("subprocess.Popen")
     def test_mediainfo_fallback(self, mock_popen: MagicMock,
                                  mock_find: MagicMock) -> None:
@@ -337,7 +337,7 @@ class TestGetSoundDuration(unittest.TestCase):
         finally:
             os.unlink(fname)
 
-    @patch("ovos_utils.sound.find_executable", return_value=None)
+    @patch("ovos_utils.sound.which", return_value=None)
     def test_no_tool_raises_runtime_error(self, _mock_find: MagicMock) -> None:
         """get_sound_duration should raise RuntimeError when no tool is available."""
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
