@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.3a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.3a3) (2026-09-26)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.3a2...0.15.3a3)
+
+**Merged pull requests:**
+
+- Update dependency requests to v2.33.0 \[SECURITY\] [\#364](https://github.com/OpenVoiceOS/ovos-utils/pull/364) ([renovate[bot]](https://github.com/apps/renovate))
+
 ## [0.15.3a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.3a2) (2026-09-26)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.3a1...0.15.3a2)
@@ -350,7 +358,6 @@
 **Merged pull requests:**
 
 - Release 0.8.5a2 [\#351](https://github.com/OpenVoiceOS/ovos-utils/pull/351) ([github-actions[bot]](https://github.com/apps/github-actions))
-- chore: Configure Renovate [\#347](https://github.com/OpenVoiceOS/ovos-utils/pull/347) ([renovate[bot]](https://github.com/apps/renovate))
 
 ## [0.8.5a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a1) (2025-11-07)
 
