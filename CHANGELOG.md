@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.3a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.3a2) (2026-09-26)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.3a1...0.15.3a2)
+
+**Merged pull requests:**
+
+- chore\(ci\): drop the broken Dependabot config [\#449](https://github.com/OpenVoiceOS/ovos-utils/pull/449) ([openvoiceos-bot](https://github.com/openvoiceos-bot))
+
 ## [0.15.3a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.3a1) (2026-09-26)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.2a1...0.15.3a1)
@@ -347,10 +355,6 @@
 ## [0.8.5a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a1) (2025-11-07)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.4...0.8.5a1)
-
-**Merged pull requests:**
-
-- Release 0.8.5a1 [\#344](https://github.com/OpenVoiceOS/ovos-utils/pull/344) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [0.8.4](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.4) (2025-11-06)
 
