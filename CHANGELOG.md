@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.3a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.3a1) (2026-09-26)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.2a1...0.15.3a1)
+
+**Merged pull requests:**
+
+- fix: remember the template, not the rendered line, for dialog repeat avoidance [\#452](https://github.com/OpenVoiceOS/ovos-utils/pull/452) ([openvoiceos-bot](https://github.com/openvoiceos-bot))
+
 ## [0.15.2a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.2a1) (2026-09-18)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.1a1...0.15.2a1)
@@ -343,7 +351,6 @@
 **Merged pull requests:**
 
 - Release 0.8.5a1 [\#344](https://github.com/OpenVoiceOS/ovos-utils/pull/344) ([github-actions[bot]](https://github.com/apps/github-actions))
-- fix: use timezone-aware datetime functions and update scheduler event names [\#343](https://github.com/OpenVoiceOS/ovos-utils/pull/343) ([JarbasAl](https://github.com/JarbasAl))
 
 ## [0.8.4](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.4) (2025-11-06)
 
