@@ -341,7 +341,6 @@
 **Merged pull requests:**
 
 - chore\(deps\): update actions/setup-python action to v6 [\#353](https://github.com/OpenVoiceOS/ovos-utils/pull/353) ([renovate[bot]](https://github.com/apps/renovate))
-- chore\(deps\): update actions/checkout action to v6 [\#352](https://github.com/OpenVoiceOS/ovos-utils/pull/352) ([renovate[bot]](https://github.com/apps/renovate))
 
 ## [0.8.6a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.6a1) (2026-02-02)
 
@@ -358,10 +357,6 @@
 ## [0.8.5a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a2) (2025-12-18)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.5a1...0.8.5a2)
-
-**Merged pull requests:**
-
-- Release 0.8.5a2 [\#351](https://github.com/OpenVoiceOS/ovos-utils/pull/351) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [0.8.5a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a1) (2025-11-07)
 
