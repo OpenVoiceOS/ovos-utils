@@ -3,8 +3,9 @@ from typing import Dict, Any, Optional
 import requests
 from requests.exceptions import RequestException, Timeout
 
+from ovos_spec_tools import standardize_lang
+
 from ovos_utils import timed_lru_cache
-from ovos_utils.lang import standardize_lang_tag
 from ovos_utils.log import LOG
 from ovos_utils.network_utils import get_external_ip, is_valid_ip
 
@@ -234,7 +235,7 @@ def get_ip_geolocation(ip: Optional[str] = None,
         raise ValueError(f"Invalid IP address: {ip}")
 
     # normalize language to expected values by ip-api.com
-    lang = standardize_lang_tag(lang).split("-")[0]
+    lang = standardize_lang(lang).split("-")[0]
     if lang not in ["en", "de", "es", "pt", "fr", "ja", "zh", "ru"]:
         LOG.warning(f"Language unsupported by ip-api.com ({lang}), defaulting to english")
         lang = "en"

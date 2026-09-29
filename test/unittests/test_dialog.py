@@ -19,6 +19,23 @@ import tempfile
 import unittest
 from unittest.mock import patch, MagicMock
 
+import pytest
+
+# ovos_utils.dialog is a deprecated shim (superseded by ovos_spec_tools'
+# dialog renderer); this module deliberately keeps exercising it for
+# coverage, filtered per-module rather than dropped.
+pytestmark = [
+    pytest.mark.filterwarnings(
+        "ignore:MustacheDialogRenderer is deprecated; use the OVOS-INTENT-2:DeprecationWarning"
+    ),
+    pytest.mark.filterwarnings(
+        "ignore:get_dialog is deprecated; use the OVOS-INTENT-2:DeprecationWarning"
+    ),
+    pytest.mark.filterwarnings(
+        "ignore:load_dialogs is deprecated; use 'ovos_spec_tools.LocaleResources':DeprecationWarning"
+    ),
+]
+
 
 class TestMustacheDialogRenderer(unittest.TestCase):
     """Tests for MustacheDialogRenderer class."""

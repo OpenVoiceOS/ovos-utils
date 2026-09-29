@@ -13,7 +13,8 @@
 # limitations under the License.
 """Unit tests for :class:`~ovos_utils.skill_installer.ServiceInstaller`."""
 import sys
-from unittest.mock import MagicMock, patch, call
+import unittest
+from unittest.mock import MagicMock, Mock, patch, call
 
 import pytest
 
@@ -513,3 +514,75 @@ class TestPipUninstall:
         ):
             inst.pip_uninstall(["custom-pkg"])
         hook.assert_called_once()
+
+
+class TestServiceNameAddressing:
+    """OVOS-INSTALL-1 §2.2: ``data.service_name`` names the one service a
+    request is for, and every other installer ignores it in silence."""
+
+    @staticmethod
+    def _installer(bus: FakeBus) -> ServiceInstaller:
+        inst = ServiceInstaller(bus, service_name="ovos_audio",
+                                config={"allow_pip": True})
+        inst.pip_install = Mock(return_value=True)
+        inst.pip_uninstall = Mock(return_value=True)
+        return inst
+
+    def test_a_request_for_another_service_is_ignored_in_silence(
+            self, bus: FakeBus) -> None:
+        inst = self._installer(bus)
+        inst.handle_install_python(Message(
+            "ovos.pip.install",
+            {"packages": ["some-plugin"], "service_name": "ovos_gui"}))
+        inst.pip_install.assert_not_called()
+        assert bus.emitted == [], \
+            "an installer that is not addressed must not answer"
+
+    def test_a_request_naming_this_service_is_acted_on(
+            self, bus: FakeBus) -> None:
+        inst = self._installer(bus)
+        inst.handle_install_python(Message(
+            "ovos.pip.install",
+            {"packages": ["some-plugin"], "service_name": "ovos_audio"}))
+        inst.pip_install.assert_called_once()
+        assert bus.last_type() == "ovos.pip.install.complete"
+
+    def test_a_request_naming_nobody_reaches_every_installer(
+            self, bus: FakeBus) -> None:
+        inst = self._installer(bus)
+        inst.handle_install_python(
+            Message("ovos.pip.install", {"packages": ["some-plugin"]}))
+        inst.pip_install.assert_called_once()
+        assert bus.last_type() == "ovos.pip.install.complete"
+
+    @pytest.mark.parametrize("near_miss",
+                             ["OVOS_AUDIO", "ovos_audio_extra", "ovos_"])
+    def test_the_comparison_is_exact(self, bus: FakeBus,
+                                     near_miss: str) -> None:
+        inst = self._installer(bus)
+        inst.handle_install_python(Message(
+            "ovos.pip.install",
+            {"packages": ["p"], "service_name": near_miss}))
+        inst.pip_install.assert_not_called()
+        assert bus.emitted == []
+
+    def test_uninstall_is_addressed_the_same_way(self, bus: FakeBus) -> None:
+        inst = self._installer(bus)
+        inst.handle_uninstall_python(Message(
+            "ovos.pip.uninstall",
+            {"packages": ["some-plugin"], "service_name": "ovos_gui"}))
+        inst.pip_uninstall.assert_not_called()
+        assert bus.emitted == []
+
+    def test_the_pre_spec_suffixed_topic_is_served_and_warns(
+            self, bus: FakeBus) -> None:
+        inst = self._installer(bus)
+        assert inst._handle_legacy_install in \
+            bus.handlers["ovos.pip.install.ovos_audio"]
+        with patch("ovos_utils.skill_installer.LOG.warning") as warn:
+            inst._handle_legacy_install(Message(
+                "ovos.pip.install.ovos_audio", {"packages": ["some-plugin"]}))
+        inst.pip_install.assert_called_once()
+        assert bus.last_type() == "ovos.pip.install.complete"
+        assert any("pre-spec" in c.args[0] for c in warn.call_args_list), \
+            f"expected a deprecation warning, got {warn.call_args_list}"
