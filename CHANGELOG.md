@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.4a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.4a1) (2026-09-29)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.3a3...0.15.4a1)
+
+**Merged pull requests:**
+
+- fix: lift the rich ceiling [\#457](https://github.com/OpenVoiceOS/ovos-utils/pull/457) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.15.3a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.3a3) (2026-09-26)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.3a2...0.15.3a3)
@@ -346,10 +354,6 @@
 ## [0.8.5a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a3) (2025-12-19)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.5a2...0.8.5a3)
-
-**Merged pull requests:**
-
-- chore\(deps\): update dependency python to 3.14 [\#348](https://github.com/OpenVoiceOS/ovos-utils/pull/348) ([renovate[bot]](https://github.com/apps/renovate))
 
 ## [0.8.5a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a2) (2025-12-18)
 
