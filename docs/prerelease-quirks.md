@@ -7,6 +7,16 @@ to empty at the next stable release.
 
 ## next alpha
 
+- The `rich` requirement is a floor, `>=13.7`, where it was `~=13.7` and so
+  capped below 14. The cap made ovos-utils unsatisfiable beside anything that
+  needs rich 14 or 15 — a resolver asked for both reports no solution rather
+  than downgrading — which kept the whole OVOS base install out of
+  environments built around current `typer`, `transformers` and `rich-click`.
+  `ovos_utils.log_parser` is the only module that imports rich, and it uses
+  `Console`, `Console(file=...)`, `Table`, `Table.add_column`,
+  `Table.add_row(..., style=...)`, `Style(bgcolor=...)` and console markup
+  colour tags; all of these are present and behave the same in rich 15, so no
+  upper bound is warranted.
 - `log_deprecation()` no longer walks the full call stack
   (`inspect.stack()`) before checking whether a given deprecation warning has
   already been logged. Repeat calls from an already-seen call site now
