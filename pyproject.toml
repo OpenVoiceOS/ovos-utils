@@ -37,7 +37,7 @@ extras = [
     "ovos_bus_client>=2.11.4a1",
     "langcodes",
     "timezonefinder",
-    "oauthlib~=3.2",
+    "oauthlib~=4.0",
     "orjson",
     "packaging",
 ]
