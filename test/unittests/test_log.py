@@ -520,3 +520,27 @@ class TestDeprecationLogger(unittest.TestCase):
         log_deprecation("filtered deprecation", "9.9.9")
         self.assertEqual(len(records), 1, records)
         self.assertIn("unfiltered", records[0].getMessage())
+
+
+
+def _level_method(log):
+    # stands in for LOG.info(): the caller is two frames above _get_real_logger
+    return log._get_real_logger()
+
+
+def _named_caller(log):
+    return _level_method(log).name
+
+
+class TestRealLoggerName(unittest.TestCase):
+    def test_names_the_caller_without_walking_the_stack(self):
+        from unittest.mock import patch
+        from ovos_utils.log import LOG
+        with patch.object(LOG, "diagnostic_mode", False), \
+                patch("inspect.stack", side_effect=AssertionError("inspect.stack called")), \
+                patch("inspect.getmodule", side_effect=AssertionError("inspect.getmodule called")):
+            name = _named_caller(LOG)
+        module, function, line = name.split(" - ")[-1].split(":")
+        self.assertEqual(module, __name__)
+        self.assertEqual(function, "_named_caller")
+        self.assertTrue(line.isdigit())

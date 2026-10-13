@@ -161,22 +161,16 @@ class LOG:
         if cls.name is not None:
             name = cls.name + " - "
 
-        # Stack:
-        # [0] - _log()
+        # Frames:
+        # [0] - _get_real_logger()
         # [1] - debug(), info(), warning(), or error()
         # [2] - caller
-        stack = inspect.stack()
-
-        # Record:
-        # [0] - frame object
-        # [1] - filename
-        # [2] - line number
-        # [3] - function
-        # ...
-        record = stack[2]
-        mod = inspect.getmodule(record[0])
-        module_name = mod.__name__ if mod else ''
-        name += module_name + ':' + record[3] + ':' + str(record[2])
+        # Only the caller's frame is needed. inspect.stack() built a record
+        # for every frame on the stack and read each one's source line from
+        # disk, on every log call.
+        caller = sys._getframe(2)
+        module_name = caller.f_globals.get('__name__', '')
+        name += module_name + ':' + caller.f_code.co_name + ':' + str(caller.f_lineno)
 
         logger = cls.create_logger(name, tostdout=True)
         if cls.diagnostic_mode:
