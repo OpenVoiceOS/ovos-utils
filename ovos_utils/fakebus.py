@@ -21,8 +21,10 @@ from pyee import EventEmitter
 INTENT_COMPAT_TWIN_KEY = "_intent_compat_twin"
 
 
-def _verbatim_copy(message, topic: str):
+def _verbatim_copy(message, topic: str, data=None):
     """Retopic ``message`` onto ``topic``, carrying its context byte-for-byte.
+
+    ``data`` replaces the payload when given (a shape-changing counterpart).
 
     Mirrors ``ovos_bus_client.client.client._verbatim_copy``. NOT
     ``Message.forward`` -- ``forward()`` re-stamps the session, which for
@@ -30,7 +32,8 @@ def _verbatim_copy(message, topic: str):
     process's own and desync ``lang`` / ``active_skills`` between the
     canonical frame and its twin.
     """
-    return message.__class__(topic, data=deepcopy(message.data),
+    return message.__class__(topic,
+                              data=deepcopy(message.data if data is None else data),
                               context=deepcopy(message.context))
 
 
@@ -320,7 +323,7 @@ class FakeBus:
                 translated = self._translator.translate_payload(
                     from_topic=message.msg_type, to_topic=topic,
                     data=message.data)
-                self.ee.emit(topic, message.forward(topic, translated))
+                self.ee.emit(topic, _verbatim_copy(message, topic, translated))
             except Exception as e:
                 LOG.exception(f"Error in counterpart dispatch for '{topic}': {e}")
         try:
