@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.6a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.6a1) (2026-10-20)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.5a1...0.15.6a1)
+
+**Merged pull requests:**
+
+- fix: dispatch FakeBus namespace counterparts without re-stamping the session [\#464](https://github.com/OpenVoiceOS/ovos-utils/pull/464) ([openvoiceos-bot](https://github.com/openvoiceos-bot))
+
 ## [0.15.5a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.5a1) (2026-10-20)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.4a2...0.15.5a1)
@@ -354,10 +362,6 @@
 ## [0.8.6a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.6a1) (2026-02-02)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.5a3...0.8.6a1)
-
-**Merged pull requests:**
-
-- fix: prevent handler errors from aborting FakeBus emit [\#358](https://github.com/OpenVoiceOS/ovos-utils/pull/358) ([JarbasAl](https://github.com/JarbasAl))
 
 ## [0.8.5a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a3) (2025-12-19)
 
