@@ -71,8 +71,7 @@ def create_self_signed_cert(cert_dir, name="jarbas"):
         cert.set_pubkey(k)
         # TODO don't use sha1
         cert.sign(k, 'sha1')
-        if not exists(cert_dir):
-            makedirs(cert_dir)
+        makedirs(cert_dir, exist_ok=True)
         with open(cert_path, "wb") as f:
             f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
         with open(join(cert_dir, KEY_FILE), "wb") as f:
