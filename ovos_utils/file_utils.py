@@ -30,15 +30,16 @@ def ensure_directory_exists(directory, domain=None):
     directory = os.path.normpath(directory)
     directory = os.path.expanduser(directory)
 
-    if not os.path.isdir(directory):
-        try:
-            save = os.umask(0)
-            os.makedirs(directory, 0o777)  # give everyone rights to r/w here
-        except OSError:
-            LOG.warning("Failed to create: " + directory)
-            pass
-        finally:
-            os.umask(save)
+    if os.path.isdir(directory):
+        return directory
+
+    save = os.umask(0)
+    try:
+        os.makedirs(directory, 0o777, exist_ok=True)  # give everyone rights to r/w here
+    except OSError:
+        LOG.warning("Failed to create: " + directory)
+    finally:
+        os.umask(save)
 
     return directory
 
