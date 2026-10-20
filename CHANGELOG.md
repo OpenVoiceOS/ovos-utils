@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.15.5a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.5a1) (2026-10-20)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.4a2...0.15.5a1)
+
+**Merged pull requests:**
+
+- fix: create directories with exist\_ok [\#462](https://github.com/OpenVoiceOS/ovos-utils/pull/462) ([openvoiceos-bot](https://github.com/openvoiceos-bot))
+- perf: LOG finds its caller from one frame, not inspect.stack\(\) [\#461](https://github.com/OpenVoiceOS/ovos-utils/pull/461) ([goldyfruit](https://github.com/goldyfruit))
+
+## [0.15.4a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.4a2) (2026-09-29)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.4a1...0.15.4a2)
+
 ## [0.15.4a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.4a1) (2026-09-29)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.3a3...0.15.4a1)
@@ -337,10 +350,6 @@
 ## [0.8.6a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.6a2) (2026-02-02)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.6a1...0.8.6a2)
-
-**Merged pull requests:**
-
-- chore\(deps\): update actions/setup-python action to v6 [\#353](https://github.com/OpenVoiceOS/ovos-utils/pull/353) ([renovate[bot]](https://github.com/apps/renovate))
 
 ## [0.8.6a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.6a1) (2026-02-02)
 
