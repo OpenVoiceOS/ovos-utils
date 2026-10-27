@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.7a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.7a2) (2026-10-27)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.7a1...0.15.7a2)
+
+**Merged pull requests:**
+
+- revert: keep combo-lock for the named locks [\#468](https://github.com/OpenVoiceOS/ovos-utils/pull/468) ([openvoiceos-bot](https://github.com/openvoiceos-bot))
+
 ## [0.15.7a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.7a1) (2026-10-27)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.6a1...0.15.7a1)
@@ -357,10 +365,6 @@
 ## [0.8.5a4](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.5a4) (2026-03-11)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.8.6a2...0.8.5a4)
-
-**Merged pull requests:**
-
-- chore: Add comprehensive test suites and documentation [\#362](https://github.com/OpenVoiceOS/ovos-utils/pull/362) ([JarbasAl](https://github.com/JarbasAl))
 
 ## [0.8.6a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.6a2) (2026-02-02)
 
