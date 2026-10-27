@@ -7,11 +7,7 @@ from os import walk
 from os.path import dirname, splitext, join
 from sys import platform
 from threading import RLock
-from base64 import urlsafe_b64encode
-from pathlib import Path
 from typing import Optional, List
-
-from filelock import FileLock
 
 from ovos_spec_tools import expand
 from ovos_utils.log import LOG, log_deprecation
@@ -470,22 +466,3 @@ try:
 except ImportError:
     LOG.error("Failed to import watchdog module. FileWatcher will not be available. "
               "Are you using ovos-utils inside an application containing a file named 'watchdog.py'?")
-
-
-def named_lock(name: str) -> FileLock:
-    """Return a lock shared by every process and thread that uses ``name``.
-
-    The lock file path is the one combo-lock uses when the temp directory is
-    in RAM, so a process that still runs combo-lock waits on the same lock.
-    The directory and the file are writable by all users, because services
-    that share a lock can run as different users.
-    """
-    lock_dir = Path(tempfile.gettempdir(), "combo_locks")
-    try:
-        lock_dir.mkdir()
-    except FileExistsError:
-        pass
-    else:
-        lock_dir.chmod(0o777)
-    filename = urlsafe_b64encode(name.encode()).decode() + ".lock"
-    return FileLock(lock_dir / filename, mode=0o666)
