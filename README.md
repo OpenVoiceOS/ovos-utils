@@ -1,87 +1,109 @@
 # OVOS-utils
 
-collection of simple utilities for use across the mycroft ecosystem
+`ovos-utils` is a shared utility library for the OpenVoiceOS ecosystem. It provides
+logging, process lifecycle management, a testing-friendly fake message bus, event
+scheduling, file utilities, network checks, audio playback, and XDG path helpers.
+Most OVOS packages, including `ovos-bus-client`, `ovos-config`, and `ovos-workshop`,
+depend on it, so most projects get it as a transitive dependency.
 
 ## Install
 
 ```bash
-pip install ovos_utils
+pip install ovos-utils
 ```
 
-## Commandline scripts
-### ovos-logs
- Small helper tool to quickly navigate the logs, create slices and quickview errors  
+## Usage
 
----------------
-- **ovos-logs slice [options]**
+The library exposes many small, independent modules. Import only what you need.
+For example, use `FakeBus` to test skill code without a live message bus:
 
-  **Slice logs of a given time period. Defaults on the last service start (`-s`) until now (`-u`)**
+```python
+from ovos_utils.fakebus import FakeBus, FakeMessage
 
-  _Different logs can be picked using the `-l` option. All logs will be included if not specified._  
-  _Optionally the directory where the logs are stored (`-p`) and the file where the slices should be dumped (`-f`) can be specified._
-    
+bus = FakeBus()
 
-  _[ex: `ovos-logs slice`]_  
-  <sup>_Slice all logs from service start up until now._</sup>
-  
-  _[ex: `ovos-logs slice -s 17:05:20 -u 17:05:25`]_  
-  <sup>_Slice all logs from 17:05:20 until 17:05:25._</sup>    
-  <sup>_**no logs in that timeframe in other present logs_</sup>
-  <img width="1898" alt="Screenshot 2023-12-25 185004" src="https://github.com/emphasize/ovos-utils/assets/25036977/c7918bd6-0e13-46af-8016-55486b9a786e">  
-   
-  _[ex: `ovos-logs slice -s 17:05:20 -u 17:05:25 -l skills`]_  
-  <sup>_Slice skills.log from 17:05:20 until 17:05:25._</sup>
-  
-  _[ex: `ovos-logs slice -s 17:05:20 -u 17:05:25 -f ~/testslice.log`]_  
-  <sup>_Slice the logs from 17:05:20 until 17:05:25 on all log files and dump the slices in the file ~/testslice.log (default: `~/slice_<timestamp>.log`)._</sup>
-  <img width="1246" alt="Screenshot 2023-12-25 190732" src="https://github.com/emphasize/ovos-utils/assets/25036977/dda99d8a-2739-4872-b81a-f44902b43d7d">
---------------
+def on_utterance(message):
+    print(message.data["utterances"])
 
-- **ovos-logs list [-e|-w|-d|-x] [options]**
+bus.on("recognizer_loop:utterance", on_utterance)
+bus.emit(FakeMessage("recognizer_loop:utterance", {"utterances": ["hello"]}))
+```
 
-  **List logs by severity (error/warning/debug/exception). A log level has to be specified - more than one can be listed**  
+See [docs/index.md](docs/index.md) for the full module overview, with links to
+detailed pages on logging, process utilities, `FakeBus`, and event handling.
+See [docs/prerelease-quirks.md](docs/prerelease-quirks.md) for what changed
+since the last stable release.
 
-  _A start and end date can be specified using the `-s` and `-u` options. Defaults to the last service start until now._  
-  _Different logs can be picked using the `-l` option. All logs will be included if not specified._  
-  _Optionally, the directory where the logs are stored (`-p`) and the file where the slices should be dumped (`-f`) can be passed as arguments._  
+## Command line: ovos-logs
 
-  _[ex: `ovos-logs list -x`]_  
-  <sup>_List the logs with level EXCEPTION (plus tracebacks) from the last service start until now._</sup>
-  <img width="992" alt="Screenshot 2023-12-25 184321" src="https://github.com/emphasize/ovos-utils/assets/25036977/da8be23a-4268-4647-8dd3-32c1a889440c">
-  
-  _[ex: `ovos-logs list -w -e -s 20-12-2023 -l bus -l skills`]_  
-  <sup>_List the logs with level WARNING and ERROR from the 20th of December 2023 until now from the logs bus.log and skills.log._</sup>
-  <img width="1898" alt="Screenshot 2023-12-25 173739" src="https://github.com/emphasize/ovos-utils/assets/25036977/c5703195-4393-4989-ae40-b37638438c92">
----------------------
+`ovos-logs` is a helper tool that slices, lists, and reduces OVOS service logs.
 
-- **ovos-logs reduce [options]**
-  
-  **Downsize logs to a given size (in bytes) or remove entries before a given date.**  
-    
-  _Different logs can be included using the `-l` option. If not specified, all logs will be included._  
-  _Optionally the directory where the logs are stored (`-p`) can be specified._  
-  
-  _[ex: `ovos-logs reduce`]_  
-  <sup>_Downsize all logs to 0 bytes_</sup>  
+- **`ovos-logs slice [options]`**. Slice logs for a time period. The default
+  period runs from the last service start (`-s`) until now (`-u`). Pick specific
+  logs with `-l` (default: all logs). Set the log directory with `-p` and the
+  output file with `-f`.
 
-  _[ex: `ovos-logs reduce -s 1000000`]_  
-  <sup>_Downsize all logs to ~1MB (latest logs)_</sup>  
+  ```bash
+  ovos-logs slice
+  # Slice all logs from the last service start until now.
 
-  _[ex: `ovos-logs reduce -d "1-12-2023 17:00"`]_  
-  <sup>_Downsize all logs to entries after the specified date/time_</sup>  
+  ovos-logs slice -s 17:05:20 -u 17:05:25
+  # Slice all logs between 17:05:20 and 17:05:25.
 
-  _[ex: `ovos-logs reduce -s 1000000 -l skills -l bus`]_  
-  <sup>_Downsize skills.log and bus.log to ~1MB (latest logs)_</sup>  
+  ovos-logs slice -s 17:05:20 -u 17:05:25 -l skills
+  # Slice only skills.log between 17:05:20 and 17:05:25.
 
----------------------
+  ovos-logs slice -s 17:05:20 -u 17:05:25 -f ~/testslice.log
+  # Slice logs between 17:05:20 and 17:05:25 into ~/testslice.log.
+  # Default output file: ~/slice_<timestamp>.log
+  ```
 
-- **ovos-logs show -l [servicelog]**
+- **`ovos-logs list [-e|-w|-d|-x] [options]`**. List log lines by severity
+  (error, warning, debug, exception). Specify at least one level. You can combine
+  several. Set the time range with `-s` and `-u` (default: last service start
+  until now). Pick specific logs with `-l` (default: all logs).
 
-  **Show logs**
+  ```bash
+  ovos-logs list -x
+  # List EXCEPTION-level lines (with tracebacks) from the last service start until now.
 
-  _[ex: `ovos-logs show -l bus`]_  
-  <sup>_Show the logs from bus.log._</sup>  
+  ovos-logs list -w -e -s 20-12-2023 -l bus -l skills
+  # List WARNING and ERROR lines from bus.log and skills.log since 20 December 2023.
+  ```
 
-  _[ex: wrong servicelog]_  
-  <sup>_**logs shown depending on the logs present in the folder_</sup>
+- **`ovos-logs reduce [options]`**. Shrink logs to a target size in bytes, or
+  remove entries before a given date. Pick specific logs with `-l` (default: all
+  logs). Set the log directory with `-p`.
 
+  ```bash
+  ovos-logs reduce
+  # Shrink all logs to 0 bytes.
+
+  ovos-logs reduce -s 1000000
+  # Shrink all logs to about 1 MB, keeping the latest entries.
+
+  ovos-logs reduce -d "1-12-2023 17:00"
+  # Shrink all logs to entries after the given date and time.
+
+  ovos-logs reduce -s 1000000 -l skills -l bus
+  # Shrink skills.log and bus.log to about 1 MB each.
+  ```
+
+- **`ovos-logs show -l <servicelog>`**. Print the contents of a log file.
+
+  ```bash
+  ovos-logs show -l bus
+  # Print the contents of bus.log.
+  ```
+
+  The logs shown depend on which log files exist in the log folder.
+
+## Related projects
+
+- [OpenVoiceOS/ovos-bus-client](https://github.com/OpenVoiceOS/ovos-bus-client). The real message bus client that `FakeBus` and `FakeMessage` stand in for during testing.
+- [OpenVoiceOS/ovos-config](https://github.com/OpenVoiceOS/ovos-config). Reads and writes `mycroft.conf`, the configuration file used by `LOG`, `PIDLock`, and the network utilities.
+- [OpenVoiceOS/ovos-workshop](https://github.com/OpenVoiceOS/ovos-workshop). The skill framework built on `EventContainer`, `RuntimeRequirements`, and the other utilities in this library.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE).
