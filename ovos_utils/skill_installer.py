@@ -56,9 +56,10 @@ from subprocess import Popen, PIPE
 from typing import List, Optional
 
 import requests
-from combo_lock import NamedLock
+from filelock import FileLock
 from ovos_bus_client import Message
 from ovos_config.config import Configuration
+from ovos_utils.file_utils import named_lock
 from ovos_utils.log import LOG
 
 try:
@@ -106,7 +107,7 @@ class ServiceInstaller:
         "https://raw.githubusercontent.com/OpenVoiceOS/ovos-releases"
         "/refs/heads/main/constraints-stable.txt"
     )
-    PIP_LOCK: NamedLock = NamedLock("ovos_pip.lock")
+    PIP_LOCK: FileLock = named_lock("ovos_pip.lock")
     UV: Optional[str] = shutil.which("uv")  # prefer uv when available
 
     @staticmethod
