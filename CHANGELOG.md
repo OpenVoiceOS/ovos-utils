@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.7a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.7a1) (2026-10-27)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.6a1...0.15.7a1)
+
+**Merged pull requests:**
+
+- fix\(deps\): replace combo-lock with filelock [\#466](https://github.com/OpenVoiceOS/ovos-utils/pull/466) ([openvoiceos-bot](https://github.com/openvoiceos-bot))
+
 ## [0.15.6a1](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.6a1) (2026-10-20)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.5a1...0.15.6a1)
@@ -353,7 +361,6 @@
 **Merged pull requests:**
 
 - chore: Add comprehensive test suites and documentation [\#362](https://github.com/OpenVoiceOS/ovos-utils/pull/362) ([JarbasAl](https://github.com/JarbasAl))
-- fix: make the stopwatch test less strict [\#360](https://github.com/OpenVoiceOS/ovos-utils/pull/360) ([PureTryOut](https://github.com/PureTryOut))
 
 ## [0.8.6a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.8.6a2) (2026-02-02)
 
