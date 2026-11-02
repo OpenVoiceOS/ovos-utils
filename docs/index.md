@@ -9,6 +9,7 @@ Shared utility library used by all OVOS components. Provides logging, process li
 
 | Module | Description |
 |---|---|
+| `ovos_utils.metrics` / `ovos_utils.prometheus` | `LatencyHistogram`, Prometheus text rendering, opt-in `/metrics` endpoint, plugin collectors (see `metrics.md`) |
 | `ovos_utils.log` | `LOG` — OVOS-wide logging class with optional file rotation |
 | `ovos_utils.process_utils` | `ProcessStatus`, `RuntimeRequirements`, `PIDLock`, `MonotonicEvent` |
 | `ovos_utils.fakebus` | `FakeBus`, `AsyncFakeBus`, `FakeMessage` — in-process bus for testing without a live WebSocket |
