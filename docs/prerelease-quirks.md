@@ -7,6 +7,13 @@ to empty at the next stable release.
 
 ## next alpha
 
+- `ovos_utils.metrics` gains `LatencyHistogram` and the opt-in switch
+  (`OVOS_METRICS_ENABLED`), and the new `ovos_utils.prometheus` renders
+  histograms and counters as Prometheus text, serves them on an opt-in
+  `/metrics` endpoint and discovers plugin collectors in the
+  `ovos.performance.metrics` entry-point group, skipping any that fail to
+  import. Nothing records or listens unless `OVOS_METRICS_ENABLED` is set, and
+  `Stopwatch` is unchanged. See `docs/metrics.md`.
 - The `rich` requirement is a floor, `>=13.7`, where it was `~=13.7` and so
   capped below 14. The cap made ovos-utils unsatisfiable beside anything that
   needs rich 14 or 15 — a resolver asked for both reports no solution rather

@@ -30,7 +30,7 @@ bus.emit(FakeMessage("recognizer_loop:utterance", {"utterances": ["hello"]}))
 ```
 
 See [docs/index.md](docs/index.md) for the full module overview, with links to
-detailed pages on logging, process utilities, `FakeBus`, and event handling.
+detailed pages on logging, process utilities, `FakeBus`, event handling, and the opt-in performance metrics ([docs/metrics.md](docs/metrics.md)).
 See [docs/prerelease-quirks.md](docs/prerelease-quirks.md) for what changed
 since the last stable release.
 
