@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.15.7a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.7a3) (2026-11-17)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.7a2...0.15.7a3)
+
+**Merged pull requests:**
+
+- fix: is\_process\_running returns False when no process list can be read [\#471](https://github.com/OpenVoiceOS/ovos-utils/pull/471) ([andlo](https://github.com/andlo))
+- feat: shared opt-in performance metrics \(histogram, Prometheus exposition, collectors\) [\#470](https://github.com/OpenVoiceOS/ovos-utils/pull/470) ([goldyfruit](https://github.com/goldyfruit))
+
 ## [0.15.7a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.7a2) (2026-10-27)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.7a1...0.15.7a2)
@@ -48,10 +57,6 @@
 ## [0.15.3a3](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.3a3) (2026-09-26)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-utils/compare/0.15.3a2...0.15.3a3)
-
-**Merged pull requests:**
-
-- Update dependency requests to v2.33.0 \[SECURITY\] [\#364](https://github.com/OpenVoiceOS/ovos-utils/pull/364) ([renovate[bot]](https://github.com/apps/renovate))
 
 ## [0.15.3a2](https://github.com/OpenVoiceOS/ovos-utils/tree/0.15.3a2) (2026-09-26)
 
