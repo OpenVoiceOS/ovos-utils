@@ -273,8 +273,13 @@ def is_process_running(process):
     # and http://richarddingwall.name/2009/06/18/windows-equivalents-of-ps-and-kill-commands/
     try:  # Linux/Unix
         s = subprocess.Popen(["ps", "axw"], stdout=subprocess.PIPE)
-    except:  # Windows
-        s = subprocess.Popen(["tasklist", "/v"], stdout=subprocess.PIPE)
+    except OSError:
+        try:  # Windows
+            s = subprocess.Popen(["tasklist", "/v"], stdout=subprocess.PIPE)
+        except OSError:
+            # neither command can be run (no ps in a slim container, or no
+            # processes at all, e.g. Pyodide/Emscripten): nothing to find
+            return False
     for x in s.stdout:
         if re.search(process, x.decode("utf-8")):
             return True

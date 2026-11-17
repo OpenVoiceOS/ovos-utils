@@ -234,6 +234,19 @@ class TestIsProcessRunning(unittest.TestCase):
         from ovos_utils.system import is_process_running
         self.assertFalse(is_process_running("myprocess"))
 
+    @patch("subprocess.Popen", side_effect=FileNotFoundError("ps"))
+    def test_no_ps_or_tasklist(self, mock_popen: MagicMock) -> None:
+        """is_process_running should return False when no process listing can be run."""
+        from ovos_utils.system import is_process_running
+        self.assertFalse(is_process_running("myprocess"))
+        self.assertEqual(mock_popen.call_count, 2)
+
+    @patch("subprocess.Popen", side_effect=OSError(138, "emscripten does not support processes"))
+    def test_no_processes_at_all(self, mock_popen: MagicMock) -> None:
+        """is_process_running should return False where processes cannot be started."""
+        from ovos_utils.system import is_process_running
+        self.assertFalse(is_process_running("myprocess"))
+
 
 class TestFindExecutable(unittest.TestCase):
     """Tests for find_executable and is_installed."""
