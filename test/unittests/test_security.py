@@ -163,5 +163,27 @@ class TestCreateSelfSignedCert(unittest.TestCase):
                 create_self_signed_cert("/tmp/certs")
 
 
+class TestDirectoryRace(unittest.TestCase):
+    """The directory may appear between the existence check and creation."""
+
+    def test_cert_dir_created_concurrently(self) -> None:
+        import os
+        import tempfile
+        from ovos_utils import security
+        from test_security_extra import TestCreateSelfSignedCertMocked
+
+        mock_crypto = TestCreateSelfSignedCertMocked()._make_mock_crypto()
+        with tempfile.TemporaryDirectory() as cert_dir, \
+                patch.object(security, "crypto", mock_crypto), \
+                patch.object(security, "exists", return_value=False):
+            cert_path, key_path = security.create_self_signed_cert(
+                cert_dir, name="race")
+            self.assertEqual(cert_path, os.path.join(cert_dir, "race.crt"))
+            with open(cert_path, "rb") as f:
+                self.assertEqual(f.read(), b"CERT_DATA")
+            with open(key_path, "rb") as f:
+                self.assertEqual(f.read(), b"KEY_DATA")
+
+
 if __name__ == "__main__":
     unittest.main()

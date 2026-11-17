@@ -81,9 +81,14 @@ class InstallError(str, enum.Enum):
 class ServiceInstaller:
     """Pip installer bound to a single OVOS service process.
 
-    Listens on both the broadcast ``ovos.pip.install`` topic and the
-    service-specific ``ovos.pip.install.<service_name>`` topic so that each
-    containerised service can be updated independently.
+    Listens on ``ovos.pip.install`` and ``ovos.pip.uninstall``. A request
+    carrying ``data.service_name`` is acted on only by the service of that
+    name, so a containerised deployment can install a plugin into the
+    environment that loads it; a request without it reaches every installer.
+
+    The suffixed ``ovos.pip.install.<service_name>`` topics are the pre-spec
+    way of addressing one service. They still work and are logged as
+    deprecated: a topic carries no target, that is what the payload is for.
 
     Args:
         bus: Connected ``MessageBusClient`` (or compatible FakeBus).
@@ -129,18 +134,20 @@ class ServiceInstaller:
         )
         self.bus = bus
 
-        # Broadcast topics — every service with an installer will respond.
+        # The canonical topics. Addressing is in the payload: a request
+        # naming another service is ignored here (see _addressed_to_us).
         self.bus.on("ovos.pip.install", self.handle_install_python)
         self.bus.on("ovos.pip.uninstall", self.handle_uninstall_python)
 
-        # Targeted topics — only this service responds.
+        # Pre-spec suffixed topics, kept for one stable cycle so a client
+        # that has not moved to data.service_name keeps working.
         self.bus.on(
             f"ovos.pip.install.{self.service_name}",
-            self.handle_install_python,
+            self._handle_legacy_install,
         )
         self.bus.on(
             f"ovos.pip.uninstall.{self.service_name}",
-            self.handle_uninstall_python,
+            self._handle_legacy_uninstall,
         )
 
         LOG.info(
@@ -153,12 +160,55 @@ class ServiceInstaller:
         self.bus.remove("ovos.pip.uninstall", self.handle_uninstall_python)
         self.bus.remove(
             f"ovos.pip.install.{self.service_name}",
-            self.handle_install_python,
+            self._handle_legacy_install,
         )
         self.bus.remove(
             f"ovos.pip.uninstall.{self.service_name}",
-            self.handle_uninstall_python,
+            self._handle_legacy_uninstall,
         )
+
+    # ------------------------------------------------------------------
+    # Addressing
+    # ------------------------------------------------------------------
+
+    def _addressed_to_us(self, message: Message) -> bool:
+        """Whether this installer should act on ``message``.
+
+        ``data.service_name`` names the one service a request is for. Absent,
+        every installer acts. Present and naming another service, this one
+        stays silent: it installs nothing and answers nothing, because a
+        refusal from every other installer on the bus would bury the real
+        answer in a burst the client cannot tell it from.
+
+        The comparison is exact. A service name is an identifier, not a
+        pattern.
+        """
+        target = message.data.get("service_name")
+        if target is None:
+            return True
+        if target == self.service_name:
+            return True
+        LOG.debug(f"{message.msg_type} is addressed to '{target}', "
+                  f"not '{self.service_name}'; ignoring")
+        return False
+
+    def _warn_deprecated_topic(self, message: Message) -> None:
+        LOG.warning(
+            f"'{message.msg_type}' addresses a service in the topic, which is "
+            f"a pre-spec form kept for one stable cycle. Emit "
+            f"'{message.msg_type.rsplit('.', 1)[0]}' with "
+            f"data.service_name='{self.service_name}' instead."
+        )
+
+    def _handle_legacy_install(self, message: Message) -> None:
+        """Serve the pre-spec ``ovos.pip.install.<service_name>`` topic."""
+        self._warn_deprecated_topic(message)
+        self.handle_install_python(message)
+
+    def _handle_legacy_uninstall(self, message: Message) -> None:
+        """Serve the pre-spec ``ovos.pip.uninstall.<service_name>`` topic."""
+        self._warn_deprecated_topic(message)
+        self.handle_uninstall_python(message)
 
     # ------------------------------------------------------------------
     # Audio feedback helpers
@@ -386,7 +436,9 @@ class ServiceInstaller:
     # ------------------------------------------------------------------
 
     def handle_install_python(self, message: Message) -> None:
-        """Handle ``ovos.pip.install`` or ``ovos.pip.install.<service>``."""
+        """Handle ``ovos.pip.install``, addressed by ``data.service_name``."""
+        if not self._addressed_to_us(message):
+            return
         if not self.config.get("allow_pip"):
             LOG.error(InstallError.DISABLED.value)
             self.play_error_sound()
@@ -422,7 +474,9 @@ class ServiceInstaller:
             )
 
     def handle_uninstall_python(self, message: Message) -> None:
-        """Handle ``ovos.pip.uninstall`` or ``ovos.pip.uninstall.<service>``."""
+        """Handle ``ovos.pip.uninstall``, addressed by ``data.service_name``."""
+        if not self._addressed_to_us(message):
+            return
         if not self.config.get("allow_pip"):
             LOG.error(InstallError.DISABLED.value)
             self.play_error_sound()

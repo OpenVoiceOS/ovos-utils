@@ -132,5 +132,33 @@ class TestGetCacheDirectory(unittest.TestCase):
         self.assertIn("mycache", result)
 
 
+class TestEnsureDirectoryRace(unittest.TestCase):
+    def test_directory_created_by_another_process(self):
+        from ovos_utils.file_utils import ensure_directory_exists
+        real_makedirs = os.makedirs
+
+        def lose_race(path, mode=0o777, exist_ok=False):
+            os.mkdir(path)  # the other process wins between check and create
+            return real_makedirs(path, mode, exist_ok=exist_ok)
+
+        with tempfile.TemporaryDirectory() as base, \
+                patch("os.makedirs", side_effect=lose_race), \
+                patch("ovos_utils.file_utils.LOG") as log:
+            target = os.path.join(base, "shared")
+            result = ensure_directory_exists(target)
+            self.assertEqual(result, target)
+            self.assertTrue(os.path.isdir(target))
+        log.warning.assert_not_called()
+
+
+class TestEnsureDirectoryExisting(unittest.TestCase):
+    def test_existing_directory_leaves_umask_alone(self):
+        from ovos_utils.file_utils import ensure_directory_exists
+        with tempfile.TemporaryDirectory() as base, \
+                patch("os.umask") as umask:
+            self.assertEqual(ensure_directory_exists(base), base)
+        umask.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()

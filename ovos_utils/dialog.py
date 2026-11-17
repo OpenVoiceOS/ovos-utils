@@ -1,20 +1,31 @@
 import os
 import random
 import re
+import warnings
 from os.path import join
 from pathlib import Path
 from typing import Optional
 
-from ovos_utils.bracket_expansion import expand_template
+from ovos_spec_tools import expand
+
 from ovos_utils.file_utils import resolve_resource_file
 from ovos_utils.lang import translate_word
-from ovos_utils.log import LOG, log_deprecation
+from ovos_utils.log import LOG, deprecated, log_deprecation
+from ovos_utils.version import VERSION_MAJOR
 
 
 class MustacheDialogRenderer:
     """A dialog template renderer based on the mustache templating language."""
 
+    @deprecated("use the OVOS-INTENT-2 §4.2 dialog renderer in "
+                "'ovos_spec_tools' ('render' / 'DialogRenderer')",
+                f"{VERSION_MAJOR + 1}.0.0")
     def __init__(self):
+        warnings.warn(
+            "MustacheDialogRenderer is deprecated; use the OVOS-INTENT-2 §4.2 "
+            "dialog renderer in 'ovos_spec_tools' ('render' / "
+            "'DialogRenderer')",
+            DeprecationWarning, stacklevel=3)
         self.templates = {}
         self.recent_phrases = []
 
@@ -87,16 +98,19 @@ class MustacheDialogRenderer:
             template_functions = ([t for t in template_functions
                                    if t not in self.recent_phrases] or
                                   template_functions)
-            line = random.choice(template_functions)
+            template = random.choice(template_functions)
         else:
-            line = template_functions[index % len(template_functions)]
+            template = template_functions[index % len(template_functions)]
         # Replace {key} in line with matching values from context
-        line = line.format(**context)
-        line = random.choice(expand_template(line))
+        line = template.format(**context)
+        line = random.choice(sorted(expand(line)))
 
         # Here's where we keep track of what we've said recently. Remember,
-        # this is by line in the .dialog file, not by exact phrase
-        self.recent_phrases.append(line)
+        # this is by line in the .dialog file, not by exact phrase, so the
+        # unrendered template is remembered. A rendered line never equals the
+        # template it came from when the template carries a {slot} or an
+        # (a|b) group, and the filter above would then match nothing.
+        self.recent_phrases.append(template)
         if (len(self.recent_phrases) >
                 min(self.max_recent_phrases, len(self.templates.get(
                     template_name)) - self.loop_prevention_offset)):
@@ -104,6 +118,8 @@ class MustacheDialogRenderer:
         return line
 
 
+@deprecated("use 'ovos_spec_tools.LocaleResources' to load .dialog resources",
+            f"{VERSION_MAJOR + 1}.0.0")
 def load_dialogs(dialog_dir: str,
                  renderer: Optional[MustacheDialogRenderer] = None) -> \
         MustacheDialogRenderer:
@@ -116,6 +132,10 @@ def load_dialogs(dialog_dir: str,
     Returns:
         a loaded instance of a dialog renderer
     """
+    warnings.warn(
+        "load_dialogs is deprecated; use 'ovos_spec_tools.LocaleResources' "
+        "to load .dialog resources",
+        DeprecationWarning, stacklevel=3)
     if renderer is None:
         renderer = MustacheDialogRenderer()
 
@@ -132,6 +152,8 @@ def load_dialogs(dialog_dir: str,
     return renderer
 
 
+@deprecated("use the OVOS-INTENT-2 §4.2 dialog renderer in 'ovos_spec_tools' "
+            "('render' / 'DialogRenderer')", f"{VERSION_MAJOR + 1}.0.0")
 def get_dialog(phrase: str, lang: str = None,
                context: Optional[dict] = None) -> str:
     """
@@ -149,6 +171,10 @@ def get_dialog(phrase: str, lang: str = None,
         str: a randomized and/or translated version of the phrase
     """
 
+    warnings.warn(
+        "get_dialog is deprecated; use the OVOS-INTENT-2 §4.2 dialog renderer "
+        "in 'ovos_spec_tools' ('render' / 'DialogRenderer')",
+        DeprecationWarning, stacklevel=3)
     if not lang:
         log_deprecation("Expected a string lang and got None.", "0.1.0")
         try:
