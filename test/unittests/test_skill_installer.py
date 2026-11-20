@@ -586,3 +586,41 @@ class TestServiceNameAddressing:
         assert bus.last_type() == "ovos.pip.install.complete"
         assert any("pre-spec" in c.args[0] for c in warn.call_args_list), \
             f"expected a deprecation warning, got {warn.call_args_list}"
+
+
+# ---------------------------------------------------------------------------
+# skills.installer is read when used, not only at startup
+# ---------------------------------------------------------------------------
+
+class TestConfigReadAtUse:
+    def _install_args(self, installer: ServiceInstaller) -> list:
+        proc_mock = MagicMock()
+        proc_mock.wait.return_value = 0
+        with (
+            patch.object(ServiceInstaller, "validate_constraints", return_value=True),
+            patch("ovos_utils.skill_installer.Popen", return_value=proc_mock) as popen_mock,
+        ):
+            installer.pip_install(["my-pkg"], print_logs=False)
+        return popen_mock.call_args[0][0]
+
+    def test_a_changed_config_applies_without_a_restart(self, bus: FakeBus) -> None:
+        """Switching the release channel (e.g. in ovos-control-panel) changes
+        the constraints file and allow_alphas; the next install must use them."""
+        live = {"skills": {"installer": {"constraints": "http://x/stable.txt"}}}
+        with patch("ovos_utils.skill_installer.Configuration", return_value=live):
+            installer = ServiceInstaller(bus, service_name="ovos_test")
+            args = self._install_args(installer)
+            assert "http://x/stable.txt" in args and "--pre" not in args
+
+            live["skills"]["installer"] = {"constraints": "http://x/alpha.txt",
+                                           "allow_alphas": True}
+            args = self._install_args(installer)
+        assert "http://x/alpha.txt" in args and "--pre" in args
+
+    def test_a_config_given_to_the_constructor_is_used_as_given(self, bus: FakeBus) -> None:
+        with patch("ovos_utils.skill_installer.Configuration",
+                   return_value={"skills": {"installer": {"allow_pip": False}}}):
+            installer = ServiceInstaller(bus, service_name="ovos_test", config={"allow_pip": True})
+            assert installer.config == {"allow_pip": True}
+            installer.config = {"allow_pip": False, "upgrade": True}
+            assert installer.config == {"allow_pip": False, "upgrade": True}
