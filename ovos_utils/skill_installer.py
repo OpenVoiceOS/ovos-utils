@@ -129,9 +129,7 @@ class ServiceInstaller:
         config: Optional[dict] = None,
     ) -> None:
         self.service_name: str = service_name
-        self.config: dict = config or Configuration().get("skills", {}).get(
-            "installer", {}
-        )
+        self._config: Optional[dict] = config or None
         self.bus = bus
 
         # The canonical topics. Addressing is in the payload: a request
@@ -153,6 +151,23 @@ class ServiceInstaller:
         LOG.info(
             f"ServiceInstaller registered for service '{self.service_name}'"
         )
+
+    @property
+    def config(self) -> dict:
+        """``skills.installer``, read when it is used.
+
+        Read at use rather than once at startup, so a change to the installer
+        settings (the constraints file, ``allow_alphas``) applies to the next
+        install without a restart. A config passed to the constructor, or set
+        later, is used as given.
+        """
+        if self._config is not None:
+            return self._config
+        return Configuration().get("skills", {}).get("installer", {})
+
+    @config.setter
+    def config(self, value: Optional[dict]) -> None:
+        self._config = value or None
 
     def shutdown(self) -> None:
         """Unregister all message bus event handlers."""
