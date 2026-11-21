@@ -624,3 +624,17 @@ class TestConfigReadAtUse:
             assert installer.config == {"allow_pip": True}
             installer.config = {"allow_pip": False, "upgrade": True}
             assert installer.config == {"allow_pip": False, "upgrade": True}
+
+    def test_an_empty_config_set_later_is_used_as_given(self, bus: FakeBus) -> None:
+        """An empty override must not fall back to the live configuration,
+        which may allow pip."""
+        with patch("ovos_utils.skill_installer.Configuration",
+                   return_value={"skills": {"installer": {"allow_pip": True}}}):
+            installer = ServiceInstaller(bus, service_name="ovos_test", config={"allow_pip": True})
+            installer.config = {}
+            assert installer.config == {}
+            installer.handle_install_python(Message("ovos.pip.install", {"packages": ["x"]}))
+            assert bus.last_type() == "ovos.pip.install.failed"
+            assert bus.last_data()["error"] == InstallError.DISABLED.value
+            installer.config = None
+            assert installer.config == {"allow_pip": True}, "None means the live configuration"
