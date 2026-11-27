@@ -3,7 +3,7 @@
 covers: the behaviours of a dev alpha that differ from the last stable release, and what to do about each one
 source: pyproject.toml, ovos_utils/fakebus.py, ovos_utils/prometheus.py, ovos_utils/file_utils.py
 generated: no
-verify: python3 docs/check_page.py docs/prerelease-quirks.md && grep -q '"rich>=13.7"' pyproject.toml && grep -qF '`rich>=13.7`' docs/prerelease-quirks.md
+verify: python3 docs/check_page.py docs/prerelease-quirks.md && grep -q '"rich>=13.7"' pyproject.toml && grep -v '^verify:' docs/prerelease-quirks.md | grep -qF '`rich>=13.7`'
 see: index.md
 -->
 
