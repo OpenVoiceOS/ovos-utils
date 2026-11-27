@@ -1,4 +1,11 @@
 # Process Utilities
+<!-- agent-hint
+covers: how a service reports its state and declares its runtime requirements
+source: ovos_utils/process_utils.py
+generated: no
+verify: python3 docs/check_page.py docs/process-utils.md mycroft.{name}.all_loaded
+see: utilities.md
+-->
 
 **Module:** `ovos_utils.process_utils`
 
@@ -138,4 +145,4 @@ Chainable POSIX signal handler. Each instance installs a user function as the ne
 Reset `SIGINT` to the default Python handler. Needed when starting OVOS services from shell scripts that have modified the signal mask.
 
 ---
-[← Logging](log.md) · [Home](index.md) · [FakeBus →](fakebus.md)
+[← ovos-logs](ovos-logs.md) · [Home](index.md) · [Next →](utilities.md)

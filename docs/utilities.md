@@ -1,4 +1,11 @@
 # Utilities
+<!-- agent-hint
+covers: which file, network, sound, thread and XDG helpers exist and how to call them
+source: ovos_utils/file_utils.py, ovos_utils/network_utils.py, ovos_utils/sound.py, ovos_utils/thread_utils.py, ovos_utils/xdg_utils.py
+generated: no
+verify: python3 docs/check_page.py docs/utilities.md
+see: metrics.md
+-->
 
 Reference for the remaining utility modules in `ovos_utils`.
 
@@ -203,4 +210,4 @@ cache_dir = xdg_cache_home() / "mycroft"     # ~/.cache/mycroft
 Environment variable values are only used if they are absolute paths; relative paths fall back to the default.
 
 ---
-[← Events](events.md) · [Home](index.md)
+[← Process utilities](process-utils.md) · [Home](index.md) · [Next →](metrics.md)

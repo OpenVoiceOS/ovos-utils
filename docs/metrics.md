@@ -1,4 +1,11 @@
 # Performance metrics
+<!-- agent-hint
+covers: how to time code and turn on the opt-in metrics endpoint
+source: ovos_utils/metrics.py, ovos_utils/prometheus.py
+generated: no
+verify: python3 docs/check_page.py docs/metrics.md
+see: prerelease-quirks.md
+-->
 
 **Modules:** `ovos_utils.metrics`, `ovos_utils.prometheus`
 
@@ -64,3 +71,6 @@ A plugin adds its collector to the `ovos.performance.metrics` entry-point group;
 `load_metric_collectors()` finds it when the server starts. A collector that
 cannot be imported, or is not callable, is logged and skipped: a metrics extra
 costs only its own metrics, never the service.
+
+---
+[← Utilities](utilities.md) · [Home](index.md) · [Next →](prerelease-quirks.md)

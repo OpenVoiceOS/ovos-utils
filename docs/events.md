@@ -1,4 +1,11 @@
 # Events
+<!-- agent-hint
+covers: how to register bus handlers and schedule events with EventContainer and EventSchedulerInterface
+source: ovos_utils/events.py
+generated: no
+verify: python3 docs/check_page.py docs/events.md my.skill
+see: log.md
+-->
 
 **Module:** `ovos_utils.events`
 
@@ -87,4 +94,4 @@ from ovos_bus_client.apis.events import EventSchedulerInterface
 `when` may be a `datetime`, or a positive `int`/`float` representing seconds from now.
 
 ---
-[← FakeBus](fakebus.md) · [Home](index.md) · [Utilities →](utilities.md)
+[← FakeBus](fakebus.md) · [Home](index.md) · [Next →](log.md)
