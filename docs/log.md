@@ -1,4 +1,11 @@
 # Logging
+<!-- agent-hint
+covers: how to log with LOG, start a service logger and mark code as deprecated
+source: ovos_utils/log.py
+generated: no
+verify: python3 docs/check_page.py docs/log.md
+see: ovos-logs.md
+-->
 
 **Module:** `ovos_utils.log`
 
@@ -143,4 +150,4 @@ Return all configured log directories across all services.
 Return a list of log file basenames (e.g. `["audio", "skills", "bus"]`) found in the configured log directories.
 
 ---
-[Home](index.md) · [Process Utilities →](process-utils.md)
+[← Events](events.md) · [Home](index.md) · [Next →](ovos-logs.md)

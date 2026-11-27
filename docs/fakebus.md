@@ -1,4 +1,11 @@
 # FakeBus
+<!-- agent-hint
+covers: how to test bus code without a messagebus, with FakeBus and AsyncFakeBus
+source: ovos_utils/fakebus.py
+generated: no
+verify: python3 docs/check_page.py docs/fakebus.md
+see: events.md
+-->
 
 **Module:** `ovos_utils.fakebus`
 
@@ -29,6 +36,19 @@ bus.emit(FakeMessage("recognizer_loop:utterance", {"utterances": ["hello"]}))
 3. Emits `message.msg_type` directly on the emitter (for `bus.on()` handlers)
 4. Calls `on_message()` with the serialized payload
 
+### Topic bridges
+
+`FakeBus` and `AsyncFakeBus` copy two bridges of `MessageBusClient`, so a test sees the same delivery as on a real bus:
+
+- **Namespace bridge.** An emit on either spelling of a migrated topic (legacy or `ovos.*`) also dispatches the other spelling. When the migration changed the payload, the copy has the shape of the other spelling. `ovos_spec_tools.NamespaceTranslator` gives the topic pairs.
+- **Intent-topic bridge.** An emit on an intent topic also dispatches its counterpart with or without the `.intent` suffix.
+
+Know these limits before you write a test:
+
+- A `FakeBus` is one bus connection. The two spellings of an intent topic share one guard. When both spellings have listeners, only the spelling that was emitted, or its canonical form, is delivered. When both spellings have listeners, a canonical emit does not reach the legacy listener. A legacy listener alone gets the copy.
+- The copy that a bridge dispatches does not fire the `"message"` listener a second time. On a real bus the copy is a second frame. A test that listens on `"message"` sees one capture for each emit. Listen on the canonical topic when the copy matters.
+- A `FakeBus` cannot model two connections. An observer on the same `FakeBus` shares the guard of the code under test.
+
 ### Session Handling
 
 `FakeBus` replicates `SessionManager` side effects from `ovos-bus-client` if that package is installed:
@@ -58,7 +78,7 @@ For asyncio-native code, see [`AsyncFakeBus`](#asyncfakebus) below.
 
 ## `AsyncFakeBus`
 
-`AsyncFakeBus` — `ovos_utils/fakebus.py:351`
+`AsyncFakeBus` in `ovos_utils/fakebus.py`
 
 In-process stand-in for `AsyncMessageBusClient` (from `ovos-bus-client`). Use this when your code is asyncio-native and needs a drop-in fake bus without a WebSocket connection. The API surface mirrors the real async client: coroutine methods keep you inside the event loop, while handler registration stays synchronous to match `pyee` and the real client's contract.
 
@@ -96,16 +116,16 @@ asyncio.run(main())
 
 ### Key Methods
 
-| Method | Description | Source |
-|---|---|---|
-| `connect()` | No-op; sets `connected_event` and `started_running = True` | `fakebus.py:409` |
-| `close()` | Clears `connected_event`, calls `on_close()` | `fakebus.py:418` |
-| `emit(message)` | Injects session, dispatches to `pyee` emitter | `fakebus.py:426` |
-| `wait_for_message(message_type, timeout)` | Awaits a single message of that type | `fakebus.py:489` |
-| `wait_for_response(message, reply_type, timeout)` | Emits a message and awaits the reply | `fakebus.py:513` |
-| `create_client()` | Returns `self` (backwards-compat shim) | `fakebus.py:543` |
-| `run_forever()` | Sets `started_running = True` (backwards-compat shim) | `fakebus.py:546` |
-| `run_in_thread()` | Calls `run_forever()` (backwards-compat shim) | `fakebus.py:549` |
+| Method | Description |
+|---|---|
+| `connect()` | No-op; sets `connected_event` and `started_running = True` |
+| `close()` | Clears `connected_event`, calls `on_close()` |
+| `emit(message)` | Injects session, dispatches to `pyee` emitter |
+| `wait_for_message(message_type, timeout)` | Awaits a single message of that type |
+| `wait_for_response(message, reply_type, timeout)` | Emits a message and awaits the reply |
+| `create_client()` | Returns `self` (backwards-compat shim) |
+| `run_forever()` | Sets `started_running = True` (backwards-compat shim) |
+| `run_in_thread()` | Calls `run_forever()` (backwards-compat shim) |
 
 ### Session Handling
 
@@ -157,4 +177,4 @@ msg = FakeMessage("skill:action", {"key": "value"}, {"session_id": "abc"})
 Tries to import and call `ovos_bus_client.message.dig_for_message`. Returns `None` if `ovos-bus-client` is not installed.
 
 ---
-[← Process Utilities](process-utils.md) · [Home](index.md) · [Events →](events.md)
+[← Modules](modules.md) · [Home](index.md) · [Next →](events.md)
