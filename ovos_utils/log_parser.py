@@ -11,7 +11,7 @@ from rich.console import Console
 from rich.style import Style
 from rich.table import Table
 import pydoc
-from combo_lock import NamedLock
+from ovos_utils.lock import NamedLock
 
 try:
     from ovos_config import Configuration

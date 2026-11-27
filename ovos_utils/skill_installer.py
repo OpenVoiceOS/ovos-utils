@@ -56,7 +56,7 @@ from subprocess import Popen, PIPE
 from typing import List, Optional
 
 import requests
-from combo_lock import NamedLock
+from ovos_utils.lock import NamedLock
 from ovos_bus_client import Message
 from ovos_config.config import Configuration
 from ovos_utils.log import LOG
