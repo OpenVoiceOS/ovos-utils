@@ -32,7 +32,7 @@ There is no `test` extra. CI (`build-tests.yml`) installs the `extras` extra and
 - Pull requests are squash-merged. Do not squash by hand.
 - Put an AI disclosure at the top of each PR and issue that an agent writes. Name the exact model and say that no human reviewed the text.
 - Use `uv`, not `pip`. Use floor pins with prereleases (`>=X.Y.Za1`). Use no git URL dependency. All metadata is in `pyproject.toml`.
-- The base install has no hard dependency on other OVOS packages. Code that needs `ovos-config`, `ovos_bus_client` or `ovos-plugin-manager` goes behind the `extras` extra.
+- The base install depends on no other OVOS package except `ovos-spec-tools`. Code that needs `ovos-config`, `ovos_bus_client` or `ovos-plugin-manager` goes behind the `extras` extra.
 - `FakeBus` behaves like `MessageBusClient`: the same methods and the same delivery, with no websocket. A difference from the real client is a bug, also when the `fakebus` tests pass.
 - A regression test fails on the code before the fix and passes after it.
 - A change in behaviour updates the page in `docs/` that describes it, in the same PR.

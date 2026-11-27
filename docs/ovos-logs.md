@@ -14,7 +14,7 @@ see: modules.md
 List the errors in `skills.log` after a start time:
 
 ```bash
-ovos-logs list -e -s "01-11-2026 00:00" -l skills
+ovos-logs list -e -s "2026-11-01 00:00" -l skills
 ```
 
 ```text
@@ -26,11 +26,13 @@ ovos-logs list -e -s "01-11-2026 00:00" -l skills
 └─────────────────┴─────────┴────────┘
 ```
 
+The time column shows AM or PM when the `time_format` of ovos-config is `half`, and 24-hour time when it is `full`.
+
 ## Steps
 
 1. Pick the command: `slice`, `list`, `reduce` or `show`.
-2. Pick the logs with `-l`, once for each log: `-l bus -l skills`. With no `-l`, the command reads all logs in the log directory.
-3. Pick the time range with `-s` (start) and `-u` (until). The format is `[DD-MM-YYYY] HH:MM[:SS] [AM/PM]`. The start default is the last service start. The until default is the current time.
+2. Pick the logs with `-l`, once for each log: `-l bus -l skills`. With no `-l`, the command reads all logs in the default log directory.
+3. Pick the time range with `-s` (start) and `-u` (until). Write the date as `YYYY-MM-DD`: an ambiguous date such as `01-11-2026` is read month first ([#477](https://github.com/OpenVoiceOS/ovos-utils/issues/477)). The start default is the last service start. The until default is the current time.
 4. To read another directory, give `-p <dir>`. Also give `-l`: with `-p` and no `-l`, the command refuses the logs in that directory ([#476](https://github.com/OpenVoiceOS/ovos-utils/issues/476)).
 5. To write the result to a file, give `-f <file>` (`slice` and `list`).
 

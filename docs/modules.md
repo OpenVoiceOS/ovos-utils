@@ -52,8 +52,10 @@ This page lists each module of `ovos_utils` and what it holds. Import only the m
 | :--- | :--- | :--- | :--- |
 | `OVOS_DEFAULT_LOG_NAME` | `LOG` | `OVOS` | The logger name |
 | `OVOS_DEFAULT_LOG_LEVEL` | `LOG` | `INFO` | The log level |
-| `OVOS_CONFIG_BASE_FOLDER` | `LOG`, `PIDLock` | `mycroft` | The XDG folder name |
-| `OVOS_METRICS_ENABLED` | `ovos_utils.prometheus` | unset | Turns on the histograms and the endpoint |
+| `OVOS_CONFIG_BASE_FOLDER` | `LOG`; `PIDLock` through ovos-config, when it is installed | `mycroft` | The XDG folder name |
+| `OVOS_METRICS_ENABLED` | `ovos_utils.metrics` | `false` | A true value (such as `true` or `1`) turns on the histograms and the endpoint |
+| `OVOS_METRICS_HOST` | `ovos_utils.prometheus` | `127.0.0.1` | The address of the endpoint |
+| `OVOS_METRICS_PORT` | `ovos_utils.prometheus` | `9474` | The port of the endpoint |
 
 ---
 [Home](index.md) · [Next →](fakebus.md)

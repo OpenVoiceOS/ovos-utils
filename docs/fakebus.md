@@ -45,7 +45,7 @@ bus.emit(FakeMessage("recognizer_loop:utterance", {"utterances": ["hello"]}))
 
 Know these limits before you write a test:
 
-- A `FakeBus` is one bus connection. The two spellings of an intent topic share one guard. When both spellings have listeners, only the spelling that was emitted, or its canonical form, is delivered. A listener on the legacy spelling only gets nothing from a canonical emit.
+- A `FakeBus` is one bus connection. The two spellings of an intent topic share one guard. When both spellings have listeners, only the spelling that was emitted, or its canonical form, is delivered. When both spellings have listeners, a canonical emit does not reach the legacy listener. A legacy listener alone gets the copy.
 - The copy that a bridge dispatches does not fire the `"message"` listener a second time. On a real bus the copy is a second frame. A test that listens on `"message"` sees one capture for each emit. Listen on the canonical topic when the copy matters.
 - A `FakeBus` cannot model two connections. An observer on the same `FakeBus` shares the guard of the code under test.
 

@@ -11,6 +11,8 @@ see: docs/index.md
 
 ## Install
 
+Python 3.9 or later.
+
 ```bash
 uv pip install --prerelease=allow ovos-utils
 ```
@@ -44,6 +46,14 @@ bus.emit(FakeMessage("recognizer_loop:utterance", {"utterances": ["hello"]}))
 | [docs/fakebus.md](docs/fakebus.md) | How to test bus code with `FakeBus` and `AsyncFakeBus` |
 | [docs/log.md](docs/log.md) | How to log with `LOG` |
 | [docs/ovos-logs.md](docs/ovos-logs.md) | How to slice, list and shrink service logs |
+
+## Related projects
+
+- [ovos-bus-client](https://github.com/OpenVoiceOS/ovos-bus-client): the real bus client that `FakeBus` stands in for.
+- [ovos-config](https://github.com/OpenVoiceOS/ovos-config): reads `mycroft.conf`, which `LOG`, `PIDLock` and `ovos-logs` use.
+- [ovos-workshop](https://github.com/OpenVoiceOS/ovos-workshop): the skill framework built on these helpers.
+
+Report a bug as an issue on this repository.
 
 ## License
 

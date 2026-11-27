@@ -12,9 +12,13 @@ This page lists the behaviours of a `dev` alpha that differ from the last stable
 ## Dependencies
 
 - `ovos-utils` depends on `ovos-spec-tools`. `fakebus.Message` is a subclass of `ovos_spec_tools.Message`. The API does not change.
+- `json_database` 1.x is accepted.
+- No module imports `distutils`, so `ovos-utils` imports on Python 3.12 and later.
 - The `rich` requirement is `rich>=13.7`, with no upper bound. An environment with rich 14 or 15 resolves.
 
 ## FakeBus
+
+- `AsyncFakeBus` is an asyncio form of `FakeBus`. See [fakebus.md](fakebus.md).
 
 - `FakeBus` and `AsyncFakeBus` dispatch both spellings of a migrated topic and of an intent topic. A test that counts deliveries can see a second handler call. See [fakebus.md](fakebus.md#topic-bridges).
 - A second `on()` or `once()` with the same topic and handler does not add a listener. The handler fires once.
